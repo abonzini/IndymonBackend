@@ -25,7 +25,7 @@ namespace MoveParser
             // Get mons first
             Dictionary<string, Pokemon> monData = DexParser.ParseDexFile(dexPath);
             // Update the moves
-            MovesetParser.ParseMoves(learnsetPath, monData);
+            MovesetParser.ParseMovests(learnsetPath, monData);
             // Cleanup
             monData = Cleanups.NameAndMovesetCleanup(monData);
             // Finally, write csv

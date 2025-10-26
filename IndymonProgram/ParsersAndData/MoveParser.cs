@@ -2,10 +2,10 @@
 {
     public class Move
     {
-        public string Name = "";
+        public string Name { get; set; } = "";
         public string TagName = "";
-        public string Type = "";
-        public bool Damaging = false;
+        public string Type { get; set; } = "";
+        public bool Damaging { get; set; } = false;
 
         public override string ToString()
         {

@@ -25,9 +25,8 @@ namespace ParsersAndData
             foreach (KeyValuePair<JsValue, PropertyDescriptor> typeData in dex.GetOwnProperties())
             {
                 Dictionary<string, float> thisTypeEffectiveness = new Dictionary<string, float>();
-                string type = typeData.Key.ToString(); // Extract the tag as the name tag
+                string type = typeData.Key.ToString().ToLower(); // Extract the tag as the name tag
                 ObjectInstance typeObject = typeData.Value.Value.AsObject(); // Jint as object not c# object casting...
-                Console.WriteLine("Successfully parsed type defensive chart.");
                 if (typeObject.HasProperty("damageTaken"))
                 {
                     ObjectInstance defTypes = typeObject.Get("damageTaken").AsObject();

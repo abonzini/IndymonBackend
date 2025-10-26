@@ -12,7 +12,7 @@ namespace ParsersAndData
         /// </summary>
         /// <param name="path">Path to ts</param>
         /// <param name="pokemonLookup">Pokemon list where the moves will be added</param>
-        public static void ParseMoves(string path, Dictionary<string, Pokemon> pokemonLookup)
+        public static void ParseMovests(string path, Dictionary<string, Pokemon> pokemonLookup)
         {
             string script = File.ReadAllText(path);
             Engine engine = new Engine();

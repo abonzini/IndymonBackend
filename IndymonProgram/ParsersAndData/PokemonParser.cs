@@ -7,14 +7,14 @@ namespace ParsersAndData
 {
     public class Pokemon
     {
-        public string Name = "";
+        public string Name { get; set; } = "";
         public string TagName = "";
-        public List<string> Types = new List<string>();
-        public List<string> Abilities = new List<string>();
+        public List<string> Types { get; set; } = new List<string>();
+        public List<string> Abilities { get; set; } = new List<string>();
         public string Prevo = "";
         public string OriginalForm = "";
-        public HashSet<string> Moves = new HashSet<string>();
-        public HashSet<string> DamagingStabs = new HashSet<string>();
+        public HashSet<string> Moves { get; set; } = new HashSet<string>();
+        public HashSet<string> DamagingStabs { get; set; } = new HashSet<string>();
         public override string ToString()
         {
             return TagName;
