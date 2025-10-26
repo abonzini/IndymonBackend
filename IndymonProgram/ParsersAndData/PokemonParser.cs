@@ -14,6 +14,7 @@ namespace ParsersAndData
         public string Prevo = "";
         public string OriginalForm = "";
         public HashSet<string> Moves = new HashSet<string>();
+        public HashSet<string> DamagingStabs = new HashSet<string>();
         public override string ToString()
         {
             return TagName;

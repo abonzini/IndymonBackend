@@ -55,4 +55,3 @@ nunit-*.xml
 
 # Visual studio
 */.vs
-*.csv

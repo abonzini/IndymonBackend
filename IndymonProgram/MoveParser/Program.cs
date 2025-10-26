@@ -10,7 +10,8 @@ namespace MoveParser
             string path = Console.ReadLine();
             string learnsetPath = Path.Combine(path, "learnsets.ts");
             string dexPath = Path.Combine(path, "pokedex.ts");
-            string csvPath = Path.Combine(path, "learnsets.csv");
+            string learnsetCsvPath = Path.Combine(path, "learnsets.csv");
+            string abilityCsvPath = Path.Combine(path, "abilities.csv");
             if (!File.Exists(learnsetPath))
             {
                 Console.WriteLine("Learnset file not found.");
@@ -26,10 +27,10 @@ namespace MoveParser
             // Update the moves
             MovesetParser.ParseMoves(learnsetPath, monData);
             // Cleanup
-            monData = DexCleanup.Cleanup(monData);
+            monData = Cleanups.NameAndMovesetCleanup(monData);
             // Finally, write csv
             string resultingCsv = "";
-            foreach (Pokemon mon in  monData.Values)
+            foreach (Pokemon mon in monData.Values)
             {
                 resultingCsv += mon.Name;
                 foreach (string move in mon.Moves)
@@ -38,7 +39,18 @@ namespace MoveParser
                 }
                 resultingCsv += "\n";
             }
-            File.WriteAllText(csvPath, resultingCsv);
+            File.WriteAllText(learnsetCsvPath, resultingCsv);
+            resultingCsv = "";
+            foreach (Pokemon mon in monData.Values)
+            {
+                resultingCsv += mon.Name;
+                foreach (string ability in mon.Abilities)
+                {
+                    resultingCsv += "," + ability;
+                }
+                resultingCsv += "\n";
+            }
+            File.WriteAllText(abilityCsvPath, resultingCsv);
         }
     }
 }
