@@ -9,13 +9,14 @@ namespace ParsersAndData
     {
         public string Name { get; set; } = "";
         public string TagName = "";
-        public List<string> Types { get; set; } = new List<string>();
-        public List<string> Abilities { get; set; } = new List<string>();
+        public HashSet<string> Types { get; set; } = new HashSet<string>();
+        public HashSet<string> Abilities { get; set; } = new HashSet<string>();
         public string Prevo = "";
         public string OriginalForm = "";
         public HashSet<string> Moves { get; set; } = new HashSet<string>();
         public HashSet<string> DamagingStabs { get; set; } = new HashSet<string>();
-        public HashSet<string> AiBanlist { get; set; } = new HashSet<string>();
+        public HashSet<string> AiMoveBanlist { get; set; } = new HashSet<string>();
+        public HashSet<string> AiAbilityBanlist { get; set; } = new HashSet<string>();
         public override string ToString()
         {
             return TagName;
