@@ -15,6 +15,7 @@ namespace ParsersAndData
         public string OriginalForm = "";
         public HashSet<string> Moves { get; set; } = new HashSet<string>();
         public HashSet<string> DamagingStabs { get; set; } = new HashSet<string>();
+        public HashSet<string> AiBanlist { get; set; } = new HashSet<string>();
         public override string ToString()
         {
             return TagName;

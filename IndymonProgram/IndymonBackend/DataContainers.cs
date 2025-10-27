@@ -10,6 +10,9 @@ namespace IndymonBackend
         public Dictionary<string, Move> MoveData { get; set; } = null;
         public Dictionary<string, string> OffensiveItemData { get; set; } = null;
         public Dictionary<string, string> DefensiveItemData { get; set; } = null;
+        public Dictionary<string, string> NatureItemData { get; set; } = null;
+        public Dictionary<string, string> EvItemData { get; set; } = null;
+        public Dictionary<string, string> TeraItemData { get; set; } = null;
         public List<TrainerData> TrainerData { get; set; } = new List<TrainerData>();
         public List<TrainerData> NpcData { get; set; } = new List<TrainerData>();
         public List<TrainerData> NamedTrainerData { get; set; } = new List<TrainerData>();
@@ -33,7 +36,6 @@ namespace IndymonBackend
         public bool AutoItem { get; set; }
         public bool AutoTeam { get; set; }
         public List<Item> BattleItems { get; set; }
-        public int NumberOfPokemon { get; set; }
         public List<TrainersPokemon> TrainersPokemon { get; set; } = new List<TrainersPokemon>(6);
     }
 }

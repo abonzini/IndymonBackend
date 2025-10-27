@@ -2,7 +2,7 @@
 {
     public static class ItemParser
     {
-        public static Dictionary<string, string> ParseItemAndTypes(string path)
+        public static Dictionary<string, string> ParseItemAndEffect(string path)
         {
             {
                 Dictionary<string, string> result = new Dictionary<string, string>();

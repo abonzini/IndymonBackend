@@ -65,6 +65,9 @@ namespace IndymonBackend
             if (dataContainers.MoveData == null) Console.WriteLine("WARNING: Move data not initialised yet");
             if (dataContainers.OffensiveItemData == null) Console.WriteLine("WARNING: Offensive item data not initialised yet");
             if (dataContainers.DefensiveItemData == null) Console.WriteLine("WARNING: Defensive item data not initialised yet");
+            if (dataContainers.TeraItemData == null) Console.WriteLine("WARNING: Tera item data not initialised yet");
+            if (dataContainers.EvItemData == null) Console.WriteLine("WARNING: Ev item data not initialised yet");
+            if (dataContainers.NatureItemData == null) Console.WriteLine("WARNING: Nature item data not initialised yet");
             Console.ResetColor();
         }
         /// <summary>
@@ -105,6 +108,9 @@ namespace IndymonBackend
                 string typeChartFile = Path.Combine(directory, "typechart.ts");
                 string defItemFile = Path.Combine(directory, "defensiveitems.csv");
                 string offItemFile = Path.Combine(directory, "offensiveitems.csv");
+                string teraItemFile = Path.Combine(directory, "teraitems.csv");
+                string evItemFile = Path.Combine(directory, "evitems.csv");
+                string natureItemFile = Path.Combine(directory, "natureitems.csv");
                 if (File.Exists(dexPath))
                 {
                     // First, retrieve all mons
@@ -133,11 +139,23 @@ namespace IndymonBackend
                 }
                 if (File.Exists(defItemFile))
                 {
-                    dataContainers.DefensiveItemData = ItemParser.ParseItemAndTypes(defItemFile);
+                    dataContainers.DefensiveItemData = ItemParser.ParseItemAndEffect(defItemFile);
                 }
                 if (File.Exists(offItemFile))
                 {
-                    dataContainers.OffensiveItemData = ItemParser.ParseItemAndTypes(offItemFile);
+                    dataContainers.OffensiveItemData = ItemParser.ParseItemAndEffect(offItemFile);
+                }
+                if (File.Exists(teraItemFile))
+                {
+                    dataContainers.TeraItemData = ItemParser.ParseItemAndEffect(teraItemFile);
+                }
+                if (File.Exists(evItemFile))
+                {
+                    dataContainers.EvItemData = ItemParser.ParseItemAndEffect(evItemFile);
+                }
+                if (File.Exists(natureItemFile))
+                {
+                    dataContainers.NatureItemData = ItemParser.ParseItemAndEffect(natureItemFile);
                 }
             }
             dataContainers.MasterDirectory = directory;
