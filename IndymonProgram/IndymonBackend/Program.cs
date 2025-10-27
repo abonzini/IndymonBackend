@@ -41,17 +41,17 @@ namespace IndymonBackend
                     case "1":
                         LoadEssentialData();
                         break;
+                    case "2":
+                        LoadTrainerData();
+                        LoadNpcData();
+                        LoadNamedNpcData();
+                        // TODO LoadTournamentHistory();
+                        break;
                     default:
                         break;
                 }
                 Console.WriteLine("");
             } while (InputString.ToLower() != "q");
-            /*
-            using HttpClient client = new HttpClient();
-            string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
-            string tab = "1015902951";
-            string url = $"https://docs.google.com/spreadsheets/d/{sheetId}/export?format=csv&gid={tab}";
-            string csv = client.GetStringAsync(url).GetAwaiter().GetResult();*/
             Console.WriteLine("Session finished. Have a good day and don't forget to update spreadsheet!");
         }
         /// <summary>
@@ -159,6 +159,138 @@ namespace IndymonBackend
                 }
             }
             dataContainers.MasterDirectory = directory;
+        }
+        /// <summary>
+        /// Loads playable trainer data from google doc
+        /// </summary>
+        private static void LoadTrainerData()
+        {
+            Console.WriteLine("Loading data from trainers");
+            string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
+            string tab = "1015902951";
+            List<TrainerData> data = dataContainers.TrainerData;
+            LoadTeamData(data, sheetId, tab);
+        }
+        /// <summary>
+        /// Loads playable trainer data from google doc
+        /// </summary>
+        private static void LoadNpcData()
+        {
+            Console.WriteLine("Loading data from NPCs");
+            string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
+            string tab = "1499993838";
+            List<TrainerData> data = dataContainers.NpcData;
+            LoadTeamData(data, sheetId, tab);
+        }
+        /// <summary>
+        /// Loads playable trainer data from google doc
+        /// </summary>
+        private static void LoadNamedNpcData()
+        {
+            Console.WriteLine("Loading data from Named NPCs");
+            string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
+            string tab = "224914063";
+            List<TrainerData> data = dataContainers.NamedTrainerData;
+            LoadTeamData(data, sheetId, tab);
+        }
+        /// <summary>
+        /// Loads the team data from entities
+        /// </summary>
+        /// <param name="trainerData">Container where this'll be stored</param>
+        /// <param name="sheetId">Id of google doc</param>
+        /// <param name="tab">Id of google doc tab (page)</param>
+        private static void LoadTeamData(List<TrainerData> trainerData, string sheetId, string tab)
+        {
+            string url = $"https://docs.google.com/spreadsheets/d/{sheetId}/export?format=csv&gid={tab}";
+            using HttpClient client = new HttpClient();
+            string csv = client.GetStringAsync(url).GetAwaiter().GetResult();
+            // Trainer card format
+            const int xSize = 10, ySize = 12; // Dimensions of the trainer cards in indices
+            int verticalAmount, horizontalAmount;
+            string[] rows = csv.Split("\n");
+            // Verify vertical cards
+            if ((rows.Length % ySize) != 0) throw new Exception("Y dimension of trainer cards doesnt fit");
+            else verticalAmount = rows.Length / ySize;
+            // Verify horizontal cards
+            string[] csvFields = rows[0].Split(",");
+            if ((csvFields.Length % xSize) != 0) throw new Exception("C dimension of trainer cards doesnt fit");
+            else horizontalAmount = csvFields.Length / xSize;
+            // Ok now ready to load card data, one by one
+            trainerData.Clear(); // Empty list, will load from scratch
+            for (int cardY = 0; cardY < verticalAmount; cardY++)
+            {
+                int offsetY = cardY * ySize;
+                for (int cardX = 0; cardX < horizontalAmount; cardX++)
+                {
+                    int offsetX = cardX * xSize;
+                    // Now parse all
+                    // Row 0, contains Name, auto-flags
+                    csvFields = rows[offsetY + 0].Split(",");
+                    string trainerName = csvFields[offsetX + 2].Trim().ToLower();
+                    if (trainerName == "") continue;
+                    TrainerData newtrainer = new TrainerData();
+                    newtrainer.Name = csvFields[offsetX + 2].Trim().ToLower();
+                    newtrainer.AutoItem = (csvFields[offsetX + 7].Trim().ToLower() == "true");
+                    newtrainer.AutoTeam = (csvFields[offsetX + 9].Trim().ToLower() == "true");
+                    // Then, rows 2-7 contain the mons
+                    for (int mon = 0; mon < 6; mon++)
+                    {
+                        csvFields = rows[offsetY + 2 + mon].Split(",");
+                        string monName = csvFields[offsetX + 2].Trim().ToLower();
+                        if (monName == "") break; // If no mon, then I'm done doing mons then
+                        TrainersPokemon newMon = new TrainersPokemon();
+                        newMon.Name = monName;
+                        newMon.Shiny = (csvFields[offsetX + 0].Trim().ToLower() == "true");
+                        if (!newtrainer.AutoTeam) // Check if moves and ability are actually relevant
+                        {
+                            newMon.Ability = csvFields[offsetX + 3].Trim().ToLower();
+                            for (int move = 0; move < 4; move++)
+                            {
+                                newMon.Moves[move] = csvFields[offsetX + 4 + move].Trim().ToLower();
+                            }
+                        }
+                        // Finally, item, check if need to place on mon or back into bag
+                        string itemName = csvFields[offsetX + 8].Trim().ToLower();
+                        if (itemName != "") // There's an item, then
+                        {
+                            int usesNumber = int.Parse(csvFields[offsetX + 9]);
+                            Item newItem = new Item() { Name = itemName, Uses = usesNumber };
+                            if (newtrainer.AutoTeam || newtrainer.AutoItem) // In this case, goes to bag
+                            {
+                                newtrainer.BattleItems.Add(newItem);
+                            }
+                            else
+                            {
+                                newMon.Item = newItem;
+                            }
+                        }
+                        newtrainer.TrainersPokemon.Add(newMon);
+                    }
+                    // Then, row 8 contains the 1-use consumable items
+                    csvFields = rows[offsetY + 8].Split(",");
+                    for (int item = 0; item < 8; item++)
+                    {
+                        // First field is the trainer data label, not an actual item
+                        string nextItem = csvFields[offsetX + 1 + item].Trim().ToLower();
+                        if (nextItem == "") break; // End if no more items
+                        // Otherwise add to bag
+                        newtrainer.BattleItems.Add(new Item() { Name = nextItem, Uses = 1 }); // Always 1 use these ones
+                    }
+                    // Then, row 9 contains the n-use consumable items
+                    csvFields = rows[offsetY + 9].Split(",");
+                    for (int item = 0; item < 4; item++)
+                    {
+                        // First field is the trainer data label, not an actual item
+                        string nextItem = csvFields[offsetX + 1 + (2 * item)].Trim().ToLower();
+                        if (nextItem == "") break; // End if no more items
+                        // Otherwise add to bag
+                        int usesNumber = int.Parse(csvFields[offsetX + 2 + (2 * item)]);
+                        newtrainer.BattleItems.Add(new Item() { Name = nextItem, Uses = usesNumber }); // Always 1 use these ones
+                    }
+                    trainerData.Add(newtrainer);
+                }
+            }
+            // That should be it...
         }
     }
 }

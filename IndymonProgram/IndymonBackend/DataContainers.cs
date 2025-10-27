@@ -21,6 +21,10 @@ namespace IndymonBackend
     {
         public string Name { get; set; }
         public int Uses { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
     public class TrainersPokemon
     {
@@ -29,13 +33,22 @@ namespace IndymonBackend
         public string Ability { get; set; }
         public string[] Moves { get; set; } = new string[4];
         public Item Item { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
     public class TrainerData
     {
         public string Name { get; set; }
         public bool AutoItem { get; set; }
         public bool AutoTeam { get; set; }
-        public List<Item> BattleItems { get; set; }
+        public List<Item> BattleItems { get; set; } = new List<Item>();
         public List<TrainersPokemon> TrainersPokemon { get; set; } = new List<TrainersPokemon>(6);
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }
