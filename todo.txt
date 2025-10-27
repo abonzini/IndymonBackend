@@ -1,0 +1,13 @@
+Generation of tournament interface (goal: aim for pre-season tournament)
+3 - Tournament create. "Ongoing Tournament Class", with participants. Asks for type, n players. Then, will ask for players, number of mons, 1,2,3 for adding player,npc,nnpc. Hashset for available ones. Option to then fill with npc randomly. Tournament finished.
+4 - Tournament initialize. If tournament not null, then can init. First, will generate all teams from auto-teams (may need to convert abilities into hashset). Option to accept, or reject ability/moves, when they'd be added into the AI blacklist. Reshuffle option. Finally, if accepted, saves the team. After all done, creates massive pokepaste importable file to manually import in showdown.
+5 - Tournament execute, shuffles, makes the matchups, then asks for score, randomizes if "0". At this point tournament shoudl be done.
+6 - Tournament replay. Generates a video animation (blinking console) for a tournament simulation, once all is done. 
+For game proper:
+2 - Generate leaderboard class, by default will be blank unless loaded. Class with each entry a name, and dictionaries with stats for all matchups. Same for NPC but simpler.
+6 - When tournament concluded, leaderboard updated, trainers who participated first time added. Whoel thign sorted. Csv with desired format created for quick pasting
+2 - Load leaderboard data from sheets (hidden, private with only leaderboard). Copied into public sheet
+7 - SHEET: Create exploration section
+7-  Load exploration section from sheets, insert into data structure.
+7 - Generate exploration command. Select player and location (numbers). Will choose 6mon each stage with non-ai moves/ability. Item prizes accordingly. Exports a pokepaste
+4 - Auto item logic sorted, find if item makes sense, chosoe items to ansure a healthy inventory
