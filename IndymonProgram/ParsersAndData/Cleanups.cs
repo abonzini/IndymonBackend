@@ -57,5 +57,20 @@
                 mon.DamagingStabs = newDamagingStabs;
             }
         }
+        /// <summary>
+        /// Cleans move data to reference dict with the actual name
+        /// </summary>
+        /// <param name="moveData">Move dictionary</param>
+        /// <returns>Clean move dictionary</returns>
+        public static Dictionary<string, Move> MoveListCleanup(Dictionary<string, Move> moveData)
+        {
+            Dictionary<string, Move> cleanDictionary = new Dictionary<string, Move>();
+            // First step, re-making of dictionary
+            foreach (Move move in moveData.Values) // Get all pokemon from the lookup
+            {
+                cleanDictionary.Add(move.Name, move);
+            }
+            return cleanDictionary;
+        }
     }
 }

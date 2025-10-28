@@ -1,4 +1,6 @@
-﻿namespace IndymonBackend
+﻿using System.Text;
+
+namespace IndymonBackend
 {
     public class TournamentManager
     {
@@ -33,15 +35,15 @@
                 }
             } while (!validSelection);
             Console.WriteLine("How many players will participate?");
-            _ongoingTournament.nPlayers = int.Parse(Console.ReadLine());
+            _ongoingTournament.NPlayers = int.Parse(Console.ReadLine());
             Console.WriteLine("How many pokemon each team?");
-            _ongoingTournament.nMons = int.Parse(Console.ReadLine());
+            _ongoingTournament.NMons = int.Parse(Console.ReadLine());
             // Finally, player selection
             List<TrainerData> trainers = _backEndData.TrainerData.Values.ToList();
             List<TrainerData> npcs = _backEndData.NpcData.Values.ToList();
             List<TrainerData> namedNpcs = _backEndData.NamedNpcData.Values.ToList();
             List<TrainerData> currentChosenTrainers = null;
-            int remainingPlayersNeeded = _ongoingTournament.nPlayers;
+            int remainingPlayersNeeded = _ongoingTournament.NPlayers;
             bool randomizeFill = false;
             while (remainingPlayersNeeded > 0) // Will do addition loop until all players are selected
             {
@@ -97,16 +99,42 @@
                 {
                     currentChosenTrainers.Remove(nextTrainer);
                     remainingPlayersNeeded--;
-                    _ongoingTournament.participants.Add(nextTrainer);
+                    _ongoingTournament.Participants.Add(nextTrainer);
                     Console.WriteLine($"{nextTrainer.Name} added");
                 }
             }
         }
+        /// <summary>
+        /// Updates the tournament teams, meaning a team randomization and updating team sheets if needed
+        /// </summary>
+        public void UpdateTournamentTeams()
+        {
+            // First, shuffle the participants
+            Random _rng = new Random();
+            int n = _ongoingTournament.Participants.Count;
+            while (n > 1) // Fischer yates
+            {
+                n--;
+                int k = _rng.Next(n + 1);
+                (_ongoingTournament.Participants[k], _ongoingTournament.Participants[n]) = (_ongoingTournament.Participants[n], _ongoingTournament.Participants[k]); // Swap
+            }
+            // Ok not bad, next step is to update participant team sheet if needed, and generate the import pokepaste
+            StringBuilder pokepasteBuilder = new StringBuilder();
+            foreach (TrainerData participant in _ongoingTournament.Participants)
+            {
+                participant.DefineSets(_backEndData, _ongoingTournament.NMons); // Gets the team for everyone
+                pokepasteBuilder.AppendLine($"=== {participant.Name} ===");
+                pokepasteBuilder.AppendLine(participant.GetPokepaste(_backEndData, _ongoingTournament.NMons));
+            }
+            // Finally, ready to save the pokepaste
+            string exportFile = Path.Combine(_backEndData.MasterDirectory, "importable-pokepaste.txt");
+            File.WriteAllText(exportFile, pokepasteBuilder.ToString()); // Save the export
+        }
     }
     public class TournamentData
     {
-        public int nPlayers = 0;
-        public int nMons = 3;
-        public HashSet<TrainerData> participants = new HashSet<TrainerData>();
+        public int NPlayers = 0;
+        public int NMons = 3;
+        public List<TrainerData> Participants = new List<TrainerData>();
     }
 }

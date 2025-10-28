@@ -19,7 +19,7 @@ namespace ParsersAndData
         public HashSet<string> AiAbilityBanlist { get; set; } = new HashSet<string>();
         public override string ToString()
         {
-            return TagName;
+            return $"{Name} ({TagName})";
         }
     }
     public static class DexParser

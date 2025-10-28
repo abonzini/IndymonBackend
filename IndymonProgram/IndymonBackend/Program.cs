@@ -52,6 +52,9 @@ namespace IndymonBackend
                         _tournamentManager = new TournamentManager(_dataContainers);
                         _tournamentManager.GenerateNewTournament();
                         break;
+                    case "4":
+                        _tournamentManager.UpdateTournamentTeams();
+                        break;
                     default:
                         break;
                 }
@@ -65,7 +68,7 @@ namespace IndymonBackend
         static void PrintWarnings()
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            if (_dataContainers.LocalPokemonSettings == null) Console.WriteLine("WARNING: Pokemon data not initialised yet");
+            if (_dataContainers.Dex == null) Console.WriteLine("WARNING: Pokemon data not initialised yet");
             if (_dataContainers.TypeChart == null) Console.WriteLine("WARNING: Type chart not initialised yet");
             if (_dataContainers.MoveData == null) Console.WriteLine("WARNING: Move data not initialised yet");
             if (_dataContainers.OffensiveItemData == null) Console.WriteLine("WARNING: Offensive item data not initialised yet");
@@ -132,8 +135,10 @@ namespace IndymonBackend
                             Dictionary<string, Move> moveData = MoveParser.ParseMoves(movesPath);
                             // And clean up names in mons, obtain STAB
                             Cleanups.MoveDataCleanup(monData, moveData);
+                            // Finally clean moves themselves
+                            moveData = Cleanups.MoveListCleanup(moveData);
                             Console.WriteLine("Loaded dex and moves correctly");
-                            _dataContainers.LocalPokemonSettings = monData;
+                            _dataContainers.Dex = monData;
                             _dataContainers.MoveData = moveData;
                         }
                     }
@@ -234,7 +239,7 @@ namespace IndymonBackend
                     string trainerName = csvFields[offsetX + 2].Trim().ToLower();
                     if (trainerName == "") continue;
                     TrainerData newTrainer = new TrainerData();
-                    newTrainer.Name = csvFields[offsetX + 2].Trim().ToLower();
+                    newTrainer.Name = trainerName;
                     newTrainer.AutoItem = (csvFields[offsetX + 7].Trim().ToLower() == "true");
                     newTrainer.AutoTeam = (csvFields[offsetX + 9].Trim().ToLower() == "true");
                     // Then, rows 2-7 contain the mons
@@ -243,7 +248,7 @@ namespace IndymonBackend
                         csvFields = rows[offsetY + 2 + mon].Split(",");
                         string monName = csvFields[offsetX + 2].Trim().ToLower();
                         if (monName == "") break; // If no mon, then I'm done doing mons then
-                        TrainersPokemon newMon = new TrainersPokemon();
+                        PokemonSet newMon = new PokemonSet();
                         newMon.Name = monName;
                         newMon.Shiny = (csvFields[offsetX + 0].Trim().ToLower() == "true");
                         if (!newTrainer.AutoTeam) // Check if moves and ability are actually relevant
@@ -269,7 +274,7 @@ namespace IndymonBackend
                                 newMon.Item = newItem;
                             }
                         }
-                        newTrainer.TrainersPokemon.Add(newMon);
+                        newTrainer.Teamsheet.Add(newMon);
                     }
                     // Then, row 8 contains the 1-use consumable items
                     csvFields = rows[offsetY + 8].Split(",");
