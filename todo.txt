@@ -1,5 +1,4 @@
 Generation of tournament interface (goal: aim for pre-season tournament)
-5 - Tournament execute, shuffles, makes the matchups, then asks for score, randomizes if "0". At this point tournament shoudl be done.
 6 - Tournament replay. Generates a video animation (blinking console) for a tournament simulation, once all is done. 
 For game proper:
 2 - Generate leaderboard class, by default will be blank unless loaded. Class with each entry a name, and dictionaries with stats for all matchups. Same for NPC but simpler.

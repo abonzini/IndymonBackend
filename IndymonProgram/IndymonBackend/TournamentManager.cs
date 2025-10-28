@@ -4,7 +4,7 @@ namespace IndymonBackend
 {
     public class TournamentManager
     {
-        TournamentData _ongoingTournament;
+        Tournament _ongoingTournament;
         DataContainers _backEndData;
         Random _rng = new Random();
         public TournamentManager(DataContainers backEndData)
@@ -27,7 +27,7 @@ namespace IndymonBackend
                 {
                     case "elim":
                         validSelection = true;
-                        _ongoingTournament = new TournamentData();
+                        _ongoingTournament = new Tournament();
                         break;
                     default:
                         validSelection = false;
@@ -130,11 +130,137 @@ namespace IndymonBackend
             string exportFile = Path.Combine(_backEndData.MasterDirectory, "importable-pokepaste.txt");
             File.WriteAllText(exportFile, pokepasteBuilder.ToString()); // Save the export
         }
+        /// <summary>
+        /// Starts the tourn proper, will ask for input of scores
+        /// </summary>
+        public void ExecuteTournament()
+        {
+            _ongoingTournament.PlayTournament();
+        }
     }
-    public class TournamentData
+    public class Tournament
     {
         public int NPlayers = 0;
         public int NMons = 3;
         public List<TrainerData> Participants = new List<TrainerData>();
+        class TournamentMatch()
+        {
+            public string player1 = "";
+            public string player2 = "";
+            public bool isBye = false;
+            public int score1 = 0;
+            public int score2 = 0;
+            public string winner = "";
+            public override string ToString()
+            {
+                return $"\t{player1} {((player1 == winner) ? "(v)" : "")} {score1}-{score2} {((player2 == winner) ? "(v)" : "")} {player2}";
+            }
+        }
+        List<List<TournamentMatch>> _roundHistory = new List<List<TournamentMatch>>();
+        /// <summary>
+        /// Will play the tournament, organising the bracket and asking for results
+        /// </summary>
+        public void PlayTournament()
+        {
+            int closestPowerOf2 = 1;
+            while (closestPowerOf2 < NPlayers) closestPowerOf2 *= 2; // Find the closest po2 above player name (will add byes)
+            int numberOfByes = closestPowerOf2 - NPlayers;
+            int byesBeginning = (numberOfByes / 2) + (numberOfByes % 2); // The beginning ones may have 1 more bye
+            int byesEnd = numberOfByes / 2; // The beginning ones may have 1 more bye
+            // Ok will start doing the matchups, first round
+            List<TournamentMatch> thisRound = new List<TournamentMatch>();
+            for (int i = 0; i < Participants.Count; i++)
+            {
+                TournamentMatch thisMatch = new TournamentMatch();
+                thisMatch.player1 = Participants[i].Name;
+                if (i < byesBeginning)
+                {
+                    thisMatch.isBye = true;
+                }
+                else if (i >= (Participants.Count - byesEnd))
+                {
+                    thisMatch.isBye = true;
+                }
+                else // Not a bye in either side...
+                {
+                    i++; // Get next player (opp)
+                    thisMatch.player2 = Participants[i].Name;
+                    thisMatch.isBye = false;
+                }
+                thisRound.Add(thisMatch);
+            }
+            // Ok now the tournament begins
+            bool finished = false;
+            while (!finished)
+            {
+                _roundHistory.Add(thisRound); // Add the round to match history
+                int playerProcessed = 0;
+                List<TournamentMatch> futureRound = new List<TournamentMatch>();
+                foreach (TournamentMatch match in thisRound)
+                {
+                    if (match.isBye)
+                    {
+                        Console.WriteLine($"{match.player1} has a bye");
+                        match.winner = match.player1;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Score for match between {match.player1} and {match.player2}? 0 if randomized");
+                        string scoreString = Console.ReadLine();
+                        if (scoreString == "0")
+                        {
+                            Random _rng = new Random(); // Will randomize result
+                            if (_rng.Next(2) == 0) // Winner was 1
+                            {
+                                match.score1 = _rng.Next(1, NMons + 1);
+                                match.score2 = 0;
+                            }
+                            else // Winner was 2
+                            {
+                                match.score1 = 0;
+                                match.score2 = _rng.Next(1, NMons + 1);
+                            }
+                        }
+                        else
+                        {
+                            string[] scores = scoreString.Split('-');
+                            match.score1 = int.Parse(scores[0]);
+                            match.score2 = int.Parse(scores[1]);
+                        }
+                        if (match.score1 > match.score2)
+                        {
+                            match.winner = match.player1;
+                        }
+                        else
+                        {
+                            match.winner = match.player2;
+                        }
+                        Console.WriteLine($"\t{match.ToString()}");
+                    }
+                    if ((playerProcessed % 2) == 0) // Even players, first of the next match
+                    {
+                        TournamentMatch nextMatch = new TournamentMatch();
+                        nextMatch.player1 = match.winner;
+                        futureRound.Add(nextMatch);
+                    }
+                    else // It's the player 2
+                    {
+                        TournamentMatch nextMatch = futureRound.Last();
+                        nextMatch.player2 = match.winner;
+                    }
+                    playerProcessed++;
+                }
+                // Finally, now here's the next round, unless tournament was finished
+                if (thisRound.Count == 1) // was the finals...
+                {
+                    finished = true;
+                    Console.WriteLine($"\tTournament won by {thisRound.Last().winner}");
+                }
+                else
+                {
+                    thisRound = futureRound; // Otherwise move forward
+                }
+            }
+        }
     }
 }

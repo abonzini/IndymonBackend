@@ -55,6 +55,9 @@ namespace IndymonBackend
                     case "4":
                         _tournamentManager.UpdateTournamentTeams();
                         break;
+                    case "5":
+                        _tournamentManager.ExecuteTournament();
+                        break;
                     default:
                         break;
                 }
@@ -87,7 +90,7 @@ namespace IndymonBackend
                 "1 - Load mechanics data from folder\n" +
                 "2 - Fetch trainer data and tournament history from online sheet\n" +
                 "3 - Generate a new tournament\n" +
-                "4 - Update torunament participant's team sheets\n" +
+                "4 - Update tournament participant's team sheets\n" +
                 "5 - Input tournament data\n" +
                 "6 - Finalize tournament. Animation + export new tournament data\n" +
                 "7 - Generate exploration results\n"

@@ -172,8 +172,8 @@ namespace IndymonBackend
                     {
                         pokemonSet.RandomizeMon(backEndData, true, 15); // Randomize mon (smart, switch chance of 15%)
                         // Show it to user, user will decide if redo or revise (banning sets for the future)
-                        Console.WriteLine($"\tSet for {pokemonSet.ToString()}");
-                        Console.WriteLine("\tTo modify AI for future: 0: ban ability. 1-4 ban moves. Otherwise this mon is approved.");
+                        Console.WriteLine($"\t\tSet for {pokemonSet.ToString()}");
+                        Console.WriteLine("\t\tTo modify AI for future: 0: ban ability. 1-4 ban moves. Otherwise this mon is approved.");
                         string inputString = Console.ReadLine().ToLower();
                         switch (inputString)
                         {
@@ -301,7 +301,8 @@ namespace IndymonBackend
             for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
             {
                 PokemonSet mon = Teamsheet[i];
-                Console.WriteLine($"\tSet for {mon.ToString()}");
+                Console.WriteLine($"\t\tSet for {mon.ToString()}");
+                Console.WriteLine("");
             }
         }
         public string GetPokepaste(DataContainers backEndData, int nMons)
