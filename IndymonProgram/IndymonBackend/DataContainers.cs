@@ -8,14 +8,14 @@ namespace IndymonBackend
         public Dictionary<string, Pokemon> LocalPokemonSettings { get; set; } = null;
         public Dictionary<string, Dictionary<string, float>> TypeChart { get; set; } = null;
         public Dictionary<string, Move> MoveData { get; set; } = null;
-        public Dictionary<string, string> OffensiveItemData { get; set; } = null;
-        public Dictionary<string, string> DefensiveItemData { get; set; } = null;
-        public Dictionary<string, string> NatureItemData { get; set; } = null;
-        public Dictionary<string, string> EvItemData { get; set; } = null;
-        public Dictionary<string, string> TeraItemData { get; set; } = null;
-        public List<TrainerData> TrainerData { get; set; } = new List<TrainerData>();
-        public List<TrainerData> NpcData { get; set; } = new List<TrainerData>();
-        public List<TrainerData> NamedTrainerData { get; set; } = new List<TrainerData>();
+        public Dictionary<string, HashSet<string>> OffensiveItemData { get; set; } = null;
+        public Dictionary<string, HashSet<string>> DefensiveItemData { get; set; } = null;
+        public Dictionary<string, HashSet<string>> NatureItemData { get; set; } = null;
+        public Dictionary<string, HashSet<string>> EvItemData { get; set; } = null;
+        public Dictionary<string, HashSet<string>> TeraItemData { get; set; } = null;
+        public Dictionary<string, TrainerData> TrainerData { get; set; } = new Dictionary<string, TrainerData>();
+        public Dictionary<string, TrainerData> NpcData { get; set; } = new Dictionary<string, TrainerData>();
+        public Dictionary<string, TrainerData> NamedNpcData { get; set; } = new Dictionary<string, TrainerData>();
     }
     public class Item
     {

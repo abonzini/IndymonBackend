@@ -3,9 +3,10 @@ using System.Text.Json;
 
 namespace IndymonBackend
 {
-    internal class Program
+    public static class Program
     {
-        static DataContainers dataContainers = new DataContainers();
+        static DataContainers _dataContainers = new DataContainers();
+        static TournamentManager _tournamentManager;
         static void Main(string[] args)
         {
             string FILE_NAME = "indy.mon";
@@ -19,8 +20,8 @@ namespace IndymonBackend
             else
             {
                 string indymonFile = args[0];
-                dataContainers = JsonSerializer.Deserialize<DataContainers>(File.ReadAllText(indymonFile));
-                dataContainers.MasterDirectory = Path.GetDirectoryName(indymonFile);
+                _dataContainers = JsonSerializer.Deserialize<DataContainers>(File.ReadAllText(indymonFile));
+                _dataContainers.MasterDirectory = Path.GetDirectoryName(indymonFile);
             }
             string InputString;
             do
@@ -34,8 +35,8 @@ namespace IndymonBackend
                         {
                             Console.WriteLine("Serializing json");
                             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-                            string indymonFile = Path.Combine(dataContainers.MasterDirectory, FILE_NAME);
-                            File.WriteAllText(indymonFile, JsonSerializer.Serialize(dataContainers, options));
+                            string indymonFile = Path.Combine(_dataContainers.MasterDirectory, FILE_NAME);
+                            File.WriteAllText(indymonFile, JsonSerializer.Serialize(_dataContainers, options));
                         }
                         break;
                     case "1":
@@ -46,6 +47,10 @@ namespace IndymonBackend
                         LoadNpcData();
                         LoadNamedNpcData();
                         // TODO LoadTournamentHistory();
+                        break;
+                    case "3":
+                        _tournamentManager = new TournamentManager(_dataContainers);
+                        _tournamentManager.GenerateNewTournament();
                         break;
                     default:
                         break;
@@ -60,14 +65,14 @@ namespace IndymonBackend
         static void PrintWarnings()
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            if (dataContainers.LocalPokemonSettings == null) Console.WriteLine("WARNING: Pokemon data not initialised yet");
-            if (dataContainers.TypeChart == null) Console.WriteLine("WARNING: Type chart not initialised yet");
-            if (dataContainers.MoveData == null) Console.WriteLine("WARNING: Move data not initialised yet");
-            if (dataContainers.OffensiveItemData == null) Console.WriteLine("WARNING: Offensive item data not initialised yet");
-            if (dataContainers.DefensiveItemData == null) Console.WriteLine("WARNING: Defensive item data not initialised yet");
-            if (dataContainers.TeraItemData == null) Console.WriteLine("WARNING: Tera item data not initialised yet");
-            if (dataContainers.EvItemData == null) Console.WriteLine("WARNING: Ev item data not initialised yet");
-            if (dataContainers.NatureItemData == null) Console.WriteLine("WARNING: Nature item data not initialised yet");
+            if (_dataContainers.LocalPokemonSettings == null) Console.WriteLine("WARNING: Pokemon data not initialised yet");
+            if (_dataContainers.TypeChart == null) Console.WriteLine("WARNING: Type chart not initialised yet");
+            if (_dataContainers.MoveData == null) Console.WriteLine("WARNING: Move data not initialised yet");
+            if (_dataContainers.OffensiveItemData == null) Console.WriteLine("WARNING: Offensive item data not initialised yet");
+            if (_dataContainers.DefensiveItemData == null) Console.WriteLine("WARNING: Defensive item data not initialised yet");
+            if (_dataContainers.TeraItemData == null) Console.WriteLine("WARNING: Tera item data not initialised yet");
+            if (_dataContainers.EvItemData == null) Console.WriteLine("WARNING: Ev item data not initialised yet");
+            if (_dataContainers.NatureItemData == null) Console.WriteLine("WARNING: Nature item data not initialised yet");
             Console.ResetColor();
         }
         /// <summary>
@@ -96,12 +101,12 @@ namespace IndymonBackend
             if (File.Exists(masterPath))
             {
                 Console.WriteLine("Indymon file located, retrieving");
-                dataContainers = JsonSerializer.Deserialize<DataContainers>(File.ReadAllText(masterPath));
-                dataContainers.MasterDirectory = masterPath;
+                _dataContainers = JsonSerializer.Deserialize<DataContainers>(File.ReadAllText(masterPath));
+                _dataContainers.MasterDirectory = masterPath;
             }
             else
             {
-                Console.WriteLine("No indymon file. Attempting to create one with the basic data");
+                Console.WriteLine("No indymon file. Will jsut try to import backend data");
                 string learnsetPath = Path.Combine(directory, "learnsets.ts");
                 string dexPath = Path.Combine(directory, "pokedex.ts");
                 string movesPath = Path.Combine(directory, "moves.csv");
@@ -128,37 +133,37 @@ namespace IndymonBackend
                             // And clean up names in mons, obtain STAB
                             Cleanups.MoveDataCleanup(monData, moveData);
                             Console.WriteLine("Loaded dex and moves correctly");
-                            dataContainers.LocalPokemonSettings = monData;
-                            dataContainers.MoveData = moveData;
+                            _dataContainers.LocalPokemonSettings = monData;
+                            _dataContainers.MoveData = moveData;
                         }
                     }
                 }
                 if (File.Exists(typeChartFile))
                 {
-                    dataContainers.TypeChart = TypeChartParser.ParseTypechartFile(typeChartFile);
+                    _dataContainers.TypeChart = TypeChartParser.ParseTypechartFile(typeChartFile);
                 }
                 if (File.Exists(defItemFile))
                 {
-                    dataContainers.DefensiveItemData = ItemParser.ParseItemAndEffect(defItemFile);
+                    _dataContainers.DefensiveItemData = ItemParser.ParseItemAndEffects(defItemFile);
                 }
                 if (File.Exists(offItemFile))
                 {
-                    dataContainers.OffensiveItemData = ItemParser.ParseItemAndEffect(offItemFile);
+                    _dataContainers.OffensiveItemData = ItemParser.ParseItemAndEffects(offItemFile);
                 }
                 if (File.Exists(teraItemFile))
                 {
-                    dataContainers.TeraItemData = ItemParser.ParseItemAndEffect(teraItemFile);
+                    _dataContainers.TeraItemData = ItemParser.ParseItemAndEffects(teraItemFile);
                 }
                 if (File.Exists(evItemFile))
                 {
-                    dataContainers.EvItemData = ItemParser.ParseItemAndEffect(evItemFile);
+                    _dataContainers.EvItemData = ItemParser.ParseItemAndEffects(evItemFile);
                 }
                 if (File.Exists(natureItemFile))
                 {
-                    dataContainers.NatureItemData = ItemParser.ParseItemAndEffect(natureItemFile);
+                    _dataContainers.NatureItemData = ItemParser.ParseItemAndEffects(natureItemFile);
                 }
             }
-            dataContainers.MasterDirectory = directory;
+            _dataContainers.MasterDirectory = directory;
         }
         /// <summary>
         /// Loads playable trainer data from google doc
@@ -168,7 +173,7 @@ namespace IndymonBackend
             Console.WriteLine("Loading data from trainers");
             string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
             string tab = "1015902951";
-            List<TrainerData> data = dataContainers.TrainerData;
+            Dictionary<string, TrainerData> data = _dataContainers.TrainerData;
             LoadTeamData(data, sheetId, tab);
         }
         /// <summary>
@@ -179,7 +184,7 @@ namespace IndymonBackend
             Console.WriteLine("Loading data from NPCs");
             string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
             string tab = "1499993838";
-            List<TrainerData> data = dataContainers.NpcData;
+            Dictionary<string, TrainerData> data = _dataContainers.NpcData;
             LoadTeamData(data, sheetId, tab);
         }
         /// <summary>
@@ -190,7 +195,7 @@ namespace IndymonBackend
             Console.WriteLine("Loading data from Named NPCs");
             string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
             string tab = "224914063";
-            List<TrainerData> data = dataContainers.NamedTrainerData;
+            Dictionary<string, TrainerData> data = _dataContainers.NamedNpcData;
             LoadTeamData(data, sheetId, tab);
         }
         /// <summary>
@@ -199,7 +204,7 @@ namespace IndymonBackend
         /// <param name="trainerData">Container where this'll be stored</param>
         /// <param name="sheetId">Id of google doc</param>
         /// <param name="tab">Id of google doc tab (page)</param>
-        private static void LoadTeamData(List<TrainerData> trainerData, string sheetId, string tab)
+        private static void LoadTeamData(Dictionary<string, TrainerData> trainerData, string sheetId, string tab)
         {
             string url = $"https://docs.google.com/spreadsheets/d/{sheetId}/export?format=csv&gid={tab}";
             using HttpClient client = new HttpClient();
@@ -228,10 +233,10 @@ namespace IndymonBackend
                     csvFields = rows[offsetY + 0].Split(",");
                     string trainerName = csvFields[offsetX + 2].Trim().ToLower();
                     if (trainerName == "") continue;
-                    TrainerData newtrainer = new TrainerData();
-                    newtrainer.Name = csvFields[offsetX + 2].Trim().ToLower();
-                    newtrainer.AutoItem = (csvFields[offsetX + 7].Trim().ToLower() == "true");
-                    newtrainer.AutoTeam = (csvFields[offsetX + 9].Trim().ToLower() == "true");
+                    TrainerData newTrainer = new TrainerData();
+                    newTrainer.Name = csvFields[offsetX + 2].Trim().ToLower();
+                    newTrainer.AutoItem = (csvFields[offsetX + 7].Trim().ToLower() == "true");
+                    newTrainer.AutoTeam = (csvFields[offsetX + 9].Trim().ToLower() == "true");
                     // Then, rows 2-7 contain the mons
                     for (int mon = 0; mon < 6; mon++)
                     {
@@ -241,7 +246,7 @@ namespace IndymonBackend
                         TrainersPokemon newMon = new TrainersPokemon();
                         newMon.Name = monName;
                         newMon.Shiny = (csvFields[offsetX + 0].Trim().ToLower() == "true");
-                        if (!newtrainer.AutoTeam) // Check if moves and ability are actually relevant
+                        if (!newTrainer.AutoTeam) // Check if moves and ability are actually relevant
                         {
                             newMon.Ability = csvFields[offsetX + 3].Trim().ToLower();
                             for (int move = 0; move < 4; move++)
@@ -255,16 +260,16 @@ namespace IndymonBackend
                         {
                             int usesNumber = int.Parse(csvFields[offsetX + 9]);
                             Item newItem = new Item() { Name = itemName, Uses = usesNumber };
-                            if (newtrainer.AutoTeam || newtrainer.AutoItem) // In this case, goes to bag
+                            if (newTrainer.AutoTeam || newTrainer.AutoItem) // In this case, goes to bag
                             {
-                                newtrainer.BattleItems.Add(newItem);
+                                newTrainer.BattleItems.Add(newItem);
                             }
                             else
                             {
                                 newMon.Item = newItem;
                             }
                         }
-                        newtrainer.TrainersPokemon.Add(newMon);
+                        newTrainer.TrainersPokemon.Add(newMon);
                     }
                     // Then, row 8 contains the 1-use consumable items
                     csvFields = rows[offsetY + 8].Split(",");
@@ -274,7 +279,7 @@ namespace IndymonBackend
                         string nextItem = csvFields[offsetX + 1 + item].Trim().ToLower();
                         if (nextItem == "") break; // End if no more items
                         // Otherwise add to bag
-                        newtrainer.BattleItems.Add(new Item() { Name = nextItem, Uses = 1 }); // Always 1 use these ones
+                        newTrainer.BattleItems.Add(new Item() { Name = nextItem, Uses = 1 }); // Always 1 use these ones
                     }
                     // Then, row 9 contains the n-use consumable items
                     csvFields = rows[offsetY + 9].Split(",");
@@ -285,9 +290,9 @@ namespace IndymonBackend
                         if (nextItem == "") break; // End if no more items
                         // Otherwise add to bag
                         int usesNumber = int.Parse(csvFields[offsetX + 2 + (2 * item)]);
-                        newtrainer.BattleItems.Add(new Item() { Name = nextItem, Uses = usesNumber }); // Always 1 use these ones
+                        newTrainer.BattleItems.Add(new Item() { Name = nextItem, Uses = usesNumber }); // Always 1 use these ones
                     }
-                    trainerData.Add(newtrainer);
+                    trainerData.Add(newTrainer.Name, newTrainer);
                 }
             }
             // That should be it...
