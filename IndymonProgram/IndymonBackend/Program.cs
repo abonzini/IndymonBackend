@@ -6,7 +6,6 @@ namespace IndymonBackend
     public static class Program
     {
         static DataContainers _dataContainers = new DataContainers();
-        static TournamentManager _tournamentManager;
         static void Main(string[] args)
         {
             string FILE_NAME = "indy.mon";
@@ -49,14 +48,14 @@ namespace IndymonBackend
                         // TODO LoadTournamentHistory();
                         break;
                     case "3":
-                        _tournamentManager = new TournamentManager(_dataContainers);
-                        _tournamentManager.GenerateNewTournament();
+                        _dataContainers.TournamentManager = new TournamentManager(_dataContainers);
+                        _dataContainers.TournamentManager.GenerateNewTournament();
                         break;
                     case "4":
-                        _tournamentManager.UpdateTournamentTeams();
+                        _dataContainers.TournamentManager.UpdateTournamentTeams();
                         break;
                     case "5":
-                        _tournamentManager.ExecuteTournament();
+                        _dataContainers.TournamentManager.ExecuteTournament();
                         break;
                     default:
                         break;
@@ -109,6 +108,10 @@ namespace IndymonBackend
                 Console.WriteLine("Indymon file located, retrieving");
                 _dataContainers = JsonSerializer.Deserialize<DataContainers>(File.ReadAllText(masterPath));
                 _dataContainers.MasterDirectory = masterPath;
+                if (_dataContainers.TournamentManager != null)
+                {
+                    _dataContainers.TournamentManager.SetBackEndData(_dataContainers);
+                }
             }
             else
             {

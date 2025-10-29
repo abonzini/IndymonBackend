@@ -17,6 +17,7 @@ namespace IndymonBackend
         public Dictionary<string, TrainerData> TrainerData { get; set; } = new Dictionary<string, TrainerData>();
         public Dictionary<string, TrainerData> NpcData { get; set; } = new Dictionary<string, TrainerData>();
         public Dictionary<string, TrainerData> NamedNpcData { get; set; } = new Dictionary<string, TrainerData>();
+        public TournamentManager TournamentManager { get; set; } = null;
     }
     public class Item
     {
@@ -63,26 +64,31 @@ namespace IndymonBackend
             // Then, get the mon a stab (move 1)
             Moves[0] = legalStabs.ElementAt(_rng.Next(legalStabs.Count));
             legalMoves.Remove(Moves[0]);
-            // Move 2 (and 3), just get random shit
-            Moves[1] = legalMoves.ElementAt(_rng.Next(legalMoves.Count));
-            legalMoves.Remove(Moves[1]);
-            Moves[2] = legalMoves.ElementAt(_rng.Next(legalMoves.Count));
-            legalMoves.Remove(Moves[2]);
-            // Finally, move 4 has a chance to be empty
-            if (_rng.Next(0, 100) < switchChance) // Empty
+            // Moves 2-4, just get random shit with a chance to switch
+            for (int i = 1; i <= 3; i++)
             {
-                Moves[3] = "";
-            }
-            else // Otherwise a normal move i guess
-            {
-                Moves[3] = legalMoves.ElementAt(_rng.Next(legalMoves.Count));
+                if (_rng.Next(0, 100) < switchChance) // Empty
+                {
+                    Moves[i] = "";
+                }
+                else // Otherwise a normal move i guess
+                {
+                    Moves[i] = legalMoves.ElementAt(_rng.Next(legalMoves.Count));
+                    legalMoves.Remove(Moves[1]);
+                }
             }
         }
+        /// <summary>
+        /// Gets pokepaste for this mon set
+        /// </summary>
+        /// <param name="backEndData">Backend data to check stuff like item effects</param>
+        /// <returns>Pokepaste string</returns>
         public string GetPokepaste(DataContainers backEndData)
         {
             // Add all relevant data here
             bool hasItemEquipped = false;
             string itemEffectString = ""; // Strings that may or may not be there depending on mon's item
+            string evString = "";
             HashSet<string> auxItemSet;
             if (Item != null) // If _some_ item is there, then something's going on
             {
@@ -111,17 +117,22 @@ namespace IndymonBackend
                         };
                         allEvStrings.Add($"50 {statEvString}");
                     }
-                    itemEffectString = $"EVs: {string.Join(" / ", allEvStrings)}\n";
+                    evString = $"EVs: {string.Join(" / ", allEvStrings)}\n";
                 }
                 else // If no weird item, then it's just a usable item I guess
                 {
                     hasItemEquipped = true;
                 }
             }
+            if (evString == "") // If ev string has not been used, then add 1 ev to avoid showdown bitching
+            {
+                evString = $"EVs: 1 HP\n";
+            }
             // Now to assemble the final pokepaste
             StringBuilder resultBuilder = new StringBuilder();
             resultBuilder.Append(hasItemEquipped ? $"{Name} @ {Item.Name}\n" : $"{Name}\n");
             resultBuilder.Append(itemEffectString);
+            resultBuilder.Append(evString);
             resultBuilder.Append($"Ability: {Ability}\n");
             if (Shiny) resultBuilder.Append("Shiny: Yes\n");
             foreach (string move in Moves)
@@ -170,14 +181,15 @@ namespace IndymonBackend
                     Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Name];
                     while (!acceptedMon)
                     {
-                        pokemonSet.RandomizeMon(backEndData, true, 15); // Randomize mon (smart, switch chance of 15%)
+                        // Randomize mon, with a 7% chance of each move being empty (1->18%, 2->1.3%, 3->0.003%)
+                        pokemonSet.RandomizeMon(backEndData, true, 7); // Randomize mon
                         // Show it to user, user will decide if redo or revise (banning sets for the future)
                         Console.WriteLine($"\t\tSet for {pokemonSet.ToString()}");
-                        Console.WriteLine("\t\tTo modify AI for future: 0: ban ability. 1-4 ban moves. Otherwise this mon is approved.");
+                        Console.WriteLine("\t\tTo modify AI for future: 5: ban ability. 1-4 ban moves. Otherwise this mon is approved. 0 to reroll the whole thing");
                         string inputString = Console.ReadLine().ToLower();
                         switch (inputString)
                         {
-                            case "0":
+                            case "5":
                                 pokemonBackendData.AiAbilityBanlist.Add(pokemonSet.Ability);
                                 break;
                             case "1":
@@ -192,6 +204,8 @@ namespace IndymonBackend
                             case "4":
                                 pokemonBackendData.AiMoveBanlist.Add(pokemonSet.Moves[3]);
                                 break;
+                            case "0":
+                                break; // Rejects te mon
                             default:
                                 acceptedMon = true;
                                 break;
