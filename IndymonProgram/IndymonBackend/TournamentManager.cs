@@ -151,6 +151,13 @@ namespace IndymonBackend
         {
             OngoingTournament.PlayTournament();
         }
+        /// <summary>
+        /// Does the animation and stuff
+        /// </summary>
+        public void FinaliseTournament()
+        {
+            OngoingTournament.FinaliseTournament();
+        }
     }
     public class TournamentMatch()
     {
@@ -160,6 +167,8 @@ namespace IndymonBackend
         public int score1 { get; set; } = 0;
         public int score2 { get; set; } = 0;
         public string winner { get; set; } = "";
+        public int drawHelper1 { get; set; } = 0; // For the bracket drawing
+        public int drawHelper2 { get; set; } = 0;
         public override string ToString()
         {
             return $"{player1} ({score1}-{score2}) {player2}";
@@ -167,6 +176,9 @@ namespace IndymonBackend
     }
     public class Tournament
     {
+        const float DRAW_RYTHM_PERIOD = 1.0f;
+        const float BLINK_TOGGLE_PERIOD = 0.5f;
+        const int NUMBER_OF_BLINKS = 3;
         public int NPlayers { get; set; } = 0;
         public int NMons { get; set; } = 3;
         public List<string> Participants { get; set; } = new List<string>();
@@ -176,6 +188,7 @@ namespace IndymonBackend
         /// </summary>
         public void PlayTournament()
         {
+            Console.CursorVisible = true;
             if (RoundHistory == null) // Brand new tournament
             {
                 RoundHistory = new List<List<TournamentMatch>>();
@@ -190,6 +203,7 @@ namespace IndymonBackend
                 {
                     TournamentMatch thisMatch = new TournamentMatch();
                     thisMatch.player1 = Participants[i];
+                    thisMatch.drawHelper1 = i * 2; // Go to the next even (leave a space between names)
                     if (i < byesBeginning)
                     {
                         thisMatch.isBye = true;
@@ -203,6 +217,7 @@ namespace IndymonBackend
                         i++; // Get next player (opp)
                         thisMatch.player2 = Participants[i];
                         thisMatch.isBye = false;
+                        thisMatch.drawHelper2 = i * 2; // Go to the next even (leave a space between names)
                     }
                     thisRound.Add(thisMatch);
                 }
@@ -282,12 +297,14 @@ namespace IndymonBackend
                     {
                         TournamentMatch nextMatch = new TournamentMatch();
                         nextMatch.player1 = match.winner;
+                        nextMatch.drawHelper1 = match.isBye ? match.drawHelper1 : CalculateMidPoint(match.drawHelper1, match.drawHelper2); // Bye continues in same place, bracket goes to midpoint
                         nextRound.Add(nextMatch);
                     }
                     else // It's the player 2
                     {
                         TournamentMatch nextMatch = nextRound.Last();
                         nextMatch.player2 = match.winner;
+                        nextMatch.drawHelper2 = match.isBye ? match.drawHelper1 : CalculateMidPoint(match.drawHelper1, match.drawHelper2); // Bye continues in same place, bracket goes to midpoint
                     }
                     playerProcessed++;
                 }
@@ -303,6 +320,132 @@ namespace IndymonBackend
                     RoundHistory.Add(nextRound); // Adds the next round to the pile
                 }
             }
+            Console.CursorVisible = false;
+        }
+        /// <summary>
+        /// Performs tournament animation once complete
+        /// </summary>
+        public void FinaliseTournament()
+        {
+            // Find person with the longest name
+            int nameLength = 0;
+            foreach (string participant in Participants)
+            {
+                nameLength = Math.Max(nameLength, participant.Length + 1);
+            }
+            // Then, perform a tournament animation
+            Console.Clear();
+            int round, cursorX;
+            for (round = 0; round < RoundHistory.Count; round++) // Check each round
+            {
+                cursorX = round * (nameLength + 2); // Each one will have a horizontal offset of round * (name + 1 + 1) (name+bracket+margin)
+                List<TournamentMatch> matchesThisRound = RoundHistory[round];
+                if (round == 0) // In first round, need to place players beforehand
+                {
+                    foreach (TournamentMatch match in matchesThisRound) // First, draw all names in the right position
+                    {
+                        Console.SetCursorPosition(cursorX, match.drawHelper1); // First player always there
+                        Console.Write(match.player1);
+                        if (!match.isBye)
+                        {
+                            Console.SetCursorPosition(cursorX, match.drawHelper2); // Also draw p2 if there's any
+                            Console.Write(match.player2);
+                        }
+                    }
+                }
+                // OK now the brackets...
+                foreach (TournamentMatch match in matchesThisRound)
+                {
+                    if (match.isBye)
+                    {
+                        Thread.Sleep((int)(DRAW_RYTHM_PERIOD * 1000)); // Wait and then draw the single line right
+                        Console.SetCursorPosition(cursorX + nameLength, match.drawHelper1); // Put it after name
+                        Console.Write("─");
+                        Console.SetCursorPosition(((round + 1) * (nameLength + 2)), match.drawHelper1); // Need to place the winner in next round
+                    }
+                    else
+                    {
+                        // Need to draw and re-draw the bracket...
+                        if (BLINK_TOGGLE_PERIOD < DRAW_RYTHM_PERIOD)
+                        {
+                            Thread.Sleep((int)((DRAW_RYTHM_PERIOD - BLINK_TOGGLE_PERIOD) * 1000)); // For visual rythm consistnecy
+                        }
+                        for (int blink = 0; blink < NUMBER_OF_BLINKS; blink++)
+                        {
+                            Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Wait and then draw the bracket, on and off
+                            DrawBracket(match.drawHelper1, match.drawHelper2, cursorX + nameLength, true);
+                            Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Wait and then draw the bracket, on and off
+                            DrawBracket(match.drawHelper1, match.drawHelper2, cursorX + nameLength, false);
+                        }
+                        Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Wait and then draw the bracket, on and off
+                        DrawBracket(match.drawHelper1, match.drawHelper2, cursorX + nameLength, true);
+                        // And then after blink just put the score between
+                        Console.SetCursorPosition(cursorX, CalculateMidPoint(match.drawHelper1, match.drawHelper2)); // Put it after name
+                        if (BLINK_TOGGLE_PERIOD < DRAW_RYTHM_PERIOD)
+                        {
+                            Thread.Sleep((int)((DRAW_RYTHM_PERIOD - BLINK_TOGGLE_PERIOD) * 1000)); // For visual rythm consistnecy
+                        }
+                        Console.Write($"({match.score1}-{match.score2})");
+                        Console.SetCursorPosition(((round + 1) * (nameLength + 2)), CalculateMidPoint(match.drawHelper1, match.drawHelper2)); // Need to place the winner in next round
+                    }
+                    Console.Write(match.winner);
+                }
+            }
+            Console.ReadKey();
+            Console.Clear();
+            // And that should be it?!
+            // TODO later something else with the tournament stuff
+        }
+        /// <summary>
+        /// Draws a bracket in console, always vertical
+        /// </summary>
+        /// <param name="beginningY">Where bracket begins Y</param>
+        /// <param name="endY">Where bracket ends Y</param>
+        /// <param name="x">X position of bracker</param>
+        /// <param name="show">Whether to show or to hide</param>
+        static void DrawBracket(int beginningY, int endY, int x, bool show)
+        {
+            int midpoint = CalculateMidPoint(beginningY, endY);
+            // Walk char by char drawing accordingly
+            for (int y = beginningY; y <= endY; y++)
+            {
+                Console.SetCursorPosition(x, y); // Next position
+                if (!show)
+                {
+                    Console.CursorLeft++;
+                    Console.Write("\b "); // Overwrite with space??
+                }
+                else if (y == beginningY)
+                {
+                    Console.Write("┐");
+                }
+                else if (y == endY)
+                {
+                    Console.Write("┘");
+                }
+                else if (y == midpoint)
+                {
+                    Console.Write("├");
+                }
+                else
+                {
+                    Console.Write("│");
+                }
+            }
+        }
+        /// <summary>
+        /// Calculates midpoint for bracket calculation. in a function to keep consistent
+        /// </summary>
+        /// <param name="line1">Where bracket begins</param>
+        /// <param name="line2">Where bracket ends</param>
+        /// <returns>The location of midpoint</returns>
+        static int CalculateMidPoint(int line1, int line2)
+        {
+            int average = (line1 + line2);
+            bool integer = (average % 2) == 0;
+            average /= 2;
+            if (!integer) average++; // Move to the next odd number if middle is even (a good bracket should fall in odd numbers)
+            return average;
         }
     }
 }

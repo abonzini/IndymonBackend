@@ -10,6 +10,7 @@ namespace IndymonBackend
         {
             string FILE_NAME = "indy.mon";
             Console.WriteLine("Indymon manager program");
+            Console.CursorVisible = false;
             if (args.Length == 0) // File not included, need to ask for it
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -56,6 +57,9 @@ namespace IndymonBackend
                         break;
                     case "5":
                         _dataContainers.TournamentManager.ExecuteTournament();
+                        break;
+                    case "6":
+                        _dataContainers.TournamentManager.FinaliseTournament();
                         break;
                     default:
                         break;
