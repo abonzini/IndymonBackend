@@ -3,9 +3,18 @@ using System.Text.Json;
 
 namespace IndymonBackend
 {
+    public class IndymonData
+    {
+        public DataContainers DataContainer { get; set; }
+        public TournamentManager TournamentManager { get; set; }
+    }
     public static class Program
     {
-        static DataContainers _dataContainers = new DataContainers();
+        static IndymonData _allData = new IndymonData
+        {
+            DataContainer = new DataContainers(),
+            TournamentManager = null
+        };
         static void Main(string[] args)
         {
             string FILE_NAME = "indy.mon";
@@ -20,8 +29,8 @@ namespace IndymonBackend
             else
             {
                 string indymonFile = args[0];
-                _dataContainers = JsonSerializer.Deserialize<DataContainers>(File.ReadAllText(indymonFile));
-                _dataContainers.MasterDirectory = Path.GetDirectoryName(indymonFile);
+                _allData = JsonSerializer.Deserialize<IndymonData>(File.ReadAllText(indymonFile));
+                _allData.DataContainer.MasterDirectory = Path.GetDirectoryName(indymonFile);
             }
             string InputString;
             do
@@ -35,8 +44,8 @@ namespace IndymonBackend
                         {
                             Console.WriteLine("Serializing json");
                             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-                            string indymonFile = Path.Combine(_dataContainers.MasterDirectory, FILE_NAME);
-                            File.WriteAllText(indymonFile, JsonSerializer.Serialize(_dataContainers, options));
+                            string indymonFile = Path.Combine(_allData.DataContainer.MasterDirectory, FILE_NAME);
+                            File.WriteAllText(indymonFile, JsonSerializer.Serialize(_allData, options));
                         }
                         break;
                     case "1":
@@ -49,17 +58,17 @@ namespace IndymonBackend
                         // TODO LoadTournamentHistory();
                         break;
                     case "3":
-                        _dataContainers.TournamentManager = new TournamentManager(_dataContainers);
-                        _dataContainers.TournamentManager.GenerateNewTournament();
+                        _allData.TournamentManager = new TournamentManager(_allData.DataContainer);
+                        _allData.TournamentManager.GenerateNewTournament();
                         break;
                     case "4":
-                        _dataContainers.TournamentManager.UpdateTournamentTeams();
+                        _allData.TournamentManager.UpdateTournamentTeams();
                         break;
                     case "5":
-                        _dataContainers.TournamentManager.ExecuteTournament();
+                        _allData.TournamentManager.ExecuteTournament();
                         break;
                     case "6":
-                        _dataContainers.TournamentManager.FinaliseTournament();
+                        _allData.TournamentManager.FinaliseTournament();
                         break;
                     default:
                         break;
@@ -74,14 +83,14 @@ namespace IndymonBackend
         static void PrintWarnings()
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            if (_dataContainers.Dex == null) Console.WriteLine("WARNING: Pokemon data not initialised yet");
-            if (_dataContainers.TypeChart == null) Console.WriteLine("WARNING: Type chart not initialised yet");
-            if (_dataContainers.MoveData == null) Console.WriteLine("WARNING: Move data not initialised yet");
-            if (_dataContainers.OffensiveItemData == null) Console.WriteLine("WARNING: Offensive item data not initialised yet");
-            if (_dataContainers.DefensiveItemData == null) Console.WriteLine("WARNING: Defensive item data not initialised yet");
-            if (_dataContainers.TeraItemData == null) Console.WriteLine("WARNING: Tera item data not initialised yet");
-            if (_dataContainers.EvItemData == null) Console.WriteLine("WARNING: Ev item data not initialised yet");
-            if (_dataContainers.NatureItemData == null) Console.WriteLine("WARNING: Nature item data not initialised yet");
+            if (_allData.DataContainer.Dex == null) Console.WriteLine("WARNING: Pokemon data not initialised yet");
+            if (_allData.DataContainer.TypeChart == null) Console.WriteLine("WARNING: Type chart not initialised yet");
+            if (_allData.DataContainer.MoveData == null) Console.WriteLine("WARNING: Move data not initialised yet");
+            if (_allData.DataContainer.OffensiveItemData == null) Console.WriteLine("WARNING: Offensive item data not initialised yet");
+            if (_allData.DataContainer.DefensiveItemData == null) Console.WriteLine("WARNING: Defensive item data not initialised yet");
+            if (_allData.DataContainer.TeraItemData == null) Console.WriteLine("WARNING: Tera item data not initialised yet");
+            if (_allData.DataContainer.EvItemData == null) Console.WriteLine("WARNING: Ev item data not initialised yet");
+            if (_allData.DataContainer.NatureItemData == null) Console.WriteLine("WARNING: Nature item data not initialised yet");
             Console.ResetColor();
         }
         /// <summary>
@@ -110,11 +119,11 @@ namespace IndymonBackend
             if (File.Exists(masterPath))
             {
                 Console.WriteLine("Indymon file located, retrieving");
-                _dataContainers = JsonSerializer.Deserialize<DataContainers>(File.ReadAllText(masterPath));
-                _dataContainers.MasterDirectory = masterPath;
-                if (_dataContainers.TournamentManager != null)
+                _allData = JsonSerializer.Deserialize<IndymonData>(File.ReadAllText(masterPath));
+                _allData.DataContainer.MasterDirectory = masterPath;
+                if (_allData.TournamentManager != null)
                 {
-                    _dataContainers.TournamentManager.SetBackEndData(_dataContainers);
+                    _allData.TournamentManager.SetBackEndData(_allData.DataContainer);
                 }
             }
             else
@@ -148,37 +157,37 @@ namespace IndymonBackend
                             // Finally clean moves themselves
                             moveData = Cleanups.MoveListCleanup(moveData);
                             Console.WriteLine("Loaded dex and moves correctly");
-                            _dataContainers.Dex = monData;
-                            _dataContainers.MoveData = moveData;
+                            _allData.DataContainer.Dex = monData;
+                            _allData.DataContainer.MoveData = moveData;
                         }
                     }
                 }
                 if (File.Exists(typeChartFile))
                 {
-                    _dataContainers.TypeChart = TypeChartParser.ParseTypechartFile(typeChartFile);
+                    _allData.DataContainer.TypeChart = TypeChartParser.ParseTypechartFile(typeChartFile);
                 }
                 if (File.Exists(defItemFile))
                 {
-                    _dataContainers.DefensiveItemData = ItemParser.ParseItemAndEffects(defItemFile);
+                    _allData.DataContainer.DefensiveItemData = ItemParser.ParseItemAndEffects(defItemFile);
                 }
                 if (File.Exists(offItemFile))
                 {
-                    _dataContainers.OffensiveItemData = ItemParser.ParseItemAndEffects(offItemFile);
+                    _allData.DataContainer.OffensiveItemData = ItemParser.ParseItemAndEffects(offItemFile);
                 }
                 if (File.Exists(teraItemFile))
                 {
-                    _dataContainers.TeraItemData = ItemParser.ParseItemAndEffects(teraItemFile);
+                    _allData.DataContainer.TeraItemData = ItemParser.ParseItemAndEffects(teraItemFile);
                 }
                 if (File.Exists(evItemFile))
                 {
-                    _dataContainers.EvItemData = ItemParser.ParseItemAndEffects(evItemFile);
+                    _allData.DataContainer.EvItemData = ItemParser.ParseItemAndEffects(evItemFile);
                 }
                 if (File.Exists(natureItemFile))
                 {
-                    _dataContainers.NatureItemData = ItemParser.ParseItemAndEffects(natureItemFile);
+                    _allData.DataContainer.NatureItemData = ItemParser.ParseItemAndEffects(natureItemFile);
                 }
             }
-            _dataContainers.MasterDirectory = directory;
+            _allData.DataContainer.MasterDirectory = directory;
         }
         /// <summary>
         /// Loads playable trainer data from google doc
@@ -188,7 +197,7 @@ namespace IndymonBackend
             Console.WriteLine("Loading data from trainers");
             string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
             string tab = "1015902951";
-            Dictionary<string, TrainerData> data = _dataContainers.TrainerData;
+            Dictionary<string, TrainerData> data = _allData.DataContainer.TrainerData;
             LoadTeamData(data, sheetId, tab);
         }
         /// <summary>
@@ -199,7 +208,7 @@ namespace IndymonBackend
             Console.WriteLine("Loading data from NPCs");
             string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
             string tab = "364323808";
-            Dictionary<string, TrainerData> data = _dataContainers.NpcData;
+            Dictionary<string, TrainerData> data = _allData.DataContainer.NpcData;
             LoadTeamData(data, sheetId, tab);
         }
         /// <summary>
@@ -210,7 +219,7 @@ namespace IndymonBackend
             Console.WriteLine("Loading data from Named NPCs");
             string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
             string tab = "43578104";
-            Dictionary<string, TrainerData> data = _dataContainers.NamedNpcData;
+            Dictionary<string, TrainerData> data = _allData.DataContainer.NamedNpcData;
             LoadTeamData(data, sheetId, tab);
         }
         /// <summary>

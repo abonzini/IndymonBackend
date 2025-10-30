@@ -1,5 +1,3 @@
-Potential bot:
-- continue bot shenanigans
 For game proper:
 2 - Generate leaderboard class, by default will be blank unless loaded. Class with each entry a name, and dictionaries with stats for all matchups. Same for NPC but simpler.
 3 - Swiss tournament

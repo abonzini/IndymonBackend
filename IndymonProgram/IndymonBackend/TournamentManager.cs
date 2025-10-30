@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using ParsersAndData;
+using ShowdownBot;
+using System.Text;
 
 namespace IndymonBackend
 {
@@ -151,7 +153,7 @@ namespace IndymonBackend
         /// </summary>
         public void ExecuteTournament()
         {
-            OngoingTournament.PlayTournament();
+            OngoingTournament.PlayTournament(_backEndData);
         }
         /// <summary>
         /// Does the animation and stuff
@@ -186,9 +188,10 @@ namespace IndymonBackend
         public List<string> Participants { get; set; } = new List<string>();
         public List<List<TournamentMatch>> RoundHistory { get; set; } = null;
         /// <summary>
-        /// Will play the tournament, organising the bracket and asking for results
+        /// Will play the tournament, organising the bracket and asking for results or simulating it
         /// </summary>
-        public void PlayTournament()
+        /// <param name="_backEndData">Back end just in case needs to simulate bot</param>
+        public void PlayTournament(DataContainers _backEndData)
         {
             Console.CursorVisible = true;
             if (RoundHistory == null) // Brand new tournament
@@ -233,7 +236,7 @@ namespace IndymonBackend
                 List<TournamentMatch> nextRound = new List<TournamentMatch>();
                 int playerProcessed = 0;
                 Console.Clear();
-                Console.WriteLine("Insert scores for each match. 0 if you want it randomized, q to stop input temporarily");
+                Console.WriteLine("Insert scores for each match. 0 if you want it randomized, q to stop input temporarily. b FOR ROBOTS");
                 int consoleEndPosition = currentRound.Count + 1; // Where the cursor will be after data entry
                 int maxStringLength = 0;
                 foreach (TournamentMatch match in currentRound) // Print all rounds first (so that they can be simulated if needed
@@ -260,6 +263,7 @@ namespace IndymonBackend
                     else
                     {
                         Console.SetCursorPosition(maxStringLength + 1, i + 1); // Put the cursor on the right, and starting from 1 (to avoid message string)
+                        (int cursorX, int cursorY) = Console.GetCursorPosition(); // Just in case I need to write in same place
                         string scoreString = Console.ReadLine();
                         if (scoreString == "0")
                         {
@@ -278,6 +282,23 @@ namespace IndymonBackend
                         else if (scoreString.ToLower() == "q") // If q, just stop here we'll need to restart after
                         {
                             finished = true;
+                            break; // Stops iteration
+                        }
+                        else if (scoreString.ToLower() == "b") // If b, do battle bots
+                        {
+
+                            BotBattle automaticBattle = new BotBattle(_backEndData);
+                            (match.score1, match.score2) = automaticBattle.SimulateBotBattle(match.player1, match.player2, NMons, NMons);
+                            Console.SetCursorPosition(cursorX, cursorY);
+                            Console.Write($"{match.score1}-{match.score2} GET THE REPLAY");
+                            if (match.score1 > match.score2)
+                            {
+                                match.winner = match.player1;
+                            }
+                            else
+                            {
+                                match.winner = match.player2;
+                            }
                             break; // Stops iteration
                         }
                         else

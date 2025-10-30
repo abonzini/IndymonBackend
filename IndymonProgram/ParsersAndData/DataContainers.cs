@@ -1,7 +1,6 @@
-﻿using ParsersAndData;
-using System.Text;
+﻿using System.Text;
 
-namespace IndymonBackend
+namespace ParsersAndData
 {
     public class DataContainers
     {
@@ -17,7 +16,6 @@ namespace IndymonBackend
         public Dictionary<string, TrainerData> TrainerData { get; set; } = new Dictionary<string, TrainerData>();
         public Dictionary<string, TrainerData> NpcData { get; set; } = new Dictionary<string, TrainerData>();
         public Dictionary<string, TrainerData> NamedNpcData { get; set; } = new Dictionary<string, TrainerData>();
-        public TournamentManager TournamentManager { get; set; } = null;
     }
     public class Item
     {
@@ -40,7 +38,7 @@ namespace IndymonBackend
 
         public override string ToString()
         {
-            return $"{Species}: {Ability}, {Moves[0]}-{Moves[1]}-{Moves[2]}-{Moves[3]}, {Item?.Name}";
+            return $"{Species}: {Ability}, {string.Join('-', Moves)}, {Item?.Name}";
         }
         /// <summary>
         /// Randomizes this mon's sets (ability+moves)
