@@ -198,7 +198,7 @@ namespace IndymonBackend
         {
             Console.WriteLine("Loading data from NPCs");
             string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
-            string tab = "1499993838";
+            string tab = "364323808";
             Dictionary<string, TrainerData> data = _dataContainers.NpcData;
             LoadTeamData(data, sheetId, tab);
         }
@@ -209,7 +209,7 @@ namespace IndymonBackend
         {
             Console.WriteLine("Loading data from Named NPCs");
             string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
-            string tab = "224914063";
+            string tab = "43578104";
             Dictionary<string, TrainerData> data = _dataContainers.NamedNpcData;
             LoadTeamData(data, sheetId, tab);
         }
@@ -225,7 +225,7 @@ namespace IndymonBackend
             using HttpClient client = new HttpClient();
             string csv = client.GetStringAsync(url).GetAwaiter().GetResult();
             // Trainer card format
-            const int xSize = 10, ySize = 12; // Dimensions of the trainer cards in indices
+            const int xSize = 10, ySize = 18; // Dimensions of the trainer cards in row-col
             int verticalAmount, horizontalAmount;
             string[] rows = csv.Split("\n");
             // Verify vertical cards
@@ -244,23 +244,29 @@ namespace IndymonBackend
                 {
                     int offsetX = cardX * xSize;
                     // Now parse all
-                    // Row 0, contains Name, auto-flags
+                    // Row 0, contains picture, Name, auto-flags
                     csvFields = rows[offsetY + 0].Split(",");
                     string trainerName = csvFields[offsetX + 2].Trim().ToLower();
                     if (trainerName == "") continue;
                     TrainerData newTrainer = new TrainerData();
                     newTrainer.Name = trainerName;
+                    newTrainer.Avatar = csvFields[offsetX + 0].Trim().ToLower();
                     newTrainer.AutoItem = (csvFields[offsetX + 7].Trim().ToLower() == "true");
                     newTrainer.AutoTeam = (csvFields[offsetX + 9].Trim().ToLower() == "true");
-                    // Then, rows 2-7 contain the mons
+                    // Then, rows 2-13 contain the mons
                     for (int mon = 0; mon < 6; mon++)
                     {
-                        csvFields = rows[offsetY + 2 + mon].Split(",");
+                        // First, get mon name and if shiny, data will come later
+                        csvFields = rows[offsetY + 3 + (2 * mon)].Split(",");
                         string monName = csvFields[offsetX + 2].Trim().ToLower();
                         if (monName == "") break; // If no mon, then I'm done doing mons then
                         PokemonSet newMon = new PokemonSet();
-                        newMon.Name = monName;
+                        newMon.Species = monName;
                         newMon.Shiny = (csvFields[offsetX + 0].Trim().ToLower() == "true");
+                        // Then, check the other row for the rest
+                        csvFields = rows[offsetY + 2 + (2 * mon)].Split(",");
+                        newMon.Gender = csvFields[offsetX + 0].Trim().ToLower();
+                        newMon.NickName = csvFields[offsetX + 2].Trim().ToLower();
                         if (!newTrainer.AutoTeam) // Check if moves and ability are actually relevant
                         {
                             newMon.Ability = csvFields[offsetX + 3].Trim().ToLower();
@@ -286,8 +292,8 @@ namespace IndymonBackend
                         }
                         newTrainer.Teamsheet.Add(newMon);
                     }
-                    // Then, row 8 contains the 1-use consumable items
-                    csvFields = rows[offsetY + 8].Split(",");
+                    // Then, row 14 contains the 1-use consumable items
+                    csvFields = rows[offsetY + 14].Split(",");
                     for (int item = 0; item < 8; item++)
                     {
                         // First field is the trainer data label, not an actual item
@@ -296,8 +302,8 @@ namespace IndymonBackend
                         // Otherwise add to bag
                         newTrainer.BattleItems.Add(new Item() { Name = nextItem, Uses = 1 }); // Always 1 use these ones
                     }
-                    // Then, row 9 contains the n-use consumable items
-                    csvFields = rows[offsetY + 9].Split(",");
+                    // Then, row 15 contains the n-use consumable items
+                    csvFields = rows[offsetY + 15].Split(",");
                     for (int item = 0; item < 4; item++)
                     {
                         // First field is the trainer data label, not an actual item

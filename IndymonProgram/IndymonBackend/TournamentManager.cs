@@ -126,6 +126,8 @@ namespace IndymonBackend
                 int k = _rng.Next(n + 1);
                 (OngoingTournament.Participants[k], OngoingTournament.Participants[n]) = (OngoingTournament.Participants[n], OngoingTournament.Participants[k]); // Swap
             }
+            // Reset the tournament if one was already in progress
+            OngoingTournament.RoundHistory = null;
             // Ok not bad, next step is to update participant team sheet if needed, and generate the import pokepaste
             StringBuilder pokepasteBuilder = new StringBuilder();
             foreach (string participantName in OngoingTournament.Participants)

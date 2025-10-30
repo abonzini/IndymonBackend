@@ -30,7 +30,9 @@ namespace IndymonBackend
     }
     public class PokemonSet
     {
-        public string Name { get; set; }
+        public string NickName { get; set; }
+        public string Species { get; set; }
+        public string Gender { get; set; }
         public bool Shiny { get; set; }
         public string Ability { get; set; }
         public string[] Moves { get; set; } = new string[4];
@@ -38,7 +40,7 @@ namespace IndymonBackend
 
         public override string ToString()
         {
-            return $"{Name}: {Ability}, {Moves[0]}-{Moves[1]}-{Moves[2]}-{Moves[3]}, {Item?.Name}";
+            return $"{Species}: {Ability}, {Moves[0]}-{Moves[1]}-{Moves[2]}-{Moves[3]}, {Item?.Name}";
         }
         /// <summary>
         /// Randomizes this mon's sets (ability+moves)
@@ -49,7 +51,7 @@ namespace IndymonBackend
         public void RandomizeMon(DataContainers backendData, bool smart, int switchChance)
         {
             Random _rng = new Random();
-            Pokemon pokemonBackendData = backendData.Dex[Name];
+            Pokemon pokemonBackendData = backendData.Dex[Species];
             HashSet<string> legalAbilities = pokemonBackendData.Abilities.ToHashSet();
             HashSet<string> legalMoves = pokemonBackendData.Moves.ToHashSet();
             HashSet<string> legalStabs = pokemonBackendData.DamagingStabs.ToHashSet();
@@ -79,71 +81,159 @@ namespace IndymonBackend
             }
         }
         /// <summary>
+        /// Gets the pokemon nature (if any)
+        /// </summary>
+        /// <param name="backEndData">Back End data to check properties</param>
+        /// <returns>The nature name or ""</returns>
+        string GetNature(DataContainers backEndData)
+        {
+            if (Item != null) // Teras are determined by item
+            {
+                if (backEndData.NatureItemData.TryGetValue(Item.Name, out HashSet<string> auxItemSet)) // If the item is a nature-setting item
+                {
+                    return auxItemSet.FirstOrDefault(); // Found the nature set by item
+                }
+            }
+            return "";
+        }
+        /// <summary>
+        /// Gets the EVs of this mon
+        /// </summary>
+        /// <param name="backEndData">Back end data</param>
+        /// <returns>Array of the 6ev in order, HP, Atk, Def, SpA, SpD, Spe</returns>
+        int[] GetEvs(DataContainers backEndData)
+        {
+            int[] evs = { 1, 1, 1, 1, 1, 1 }; // All ev's 1 so the thing doesnt annoy me
+            if (Item != null) // EVs also by item
+            {
+                if (backEndData.EvItemData.TryGetValue(Item.Name, out HashSet<string> auxItemSet)) // If the item is a nature-setting item
+                {
+                    foreach (string evStat in auxItemSet)
+                    {
+                        int evIndex = evStat.ToLower() switch
+                        {
+                            "hp" => 0,
+                            "attack" => 1,
+                            "defense" => 2,
+                            "special attack" => 3,
+                            "special defense" => 4,
+                            "speed" => 5,
+                            _ => 6
+                        };
+                        evs[evIndex] = 50; // This stat gets 50
+                    }
+                }
+            }
+            return evs;
+        }
+        /// <summary>
+        /// Gets the pokemon tera type
+        /// </summary>
+        /// <param name="backEndData">Back End data to check properties</param>
+        /// <returns>The tera type or ""</returns>
+        string GetTera(DataContainers backEndData)
+        {
+            if (Item != null) // Natures are determined by item
+            {
+                if (backEndData.TeraItemData.TryGetValue(Item.Name, out HashSet<string> auxItemSet)) // If the item is a nature-setting item
+                {
+                    return auxItemSet.FirstOrDefault(); // Found the nature set by item
+                }
+            }
+            return "";
+        }
+        /// <summary>
+        /// If the pokemon has an item that will be equipped in battle, return its name
+        /// </summary>
+        /// <param name="backEndData">Back End data to check properties</param>
+        /// <returns>The item name or ""</returns>
+        string GetBattleItem(DataContainers backEndData)
+        {
+            if (Item != null)
+            {
+                // Ensure it's not one of my special items
+                if (!backEndData.NatureItemData.ContainsKey(Item.Name) &&
+                    !backEndData.TeraItemData.ContainsKey(Item.Name) &&
+                    !backEndData.EvItemData.ContainsKey(Item.Name))
+                {
+                    return Item.Name;
+                }
+            }
+            return "";
+        }
+        /// <summary>
         /// Gets pokepaste for this mon set
         /// </summary>
         /// <param name="backEndData">Backend data to check stuff like item effects</param>
         /// <returns>Pokepaste string</returns>
         public string GetPokepaste(DataContainers backEndData)
         {
-            // Add all relevant data here
-            bool hasItemEquipped = false;
-            string itemEffectString = ""; // Strings that may or may not be there depending on mon's item
-            string evString = "";
-            HashSet<string> auxItemSet;
-            if (Item != null) // If _some_ item is there, then something's going on
-            {
-                if (backEndData.NatureItemData.TryGetValue(Item.Name, out auxItemSet)) // If the item is a nature-setting item
-                {
-                    itemEffectString = $"{auxItemSet.FirstOrDefault()} Nature\n";
-                }
-                else if (backEndData.TeraItemData.TryGetValue(Item.Name, out auxItemSet)) // Maybe tera?
-                {
-                    itemEffectString = $"Tera Type: {auxItemSet.FirstOrDefault()}\n";
-                }
-                else if (backEndData.EvItemData.TryGetValue(Item.Name, out auxItemSet)) // Maybe ev?
-                {
-                    List<string> allEvStrings = new List<string>();
-                    foreach (string statName in auxItemSet)
-                    {
-                        string statEvString = statName.ToLower() switch
-                        {
-                            "attack" => "Atk",
-                            "defense" => "Def",
-                            "special attack" => "SpA",
-                            "special defense" => "SpD",
-                            "hp" => "HP",
-                            "speed" => "Spe",
-                            _ => ""
-                        };
-                        allEvStrings.Add($"50 {statEvString}");
-                    }
-                    evString = $"EVs: {string.Join(" / ", allEvStrings)}\n";
-                }
-                else // If no weird item, then it's just a usable item I guess
-                {
-                    hasItemEquipped = true;
-                }
-            }
-            if (evString == "") // If ev string has not been used, then add 1 ev to avoid showdown bitching
-            {
-                evString = $"EVs: 1 HP\n";
-            }
             // Now to assemble the final pokepaste
             StringBuilder resultBuilder = new StringBuilder();
-            resultBuilder.Append(hasItemEquipped ? $"{Name} @ {Item.Name}\n" : $"{Name}\n");
-            resultBuilder.Append(itemEffectString);
-            resultBuilder.Append(evString);
-            resultBuilder.Append($"Ability: {Ability}\n");
-            if (Shiny) resultBuilder.Append("Shiny: Yes\n");
-            foreach (string move in Moves)
+            string pokemonName = (NickName != "") ? $"{NickName} ({Species})" : Species;
+            string nameString = (Gender != "") ? $"{pokemonName} ({Gender.ToUpper()})" : pokemonName;
+            resultBuilder.Append((GetBattleItem(backEndData) != "") ? $"{nameString} @ {GetBattleItem(backEndData)}\n" : $"{nameString}\n"); // Name
+            if (GetNature(backEndData) != "") resultBuilder.Append($"{GetNature(backEndData)} Nature\n"); // Add nature if there
+            if (GetTera(backEndData) != "") resultBuilder.Append($"Tera Type: {GetTera(backEndData)}\n"); // Add tera if there
+            int[] evs = GetEvs(backEndData); // Load ev one by one
+            List<string> allEvStrings = new List<string>();
+            for (int i = 0; i < evs.Length; i++)
+            {
+                string evName = i switch
+                {
+                    0 => "HP",
+                    1 => "Atk",
+                    2 => "Def",
+                    3 => "SpA",
+                    4 => "SpD",
+                    5 => "Spe",
+                    _ => ""
+                };
+                allEvStrings.Add($"{evs[i]} {evName}");
+            }
+            resultBuilder.Append($"EVs: {string.Join(" / ", allEvStrings)}\n");
+            resultBuilder.Append($"Ability: {Ability}\n"); // Ability
+            if (Shiny) resultBuilder.Append("Shiny: Yes\n"); // Shiny
+            foreach (string move in Moves) // Moves
             {
                 resultBuilder.Append($"- {move}\n");
             }
             return resultBuilder.ToString();
         }
+        /// <summary>
+        /// Gets pokemon string in showdown packed format
+        /// </summary>
+        /// <param name="backEndData">Backend data to check stuff like item effects</param>
+        /// <returns>Pokemon string in showdown packed format</returns>
+        public string GetPacked(DataContainers backEndData)
+        {
+            //NICKNAME|SPECIES|ITEM|ABILITY|MOVES|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS,POKEBALL,HIDDENPOWERTYPE,GIGANTAMAX,DYNAMAXLEVEL,TERATYPE
+            List<string> packedStrings = new List<string>();
+            packedStrings.Add(NickName);
+            packedStrings.Add(Species);
+            packedStrings.Add(GetBattleItem(backEndData));
+            packedStrings.Add(Ability);
+            packedStrings.Add(string.Join(",", Moves));
+            packedStrings.Add(GetNature(backEndData));
+            packedStrings.Add(string.Join(",", GetEvs(backEndData)));
+            packedStrings.Add(Gender);
+            packedStrings.Add(""); // No IVs I don't care
+            packedStrings.Add(Shiny ? "S" : ""); // Depending if shiny
+            packedStrings.Add(""); // Always lvl 100
+            if (GetTera(backEndData) == "")
+            {
+                packedStrings.Add(""); // No tera means no need to put anything here
+            }
+            else
+            { // I need to add tera...
+                packedStrings.Add($",,,,,{GetTera(backEndData)}");
+            }
+            return string.Join("|", packedStrings); // Join them together with |
+        }
     }
     public class TrainerData
     {
+        public string Avatar { get; set; }
         public string Name { get; set; }
         public bool AutoItem { get; set; }
         public bool AutoTeam { get; set; }
@@ -178,7 +268,7 @@ namespace IndymonBackend
                 {
                     PokemonSet pokemonSet = Teamsheet[i];
                     bool acceptedMon = false;
-                    Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Name];
+                    Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Species];
                     while (!acceptedMon)
                     {
                         // Randomize mon, with a 7% chance of each move being empty (1->18%, 2->1.3%, 3->0.003%)
@@ -268,7 +358,7 @@ namespace IndymonBackend
                                 // Otherwise, it may be a defensive item, which may help resisting super effective types...
                                 else if (backEndData.DefensiveItemData.TryGetValue(itemCandidate.Name, out HashSet<string> defensiveTypes))
                                 {
-                                    Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Name]; // Get the mon
+                                    Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Species]; // Get the mon
                                     foreach (string damageType in defensiveTypes) // Ensure it will be useful for at least 1 type??
                                     {
                                         float damageTaken = 1.0f; // Damage i'd take for this type
@@ -319,6 +409,12 @@ namespace IndymonBackend
                 Console.WriteLine("");
             }
         }
+        /// <summary>
+        /// Gets team pokepaste
+        /// </summary>
+        /// <param name="backEndData">Back end data</param>
+        /// <param name="nMons">first N mons to include</param>
+        /// <returns>The pokepaste string</returns>
         public string GetPokepaste(DataContainers backEndData, int nMons)
         {
             StringBuilder resultBuilder = new StringBuilder();
@@ -328,6 +424,22 @@ namespace IndymonBackend
                 resultBuilder.AppendLine(mon.GetPokepaste(backEndData));
             }
             return resultBuilder.ToString();
+        }
+        /// <summary>
+        /// Gets team showdown packed data
+        /// </summary>
+        /// <param name="backEndData">Back end data</param>
+        /// <param name="nMons">first N mons to include</param>
+        /// <returns>The packed string</returns>
+        public string GetPacked(DataContainers backEndData, int nMons)
+        {
+            List<string> eachMonPacked = new List<string>();
+            for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
+            {
+                PokemonSet mon = Teamsheet[i];
+                eachMonPacked.Add(mon.GetPacked(backEndData));
+            }
+            return string.Join("]", eachMonPacked); // Returns the packed data joined with ]
         }
     }
 }
