@@ -1,4 +1,5 @@
 For game proper:
+BOT MECHANICS - Showteam may help
 BOT MECHANICS REMAINING - Debug item and item tricking output, forbidden move in custom game format
 BOT MECHANICS REMAINING - Tera, try item of "cantera" y "move tera" auto tera if avail. Otherwise more complex logic and placeholder item
 BOT MECHANICS REMAINING - TRs and move usage just do it through logic
