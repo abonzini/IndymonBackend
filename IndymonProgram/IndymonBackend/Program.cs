@@ -7,6 +7,7 @@ namespace IndymonBackend
     {
         public DataContainers DataContainer { get; set; }
         public TournamentManager TournamentManager { get; set; }
+        public TournamentHistory TournamentHistory { get; set; }
     }
     public static class Program
     {
@@ -18,6 +19,7 @@ namespace IndymonBackend
         static void Main(string[] args)
         {
             string FILE_NAME = "indy.mon";
+            string TOURN_CSV = "tournament_stats.csv";
             Console.WriteLine("Indymon manager program");
             Console.CursorVisible = false;
             if (args.Length == 0) // File not included, need to ask for it
@@ -42,6 +44,9 @@ namespace IndymonBackend
                 {
                     case "0":
                         {
+                            Console.WriteLine("Ordering Tournament history and exporting csv");
+                            string csvFile = Path.Combine(_allData.DataContainer.MasterDirectory, TOURN_CSV);
+                            File.WriteAllText(csvFile, FormatTournamentHistory());
                             Console.WriteLine("Serializing json");
                             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
                             string indymonFile = Path.Combine(_allData.DataContainer.MasterDirectory, FILE_NAME);
@@ -55,7 +60,7 @@ namespace IndymonBackend
                         LoadTrainerData();
                         LoadNpcData();
                         LoadNamedNpcData();
-                        // TODO LoadTournamentHistory();
+                        LoadTournamentHistory();
                         break;
                     case "3":
                         _allData.TournamentManager = new TournamentManager(_allData.DataContainer);
@@ -326,6 +331,171 @@ namespace IndymonBackend
                 }
             }
             // That should be it...
+        }
+        /// <summary>
+        /// Fetches current tournament history from google sheets and stores into struct
+        /// </summary>
+        private static void LoadTournamentHistory()
+        {
+            string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
+            string tab = "282272919";
+            string url = $"https://docs.google.com/spreadsheets/d/{sheetId}/export?format=csv&gid={tab}";
+            using HttpClient client = new HttpClient();
+            string csv = client.GetStringAsync(url).GetAwaiter().GetResult();
+            // Obtained tournament data csv
+            // Assumes the row order is same as column order!
+            string[] rows = csv.Split("\n");
+            Console.WriteLine("Loading tournament history");
+            _allData.TournamentHistory = new TournamentHistory();
+            // First pass is to obtain list of players in the order given no matter what
+            for (int row = 2; row < rows.Length; row++)
+            {
+                string[] cols = rows[row].Split(',');
+                string playerName = cols[4].Trim().ToLower(); // Contains player name
+                PlayerAndStats nextPlayer = new PlayerAndStats();
+                nextPlayer.Name = playerName;
+                // Statistics...
+                nextPlayer.TournamentWins = int.Parse(cols[5]);
+                nextPlayer.TournamentsPlayed = int.Parse(cols[6]);
+                nextPlayer.Kills = int.Parse(cols[8]);
+                nextPlayer.Deaths = int.Parse(cols[9]);
+                // Finally add to the right place
+                if (_allData.DataContainer.TrainerData.ContainsKey(playerName)) // This was an actual player, add to correct array
+                {
+                    _allData.TournamentHistory.PlayerStats.Add(nextPlayer);
+                }
+                else if (_allData.DataContainer.NpcData.ContainsKey(playerName)) // Otherwise it's NPC data
+                {
+                    _allData.TournamentHistory.NpcStats.Add(nextPlayer);
+                }
+                else
+                {
+                    throw new Exception("Found a non-npc and non-player in tournament data!");
+                }
+            }
+            // Once the players are in the correct order, we begin the parsing
+            for (int row = 0; row < _allData.TournamentHistory.PlayerStats.Count; row++) // Next part is to examine each PLAYER CHARACTER ONLY FOR STATS
+            {
+                int yOffset = 2; // 2nd row begins
+                string[] cols = rows[yOffset + row].Split(',');
+                int xOffset = 11; // Beginning of "vs trainer" data
+                PlayerAndStats thisPlayer = _allData.TournamentHistory.PlayerStats[row]; // Get player owner of this data
+                thisPlayer.EachMuWr = new Dictionary<string, IndividualMu>();
+                for (int col = 0; col < _allData.TournamentHistory.PlayerStats.Count; col++) // Check all players score first
+                {
+                    if (row == col) continue; // No MU agains oneself
+                    // Get data for this opp
+                    string oppName = _allData.TournamentHistory.PlayerStats[col].Name;
+                    int wins = int.Parse(cols[xOffset + (3 * col)]); // Data has 3 columns per player
+                    int losses = int.Parse(cols[xOffset + (3 * col) + 1]);
+                    thisPlayer.EachMuWr.Add(oppName, new IndividualMu { Wins = wins, Losses = losses }); // Add this data to the stats
+                }
+                xOffset = 11 + (3 * _allData.TournamentHistory.PlayerStats.Count); // Offset to NPC data
+                for (int col = 0; col < _allData.TournamentHistory.NpcStats.Count; col++) // Check NPC score now
+                {
+                    // Get data for this opp
+                    string oppName = _allData.TournamentHistory.NpcStats[col].Name;
+                    int wins = int.Parse(cols[xOffset + (3 * col)]);
+                    int losses = int.Parse(cols[xOffset + (3 * col) + 1]);
+                    thisPlayer.EachMuWr.Add(oppName, new IndividualMu { Wins = wins, Losses = losses });
+                }
+            }
+            // And thats it, tourn data has been found
+        }
+        /// <summary>
+        /// Reorders tournament history to sort it by TW and then WR and then DIFF
+        /// </summary>
+        private static string FormatTournamentHistory()
+        {
+            // Firstly, just sort the lists
+            _allData.TournamentHistory.PlayerStats = _allData.TournamentHistory.PlayerStats.OrderByDescending(c => c.TournamentWins).ThenBy(c => c.Winrate).ThenBy(c => c.Diff).ToList();
+            _allData.TournamentHistory.NpcStats = _allData.TournamentHistory.NpcStats.OrderByDescending(c => c.TournamentWins).ThenBy(c => c.Winrate).ThenBy(c => c.Diff).ToList();
+            // Ok now I need to do multiple row and column csv:
+            int nRows = 2 + _allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count; // this is how many rows It'll have (label + players)
+            int nColumns = 7 + 3 * (_allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count); // Cols, will be the fixed + 3 per participant
+            string[] lines = new string[nRows];
+            // First row has names only
+            string[] firstLine = new string[nColumns];
+            firstLine[0] = "Individual Match History ->";
+            int xOffset = 7; // First part starts from offset (players)
+            for (int player = 0; player < _allData.TournamentHistory.PlayerStats.Count; player++)
+            {
+                firstLine[xOffset + (3 * player)] = $"vs {_allData.TournamentHistory.PlayerStats[player].Name}";
+            }
+            // Then NPCs
+            xOffset = 7 + (3 * _allData.TournamentHistory.PlayerStats.Count);
+            for (int player = 0; player < _allData.TournamentHistory.NpcStats.Count; player++)
+            {
+                firstLine[xOffset + 3 * player] = $"vs {_allData.TournamentHistory.NpcStats[player].Name}";
+            }
+            lines[0] = string.Join(",", firstLine);
+            // Second row is no real content, just repeated
+            string[] secondLine = new string[nColumns];
+            secondLine[0] = "Trainer";
+            secondLine[1] = "Tourn. Wins";
+            secondLine[2] = "Tourn. Played";
+            secondLine[3] = "WR%";
+            secondLine[4] = "K";
+            secondLine[5] = "D";
+            secondLine[6] = "DIFF";
+            // Then all together
+            xOffset = 7;
+            for (int player = 0; player < (_allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count); player++)
+            {
+                secondLine[xOffset + (3 * player)] = "W";
+                secondLine[xOffset + (3 * player) + 1] = "L";
+                secondLine[xOffset + (3 * player) + 2] = "%";
+            }
+            lines[1] = string.Join(",", secondLine);
+            // Ok finally need to do each player's
+            int yOffset = 2;
+            for (int player = 0; player < (_allData.TournamentHistory.PlayerStats.Count); player++)
+            {
+                string[] nextLine = new string[nColumns];
+                PlayerAndStats nextPlayer = _allData.TournamentHistory.PlayerStats[player];
+                nextLine[0] = nextPlayer.Name;
+                nextLine[1] = nextPlayer.TournamentWins.ToString();
+                nextLine[2] = nextPlayer.TournamentsPlayed.ToString();
+                nextLine[3] = nextPlayer.Winrate.ToString();
+                nextLine[4] = nextPlayer.Kills.ToString();
+                nextLine[5] = nextPlayer.Deaths.ToString();
+                nextLine[6] = nextPlayer.Diff.ToString();
+                xOffset = 7;
+                for (int opp = 0; opp < (_allData.TournamentHistory.PlayerStats.Count); opp++)
+                {
+                    if (opp == player) continue; // Inexistant MU
+                    IndividualMu mu = nextPlayer.EachMuWr[_allData.TournamentHistory.PlayerStats[opp].Name];
+                    nextLine[xOffset + (3 * opp)] = mu.Wins.ToString();
+                    nextLine[xOffset + (3 * opp) + 1] = mu.Losses.ToString();
+                    nextLine[xOffset + (3 * opp) + 2] = mu.Winrate.ToString();
+                }
+                xOffset = 7 + (3 * _allData.TournamentHistory.PlayerStats.Count);
+                for (int opp = 0; opp < (_allData.TournamentHistory.NpcStats.Count); opp++)
+                {
+                    IndividualMu mu = nextPlayer.EachMuWr[_allData.TournamentHistory.NpcStats[opp].Name];
+                    nextLine[xOffset + (3 * opp)] = mu.Wins.ToString();
+                    nextLine[xOffset + (3 * opp) + 1] = mu.Losses.ToString();
+                    nextLine[xOffset + (3 * opp) + 2] = mu.Winrate.ToString();
+                }
+                lines[yOffset + player] = string.Join(",", nextLine);
+            }
+            // And NPCs
+            yOffset = 2 + _allData.TournamentHistory.PlayerStats.Count;
+            for (int player = 0; player < (_allData.TournamentHistory.NpcStats.Count); player++)
+            {
+                string[] nextLine = new string[nColumns];
+                PlayerAndStats nextPlayer = _allData.TournamentHistory.NpcStats[player];
+                nextLine[0] = nextPlayer.Name;
+                nextLine[1] = nextPlayer.TournamentWins.ToString();
+                nextLine[2] = nextPlayer.TournamentsPlayed.ToString();
+                nextLine[3] = nextPlayer.Winrate.ToString();
+                nextLine[4] = nextPlayer.Kills.ToString();
+                nextLine[5] = nextPlayer.Deaths.ToString();
+                nextLine[6] = nextPlayer.Diff.ToString();
+                lines[yOffset + player] = string.Join(",", nextLine);
+            }
+            // ok finally make the master string
+            return string.Join("\n", lines);
         }
     }
 }

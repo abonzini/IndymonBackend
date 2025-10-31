@@ -4,6 +4,32 @@ using System.Text;
 
 namespace IndymonBackend
 {
+    public class IndividualMu
+    {
+        public int Wins { get; set; }
+        public int Losses { get; set; }
+        public float Winrate { get { return (float)Wins / (float)(Losses + Wins); } }
+    }
+    public class PlayerAndStats
+    {
+        public string Name { get; set; }
+        public Dictionary<string, IndividualMu> EachMuWr { get; set; } = null; // Contains each matchup
+        public int TournamentWins { get; set; } = 0;
+        public int TournamentsPlayed { get; set; } = 1;
+        public float Winrate { get { return (float)TournamentWins / (float)TournamentsPlayed; } }
+        public int Kills { get; set; } = 0;
+        public int Deaths { get; set; } = 0;
+        public int Diff { get { return Kills - Deaths; } }
+        public override string ToString()
+        {
+            return $"{Name}: {TournamentWins}/{TournamentsPlayed})";
+        }
+    }
+    public class TournamentHistory
+    {
+        public List<PlayerAndStats> PlayerStats { get; set; } = new List<PlayerAndStats>();
+        public List<PlayerAndStats> NpcStats { get; set; } = new List<PlayerAndStats>();
+    }
     public class TournamentManager
     {
         public Tournament OngoingTournament { get; set; }
