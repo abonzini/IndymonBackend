@@ -191,6 +191,7 @@ namespace ShowdownBot
                 // Send showteam
                 if (Verbose) Console.WriteLine($"{Winner} won, this bot had {BotRemainingMons} mons remaining");
                 CurrentState = BotState.GAME_DONE;
+                _socket.Dispose();
             }
             else
             {

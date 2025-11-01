@@ -325,7 +325,6 @@ namespace IndymonBackend
                             {
                                 match.winner = match.player2;
                             }
-                            break; // Stops iteration
                         }
                         else
                         {
