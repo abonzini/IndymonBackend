@@ -31,6 +31,7 @@ namespace ShowdownBot
         public string Winner;
         public int BotRemainingMons;
         GameState _currentGameState;
+        public string Challenger;
         /// <summary>
         /// Tries to establish connection to localhost:8000 server and get all i need to actually log in
         /// </summary>
@@ -163,6 +164,9 @@ namespace ShowdownBot
             {
                 if (CurrentState == BotState.PROFILE_INITIALISED) // Can only accept from here (1 fight at a time)
                 {
+                    string[] challengeData = message.Split("|");
+                    Challenger = challengeData[2]; // Obtain challenger
+                    Challenger = Challenger.Trim('~').Trim().ToLower(); // Clean challenger
                     CurrentState = BotState.BEING_CHALLENGED;
                 }
             }
@@ -184,6 +188,7 @@ namespace ShowdownBot
                 {
                     BotRemainingMons = 0; // Loser got 0 mon
                 }
+                // Send showteam
                 if (Verbose) Console.WriteLine($"{Winner} won, this bot had {BotRemainingMons} mons remaining");
                 CurrentState = BotState.GAME_DONE;
             }
@@ -238,8 +243,8 @@ namespace ShowdownBot
                     }
                     else // try the move then
                     {
-                        string chosenMove = playOptions.moves[moveChoice].move;
-                        command = $"{battle}|/choose move {chosenMove}"; // Choose move
+                        command = $"{battle}|/choose move {moveChoice + 1}"; // Choose move (slot 1-4)
+                        // use terastallize for tera but need to check can tera flag and item
                     }
                 } while (invalidChoice); // Try again until I get a valid option
             }
