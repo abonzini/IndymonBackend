@@ -232,13 +232,16 @@ namespace ShowdownBot
                     invalidChoice = moveChoice >= playOptions.moves.Count || playOptions.moves[moveChoice].disabled || (playOptions.moves[moveChoice].pp == 0);
                     if (invalidChoice) // If choice invalid, may need to switch randomly
                     {
-                        List<string> switchIns = _currentGameState.side.GetValidSwitchIns();
-                        if (switchIns.Count > 0) // Can switch then, so theres a valid move
+                        if (!playOptions.trapped) // But only can if not trapped
                         {
-                            int switchChoice = _rng.Next(0, switchIns.Count);
-                            string switchInMon = switchIns[switchChoice].Split(",")[0];
-                            command = $"{battle}|/choose switch {switchInMon}"; // Switch to random mon
-                            invalidChoice = false; // Move valid after all
+                            List<string> switchIns = _currentGameState.side.GetValidSwitchIns();
+                            if (switchIns.Count > 0) // Can switch then, so theres a valid move
+                            {
+                                int switchChoice = _rng.Next(0, switchIns.Count);
+                                string switchInMon = switchIns[switchChoice].Split(",")[0];
+                                command = $"{battle}|/choose switch {switchInMon}"; // Switch to random mon
+                                invalidChoice = false; // Move valid after all
+                            }
                         }
                     }
                     else // try the move then

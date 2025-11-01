@@ -3,7 +3,7 @@
     public class AvailableMove
     {
         public string move { get; set; }
-        public int pp { get; set; }
+        public int pp { get; set; } = 1; // Moves without pp (struggle, recharge) are always usable
         public bool disabled { get; set; }
         public override string ToString()
         {
@@ -13,6 +13,7 @@
     public class ActiveOptions
     {
         public List<AvailableMove> moves { get; set; }
+        public bool trapped { get; set; }
     }
     public class SideOptions
     {
