@@ -1,7 +1,7 @@
 For game proper:
 3 - Swiss tournament
-tera shard mechanics (item, teambuilder and bot)
-tr mechanics (item, teambuilder)
+tera shard mechanics (teambuilder and bot)
+tr mechanics (teambuilder)
 7 - Exploration overhaul. Find out if possible to send status and hp data to battle sim, unpack and init set with that, later init mon with status and HP start (after volatile). enhances explo
 7 - Server experiment. Haze every 6 enemy mons. Roar fails (worst case, forbidden). See if easy to leave hook for later
 7 - Upgrade feathers, 24 EVs
