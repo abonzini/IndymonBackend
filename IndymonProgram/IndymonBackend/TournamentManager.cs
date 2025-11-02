@@ -6,8 +6,8 @@ namespace IndymonBackend
 {
     public class IndividualMu
     {
-        public int Wins { get; set; }
-        public int Losses { get; set; }
+        public int Wins { get; set; } = 0;
+        public int Losses { get; set; } = 0;
         public float Winrate { get { return (float)Wins / (float)(Losses + Wins); } }
     }
     public class PlayerAndStats
@@ -34,18 +34,21 @@ namespace IndymonBackend
     {
         public Tournament OngoingTournament { get; set; }
         DataContainers _backEndData = null;
+        TournamentHistory _leaderboard = null;
         Random _rng = new Random();
-        public TournamentManager(DataContainers backEndData)
+        public TournamentManager(DataContainers backEndData, TournamentHistory leaderboard)
         {
             _backEndData = backEndData;
+            _leaderboard = leaderboard;
         }
         public TournamentManager()
         {
 
         }
-        public void SetBackEndData(DataContainers backEndData)
+        public void SetBackEndData(DataContainers backEndData, TournamentHistory leaderboard)
         {
             _backEndData = backEndData;
+            _leaderboard = leaderboard;
         }
         /// <summary>
         /// Generates a new tournament, dialog asking for tpy, n players, n mons, and which participants
@@ -187,21 +190,23 @@ namespace IndymonBackend
         public void FinaliseTournament()
         {
             OngoingTournament.FinaliseTournament();
+            // Also, ask the tournament to update the sheets
+            OngoingTournament.UpdateLeaderboard(_leaderboard, _backEndData);
         }
     }
     public class TournamentMatch()
     {
-        public string player1 { get; set; } = "";
-        public string player2 { get; set; } = "";
-        public bool isBye { get; set; } = false;
-        public int score1 { get; set; } = 0;
-        public int score2 { get; set; } = 0;
-        public string winner { get; set; } = "";
-        public int drawHelper1 { get; set; } = 0; // For the bracket drawing
-        public int drawHelper2 { get; set; } = 0;
+        public string Player1 { get; set; } = "";
+        public string Player2 { get; set; } = "";
+        public bool IsBye { get; set; } = false;
+        public int Score1 { get; set; } = 0;
+        public int Score2 { get; set; } = 0;
+        public string Winner { get; set; } = "";
+        public int DrawHelper1 { get; set; } = 0; // For the bracket drawing
+        public int DrawHelper2 { get; set; } = 0;
         public override string ToString()
         {
-            return $"{player1} ({score1}-{score2}) {player2}";
+            return $"{Player1} ({Score1}-{Score2}) {Player2}";
         }
     }
     public class Tournament
@@ -233,22 +238,22 @@ namespace IndymonBackend
                 for (int i = 0; i < Participants.Count; i++)
                 {
                     TournamentMatch thisMatch = new TournamentMatch();
-                    thisMatch.player1 = Participants[i];
-                    thisMatch.drawHelper1 = i * 2; // Go to the next even (leave a space between names)
+                    thisMatch.Player1 = Participants[i];
+                    thisMatch.DrawHelper1 = i * 2; // Go to the next even (leave a space between names)
                     if (i < byesBeginning)
                     {
-                        thisMatch.isBye = true;
+                        thisMatch.IsBye = true;
                     }
                     else if (i >= (Participants.Count - byesEnd))
                     {
-                        thisMatch.isBye = true;
+                        thisMatch.IsBye = true;
                     }
                     else // Not a bye in either side...
                     {
                         i++; // Get next player (opp)
-                        thisMatch.player2 = Participants[i];
-                        thisMatch.isBye = false;
-                        thisMatch.drawHelper2 = i * 2; // Go to the next even (leave a space between names)
+                        thisMatch.Player2 = Participants[i];
+                        thisMatch.IsBye = false;
+                        thisMatch.DrawHelper2 = i * 2; // Go to the next even (leave a space between names)
                     }
                     thisRound.Add(thisMatch);
                 }
@@ -268,13 +273,13 @@ namespace IndymonBackend
                 foreach (TournamentMatch match in currentRound) // Print all rounds first (so that they can be simulated if needed
                 {
                     string matchString;
-                    if (match.isBye)
+                    if (match.IsBye)
                     {
-                        matchString = $"{match.player1} gets a bye";
+                        matchString = $"{match.Player1} gets a bye";
                     }
                     else
                     {
-                        matchString = $"{match.player1} v {match.player2}";
+                        matchString = $"{match.Player1} v {match.Player2}";
                     }
                     maxStringLength = Math.Max(maxStringLength, matchString.Length);
                     Console.WriteLine(matchString);
@@ -282,9 +287,9 @@ namespace IndymonBackend
                 for (int i = 0; i < currentRound.Count; i++)
                 {
                     TournamentMatch match = currentRound[i];
-                    if (match.isBye)
+                    if (match.IsBye)
                     {
-                        match.winner = match.player1;
+                        match.Winner = match.Player1;
                     }
                     else
                     {
@@ -296,13 +301,13 @@ namespace IndymonBackend
                             Random _rng = new Random(); // Will randomize result
                             if (_rng.Next(2) == 0) // Winner was 1
                             {
-                                match.score1 = _rng.Next(1, NMons + 1);
-                                match.score2 = 0;
+                                match.Score1 = _rng.Next(1, NMons + 1);
+                                match.Score2 = 0;
                             }
                             else // Winner was 2
                             {
-                                match.score1 = 0;
-                                match.score2 = _rng.Next(1, NMons + 1);
+                                match.Score1 = 0;
+                                match.Score2 = _rng.Next(1, NMons + 1);
                             }
                         }
                         else if (scoreString.ToLower() == "q") // If q, just stop here we'll need to restart after
@@ -314,45 +319,45 @@ namespace IndymonBackend
                         {
 
                             BotBattle automaticBattle = new BotBattle(_backEndData);
-                            (match.score1, match.score2) = automaticBattle.SimulateBotBattle(match.player1, match.player2, NMons, NMons);
+                            (match.Score1, match.Score2) = automaticBattle.SimulateBotBattle(match.Player1, match.Player2, NMons, NMons);
                             Console.SetCursorPosition(cursorX, cursorY);
-                            Console.Write($"{match.score1}-{match.score2} GET THE REPLAY");
-                            if (match.score1 > match.score2)
+                            Console.Write($"{match.Score1}-{match.Score2} GET THE REPLAY");
+                            if (match.Score1 > match.Score2)
                             {
-                                match.winner = match.player1;
+                                match.Winner = match.Player1;
                             }
                             else
                             {
-                                match.winner = match.player2;
+                                match.Winner = match.Player2;
                             }
                         }
                         else
                         {
                             string[] scores = scoreString.Split('-');
-                            match.score1 = int.Parse(scores[0]);
-                            match.score2 = int.Parse(scores[1]);
+                            match.Score1 = int.Parse(scores[0]);
+                            match.Score2 = int.Parse(scores[1]);
                         }
-                        if (match.score1 > match.score2)
+                        if (match.Score1 > match.Score2)
                         {
-                            match.winner = match.player1;
+                            match.Winner = match.Player1;
                         }
                         else
                         {
-                            match.winner = match.player2;
+                            match.Winner = match.Player2;
                         }
                     }
                     if ((playerProcessed % 2) == 0) // Even players, first of the next match
                     {
                         TournamentMatch nextMatch = new TournamentMatch();
-                        nextMatch.player1 = match.winner;
-                        nextMatch.drawHelper1 = match.isBye ? match.drawHelper1 : CalculateMidPoint(match.drawHelper1, match.drawHelper2); // Bye continues in same place, bracket goes to midpoint
+                        nextMatch.Player1 = match.Winner;
+                        nextMatch.DrawHelper1 = match.IsBye ? match.DrawHelper1 : CalculateMidPoint(match.DrawHelper1, match.DrawHelper2); // Bye continues in same place, bracket goes to midpoint
                         nextRound.Add(nextMatch);
                     }
                     else // It's the player 2
                     {
                         TournamentMatch nextMatch = nextRound.Last();
-                        nextMatch.player2 = match.winner;
-                        nextMatch.drawHelper2 = match.isBye ? match.drawHelper1 : CalculateMidPoint(match.drawHelper1, match.drawHelper2); // Bye continues in same place, bracket goes to midpoint
+                        nextMatch.Player2 = match.Winner;
+                        nextMatch.DrawHelper2 = match.IsBye ? match.DrawHelper1 : CalculateMidPoint(match.DrawHelper1, match.DrawHelper2); // Bye continues in same place, bracket goes to midpoint
                     }
                     playerProcessed++;
                 }
@@ -381,6 +386,15 @@ namespace IndymonBackend
             {
                 nameLength = Math.Max(nameLength, participant.Length + 1);
             }
+            // Need to resize console so this fits
+            int minXSize = ((RoundHistory.Count + 1) * nameLength) + RoundHistory.Count; // Need to fit names and brackets
+            int minYSize = (NPlayers * 2) + 1; // Need to fit names
+            while ((Console.WindowHeight < minYSize) || (Console.WindowWidth < minXSize))
+            {
+                Console.WriteLine($"Console has to have atleast dimensions X:{minXSize} Y: {minYSize}");
+                Console.WriteLine($"Current X:{Console.WindowWidth} Y: {Console.WindowHeight}");
+                Console.ReadLine();
+            }
             // Then, perform a tournament animation
             Console.Clear();
             int round, cursorX;
@@ -392,24 +406,24 @@ namespace IndymonBackend
                 {
                     foreach (TournamentMatch match in matchesThisRound) // First, draw all names in the right position
                     {
-                        Console.SetCursorPosition(cursorX, match.drawHelper1); // First player always there
-                        Console.Write(match.player1);
-                        if (!match.isBye)
+                        Console.SetCursorPosition(cursorX, match.DrawHelper1); // First player always there
+                        Console.Write(match.Player1);
+                        if (!match.IsBye)
                         {
-                            Console.SetCursorPosition(cursorX, match.drawHelper2); // Also draw p2 if there's any
-                            Console.Write(match.player2);
+                            Console.SetCursorPosition(cursorX, match.DrawHelper2); // Also draw p2 if there's any
+                            Console.Write(match.Player2);
                         }
                     }
                 }
                 // OK now the brackets...
                 foreach (TournamentMatch match in matchesThisRound)
                 {
-                    if (match.isBye)
+                    if (match.IsBye)
                     {
                         Thread.Sleep((int)(DRAW_RYTHM_PERIOD * 1000)); // Wait and then draw the single line right
-                        Console.SetCursorPosition(cursorX + nameLength, match.drawHelper1); // Put it after name
+                        Console.SetCursorPosition(cursorX + nameLength, match.DrawHelper1); // Put it after name
                         Console.Write("─");
-                        Console.SetCursorPosition(((round + 1) * (nameLength + 2)), match.drawHelper1); // Need to place the winner in next round
+                        Console.SetCursorPosition(((round + 1) * (nameLength + 2)), match.DrawHelper1); // Need to place the winner in next round
                     }
                     else
                     {
@@ -421,29 +435,29 @@ namespace IndymonBackend
                         for (int blink = 0; blink < NUMBER_OF_BLINKS; blink++)
                         {
                             Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Wait and then draw the bracket, on and off
-                            DrawBracket(match.drawHelper1, match.drawHelper2, cursorX + nameLength, true);
+                            DrawBracket(match.DrawHelper1, match.DrawHelper2, cursorX + nameLength, true);
                             Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Wait and then draw the bracket, on and off
-                            DrawBracket(match.drawHelper1, match.drawHelper2, cursorX + nameLength, false);
+                            DrawBracket(match.DrawHelper1, match.DrawHelper2, cursorX + nameLength, false);
                         }
                         Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Wait and then draw the bracket, on and off
-                        DrawBracket(match.drawHelper1, match.drawHelper2, cursorX + nameLength, true);
+                        DrawBracket(match.DrawHelper1, match.DrawHelper2, cursorX + nameLength, true);
                         // And then after blink just put the score between
-                        Console.SetCursorPosition(cursorX, CalculateMidPoint(match.drawHelper1, match.drawHelper2)); // Put it after name
+                        Console.SetCursorPosition(cursorX, CalculateMidPoint(match.DrawHelper1, match.DrawHelper2)); // Put it after name
                         if (BLINK_TOGGLE_PERIOD < DRAW_RYTHM_PERIOD)
                         {
                             Thread.Sleep((int)((DRAW_RYTHM_PERIOD - BLINK_TOGGLE_PERIOD) * 1000)); // For visual rythm consistnecy
                         }
-                        Console.Write($"({match.score1}-{match.score2})");
-                        Console.SetCursorPosition(((round + 1) * (nameLength + 2)), CalculateMidPoint(match.drawHelper1, match.drawHelper2)); // Need to place the winner in next round
+                        Console.Write($"({match.Score1}-{match.Score2})");
+                        Console.SetCursorPosition(((round + 1) * (nameLength + 2)), CalculateMidPoint(match.DrawHelper1, match.DrawHelper2)); // Need to place the winner in next round
                     }
-                    Console.Write(match.winner);
+                    Console.Write(match.Winner);
                 }
             }
             Console.ReadKey();
             Console.Clear();
             // And that should be it?!
-            // TODO later something else with the tournament stuff
         }
+        #region BRACKET_DRAWING
         /// <summary>
         /// Draws a bracket in console, always vertical
         /// </summary>
@@ -494,6 +508,131 @@ namespace IndymonBackend
             average /= 2;
             if (!integer) average++; // Move to the next odd number if middle is even (a good bracket should fall in odd numbers)
             return average;
+        }
+        #endregion
+        /// <summary>
+        /// Asks tournament to update leaderboard according to match history
+        /// </summary>
+        /// <param name="leaderboard">The leaderboard to update</param>
+        /// <param name="backend">Backend, to determine whether a character is added into leaderboard</param>
+        public void UpdateLeaderboard(TournamentHistory leaderboard, DataContainers backend)
+        {
+            for (int round = 0; round < RoundHistory.Count; round++) // Check round by round
+            {
+                List<TournamentMatch> matchesThisRound = RoundHistory[round]; // Get matches for this round
+                foreach (TournamentMatch match in matchesThisRound) // Need to gather the matches to calculate each match stat
+                {
+                    // Try to find where P1 is
+                    List<PlayerAndStats> p1Location = null;
+                    if (backend.TrainerData.ContainsKey(match.Player1)) p1Location = leaderboard.PlayerStats; // Is it a trainer?
+                    else if (backend.TrainerData.ContainsKey(match.Player1)) p1Location = leaderboard.NpcStats; // Is it NPC?
+                    else { } // Never mind then
+                    List<PlayerAndStats> p2Location = null;
+                    if (!match.IsBye) // If there's actually a p2...
+                    {
+                        if (backend.TrainerData.ContainsKey(match.Player2)) p2Location = leaderboard.PlayerStats; // Is it a trainer?
+                        else if (backend.TrainerData.ContainsKey(match.Player2)) p2Location = leaderboard.NpcStats; // Is it NPC?
+                        else { } // Never mind then
+                    }
+                    // Then, will add new players into the stats, check round 0
+                    if (round == 0) // First round, I also check whether there's a new player not previously there, and update the tournament number for each player
+                    {
+                        if (p1Location != null) // Add p1 if relevant
+                        {
+                            PlayerAndStats p1Stats = p1Location.FirstOrDefault(p => (p.Name == match.Player1)); // Get data for p1
+                            if (p1Stats != null) // Player wasn't there, need to add
+                            {
+                                PlayerAndStats newPlayer = new PlayerAndStats()
+                                {
+                                    Name = match.Player1,
+                                    TournamentsPlayed = 1,
+                                    Deaths = 0,
+                                    Kills = 0,
+                                    TournamentWins = 0,
+                                    EachMuWr = new Dictionary<string, IndividualMu>()
+                                };
+                                p1Location.Add(newPlayer);
+                            }
+                            else
+                            {
+                                p1Stats.TournamentsPlayed++;
+                            }
+                        }
+                        if (!match.IsBye && (p2Location != null)) // There may be a relevant p2...
+                        {
+                            PlayerAndStats p2Stats = p2Location.FirstOrDefault(p => (p.Name == match.Player2)); // Get data for p1
+                            if (p2Stats != null) // Player wasn't there, need to add
+                            {
+                                PlayerAndStats newPlayer = new PlayerAndStats()
+                                {
+                                    Name = match.Player2,
+                                    TournamentsPlayed = 1,
+                                    Deaths = 0,
+                                    Kills = 0,
+                                    TournamentWins = 0,
+                                    EachMuWr = new Dictionary<string, IndividualMu>()
+                                };
+                                p2Location.Add(newPlayer);
+                            }
+                            else
+                            {
+                                p2Stats.TournamentsPlayed++;
+                            }
+                        }
+                    }
+                    // After that is done, guaranteed everything is in place, just update each match stats individually
+                    if (!match.IsBye) // A bye doesn't have additional stats as no one fought anyone
+                    {
+                        // These 2 should exist unless they're not players or npc
+                        PlayerAndStats p1Stats = p1Location?.First(p => (p.Name == match.Player1));
+                        PlayerAndStats p2Stats = p2Location?.First(p => (p.Name == match.Player2));
+                        // How many mons each player killed
+                        int p1Kills = (NMons - match.Score2);
+                        int p2Kills = (NMons - match.Score1);
+                        // Update all remaining stats
+                        if (p1Stats != null)
+                        {
+                            p1Stats.Kills += p1Kills;
+                            p1Stats.Deaths += p2Kills;
+                            if (!p1Stats.EachMuWr.ContainsKey(match.Player2)) { p1Stats.EachMuWr.Add(match.Player2, new IndividualMu()); }
+                            IndividualMu mu = p1Stats.EachMuWr[match.Player2];
+                            bool playerWon = (match.Winner.Trim().ToLower() == p1Stats.Name.Trim().ToLower());
+                            if (playerWon)
+                            {
+                                mu.Wins++;
+                            }
+                            else
+                            {
+                                mu.Losses++;
+                            }
+                        }
+                        if (p2Stats != null)
+                        {
+                            p2Stats.Kills += p2Kills;
+                            p2Stats.Deaths += p1Kills;
+                            if (!p2Stats.EachMuWr.ContainsKey(match.Player1)) { p2Stats.EachMuWr.Add(match.Player1, new IndividualMu()); }
+                            IndividualMu mu = p1Stats.EachMuWr[match.Player1];
+                            bool playerWon = (match.Winner.Trim().ToLower() == p2Stats.Name.Trim().ToLower());
+                            if (playerWon)
+                            {
+                                mu.Wins++;
+                            }
+                            else
+                            {
+                                mu.Losses++;
+                            }
+                        }
+                    }
+                }
+            }
+            // Ok! finally need the winner
+            string winnerName = RoundHistory.Last().Last().Winner; // Last winner of last match of last round is tournament winner
+            List<PlayerAndStats> winnerLocation = null;
+            if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
+            else if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?
+            else { } // Never mind then
+            PlayerAndStats winnerStats = winnerLocation?.FirstOrDefault(p => (p.Name == winnerName));
+            if (winnerStats != null) winnerStats.TournamentWins++;
         }
     }
 }

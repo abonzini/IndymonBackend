@@ -63,7 +63,7 @@ namespace IndymonBackend
                         LoadTournamentHistory();
                         break;
                     case "3":
-                        _allData.TournamentManager = new TournamentManager(_allData.DataContainer);
+                        _allData.TournamentManager = new TournamentManager(_allData.DataContainer, _allData.TournamentHistory);
                         _allData.TournamentManager.GenerateNewTournament();
                         break;
                     case "4":
@@ -128,7 +128,7 @@ namespace IndymonBackend
                 _allData.DataContainer.MasterDirectory = masterPath;
                 if (_allData.TournamentManager != null)
                 {
-                    _allData.TournamentManager.SetBackEndData(_allData.DataContainer);
+                    _allData.TournamentManager.SetBackEndData(_allData.DataContainer, _allData.TournamentHistory);
                 }
             }
             else

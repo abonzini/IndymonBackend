@@ -1,9 +1,7 @@
 For game proper:
-2 - Generate leaderboard class, by default will be blank unless loaded. Class with each entry a name, and dictionaries with stats for all matchups. Same for NPC but simpler.
 3 - Swiss tournament
-6 - When tournament concluded, leaderboard updated, trainers who participated first time added. Whoel thign sorted. Csv with desired format created for quick pasting
-2 - Load leaderboard data from sheets (hidden, private with only leaderboard). Copied into public sheet
-4 - Auto item logic sorted, find if item makes sense, chosoe items to ansure a healthy inventory
+tera shard mechanics (item, teambuilder and bot)
+tr mechanics (item, teambuilder)
 7 - Exploration overhaul. Find out if possible to send status and hp data to battle sim, unpack and init set with that, later init mon with status and HP start (after volatile). enhances explo
 7 - Server experiment. Haze every 6 enemy mons. Roar fails (worst case, forbidden). See if easy to leave hook for later
 7 - Upgrade feathers, 24 EVs
