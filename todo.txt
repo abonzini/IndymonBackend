@@ -1,10 +1,9 @@
 For game proper:
-3 - Swiss tournament
 3 - king tournament
+3 - Swiss tournament
 better linkage between showdown turn data and existing team. Init bot with teamsheet instead, try to link name+nickname
-enhance teamsheet (+mon) with extra flags and configs, including hp and etc. add the "can tera" flag to allow only a specific mon to tera, use it during turn decision
-tera shard mechanics (teambuilder and bot)
-tr mechanics (teambuilder)
+tera shard mechanics (showdown, teambuilder and bot)
+tr mechanics (showdown, teambuilder)
 7 - Exploration. Send optional status and hp data to battle sim, unpack and init set with that, later init mon with status and HP start (after volatile). Add them to team sheet (and/or create an inherited class for exploration team sheet)
 7 - SHEET: Create exploration section backend, define rares, commons, mons for each floor, boss and obstacles+text
 7 - Load exploration section from sheets, insert into new data structure.

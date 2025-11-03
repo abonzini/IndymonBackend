@@ -56,7 +56,7 @@ namespace IndymonBackend
         /// <param name="backEndData"></param>
         public void GenerateNewTournament()
         {
-            Console.WriteLine("Creation of a new tournament. Which type of tournament? [elim, swiss]");
+            Console.WriteLine("Creation of a new tournament. Which type of tournament? [elim, king, swiss]");
             string inputString;
             bool validSelection = false;
             do
@@ -66,7 +66,7 @@ namespace IndymonBackend
                 {
                     case "elim":
                         validSelection = true;
-                        OngoingTournament = new Tournament();
+                        OngoingTournament = new ElimTournament();
                         break;
                     default:
                         validSelection = false;
@@ -146,19 +146,39 @@ namespace IndymonBackend
         /// <summary>
         /// Updates the tournament teams, meaning a team randomization and updating team sheets if needed
         /// </summary>
+        /// <param name="Seeds">Potential seed list if some players are too good and need to done last (this is mostly for special tournaments)</param>
         public void UpdateTournamentTeams()
         {
-            // First, shuffle the participants
-            Random _rng = new Random();
-            int n = OngoingTournament.Participants.Count;
-            while (n > 1) // Fischer yates
+            // First, shuffle the participants (use seed if needed)
+            List<string> Seeds = null;
+            Console.WriteLine("Want to add specific seeding? Y/N");
+            string seedInput = Console.ReadLine();
+            if (seedInput.Trim().ToLower() == "y") // One last seeding step
             {
-                n--;
-                int k = _rng.Next(n + 1);
-                (OngoingTournament.Participants[k], OngoingTournament.Participants[n]) = (OngoingTournament.Participants[n], OngoingTournament.Participants[k]); // Swap
+                Seeds = new List<string>();
+                List<string> seedOptions = [.. OngoingTournament.Participants];
+                bool seedingFinished = false;
+                while (!seedingFinished && Seeds.Count < OngoingTournament.Participants.Count) // Continue seeding until finished or all players seeded
+                {
+                    Console.WriteLine("Choose next seed, or anything if finished seeding:");
+                    for (int i = 0; i < seedOptions.Count; i++)
+                    {
+                        Console.Write($"{i + 1}: " + seedOptions[i] + ",");
+                    }
+                    if (int.TryParse(Console.ReadLine(), out int seedChoice)) // If user chose one...
+                    {
+                        Seeds.Add(seedOptions[seedChoice - 1]);
+                        seedOptions.RemoveAt(seedChoice - 1);
+                    }
+                    else // Finish here
+                    {
+                        seedingFinished = true;
+                    }
+                }
             }
+            OngoingTournament.ShuffleWithSeeds(Seeds);
             // Reset the tournament if one was already in progress
-            OngoingTournament.RoundHistory = null;
+            OngoingTournament.ResetTournament();
             // Ok not bad, next step is to update participant team sheet if needed, and generate the import pokepaste
             StringBuilder pokepasteBuilder = new StringBuilder();
             foreach (string participantName in OngoingTournament.Participants)
@@ -209,20 +229,115 @@ namespace IndymonBackend
             return $"{Player1} ({Score1}-{Score2}) {Player2}";
         }
     }
-    public class Tournament
+    public abstract class Tournament
     {
-        const float DRAW_RYTHM_PERIOD = 1.0f;
-        const float BLINK_TOGGLE_PERIOD = 0.5f;
-        const int NUMBER_OF_BLINKS = 3;
         public int NPlayers { get; set; } = 0;
         public int NMons { get; set; } = 3;
         public List<string> Participants { get; set; } = new List<string>();
-        public List<List<TournamentMatch>> RoundHistory { get; set; } = null;
+        /// <summary>
+        /// Resets the tournament internally so that it begins anew
+        /// </summary>
+        public abstract void ResetTournament();
+        /// <summary>
+        /// From a tournament, it shuffles players, but also has a list of top seeds (from best to worst) if needed in some tournament
+        /// </summary>
+        /// <param name="Seeds">Seed list to be used in tournament</param>
+        public abstract void ShuffleWithSeeds(List<string> Seeds);
         /// <summary>
         /// Will play the tournament, organising the bracket and asking for results or simulating it
         /// </summary>
         /// <param name="_backEndData">Back end just in case needs to simulate bot</param>
-        public void PlayTournament(DataContainers _backEndData)
+        public abstract void PlayTournament(DataContainers _backEndData);
+        /// <summary>
+        /// Performs tournament animation once complete
+        /// </summary>
+        public abstract void FinaliseTournament();
+        /// <summary>
+        /// Asks tournament to update leaderboard according to match history
+        /// </summary>
+        /// <param name="leaderboard">The leaderboard to update</param>
+        /// <param name="backend">Backend, to determine whether a character is added into leaderboard</param>
+        public abstract void UpdateLeaderboard(TournamentHistory leaderboard, DataContainers backend);
+    }
+    public class ElimTournament : Tournament
+    {
+        // Internal draw helpers
+        const float DRAW_RYTHM_PERIOD = 1.0f;
+        const float BLINK_TOGGLE_PERIOD = 0.5f;
+        const int NUMBER_OF_BLINKS = 3;
+        List<List<TournamentMatch>> RoundHistory { get; set; } = null;
+        // Seed helper
+        enum SeedState
+        {
+            TOP,
+            BOTTOM,
+            MID_BOT,
+            MID_TOP
+        }
+        public override void ResetTournament()
+        {
+            RoundHistory = null;
+        }
+        public override void ShuffleWithSeeds(List<string> Seeds)
+        {
+            // Shuffle everything
+            Random _rng = new Random();
+            int n = Participants.Count;
+            while (n > 1) // Fischer yates
+            {
+                n--;
+                int k = _rng.Next(n + 1);
+                (Participants[k], Participants[n]) = (Participants[n], Participants[k]); // Swap
+            }
+            // Bad seeding (not optimal or correct) but hopefully simple and fair-ish
+            // Goes in small sections alternating (TOP-BOTTOM-MIDDLEBOT-MIDDLETOP) every 4 the list reverses and index increases
+            bool increasingSeedState = true;
+            int nSeedRound = 0;
+            SeedState seedState = SeedState.TOP;
+            for (int seed = 0; seed < Seeds.Count; seed++) // Now seed by seed
+            {
+                int currentIndex = Participants.IndexOf(Seeds[seed]); // Find where seed is currently
+                int targetIndex = seedState switch
+                {
+                    SeedState.TOP => 0 + nSeedRound,
+                    SeedState.BOTTOM => Participants.Count - 1 - nSeedRound,
+                    SeedState.MID_BOT => (Participants.Count / 2) + nSeedRound,
+                    SeedState.MID_TOP => (Participants.Count / 2) - 1 - nSeedRound,
+                    _ => throw new Exception("???")
+                };
+                // Perform switch
+                if (currentIndex != targetIndex)
+                {
+                    (Participants[currentIndex], Participants[targetIndex]) = (Participants[targetIndex], Participants[currentIndex]); // Swap
+                }
+                // Advance seed state machine
+                if (increasingSeedState) // Increasing state
+                {
+                    if (seedState == SeedState.MID_TOP) // Turn but no advance yet
+                    {
+                        increasingSeedState = false;
+                        nSeedRound++;
+                    }
+                    else
+                    {
+                        seedState++;
+                    }
+                }
+                else
+                {
+                    if (seedState == SeedState.TOP)
+                    {
+                        increasingSeedState = true;
+                        nSeedRound++;
+                    }
+                    else
+                    {
+                        seedState--;
+                    }
+                }
+            }
+        }
+        public override void PlayTournament(DataContainers _backEndData)
         {
             Console.CursorVisible = true;
             if (RoundHistory == null) // Brand new tournament
@@ -232,7 +347,7 @@ namespace IndymonBackend
                 while (closestPowerOf2 < NPlayers) closestPowerOf2 *= 2; // Find the closest po2 above player name (will add byes)
                 int numberOfByes = closestPowerOf2 - NPlayers;
                 int byesBeginning = (numberOfByes / 2) + (numberOfByes % 2); // The beginning ones may have 1 more bye
-                int byesEnd = numberOfByes / 2; // The beginning ones may have 1 more bye
+                int byesEnd = numberOfByes / 2;
                 // Ok will start doing the matchups, first round
                 List<TournamentMatch> thisRound = new List<TournamentMatch>();
                 for (int i = 0; i < Participants.Count; i++)
@@ -375,10 +490,7 @@ namespace IndymonBackend
             }
             Console.CursorVisible = false;
         }
-        /// <summary>
-        /// Performs tournament animation once complete
-        /// </summary>
-        public void FinaliseTournament()
+        public override void FinaliseTournament()
         {
             // Find person with the longest name
             int nameLength = 0;
@@ -510,12 +622,7 @@ namespace IndymonBackend
             return average;
         }
         #endregion
-        /// <summary>
-        /// Asks tournament to update leaderboard according to match history
-        /// </summary>
-        /// <param name="leaderboard">The leaderboard to update</param>
-        /// <param name="backend">Backend, to determine whether a character is added into leaderboard</param>
-        public void UpdateLeaderboard(TournamentHistory leaderboard, DataContainers backend)
+        public override void UpdateLeaderboard(TournamentHistory leaderboard, DataContainers backend)
         {
             for (int round = 0; round < RoundHistory.Count; round++) // Check round by round
             {

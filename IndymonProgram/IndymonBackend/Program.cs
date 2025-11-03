@@ -1,5 +1,5 @@
-﻿using ParsersAndData;
-using System.Text.Json;
+﻿using Newtonsoft.Json;
+using ParsersAndData;
 
 namespace IndymonBackend
 {
@@ -31,7 +31,11 @@ namespace IndymonBackend
             else
             {
                 string indymonFile = args[0];
-                _allData = JsonSerializer.Deserialize<IndymonData>(File.ReadAllText(indymonFile));
+                JsonSerializerSettings settings = new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                };
+                _allData = JsonConvert.DeserializeObject<IndymonData>(File.ReadAllText(indymonFile), settings);
                 _allData.DataContainer.MasterDirectory = Path.GetDirectoryName(indymonFile);
             }
             string InputString;
@@ -48,9 +52,13 @@ namespace IndymonBackend
                             string csvFile = Path.Combine(_allData.DataContainer.MasterDirectory, TOURN_CSV);
                             File.WriteAllText(csvFile, FormatTournamentHistory());
                             Console.WriteLine("Serializing json");
-                            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
                             string indymonFile = Path.Combine(_allData.DataContainer.MasterDirectory, FILE_NAME);
-                            File.WriteAllText(indymonFile, JsonSerializer.Serialize(_allData, options));
+                            JsonSerializerSettings settings = new JsonSerializerSettings
+                            {
+                                TypeNameHandling = TypeNameHandling.Auto,
+                                Formatting = Formatting.Indented
+                            };
+                            File.WriteAllText(indymonFile, JsonConvert.SerializeObject(_allData, settings));
                         }
                         break;
                     case "1":
@@ -124,7 +132,11 @@ namespace IndymonBackend
             if (File.Exists(masterPath))
             {
                 Console.WriteLine("Indymon file located, retrieving");
-                _allData = JsonSerializer.Deserialize<IndymonData>(File.ReadAllText(masterPath));
+                JsonSerializerSettings settings = new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                };
+                _allData = JsonConvert.DeserializeObject<IndymonData>(File.ReadAllText(masterPath), settings);
                 _allData.DataContainer.MasterDirectory = masterPath;
                 if (_allData.TournamentManager != null)
                 {

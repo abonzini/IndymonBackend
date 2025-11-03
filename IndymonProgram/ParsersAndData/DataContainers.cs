@@ -59,6 +59,10 @@ namespace ParsersAndData
                 legalMoves.ExceptWith(pokemonBackendData.AiMoveBanlist);
                 legalStabs.ExceptWith(pokemonBackendData.AiMoveBanlist);
             }
+            if (GetTera(backendData) != "") // Mons that can tera will be able to use tera blast always, regardless if previously banned move
+            {
+                legalMoves.Add("tera blast");
+            }
             // First, get the mon an ability
             Ability = legalAbilities.ElementAt(_rng.Next(legalAbilities.Count)); // Get a random one
             // Then, get the mon a stab (move 1)
