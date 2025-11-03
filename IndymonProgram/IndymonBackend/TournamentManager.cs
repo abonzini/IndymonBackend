@@ -68,6 +68,10 @@ namespace IndymonBackend
                         validSelection = true;
                         OngoingTournament = new ElimTournament();
                         break;
+                    case "king":
+                        validSelection = true;
+                        OngoingTournament = new KingOfTheHillTournament();
+                        break;
                     default:
                         validSelection = false;
                         break;
@@ -150,12 +154,11 @@ namespace IndymonBackend
         public void UpdateTournamentTeams()
         {
             // First, shuffle the participants (use seed if needed)
-            List<string> Seeds = null;
+            List<string> Seeds = new List<string>();
             Console.WriteLine("Want to add specific seeding? Y/N");
             string seedInput = Console.ReadLine();
             if (seedInput.Trim().ToLower() == "y") // One last seeding step
             {
-                Seeds = new List<string>();
                 List<string> seedOptions = [.. OngoingTournament.Participants];
                 bool seedingFinished = false;
                 while (!seedingFinished && Seeds.Count < OngoingTournament.Participants.Count) // Continue seeding until finished or all players seeded
@@ -265,7 +268,7 @@ namespace IndymonBackend
         const float DRAW_RYTHM_PERIOD = 1.0f;
         const float BLINK_TOGGLE_PERIOD = 0.5f;
         const int NUMBER_OF_BLINKS = 3;
-        List<List<TournamentMatch>> RoundHistory { get; set; } = null;
+        public List<List<TournamentMatch>> RoundHistory { get; set; } = null;
         // Seed helper
         enum SeedState
         {
@@ -734,6 +737,315 @@ namespace IndymonBackend
             }
             // Ok! finally need the winner
             string winnerName = RoundHistory.Last().Last().Winner; // Last winner of last match of last round is tournament winner
+            List<PlayerAndStats> winnerLocation = null;
+            if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
+            else if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?
+            else { } // Never mind then
+            PlayerAndStats winnerStats = winnerLocation?.FirstOrDefault(p => (p.Name == winnerName));
+            if (winnerStats != null) winnerStats.TournamentWins++;
+        }
+    }
+    public class KingOfTheHillTournament : Tournament
+    {
+        // Internal draw helpers
+        const float DRAW_RYTHM_PERIOD = 1.0f;
+        const float BLINK_TOGGLE_PERIOD = 0.5f;
+        const int NUMBER_OF_BLINKS = 3;
+        public List<TournamentMatch> MatchHistory { get; set; } = null;
+        public override void ResetTournament()
+        {
+            MatchHistory = null;
+        }
+        public override void ShuffleWithSeeds(List<string> Seeds)
+        {
+            // Shuffle everything
+            Random _rng = new Random();
+            int n = Participants.Count;
+            while (n > 1) // Fischer yates
+            {
+                n--;
+                int k = _rng.Next(n + 1);
+                (Participants[k], Participants[n]) = (Participants[n], Participants[k]); // Swap
+            }
+            // Seeding in KOH means putting the best in the bottom
+            for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
+            {
+                int currentIndex = Participants.IndexOf(Seeds[seed]); // Find where seed is currently
+                int targetIndex = Participants.Count - 1 - seed; // Bottom up
+                // Perform switch
+                if (currentIndex != targetIndex)
+                {
+                    (Participants[currentIndex], Participants[targetIndex]) = (Participants[targetIndex], Participants[currentIndex]); // Swap
+                }
+            }
+        }
+        public override void PlayTournament(DataContainers _backEndData)
+        {
+            Console.CursorVisible = true;
+            if (MatchHistory == null) // Brand new tournament
+            {
+                MatchHistory = new List<TournamentMatch>();
+                TournamentMatch firstMatch = new TournamentMatch();
+                firstMatch.Player1 = Participants[0]; // First person is first player
+                if (Participants.Count > 1) // One would assume...
+                {
+                    firstMatch.Player2 = Participants[1]; // Add the 2nd
+                }
+                else
+                {
+                    firstMatch.IsBye = true;
+                }
+                MatchHistory.Add(firstMatch);
+            }
+            // This is the part that loads the tournament, visually it prints all matches and prompts user one by one
+            Console.Clear();
+            Console.WriteLine("Insert scores for each match. 0 if you want it randomized, q to stop input temporarily. b FOR ROBOTS");
+            int consoleEndPosition = Participants.Count + 1; // Where the cursor will be after data entry (there's n matches total)
+            int maxStringLength = 0;
+            foreach (string participant in Participants) // Matchups are not known, so just assume max v max is the text
+            {
+                maxStringLength = Math.Max(maxStringLength, (2 * participant.Length) + 3); // Need to fit "p1 v p1"
+            }
+            bool finished = false;
+            while (!finished) // In this case, it'll be battle by battle, each decided by the winner of previous
+            {
+                int matchNumber = MatchHistory.Count;
+                TournamentMatch match = MatchHistory.Last(); // Gets last (current) match
+                if (match.IsBye)
+                {
+                    match.Winner = match.Player1;
+                }
+                else
+                {
+                    Console.SetCursorPosition(0, MatchHistory.Count);
+                    Console.Write($"{match.Player1} v {match.Player2}");
+                    Console.SetCursorPosition(maxStringLength, MatchHistory.Count); // Put the cursor on the right, able to fit "p1 v p1" with p1 the longest possible player name
+                    (int cursorX, int cursorY) = Console.GetCursorPosition(); // Just in case I need to write in same place
+                    string scoreString = Console.ReadLine();
+                    if (scoreString == "0")
+                    {
+                        Random _rng = new Random(); // Will randomize result
+                        if (_rng.Next(2) == 0) // Winner was 1
+                        {
+                            match.Score1 = _rng.Next(1, NMons + 1);
+                            match.Score2 = 0;
+                        }
+                        else // Winner was 2
+                        {
+                            match.Score1 = 0;
+                            match.Score2 = _rng.Next(1, NMons + 1);
+                        }
+                    }
+                    else if (scoreString.ToLower() == "q") // If q, just stop here we'll need to restart after
+                    {
+                        finished = true;
+                        break; // Stops iteration
+                    }
+                    else if (scoreString.ToLower() == "b") // If b, do battle bots
+                    {
+
+                        BotBattle automaticBattle = new BotBattle(_backEndData);
+                        (match.Score1, match.Score2) = automaticBattle.SimulateBotBattle(match.Player1, match.Player2, NMons, NMons);
+                        Console.SetCursorPosition(cursorX, cursorY);
+                        Console.Write($"{match.Score1}-{match.Score2} GET THE REPLAY");
+                        if (match.Score1 > match.Score2)
+                        {
+                            match.Winner = match.Player1;
+                        }
+                        else
+                        {
+                            match.Winner = match.Player2;
+                        }
+                    }
+                    else
+                    {
+                        string[] scores = scoreString.Split('-');
+                        match.Score1 = int.Parse(scores[0]);
+                        match.Score2 = int.Parse(scores[1]);
+                    }
+                    // Process score now
+                    if (match.Score1 > match.Score2)
+                    {
+                        match.Winner = match.Player1;
+                    }
+                    else
+                    {
+                        match.Winner = match.Player2;
+                    }
+                }
+                // Check end condition
+                if (matchNumber >= (Participants.Count - 1)) // This signifies end of tournament
+                {
+                    finished = true;
+                    Console.SetCursorPosition(0, consoleEndPosition); // Sets the console in the right place
+                    Console.WriteLine($"Tournament data entry done");
+                }
+                else // Next match then
+                {
+                    TournamentMatch nextMatch = new TournamentMatch();
+                    MatchHistory.Add(nextMatch); // Add to pile
+                    // Winner will advance in the same pos as they were
+                    bool winnerWas1 = (match.Winner == match.Player1);
+                    nextMatch.Player1 = winnerWas1 ? match.Winner : Participants[MatchHistory.Count];
+                    nextMatch.Player2 = winnerWas1 ? Participants[MatchHistory.Count] : match.Winner;
+                }
+            }
+            Console.CursorVisible = false;
+        }
+        public override void FinaliseTournament()
+        {
+            // Find person with the longest name
+            int nameLength = 0;
+            foreach (string participant in Participants)
+            {
+                nameLength = Math.Max(nameLength, participant.Length); // Need to fit "p1 v p1" so keep in mind
+            }
+            // Need to resize console so this fits
+            int minXSize = (2 * nameLength) + 3; // Need to fit number of matches
+            int minYSize = MatchHistory.Count; // Need to fit names
+            while ((Console.WindowHeight < minYSize) || (Console.WindowWidth < minXSize))
+            {
+                Console.WriteLine($"Console has to have atleast dimensions X:{minXSize} Y: {minYSize}");
+                Console.WriteLine($"Current X:{Console.WindowWidth} Y: {Console.WindowHeight}");
+                Console.ReadLine();
+            }
+            // Then, perform a tournament animation
+            Console.Clear();
+            string emptyName = new string(' ', nameLength);
+            string emptyLine = new string(' ', (2 * nameLength) + 3);
+            for (int line = 0; line < MatchHistory.Count; line++) // Each match is a line
+            {
+                TournamentMatch match = MatchHistory[line];
+                string player1String = match.Player1.PadRight(nameLength);
+                string player2String = match.Player2.PadRight(nameLength);
+                string matchString = $"{player1String} v {player2String}";
+                string resultString = (match.Winner == match.Player1) ? $"{emptyName} v {player2String}" : $"{player1String} v {emptyName}";
+                // Print Line by Line
+                for (int blink = 0; blink < NUMBER_OF_BLINKS; blink++) // Blink the next match
+                {
+                    Console.SetCursorPosition(0, line);
+                    Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000));
+                    Console.Write(matchString);
+                    Console.SetCursorPosition(0, line);
+                    Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000));
+                    Console.Write(emptyLine);
+                }
+                Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Show it one last time, also show score
+                Console.SetCursorPosition(0, line);
+                Console.Write(matchString);
+                Console.SetCursorPosition(matchString.Length + 1, line);
+                Console.Write($"({match.Score1}-{match.Score2})");
+                Thread.Sleep((int)(2 * BLINK_TOGGLE_PERIOD * 1000)); // Remove the winner, will move down
+                Console.SetCursorPosition(0, line);
+                Console.Write(emptyLine);
+                Console.SetCursorPosition(0, line);
+                Console.Write(resultString);
+                Thread.Sleep((int)(2 * BLINK_TOGGLE_PERIOD * 1000)); // Remove the winner, will move down
+                if (line >= MatchHistory.Count - 1) // The final
+                {
+                    Console.SetCursorPosition(0, line + 1);
+                    string finalString = (match.Winner == match.Player1) ? $"{player1String}   {emptyName}" : $"{emptyName}   {player2String}";
+                    Console.Write(finalString);
+                    Console.SetCursorPosition(matchString.Length + 1, line + 1);
+                    Console.Write($"WINNER");
+                }
+            }
+            Console.ReadKey();
+            Console.Clear();
+            // And that should be it?!
+        }
+        public override void UpdateLeaderboard(TournamentHistory leaderboard, DataContainers backend)
+        {
+            // First, all participants will have their torunament counter increased
+            foreach (string participant in Participants)
+            {
+                List<PlayerAndStats> playerLocation = null;
+                if (backend.TrainerData.ContainsKey(participant)) playerLocation = leaderboard.PlayerStats; // Is it a trainer?
+                else if (backend.TrainerData.ContainsKey(participant)) playerLocation = leaderboard.NpcStats; // Is it NPC?
+                else { } // Never mind then (named npc or not existing
+                if (playerLocation != null) // Add player if relevant
+                {
+                    PlayerAndStats playerStats = playerLocation.FirstOrDefault(p => (p.Name == participant)); // Get data for p1
+                    if (playerStats != null) // Player wasn't there, need to add
+                    {
+                        PlayerAndStats newPlayer = new PlayerAndStats()
+                        {
+                            Name = participant,
+                            TournamentsPlayed = 1,
+                            Deaths = 0,
+                            Kills = 0,
+                            TournamentWins = 0,
+                            EachMuWr = new Dictionary<string, IndividualMu>()
+                        };
+                        playerLocation.Add(newPlayer);
+                    }
+                    else
+                    {
+                        playerStats.TournamentsPlayed++;
+                    }
+                }
+            }
+            // Now, need to gather the matches to calculate each match stat
+            foreach (TournamentMatch match in MatchHistory)
+            {
+                // Try to find where P1 is
+                List<PlayerAndStats> p1Location = null;
+                if (backend.TrainerData.ContainsKey(match.Player1)) p1Location = leaderboard.PlayerStats; // Is it a trainer?
+                else if (backend.TrainerData.ContainsKey(match.Player1)) p1Location = leaderboard.NpcStats; // Is it NPC?
+                else { } // Never mind then
+                List<PlayerAndStats> p2Location = null;
+                if (!match.IsBye) // If there's actually a p2...
+                {
+                    if (backend.TrainerData.ContainsKey(match.Player2)) p2Location = leaderboard.PlayerStats; // Is it a trainer?
+                    else if (backend.TrainerData.ContainsKey(match.Player2)) p2Location = leaderboard.NpcStats; // Is it NPC?
+                    else { } // Never mind then
+                }
+                // After that is done, guaranteed everything is in place, just update each match stats individually
+                if (!match.IsBye) // A bye doesn't have additional stats as no one fought anyone
+                {
+                    // These 2 should exist unless they're not players or npc
+                    PlayerAndStats p1Stats = p1Location?.First(p => (p.Name == match.Player1));
+                    PlayerAndStats p2Stats = p2Location?.First(p => (p.Name == match.Player2));
+                    // How many mons each player killed
+                    int p1Kills = (NMons - match.Score2);
+                    int p2Kills = (NMons - match.Score1);
+                    // Update all remaining stats
+                    if (p1Stats != null)
+                    {
+                        p1Stats.Kills += p1Kills;
+                        p1Stats.Deaths += p2Kills;
+                        if (!p1Stats.EachMuWr.ContainsKey(match.Player2)) { p1Stats.EachMuWr.Add(match.Player2, new IndividualMu()); }
+                        IndividualMu mu = p1Stats.EachMuWr[match.Player2];
+                        bool playerWon = (match.Winner.Trim().ToLower() == p1Stats.Name.Trim().ToLower());
+                        if (playerWon)
+                        {
+                            mu.Wins++;
+                        }
+                        else
+                        {
+                            mu.Losses++;
+                        }
+                    }
+                    if (p2Stats != null)
+                    {
+                        p2Stats.Kills += p2Kills;
+                        p2Stats.Deaths += p1Kills;
+                        if (!p2Stats.EachMuWr.ContainsKey(match.Player1)) { p2Stats.EachMuWr.Add(match.Player1, new IndividualMu()); }
+                        IndividualMu mu = p1Stats.EachMuWr[match.Player1];
+                        bool playerWon = (match.Winner.Trim().ToLower() == p2Stats.Name.Trim().ToLower());
+                        if (playerWon)
+                        {
+                            mu.Wins++;
+                        }
+                        else
+                        {
+                            mu.Losses++;
+                        }
+                    }
+                }
+            }
+            // Ok! finally need the winner
+            string winnerName = MatchHistory.Last().Winner; // Winner of last match is tournament winner
             List<PlayerAndStats> winnerLocation = null;
             if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
             else if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?

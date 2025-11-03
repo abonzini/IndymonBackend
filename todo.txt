@@ -1,5 +1,4 @@
 For game proper:
-3 - king tournament
 3 - Swiss tournament
 better linkage between showdown turn data and existing team. Init bot with teamsheet instead, try to link name+nickname
 tera shard mechanics (showdown, teambuilder and bot)
