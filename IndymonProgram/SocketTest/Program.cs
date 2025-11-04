@@ -11,7 +11,7 @@ namespace SocketTest
             IndymonData dataCont = JsonSerializer.Deserialize<IndymonData>(File.ReadAllText(indymonFile));
             BotBattle battle = new BotBattle(dataCont.DataContainer);
             //Console.WriteLine(battle.SimulateBotBattle("bot", "bot2", 2, 2));
-            battle.SimulateBotBattle("bot", 3);
+            battle.SimulateBotBattle("npc 1", 3);
         }
     }
 }

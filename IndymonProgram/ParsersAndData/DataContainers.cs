@@ -13,6 +13,7 @@ namespace ParsersAndData
         public Dictionary<string, HashSet<string>> NatureItemData { get; set; } = null;
         public Dictionary<string, HashSet<string>> EvItemData { get; set; } = null;
         public Dictionary<string, HashSet<string>> TeraItemData { get; set; } = null;
+        public Dictionary<string, HashSet<string>> MoveItemData { get; set; } = null;
         public Dictionary<string, TrainerData> TrainerData { get; set; } = new Dictionary<string, TrainerData>();
         public Dictionary<string, TrainerData> NpcData { get; set; } = new Dictionary<string, TrainerData>();
         public Dictionary<string, TrainerData> NamedNpcData { get; set; } = new Dictionary<string, TrainerData>();
@@ -35,7 +36,6 @@ namespace ParsersAndData
         public string Ability { get; set; }
         public string[] Moves { get; set; } = new string[4];
         public Item Item { get; set; }
-
         public override string ToString()
         {
             return $"{Species}: {Ability}, {string.Join('-', Moves)}, {Item?.Name}";
@@ -133,7 +133,7 @@ namespace ParsersAndData
         /// </summary>
         /// <param name="backEndData">Back End data to check properties</param>
         /// <returns>The tera type or ""</returns>
-        string GetTera(DataContainers backEndData)
+        public string GetTera(DataContainers backEndData)
         {
             if (Item != null) // Natures are determined by item
             {
@@ -151,17 +151,32 @@ namespace ParsersAndData
         /// <returns>The item name or ""</returns>
         string GetBattleItem(DataContainers backEndData)
         {
+            string itemName = "";
             if (Item != null)
             {
                 // Ensure it's not one of my special items
-                if (!backEndData.NatureItemData.ContainsKey(Item.Name) &&
-                    !backEndData.TeraItemData.ContainsKey(Item.Name) &&
-                    !backEndData.EvItemData.ContainsKey(Item.Name))
+                if (backEndData.NatureItemData.ContainsKey(Item.Name))
                 {
-                    return Item.Name;
+                    itemName = "spent mint"; // the nature-changing item
+                }
+                else if (backEndData.TeraItemData.ContainsKey(Item.Name))
+                {
+                    itemName = "spent tera shard";
+                }
+                else if (backEndData.EvItemData.ContainsKey(Item.Name))
+                {
+                    itemName = "pretty feather";
+                }
+                else if (backEndData.MoveItemData.ContainsKey(Item.Name))
+                {
+                    itemName = "blank disk";
+                }
+                else
+                {
+                    itemName = Item.Name;
                 }
             }
-            return "";
+            return itemName;
         }
         /// <summary>
         /// Gets pokepaste for this mon set
@@ -209,13 +224,24 @@ namespace ParsersAndData
         /// <returns>Pokemon string in showdown packed format</returns>
         public string GetPacked(DataContainers backEndData)
         {
+            // First, keep in mind it may have a move-altering item
+            List<string> setMoves = [.. Moves];
+            if (backEndData.MoveItemData.TryGetValue(Item.Name, out HashSet<string> overritenMoves))
+            {
+                int moveSlot = 3; // Start with last
+                foreach (string newMove in overritenMoves)
+                {
+                    setMoves[moveSlot] = newMove;
+                    moveSlot--;
+                }
+            }
             //NICKNAME|SPECIES|ITEM|ABILITY|MOVES|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS,POKEBALL,HIDDENPOWERTYPE,GIGANTAMAX,DYNAMAXLEVEL,TERATYPE
             List<string> packedStrings = new List<string>();
             packedStrings.Add(NickName);
             packedStrings.Add(Species);
             packedStrings.Add(GetBattleItem(backEndData));
             packedStrings.Add(Ability);
-            packedStrings.Add(string.Join(",", Moves));
+            packedStrings.Add(string.Join(",", setMoves));
             packedStrings.Add(GetNature(backEndData));
             packedStrings.Add(string.Join(",", GetEvs(backEndData)));
             packedStrings.Add(Gender);
@@ -373,6 +399,21 @@ namespace ParsersAndData
                                             itemIsUseless &= false;
                                             break;
                                         }
+                                    }
+                                }
+                                // Otherwise, it may be a moveset item, which only makes sense if the mon doesn't learn naturally (or already has it!)...
+                                else if (backEndData.MoveItemData.TryGetValue(itemCandidate.Name, out HashSet<string> learnedMoves))
+                                {
+                                    Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Species];
+                                    foreach (string learnedMove in learnedMoves) // Check if the move(s) added...
+                                    {
+                                        if (!pokemonBackendData.Moves.Contains(learnedMove) && // ...are not originally learned anyway
+                                            !pokemonBackendData.AiMoveBanlist.Contains(learnedMove) && // ...are not banned
+                                            !pokemonSet.Moves.Contains(learnedMove)) // ...is not already there (???how)
+                                        {
+                                            itemIsUseless &= false; // Then this can be used
+                                        }
+
                                     }
                                 }
                                 // Otherwise there's no other checks, item has to be decent

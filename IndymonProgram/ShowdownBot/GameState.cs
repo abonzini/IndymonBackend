@@ -14,6 +14,7 @@
     {
         public List<AvailableMove> moves { get; set; }
         public bool trapped { get; set; }
+        public string canTerastallize { get; set; } = "";
     }
     public class SideOptions
     {
@@ -52,6 +53,10 @@
             if (active) return false;
             if (condition.Contains("fnt")) return false;
             else return true;
+        }
+        public override string ToString()
+        {
+            return $"{ident} ({condition})";
         }
     }
     public class GameState

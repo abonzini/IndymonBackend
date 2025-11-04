@@ -155,6 +155,7 @@ namespace IndymonBackend
                 string teraItemFile = Path.Combine(directory, "teraitems.csv");
                 string evItemFile = Path.Combine(directory, "evitems.csv");
                 string natureItemFile = Path.Combine(directory, "natureitems.csv");
+                string moveItemFile = Path.Combine(directory, "moveitems.csv");
                 if (File.Exists(dexPath))
                 {
                     // First, retrieve all mons
@@ -202,6 +203,10 @@ namespace IndymonBackend
                 if (File.Exists(natureItemFile))
                 {
                     _allData.DataContainer.NatureItemData = ItemParser.ParseItemAndEffects(natureItemFile);
+                }
+                if (File.Exists(moveItemFile))
+                {
+                    _allData.DataContainer.MoveItemData = ItemParser.ParseItemAndEffects(moveItemFile);
                 }
             }
             _allData.DataContainer.MasterDirectory = directory;

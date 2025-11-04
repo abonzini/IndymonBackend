@@ -201,6 +201,16 @@ namespace ShowdownBot
         private void BotDecision(string battle, string state)
         {
             _currentGameState = JsonSerializer.Deserialize<GameState>(state);
+            PokemonSet currentPokemon = null;
+            foreach (SidePokemon pokemon in _currentGameState.side.pokemon) // First, need to parse the current mon state and update
+            {
+                string species = pokemon.details.Split(',')[0].Trim().ToLower(); // Extract name from details
+                if (pokemon.active) // This is the current mon, definitely
+                {
+                    currentPokemon = _botTrainer.Teamsheet.Where(p => p.Species == species).First(); // Get the first mon of that species (may create trouble if there's duplicates, deal with that later)
+                }
+                // The other ones, may need updating at a later date (status, hp)
+            }
             string command = "";
             bool forcedSwitch = false;
             if (_currentGameState.forceSwitch != null)
@@ -248,7 +258,11 @@ namespace ShowdownBot
                     else // try the move then
                     {
                         command = $"{battle}|/choose move {moveChoice + 1}"; // Choose move (slot 1-4)
-                        // use terastallize for tera but need to check can tera flag and item
+                        string possibleTera = _currentGameState.active.First().canTerastallize.Trim().ToLower();
+                        if (possibleTera != "" && (possibleTera == currentPokemon.GetTera(_backend))) // Means the current mon can tera and it's consistent
+                        {
+                            command += " terastallize";
+                        }
                     }
                 } while (invalidChoice); // Try again until I get a valid option
             }
