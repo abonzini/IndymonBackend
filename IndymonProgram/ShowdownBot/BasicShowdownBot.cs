@@ -204,12 +204,17 @@ namespace ShowdownBot
             PokemonSet currentPokemon = null;
             foreach (SidePokemon pokemon in _currentGameState.side.pokemon) // First, need to parse the current mon state and update
             {
+                // Get the first mon of that species (may create trouble if there's duplicates, deal with that later)
                 string species = pokemon.details.Split(',')[0].Trim().ToLower(); // Extract name from details
+                PokemonSet pokemonInTeam = _botTrainer.Teamsheet.Where(p => p.Species == species).First();
+                if (pokemonInTeam.ExplorationStatus != null)
+                {
+                    pokemonInTeam.ExplorationStatus.SetStatus(pokemon.condition);
+                }
                 if (pokemon.active) // This is the current mon, definitely
                 {
-                    currentPokemon = _botTrainer.Teamsheet.Where(p => p.Species == species).First(); // Get the first mon of that species (may create trouble if there's duplicates, deal with that later)
+                    currentPokemon = pokemonInTeam;
                 }
-                // The other ones, may need updating at a later date (status, hp)
             }
             string command = "";
             bool forcedSwitch = false;

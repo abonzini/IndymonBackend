@@ -27,6 +27,27 @@ namespace ParsersAndData
             return Name;
         }
     }
+    public class ExplorationStatus
+    {
+        public int HealthPercentage { get; set; } = 100;
+        public string NonVolatileStatus { get; set; } = "";
+        public void SetStatus(string status)
+        {
+            if (status.ToLower() == "0 fnt")
+            {
+                HealthPercentage = 0;
+                NonVolatileStatus = "";
+            }
+            else
+            {
+                string[] splitStatus = status.Split(' ');
+                string[] splitHealth = splitStatus[0].Split("/");
+                HealthPercentage = (100 * int.Parse(splitHealth[0])) / int.Parse(splitHealth[1]);
+                if (HealthPercentage == 0) HealthPercentage = 1; // Can never be 0 because otherwise it'd be fainted
+                NonVolatileStatus = (splitStatus.Length == 2) ? splitStatus[1] : "";
+            }
+        }
+    }
     public class PokemonSet
     {
         public string NickName { get; set; }
@@ -36,6 +57,8 @@ namespace ParsersAndData
         public string Ability { get; set; }
         public string[] Moves { get; set; } = new string[4];
         public Item Item { get; set; }
+        public ExplorationStatus ExplorationStatus { get; set; }
+
         public override string ToString()
         {
             return $"{Species}: {Ability}, {string.Join('-', Moves)}, {Item?.Name}";
@@ -248,14 +271,17 @@ namespace ParsersAndData
             packedStrings.Add(""); // No IVs I don't care
             packedStrings.Add(Shiny ? "S" : ""); // Depending if shiny
             packedStrings.Add(""); // Always lvl 100
-            if (GetTera(backEndData) == "")
+            string lastPackedString = $",,,,,{GetTera(backEndData)}"; // Add the "remaining" useless stuff needed for  tera, etc
+            if (ExplorationStatus != null) // This is new, status will be ,%health,status condition too after the tera, so it can be picked up from a modified showdown
             {
-                packedStrings.Add(""); // No tera means no need to put anything here
+                lastPackedString += $",{ExplorationStatus.HealthPercentage}";
+                lastPackedString += $",{ExplorationStatus.NonVolatileStatus}";
             }
             else
-            { // I need to add tera...
-                packedStrings.Add($",,,,,{GetTera(backEndData)}");
+            {
+                lastPackedString += ",,"; // Otherwise empty
             }
+            packedStrings.Add(lastPackedString);
             return string.Join("|", packedStrings); // Join them together with |
         }
     }
