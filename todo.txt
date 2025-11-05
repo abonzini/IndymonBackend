@@ -1,4 +1,6 @@
 For game proper:
+seeding - fix seeding in elim
+tournament - add "group" tournament type where "winner" is just an ordered list of groups, serve as seeds (alternate 1-2) for elim
 7 - Exploration. Send optional status and hp data to battle sim, unpack and init set with that, later init mon with status and HP start (after volatile). Add them to team sheet (and/or create an inherited class for exploration team sheet)
 7 - SHEET: Create exploration section backend, define rares, commons, mons for each floor, boss and obstacles+text
 7 - Load exploration section from sheets, insert into new data structure.
