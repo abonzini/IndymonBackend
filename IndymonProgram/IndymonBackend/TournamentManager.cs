@@ -270,20 +270,44 @@ namespace IndymonBackend
         const int NUMBER_OF_BLINKS = 3;
         public List<List<TournamentMatch>> RoundHistory { get; set; } = null;
         // Seed helper
-        enum SeedState
-        {
-            TOP,
-            BOTTOM,
-            MID_BOT,
-            MID_TOP
-        }
+        public int[] SeedOrder { get; set; }
         public override void ResetTournament()
         {
             RoundHistory = null;
         }
         public override void ShuffleWithSeeds(List<string> Seeds)
         {
-            // Shuffle everything
+            // First, assemble a list of seeds, for all players get seed order from that to the closest power of 2
+            int closestPowerOf2 = 1;
+            while (closestPowerOf2 < NPlayers) closestPowerOf2 *= 2;
+            SeedOrder = new int[closestPowerOf2]; // Create space for all seeds
+            int stage = 0;
+            while (stage < closestPowerOf2) // Continue until i reach closest power of 2
+            {
+                if (stage == 0) // First stage there's no logic, just add 1
+                {
+                    SeedOrder[0] = 0;
+                    stage = 1; // Start with power of 2
+                }
+                else // Otherwise need to expand seed list, stage also contains how many players need to be there
+                {
+                    // First stage is to move all entries and leave one space between
+                    for (int i = stage - 1; i >= 0; i--)
+                    {
+                        SeedOrder[2 * i] = SeedOrder[i]; // Move to next even
+                    }
+                    // Then, go on twos, fill the next one with the complement
+                    int complement = (2 * stage) - 1;
+                    for (int i = 0; i < stage; i++)
+                    {
+                        int mu = complement - SeedOrder[2 * i]; // Calculate MU
+                        SeedOrder[(2 * i) + 1] = mu; // Put it in the array
+                    }
+                    // Next stage
+                    stage *= 2;
+                }
+            }
+            // Ok now shuffle everything
             Random _rng = new Random();
             int n = Participants.Count;
             while (n > 1) // Fischer yates
@@ -292,51 +316,14 @@ namespace IndymonBackend
                 int k = _rng.Next(n + 1);
                 (Participants[k], Participants[n]) = (Participants[n], Participants[k]); // Swap
             }
-            // Bad seeding (not optimal or correct) but hopefully simple and fair-ish
-            // Goes in small sections alternating (TOP-BOTTOM-MIDDLEBOT-MIDDLETOP) every 4 the list reverses and index increases
-            bool increasingSeedState = true;
-            int nSeedRound = 0;
-            SeedState seedState = SeedState.TOP;
-            for (int seed = 0; seed < Seeds.Count; seed++) // Now seed by seed
+            // Seeding will involve putting the best first
+            for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
                 int currentIndex = Participants.IndexOf(Seeds[seed]); // Find where seed is currently
-                int targetIndex = seedState switch
-                {
-                    SeedState.TOP => 0 + nSeedRound,
-                    SeedState.BOTTOM => Participants.Count - 1 - nSeedRound,
-                    SeedState.MID_BOT => (Participants.Count / 2) + nSeedRound,
-                    SeedState.MID_TOP => (Participants.Count / 2) - 1 - nSeedRound,
-                    _ => throw new Exception("???")
-                };
                 // Perform switch
-                if (currentIndex != targetIndex)
+                if (currentIndex != seed)
                 {
-                    (Participants[currentIndex], Participants[targetIndex]) = (Participants[targetIndex], Participants[currentIndex]); // Swap
-                }
-                // Advance seed state machine
-                if (increasingSeedState) // Increasing state
-                {
-                    if (seedState == SeedState.MID_TOP) // Turn but no advance yet
-                    {
-                        increasingSeedState = false;
-                        nSeedRound++;
-                    }
-                    else
-                    {
-                        seedState++;
-                    }
-                }
-                else
-                {
-                    if (seedState == SeedState.TOP)
-                    {
-                        increasingSeedState = true;
-                        nSeedRound++;
-                    }
-                    else
-                    {
-                        seedState--;
-                    }
+                    (Participants[currentIndex], Participants[seed]) = (Participants[seed], Participants[currentIndex]); // Swap
                 }
             }
         }
@@ -346,32 +333,30 @@ namespace IndymonBackend
             if (RoundHistory == null) // Brand new tournament
             {
                 RoundHistory = new List<List<TournamentMatch>>();
-                int closestPowerOf2 = 1;
-                while (closestPowerOf2 < NPlayers) closestPowerOf2 *= 2; // Find the closest po2 above player name (will add byes)
-                int numberOfByes = closestPowerOf2 - NPlayers;
-                int byesBeginning = (numberOfByes / 2) + (numberOfByes % 2); // The beginning ones may have 1 more bye
-                int byesEnd = numberOfByes / 2;
                 // Ok will start doing the matchups, first round
                 List<TournamentMatch> thisRound = new List<TournamentMatch>();
-                for (int i = 0; i < Participants.Count; i++)
+                // Need to find seed by seed, and the ones that are higher than the number of player involve a bye
+                // Due to how algorithm was created, p1 will always be valid
+                int drawHelper = 0; // Where next player will be drawn
+                for (int i = 0; i < SeedOrder.Length; i += 2) // Go in pairs
                 {
                     TournamentMatch thisMatch = new TournamentMatch();
-                    thisMatch.Player1 = Participants[i];
-                    thisMatch.DrawHelper1 = i * 2; // Go to the next even (leave a space between names)
-                    if (i < byesBeginning)
+                    // Find both players
+                    int p1Index = SeedOrder[i];
+                    int p2Index = SeedOrder[i + 1];
+                    thisMatch.Player1 = Participants[p1Index];
+                    thisMatch.DrawHelper1 = drawHelper * 2; // Go to the next even (leave a space between names)
+                    drawHelper++; // Draw next
+                    if (p2Index < NPlayers) // Meaning the next seed MU is valid
                     {
-                        thisMatch.IsBye = true;
-                    }
-                    else if (i >= (Participants.Count - byesEnd))
-                    {
-                        thisMatch.IsBye = true;
-                    }
-                    else // Not a bye in either side...
-                    {
-                        i++; // Get next player (opp)
-                        thisMatch.Player2 = Participants[i];
+                        thisMatch.Player2 = Participants[p2Index]; // Got the second player
                         thisMatch.IsBye = false;
-                        thisMatch.DrawHelper2 = i * 2; // Go to the next even (leave a space between names)
+                        thisMatch.DrawHelper2 = drawHelper * 2;
+                        drawHelper++;
+                    }
+                    else // Otherwise it's a bye
+                    {
+                        thisMatch.IsBye = true;
                     }
                     thisRound.Add(thisMatch);
                 }
