@@ -1260,9 +1260,9 @@ namespace IndymonBackend
             int nPairs = _playersPerGroup / 2; // Number of player pairs
             for (int pair = 0; pair < nPairs; pair++)
             {
-                // Related indices of players (initial value before rotating)
-                int p1Index = 2 * pair;
-                int p2Index = (2 * pair) + 1;
+                // Related indices of players (initial value before rotating), they're mirrored
+                int p1Index = pair;
+                int p2Index = _playersPerGroup - 1 - pair;
                 // Rotate around round robin, except player 0 which will always be 0 (anchor)
                 p1Index = (p1Index == 0) ? 0 : ((p1Index - 1 + week) % (_playersPerGroup)) + 1;
                 p2Index = ((p2Index - 1 + week) % (_playersPerGroup)) + 1;
