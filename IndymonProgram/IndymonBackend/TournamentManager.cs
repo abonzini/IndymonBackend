@@ -1,6 +1,5 @@
 ﻿using ParsersAndData;
 using ShowdownBot;
-using System.Text;
 
 namespace IndymonBackend
 {
@@ -183,7 +182,6 @@ namespace IndymonBackend
             // Reset the tournament if one was already in progress
             OngoingTournament.ResetTournament();
             // Ok not bad, next step is to update participant team sheet if needed, and generate the import pokepaste
-            StringBuilder pokepasteBuilder = new StringBuilder();
             foreach (string participantName in OngoingTournament.Participants)
             {
                 // Try to find the participant
@@ -193,12 +191,8 @@ namespace IndymonBackend
                 else if (_backEndData.NamedNpcData.ContainsKey(participantName)) participant = _backEndData.NamedNpcData[participantName];
                 else throw new Exception("Trainer not found!?");
                 participant.DefineSets(_backEndData, OngoingTournament.NMons); // Gets the team for everyone
-                pokepasteBuilder.AppendLine($"=== {participant.Name} ===");
-                pokepasteBuilder.AppendLine(participant.GetPokepaste(_backEndData, OngoingTournament.NMons));
             }
             // Finally, ready to save the pokepaste
-            string exportFile = Path.Combine(_backEndData.MasterDirectory, "importable-pokepaste.txt");
-            File.WriteAllText(exportFile, pokepasteBuilder.ToString()); // Save the export
         }
         /// <summary>
         /// Starts the tourn proper, will ask for input of scores

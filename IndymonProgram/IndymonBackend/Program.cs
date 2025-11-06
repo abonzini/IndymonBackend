@@ -8,6 +8,12 @@ namespace IndymonBackend
         public DataContainers DataContainer { get; set; }
         public TournamentManager TournamentManager { get; set; }
         public TournamentHistory TournamentHistory { get; set; }
+        public string MasterDirectory { get; set; }
+        public string SheetId { get; set; }
+        public string TrainerDataTab { get; set; }
+        public string NpcDataTab { get; set; }
+        public string NamedNpcDataTab { get; set; }
+        public string TournamentDataTab { get; set; }
     }
     public static class Program
     {
@@ -36,7 +42,7 @@ namespace IndymonBackend
                     TypeNameHandling = TypeNameHandling.Auto,
                 };
                 _allData = JsonConvert.DeserializeObject<IndymonData>(File.ReadAllText(indymonFile), settings);
-                _allData.DataContainer.MasterDirectory = Path.GetDirectoryName(indymonFile);
+                _allData.MasterDirectory = Path.GetDirectoryName(indymonFile);
             }
             string InputString;
             do
@@ -49,10 +55,10 @@ namespace IndymonBackend
                     case "0":
                         {
                             Console.WriteLine("Ordering Tournament history and exporting csv");
-                            string csvFile = Path.Combine(_allData.DataContainer.MasterDirectory, TOURN_CSV);
+                            string csvFile = Path.Combine(_allData.MasterDirectory, TOURN_CSV);
                             File.WriteAllText(csvFile, FormatTournamentHistory());
                             Console.WriteLine("Serializing json");
-                            string indymonFile = Path.Combine(_allData.DataContainer.MasterDirectory, FILE_NAME);
+                            string indymonFile = Path.Combine(_allData.MasterDirectory, FILE_NAME);
                             JsonSerializerSettings settings = new JsonSerializerSettings
                             {
                                 TypeNameHandling = TypeNameHandling.Auto,
@@ -137,7 +143,7 @@ namespace IndymonBackend
                     TypeNameHandling = TypeNameHandling.Auto,
                 };
                 _allData = JsonConvert.DeserializeObject<IndymonData>(File.ReadAllText(masterPath), settings);
-                _allData.DataContainer.MasterDirectory = masterPath;
+                _allData.MasterDirectory = masterPath;
                 if (_allData.TournamentManager != null)
                 {
                     _allData.TournamentManager.SetBackEndData(_allData.DataContainer, _allData.TournamentHistory);
@@ -145,7 +151,7 @@ namespace IndymonBackend
             }
             else
             {
-                Console.WriteLine("No indymon file. Will jsut try to import backend data");
+                Console.WriteLine("No indymon file. Will just try to import backend data");
                 string learnsetPath = Path.Combine(directory, "learnsets.ts");
                 string dexPath = Path.Combine(directory, "pokedex.ts");
                 string movesPath = Path.Combine(directory, "moves.csv");
@@ -156,6 +162,7 @@ namespace IndymonBackend
                 string evItemFile = Path.Combine(directory, "evitems.csv");
                 string natureItemFile = Path.Combine(directory, "natureitems.csv");
                 string moveItemFile = Path.Combine(directory, "moveitems.csv");
+                string googleSheetsFile = Path.Combine(directory, "google_sheets_data.txt");
                 if (File.Exists(dexPath))
                 {
                     // First, retrieve all mons
@@ -208,8 +215,17 @@ namespace IndymonBackend
                 {
                     _allData.DataContainer.MoveItemData = ItemParser.ParseItemAndEffects(moveItemFile);
                 }
+                if (File.Exists(googleSheetsFile))
+                {
+                    string[] lines = File.ReadAllLines(googleSheetsFile);
+                    _allData.SheetId = lines[0];
+                    _allData.TrainerDataTab = lines[1];
+                    _allData.NpcDataTab = lines[2];
+                    _allData.NamedNpcDataTab = lines[3];
+                    _allData.TournamentDataTab = lines[4];
+                }
             }
-            _allData.DataContainer.MasterDirectory = directory;
+            _allData.MasterDirectory = directory;
         }
         /// <summary>
         /// Loads playable trainer data from google doc
@@ -217,8 +233,8 @@ namespace IndymonBackend
         private static void LoadTrainerData()
         {
             Console.WriteLine("Loading data from trainers");
-            string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
-            string tab = "1015902951";
+            string sheetId = _allData.SheetId;
+            string tab = _allData.TrainerDataTab;
             Dictionary<string, TrainerData> data = _allData.DataContainer.TrainerData;
             LoadTeamData(data, sheetId, tab);
         }
@@ -228,8 +244,8 @@ namespace IndymonBackend
         private static void LoadNpcData()
         {
             Console.WriteLine("Loading data from NPCs");
-            string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
-            string tab = "364323808";
+            string sheetId = _allData.SheetId;
+            string tab = _allData.NpcDataTab;
             Dictionary<string, TrainerData> data = _allData.DataContainer.NpcData;
             LoadTeamData(data, sheetId, tab);
         }
@@ -239,8 +255,8 @@ namespace IndymonBackend
         private static void LoadNamedNpcData()
         {
             Console.WriteLine("Loading data from Named NPCs");
-            string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
-            string tab = "43578104";
+            string sheetId = _allData.SheetId;
+            string tab = _allData.NamedNpcDataTab;
             Dictionary<string, TrainerData> data = _allData.DataContainer.NamedNpcData;
             LoadTeamData(data, sheetId, tab);
         }
@@ -354,8 +370,8 @@ namespace IndymonBackend
         /// </summary>
         private static void LoadTournamentHistory()
         {
-            string sheetId = "1-9T2xh10RirzTbSarbESU3rAJ2uweKoRoIyNlg0l31A";
-            string tab = "282272919";
+            string sheetId = _allData.SheetId;
+            string tab = _allData.TournamentDataTab;
             string url = $"https://docs.google.com/spreadsheets/d/{sheetId}/export?format=csv&gid={tab}";
             using HttpClient client = new HttpClient();
             string csv = client.GetStringAsync(url).GetAwaiter().GetResult();
@@ -368,14 +384,14 @@ namespace IndymonBackend
             for (int row = 2; row < rows.Length; row++)
             {
                 string[] cols = rows[row].Split(',');
-                string playerName = cols[4].Trim().ToLower(); // Contains player name
+                string playerName = cols[0].Trim().ToLower(); // Contains player name
                 PlayerAndStats nextPlayer = new PlayerAndStats();
                 nextPlayer.Name = playerName;
                 // Statistics...
-                nextPlayer.TournamentWins = int.Parse(cols[5]);
-                nextPlayer.TournamentsPlayed = int.Parse(cols[6]);
-                nextPlayer.Kills = int.Parse(cols[8]);
-                nextPlayer.Deaths = int.Parse(cols[9]);
+                nextPlayer.TournamentWins = int.Parse(cols[1]);
+                nextPlayer.TournamentsPlayed = int.Parse(cols[2]);
+                nextPlayer.Kills = int.Parse(cols[4]);
+                nextPlayer.Deaths = int.Parse(cols[5]);
                 // Finally add to the right place
                 if (_allData.DataContainer.TrainerData.ContainsKey(playerName)) // This was an actual player, add to correct array
                 {
@@ -395,7 +411,7 @@ namespace IndymonBackend
             {
                 int yOffset = 2; // 2nd row begins
                 string[] cols = rows[yOffset + row].Split(',');
-                int xOffset = 11; // Beginning of "vs trainer" data
+                int xOffset = 7; // Beginning of "vs trainer" data
                 PlayerAndStats thisPlayer = _allData.TournamentHistory.PlayerStats[row]; // Get player owner of this data
                 thisPlayer.EachMuWr = new Dictionary<string, IndividualMu>();
                 for (int col = 0; col < _allData.TournamentHistory.PlayerStats.Count; col++) // Check all players score first
@@ -407,7 +423,7 @@ namespace IndymonBackend
                     int losses = int.Parse(cols[xOffset + (3 * col) + 1]);
                     thisPlayer.EachMuWr.Add(oppName, new IndividualMu { Wins = wins, Losses = losses }); // Add this data to the stats
                 }
-                xOffset = 11 + (3 * _allData.TournamentHistory.PlayerStats.Count); // Offset to NPC data
+                xOffset = 7 + (3 * _allData.TournamentHistory.PlayerStats.Count); // Offset to NPC data
                 for (int col = 0; col < _allData.TournamentHistory.NpcStats.Count; col++) // Check NPC score now
                 {
                     // Get data for this opp

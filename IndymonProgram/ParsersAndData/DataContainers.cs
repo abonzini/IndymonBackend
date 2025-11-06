@@ -4,7 +4,6 @@ namespace ParsersAndData
 {
     public class DataContainers
     {
-        public string MasterDirectory = "";
         public Dictionary<string, Pokemon> Dex { get; set; } = null;
         public Dictionary<string, Dictionary<string, float>> TypeChart { get; set; } = null;
         public Dictionary<string, Move> MoveData { get; set; } = null;
