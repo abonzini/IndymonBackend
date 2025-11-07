@@ -49,7 +49,8 @@ namespace ShowdownBot
         /// <summary>
         /// Log in as specific trainer
         /// </summary>
-        /// <param name="trainer">Trainer class</param>
+        /// <param name="trainerName">Name to look in backend data</param>
+        /// <param name="backendData">Backend data (will be stored)</param>
         public void Login(string trainerName, DataContainers backendData)
         {
             if (CurrentState == BotState.CONNECTED)
