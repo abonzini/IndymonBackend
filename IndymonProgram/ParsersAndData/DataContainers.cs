@@ -307,15 +307,8 @@ namespace ParsersAndData
             // Shuffle teams and sets if auto-team
             if (AutoTeam)
             {
-                Random _rng = new Random();
                 // First, shuffle the mons
-                int n = Teamsheet.Count;
-                while (n > 1) // Fischer yates
-                {
-                    n--;
-                    int k = _rng.Next(n + 1);
-                    (Teamsheet[k], Teamsheet[n]) = (Teamsheet[n], Teamsheet[k]); // Swap
-                }
+                Utilities.ShuffleList(Teamsheet, 0, Teamsheet.Count);
                 // Then, for each mon, will randomize sets
                 for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
                 {
@@ -371,13 +364,7 @@ namespace ParsersAndData
                 }
                 // Then, shuffle all items
                 Random _rng = new Random();
-                int n = BattleItems.Count;
-                while (n > 1) // Fischer yates
-                {
-                    n--;
-                    int k = _rng.Next(n + 1);
-                    (BattleItems[k], BattleItems[n]) = (BattleItems[n], BattleItems[k]); // Swap
-                }
+                Utilities.ShuffleList(BattleItems, 0, BattleItems.Count, _rng);
                 for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
                 {
                     PokemonSet pokemonSet = Teamsheet[i];

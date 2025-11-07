@@ -314,14 +314,7 @@ namespace IndymonBackend
                 }
             }
             // Ok now shuffle everything
-            Random _rng = new Random();
-            int n = Participants.Count;
-            while (n > 1) // Fischer yates
-            {
-                n--;
-                int k = _rng.Next(n + 1);
-                (Participants[k], Participants[n]) = (Participants[n], Participants[k]); // Swap
-            }
+            Utilities.ShuffleList(Participants, 0, Participants.Count);
             // Seeding will involve putting the best first
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
@@ -396,13 +389,13 @@ namespace IndymonBackend
                 for (int i = 0; i < currentRound.Count; i++)
                 {
                     TournamentMatch match = currentRound[i];
+                    Console.SetCursorPosition(maxStringLength + 1, i + 1); // Put the cursor on the right, and starting from 1 (to avoid message string)
                     if (match.IsBye)
                     {
                         match.Winner = match.Player1;
                     }
                     else
                     {
-                        Console.SetCursorPosition(maxStringLength + 1, i + 1); // Put the cursor on the right, and starting from 1 (to avoid message string)
                         (int cursorX, int cursorY) = Console.GetCursorPosition(); // Just in case I need to write in same place
                         string scoreString = Console.ReadLine();
                         if (scoreString == "0")
@@ -753,14 +746,7 @@ namespace IndymonBackend
         public override void ShuffleWithSeeds(List<string> Seeds)
         {
             // Shuffle everything
-            Random _rng = new Random();
-            int n = Participants.Count;
-            while (n > 1) // Fischer yates
-            {
-                n--;
-                int k = _rng.Next(n + 1);
-                (Participants[k], Participants[n]) = (Participants[n], Participants[k]); // Swap
-            }
+            Utilities.ShuffleList(Participants, 0, Participants.Count);
             // Seeding in KOH means putting the best in the bottom
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
@@ -1083,13 +1069,7 @@ namespace IndymonBackend
         {
             // Shuffle everything
             Random _rng = new Random();
-            int n = Participants.Count;
-            while (n > 1) // Fischer yates
-            {
-                n--;
-                int k = _rng.Next(n + 1);
-                (Participants[k], Participants[n]) = (Participants[n], Participants[k]); // Swap
-            }
+            Utilities.ShuffleList(Participants, 0, Participants.Count, _rng);
             // Seeding will involve putting the best first
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
@@ -1104,13 +1084,7 @@ namespace IndymonBackend
             for (int tier = 0; tier < PlayersPerGroup; tier++)
             {
                 int pot = tier * NGroups; // Next pot is the next n players
-                n = NGroups;
-                while (n > 1) // Fischer yates
-                {
-                    n--;
-                    int k = _rng.Next(n + 1);
-                    (Participants[pot + k], Participants[pot + n]) = (Participants[pot + n], Participants[pot + k]); // Swap within pot
-                }
+                Utilities.ShuffleList(Participants, pot, NGroups, _rng);
             }
             // Finally, place in each position of group
             int participant = 0;
