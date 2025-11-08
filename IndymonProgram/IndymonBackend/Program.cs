@@ -163,6 +163,7 @@ namespace IndymonBackend
                 string natureItemFile = Path.Combine(directory, "natureitems.csv");
                 string moveItemFile = Path.Combine(directory, "moveitems.csv");
                 string googleSheetsFile = Path.Combine(directory, "google_sheets_data.txt");
+                string dungeonDirectory = Path.Combine(directory, "dungeons");
                 if (File.Exists(dexPath))
                 {
                     // First, retrieve all mons
@@ -223,6 +224,15 @@ namespace IndymonBackend
                     _allData.NpcDataTab = lines[2];
                     _allData.NamedNpcDataTab = lines[3];
                     _allData.TournamentDataTab = lines[4];
+                }
+                if (Directory.Exists(dungeonDirectory)) // Import all dungeon files and parse
+                {
+                    _allData.DataContainer.Dungeons = new Dictionary<string, Dungeon>();
+                    foreach (string file in Directory.EnumerateFiles(dungeonDirectory))
+                    {
+                        Dungeon nextDungeon = JsonConvert.DeserializeObject<Dungeon>(File.ReadAllText(file));
+                        _allData.DataContainer.Dungeons.Add(nextDungeon.Name, nextDungeon);
+                    }
                 }
             }
             _allData.MasterDirectory = directory;

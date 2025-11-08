@@ -1,4 +1,5 @@
 For game proper:
-7 - SHEET: Create exploration section backend, define rares, commons, mons for each floor, boss and obstacles+text
-7 - Load exploration section from sheets, insert into new data structure.
-7 - Generate exploration command. Select player and location (numbers). Will choose 6mon each stage with non-ai moves/ability. Item prizes accordingly. Simulate expl
+7 - Generate exploration command. Select player and location (numbers). Then, starts generating resulting rooms, one by one evaluates and prints what is going on (debug style)
+7 - For battles, generates random enemy team and applies items also randomly, don't give a shit
+7 - Then animation stage, goes bit by bit, prints in game style
+7 - And finally an exploration follow up stage where it picks up without resetting mons 

@@ -195,7 +195,7 @@ namespace IndymonBackend
                 else if (_backEndData.NpcData.ContainsKey(participantName)) participant = _backEndData.NpcData[participantName];
                 else if (_backEndData.NamedNpcData.ContainsKey(participantName)) participant = _backEndData.NamedNpcData[participantName];
                 else throw new Exception("Trainer not found!?");
-                participant.DefineSets(_backEndData, OngoingTournament.NMons); // Gets the team for everyone
+                participant.DefineSets(_backEndData, OngoingTournament.NMons, true, false); // Gets the team for everyone
             }
             // Finally, ready to save the pokepaste
         }

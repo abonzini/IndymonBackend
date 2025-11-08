@@ -1,0 +1,70 @@
+{
+  "Name": "Meadows",
+  "GoesDownwards": false,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "This is text before",
+      "PostEventString": "This is text after"
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Mon1",
+		"Mon2"
+	]
+  ],
+  "CommonItems": [
+    "item1",
+	"item2"
+  ],
+  "RareItems": [
+    "item1",
+    "item2"
+  ],
+  "Floors": [
+    {
+      "RoomColor": "White",
+      "NeCornerTile": "\u0000",
+      "NwCornerTile": "\u0000",
+      "SeCornerTile": "\u0000",
+      "SwCornerTile": "\u0000",
+      "EWallTile": "\u0000",
+      "WWallTile": "\u0000",
+      "NWallTile": "\u0000",
+      "SWallTile": "\u0000",
+      "PassageColor": "White",
+      "NePassageTile": "\u0000",
+      "NwPassageTile": "\u0000",
+      "SePassageTile": "\u0000",
+      "SwPassageTile": "\u0000",
+      "HorizontalPassageTile": "\u0000",
+      "VerticalPassageTile": "\u0000",
+      "ShortcutColor": "White",
+      "NeShortcutTile": "\u0000",
+      "NwShortcutTile": "\u0000",
+      "SeShortcutTile": "\u0000",
+      "SwShortcutTile": "\u0000",
+      "HorizontalShortcutTile": "\u0000",
+      "VerticalShortcutTile": "\u0000",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": ""
+		}
+	  ]
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "Boss thing",
+    "PostEventString": "End of boss thing"
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "Boss thing",
+    "PostEventString": "End of boss thing"
+  },
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

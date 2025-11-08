@@ -16,6 +16,7 @@ namespace ParsersAndData
         public Dictionary<string, TrainerData> TrainerData { get; set; } = new Dictionary<string, TrainerData>();
         public Dictionary<string, TrainerData> NpcData { get; set; } = new Dictionary<string, TrainerData>();
         public Dictionary<string, TrainerData> NamedNpcData { get; set; } = new Dictionary<string, TrainerData>();
+        public Dictionary<string, Dungeon> Dungeons { get; set; } = new Dictionary<string, Dungeon>();
     }
     public class Item
     {
@@ -34,7 +35,7 @@ namespace ParsersAndData
         {
             if (status.ToLower() == "0 fnt")
             {
-                HealthPercentage = 0;
+                HealthPercentage = 1; // Would be cool to res mons at 1% no matter what
                 NonVolatileStatus = "";
             }
             else
@@ -301,7 +302,9 @@ namespace ParsersAndData
         /// </summary>
         /// <param name="backEndData"></param>
         /// <param name="nMons">How many mons to perform this operation on</param>
-        public void DefineSets(DataContainers backEndData, int nMons)
+        /// <param name="smart">Whether pokemon are smart (use ai banlist)</param>
+        /// <param name="exploration">Whether pokemon need to be initialized as part of an exploration (with hp and status)</param>
+        public void DefineSets(DataContainers backEndData, int nMons, bool smart, bool exploration)
         {
             Console.WriteLine($"\tChecking {Name}'s team");
             // Shuffle teams and sets if auto-team
@@ -318,7 +321,7 @@ namespace ParsersAndData
                     while (!acceptedMon)
                     {
                         // Randomize mon, with a 7% chance of each move being empty (1->18%, 2->1.3%, 3->0.003%)
-                        pokemonSet.RandomizeMon(backEndData, true, 7); // Randomize mon
+                        pokemonSet.RandomizeMon(backEndData, smart, 7); // Randomize mon
                         // Show it to user, user will decide if redo or revise (banning sets for the future)
                         Console.WriteLine($"\t\tSet for {pokemonSet.ToString()}");
                         Console.WriteLine("\t\tTo modify AI for future: 5: ban ability. 1-4 ban moves. Otherwise this mon is approved. 0 to reroll the whole thing");
@@ -347,6 +350,7 @@ namespace ParsersAndData
                                 break;
                         }
                     }
+                    pokemonSet.ExplorationStatus = exploration ? new ExplorationStatus() : null;
                 }
             }
             // Shuffle items if auto-item
