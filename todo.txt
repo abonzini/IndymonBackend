@@ -1,6 +1,4 @@
 For game proper:
-Refactor: bot to take team instead
-Refactor: tournament to unify some things
 7 - SHEET: Create exploration section backend, define rares, commons, mons for each floor, boss and obstacles+text
 7 - Load exploration section from sheets, insert into new data structure.
 7 - Generate exploration command. Select player and location (numbers). Will choose 6mon each stage with non-ai moves/ability. Item prizes accordingly. Simulate expl

@@ -32,6 +32,10 @@ namespace ShowdownBot
         public int BotRemainingMons;
         GameState _currentGameState;
         public string Challenger;
+        public BasicShowdownBot(DataContainers backend)
+        {
+            _backend = backend;
+        }
         /// <summary>
         /// Tries to establish connection to localhost:8000 server and get all i need to actually log in
         /// </summary>
@@ -49,18 +53,12 @@ namespace ShowdownBot
         /// <summary>
         /// Log in as specific trainer
         /// </summary>
-        /// <param name="trainerName">Name to look in backend data</param>
-        /// <param name="backendData">Backend data (will be stored)</param>
-        public void Login(string trainerName, DataContainers backendData)
+        /// <param name="trainer">All data for the trainer who will fight</param>
+        public void Login(TrainerData trainer)
         {
             if (CurrentState == BotState.CONNECTED)
             {
-                // Fetch trainer and stuff
-                _backend = backendData;
-                if (_backend.TrainerData.ContainsKey(trainerName)) _botTrainer = _backend.TrainerData[trainerName];
-                else if (_backend.NpcData.ContainsKey(trainerName)) _botTrainer = _backend.NpcData[trainerName];
-                else if (_backend.NamedNpcData.ContainsKey(trainerName)) _botTrainer = _backend.NamedNpcData[trainerName];
-                else throw new Exception("Trainer not found!?");
+                _botTrainer = trainer;
                 BotName = $"Indy_{_botTrainer.Name}";
                 // Ok try and connect
                 HttpClient client = new HttpClient(); // One use client to get assertion

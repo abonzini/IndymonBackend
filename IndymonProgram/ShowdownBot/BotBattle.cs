@@ -15,13 +15,14 @@ namespace ShowdownBot
         /// </summary>
         /// <param name="player1">Who's the player 1?</param>
         /// <param name="player2">Who's player 2?</param>
-        /// <param name="nMons">How many mons per side?</param>
+        /// <param name="nMons1">Number of mons in first player team</param>
+        /// <param name="nMons2">Number of mons in second player team</param>
         /// <returns>The score</returns>
-        public (int, int) SimulateBotBattle(string player1, string player2, int nMons1, int nMons2)
+        public (int, int) SimulateBotBattle(TrainerData player1, TrainerData player2, int nMons1, int nMons2)
         {
-            BasicShowdownBot acceptBot = new BasicShowdownBot();
+            BasicShowdownBot acceptBot = new BasicShowdownBot(_backend);
             acceptBot.Verbose = false;
-            BasicShowdownBot challengeBot = new BasicShowdownBot();
+            BasicShowdownBot challengeBot = new BasicShowdownBot(_backend);
             challengeBot.Verbose = false;
             acceptBot.EstablishConnection();
             challengeBot.EstablishConnection();
@@ -29,8 +30,8 @@ namespace ShowdownBot
             {
                 Thread.Sleep(5); // Wait until connected
             }
-            acceptBot.Login(player1, _backend);
-            challengeBot.Login(player2, _backend);
+            acceptBot.Login(player1);
+            challengeBot.Login(player2);
             // Wait until ok
             while ((acceptBot.GetState() != BotState.PROFILE_INITIALISED) || (challengeBot.GetState() != BotState.PROFILE_INITIALISED))
             {
@@ -56,17 +57,17 @@ namespace ShowdownBot
         /// </summary>
         /// <param name="player1">Bot player</param>
         /// <param name="nMons1">Number of mons</param>
-        /// <returns></returns>
-        public int SimulateBotBattle(string player1, int nMons1)
+        /// <returns>This bot score</returns>
+        public int SimulateBotBattle(TrainerData player1, int nMons1)
         {
-            BasicShowdownBot acceptBot = new BasicShowdownBot();
+            BasicShowdownBot acceptBot = new BasicShowdownBot(_backend);
             acceptBot.Verbose = false;
             acceptBot.EstablishConnection();
             while ((acceptBot.GetState() != BotState.CONNECTED))
             {
                 Thread.Sleep(5); // Wait until connected
             }
-            acceptBot.Login(player1, _backend);
+            acceptBot.Login(player1);
             // Wait until ok
             while ((acceptBot.GetState() != BotState.PROFILE_INITIALISED))
             {
