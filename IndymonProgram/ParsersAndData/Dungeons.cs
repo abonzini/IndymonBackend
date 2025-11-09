@@ -6,6 +6,7 @@ namespace ParsersAndData
     [JsonConverter(typeof(StringEnumConverter))]
     public enum RoomEventType
     {
+        POKEMON_BATTLE, // Normal found in pokemon room lol
         CAMPING, // Break room/camping
         TREASURE, // Player gets a treasure from rare item pool
         ALPHA, // Mon from 1 floor above holding rare item
@@ -26,6 +27,11 @@ namespace ParsersAndData
         public RoomEventType EventType { get; set; }
         public string PreEventString { get; set; }
         public string PostEventString { get; set; }
+        public string SpecialParams { get; set; }
+        public override string ToString()
+        {
+            return EventType.ToString();
+        }
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum ShortcutConditionType
@@ -54,13 +60,16 @@ namespace ParsersAndData
         public char WWallTile { get; set; }
         public char NWallTile { get; set; }
         public char SWallTile { get; set; }
+        public char EWallPassageTile { get; set; }
+        public char WWallPassageTile { get; set; }
+        public char NWallPassageTile { get; set; }
+        public char SWallPassageTile { get; set; }
+        public char EWallShortcutTile { get; set; }
+        public char WWallShortcutTile { get; set; }
+        public char NWallShortcutTile { get; set; }
+        public char SWallShortcutTile { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
         public ConsoleColor PassageColor { get; set; } = ConsoleColor.White;
-        public char NePassageTile { get; set; }
-        public char NwPassageTile { get; set; }
-        public char SePassageTile { get; set; }
-        public char SwPassageTile { get; set; }
-        public char HorizontalPassageTile { get; set; }
         public char VerticalPassageTile { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
         public ConsoleColor ShortcutColor { get; set; } = ConsoleColor.White;
@@ -71,6 +80,8 @@ namespace ParsersAndData
         public char HorizontalShortcutTile { get; set; }
         public char VerticalShortcutTile { get; set; }
         public List<ShortcutCondition> ShortcutConditions { get; set; } = new List<ShortcutCondition>();
+        public string ShortcutClue { get; set; }
+        public string ShortcutResolution { get; set; }
     }
     public class Dungeon
     {
@@ -85,5 +96,9 @@ namespace ParsersAndData
         public RoomEvent CampingEvent { get; set; }
         public string NextDungeon { get; set; }
         public string NextDungeonShortcut { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

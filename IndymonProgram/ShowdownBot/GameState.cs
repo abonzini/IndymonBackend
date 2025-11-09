@@ -32,12 +32,13 @@
             }
             return result;
         }
-        public List<string> GetValidSwitchIns() // What pokemon can I switch to
+        public List<int> GetValidSwitchIns() // What pokemon can I switch to
         {
-            List<string> switchIns = new List<string>();
-            foreach (SidePokemon option in pokemon)
+            List<int> switchIns = new List<int>();
+            for (int i = 0; i < pokemon.Count; i++)
             {
-                if (option.IsValidSwitchIn()) switchIns.Add(option.details);
+                SidePokemon option = pokemon[i];
+                if (option.IsValidSwitchIn()) switchIns.Add(i + 1);
             }
             return switchIns;
         }

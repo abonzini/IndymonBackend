@@ -30,8 +30,8 @@ namespace ShowdownBot
             {
                 Thread.Sleep(5); // Wait until connected
             }
-            acceptBot.Login(player1);
-            challengeBot.Login(player2);
+            challengeBot.Login(player1);
+            acceptBot.Login(player2);
             // Wait until ok
             while ((acceptBot.GetState() != BotState.PROFILE_INITIALISED) || (challengeBot.GetState() != BotState.PROFILE_INITIALISED))
             {
@@ -39,18 +39,18 @@ namespace ShowdownBot
             }
             // Now I challenge
             Thread.Sleep(10);
-            challengeBot.Challenge(acceptBot.BotName, "Custom Game", nMons2);
+            challengeBot.Challenge(acceptBot.BotName, "Custom Game", nMons1);
             while ((acceptBot.GetState() != BotState.GAME_DONE) || (challengeBot.GetState() != BotState.GAME_DONE))
             {
                 if (acceptBot.GetState() == BotState.BEING_CHALLENGED)
                 {
-                    acceptBot.AcceptChallenge(acceptBot.Challenger, nMons1);
+                    acceptBot.AcceptChallenge(acceptBot.Challenger, nMons2);
                     // And that's it, they'll playe
                 }
                 Thread.Sleep(5);
             }
             // Game's done
-            return (acceptBot.BotRemainingMons, challengeBot.BotRemainingMons);
+            return (challengeBot.BotRemainingMons, acceptBot.BotRemainingMons);
         }
         /// <summary>
         /// Acceptbattle bot that battles against me

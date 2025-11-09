@@ -94,6 +94,9 @@ namespace IndymonBackend
                         _allData.ExplorationManager = new ExplorationManager(_allData.DataContainer);
                         _allData.ExplorationManager.InitializeExploration();
                         break;
+                    case "8":
+                        _allData.ExplorationManager.ExecuteExploration();
+                        break;
                     default:
                         break;
                 }
@@ -157,6 +160,10 @@ namespace IndymonBackend
                 if (_allData.TournamentManager != null)
                 {
                     _allData.TournamentManager.SetBackEndData(_allData.DataContainer, _allData.TournamentHistory);
+                }
+                if (_allData.ExplorationManager != null)
+                {
+                    _allData.ExplorationManager.SetBackEndData(_allData.DataContainer);
                 }
             }
             else

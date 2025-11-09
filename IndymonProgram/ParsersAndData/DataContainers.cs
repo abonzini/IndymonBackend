@@ -253,7 +253,7 @@ namespace ParsersAndData
         {
             // First, keep in mind it may have a move-altering item
             List<string> setMoves = [.. Moves];
-            if (backEndData.MoveItemData.TryGetValue(Item.Name, out HashSet<string> overritenMoves))
+            if ((Item != null) && (backEndData.MoveItemData.TryGetValue(Item.Name, out HashSet<string> overritenMoves)))
             {
                 int moveSlot = 3; // Start with last
                 foreach (string newMove in overritenMoves)

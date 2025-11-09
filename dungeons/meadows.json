@@ -1,69 +1,209 @@
 {
-  "Name": "Meadows",
-  "GoesDownwards": false,
+  "Name": "Mini Meadows",
+  "GoesDownwards": true,
   "Events": [
     {
       "EventType": "TREASURE",
-      "PreEventString": "This is text before",
-      "PostEventString": "This is text after"
+      "PreEventString": "While walking, you stumble upon $1 on the ground.",
+      "PostEventString": "You pick it up and continue on your way."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "A mighty $1 is trashing around and blocking your way!",
+      "PostEventString": "After defeating the wild Pokemon, you pick up the $1 it was holding."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "In the middle of a field, you find a giant glowing crystal. Suddenly, you hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "The crystal has an offering altar, where you may put an item. What will you do?"
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "You find a stream. You and your Pokemon decide to rest for a while.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "You find a stream. You and your Pokemon decide to rest for a while.",
+      "PostEventString": "Your Pokemon have recovered from their status conditions."
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "In the distance, you find a lonely $1... Its family has left it behind...",
+      "PostEventString": "After seeing you, he wants to join you and your team!"
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "You see a rising cloud of dust in the distance. The cloud is getting closer and closer...",
+      "PostEventString": "Before you can move out of the way, your team is struck by a Tauros stampede! Everyone got injured."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "You try to help an injured Vulpix, but it gets scared and uses Will-O-Wisp before running away.",
+      "PostEventString": "You wish you had burn heal...",
+	  "SpecialParams": "brn"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "You've been challenged by a trainer, who wants to participate in an unsanctioned Pokemon battle!",
+      "PostEventString": "So annoying... If you wanted a trainer battle you could've participated in a tournament."
+    },
+	{
+      "EventType": "ARCHAEOLOGIST",
+      "PreEventString": "An member of the Pokemon Research Society is busy exploring some stool samples.",
+      "PostEventString": "''Can't you see I'm busy?'' They say, they give you a plate they found on the ground, and send you on your way."
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "In the mud, you find an old backpack. It has the P logo, from team Paradox.",
+      "PostEventString": "Theres no ID inside, but you find an old TR Disk."
     }
   ],
   "PokemonEachFloor": [
 	[
-		"Mon1",
-		"Mon2"
+		"Growlithe",
+		"Blitzle"
+	],
+	[
+		"Tauros",
+		"Girafarig"
+	],
+	[
+		"Arcanine",
+		"Staraptor"
+	],
+	[
+		"Raikou",
+		"Entei"
 	]
   ],
   "CommonItems": [
-    "item1",
-	"item2"
+    "Lonely Mint",
+	"Calm Mint"
   ],
   "RareItems": [
-    "item1",
-    "item2"
+    "White Herb",
+    "Power Herb"
   ],
   "Floors": [
     {
-      "RoomColor": "White",
-      "NeCornerTile": "\u0000",
-      "NwCornerTile": "\u0000",
-      "SeCornerTile": "\u0000",
-      "SwCornerTile": "\u0000",
-      "EWallTile": "\u0000",
-      "WWallTile": "\u0000",
-      "NWallTile": "\u0000",
-      "SWallTile": "\u0000",
-      "PassageColor": "White",
-      "NePassageTile": "\u0000",
-      "NwPassageTile": "\u0000",
-      "SePassageTile": "\u0000",
-      "SwPassageTile": "\u0000",
-      "HorizontalPassageTile": "\u0000",
-      "VerticalPassageTile": "\u0000",
-      "ShortcutColor": "White",
-      "NeShortcutTile": "\u0000",
-      "NwShortcutTile": "\u0000",
-      "SeShortcutTile": "\u0000",
-      "SwShortcutTile": "\u0000",
-      "HorizontalShortcutTile": "\u0000",
-      "VerticalShortcutTile": "\u0000",
+      "RoomColor": "DarkGreen",
+      "NeCornerTile": "▒",
+      "NwCornerTile": "▒",
+      "SeCornerTile": "▒",
+      "SwCornerTile": "▒",
+      "EWallTile": "▒",
+      "WWallTile": "▒",
+      "NWallTile": "▒",
+      "SWallTile": "▒",
+	  "EWallPassageTile": "▒",
+      "WWallPassageTile": "▒",
+      "NWallPassageTile": "▒",
+      "SWallPassageTile": "▒",
+	  "EWallShortcutTile": "▒",
+      "WWallShortcutTile": "▒",
+      "NWallShortcutTile": "▒",
+      "SWallShortcutTile": "▒",
+      "PassageColor": "DarkGreen",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "DarkGray",
+      "NeShortcutTile": "●",
+      "NwShortcutTile": "●",
+      "SeShortcutTile": "●",
+      "SwShortcutTile": "●",
+      "HorizontalShortcutTile": "●",
+      "VerticalShortcutTile": "●",
 	  "ShortcutConditions": [
 		{
 				"ConditionType": "MOVE",
-				"Which": ""
+				"Which": "Strength"
 		}
-	  ]
+	  ],
+	  "ShortcutClue": "You see a boulder blocking a natural passage.",
+	  "ShortcutResolution": "You used it's strength to move the boulder away, and find a ramp that leads you downhill."
+    },
+	{
+      "RoomColor": "Yellow",
+      "NeCornerTile": "▒",
+      "NwCornerTile": "▒",
+      "SeCornerTile": "▒",
+      "SwCornerTile": "▒",
+      "EWallTile": "▒",
+      "WWallTile": "▒",
+      "NWallTile": "▒",
+      "SWallTile": "▒",
+	  "EWallPassageTile": "▒",
+      "WWallPassageTile": "▒",
+      "NWallPassageTile": "▒",
+      "SWallPassageTile": "▒",
+	  "EWallShortcutTile": "▒",
+      "WWallShortcutTile": "▒",
+      "NWallShortcutTile": "▒",
+      "SWallShortcutTile": "▒",
+      "PassageColor": "Green",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "DarkYellow",
+      "NeShortcutTile": "=",
+      "NwShortcutTile": "=",
+      "SeShortcutTile": "=",
+      "SwShortcutTile": "=",
+      "HorizontalShortcutTile": "|",
+      "VerticalShortcutTile": "=",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": "Bulldoze"
+		}
+	  ],
+	  "ShortcutClue": "As the landscape becomes more dry, you start seeing piles of mud and debris which could be opened up to find a shortcut.",
+	  "ShortcutResolution": "Your Pokemon bulldozed through the debris. The path is clear now."
+    },
+	{
+      "RoomColor": "Green",
+      "NeCornerTile": "▒",
+      "NwCornerTile": "▒",
+      "SeCornerTile": "▒",
+      "SwCornerTile": "▒",
+      "EWallTile": "▒",
+      "WWallTile": "▒",
+      "NWallTile": "▒",
+      "SWallTile": "▒",
+	  "EWallPassageTile": "▒",
+      "WWallPassageTile": "▒",
+      "NWallPassageTile": "▒",
+      "SWallPassageTile": "▒",
+	  "EWallShortcutTile": "▒",
+      "WWallShortcutTile": "▒",
+      "NWallShortcutTile": "▒",
+      "SWallShortcutTile": "▒",
+      "PassageColor": "Green",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "Yellow",
+      "NeShortcutTile": "⁂",
+      "NwShortcutTile": "⁂",
+      "SeShortcutTile": "⁂",
+      "SwShortcutTile": "⁂",
+      "HorizontalShortcutTile": "⁂",
+      "VerticalShortcutTile": "⁂",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": "Water Sport"
+		}
+	  ],
+	  "ShortcutClue": "There's a lot of suspended dust and sand, doesn't let you see the way ahead.",
+	  "ShortcutResolution": "You and your team used water spray to lower the amount of dust in the air, the way is clear."
     }
   ],
   "BossEvent": {
     "EventType": "BOSS",
-    "PreEventString": "Boss thing",
-    "PostEventString": "End of boss thing"
+    "PreEventString": "Before you stands a mighty creature. The alpha of the meadows. You'll need to face it to continue.",
+    "PostEventString": "You've beaten the legendary Pokemon, the way ahead is clear."
   },
   "CampingEvent": {
     "EventType": "CAMPING",
-    "PreEventString": "Boss thing",
-    "PostEventString": "End of boss thing"
+    "PreEventString": "The sun is shining and there's a gentle breeze. A perfect place for a picnic.",
+    "PostEventString": "But now it's time to move on..."
   },
   "NextDungeon": "",
   "NextDungeonShortcut": ""

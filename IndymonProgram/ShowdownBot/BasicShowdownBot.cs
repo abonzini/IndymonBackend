@@ -59,7 +59,12 @@ namespace ShowdownBot
             if (CurrentState == BotState.CONNECTED)
             {
                 _botTrainer = trainer;
-                BotName = $"Indy_{_botTrainer.Name}";
+
+                BotName = $"Indy{_botTrainer.Name}".Replace(" ", "");
+                if (BotName.Length > 19) // Sanitize, name has to be shorter than 19 and no spaces
+                {
+                    BotName = BotName.Substring(0, 19).Trim();
+                }
                 // Ok try and connect
                 HttpClient client = new HttpClient(); // One use client to get assertion
                 string url = $"https://play.pokemonshowdown.com/~~showdown/action.php?act=getassertion&userid={BotName}&challstr={_challstr}";
@@ -249,12 +254,12 @@ namespace ShowdownBot
                     {
                         if (!playOptions.trapped) // But only can if not trapped
                         {
-                            List<string> switchIns = _currentGameState.side.GetValidSwitchIns();
+                            List<int> switchIns = _currentGameState.side.GetValidSwitchIns();
                             if (switchIns.Count > 0) // Can switch then, so theres a valid move
                             {
                                 int switchChoice = _rng.Next(0, switchIns.Count);
-                                string switchInMon = switchIns[switchChoice].Split(",")[0];
-                                command = $"{battle}|/choose switch {switchInMon}"; // Switch to random mon
+                                int switchedInMon = switchIns[switchChoice];
+                                command = $"{battle}|/choose switch {switchedInMon}"; // Switch to random mon
                                 invalidChoice = false; // Move valid after all
                             }
                         }
