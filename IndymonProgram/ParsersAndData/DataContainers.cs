@@ -47,6 +47,10 @@ namespace ParsersAndData
                 NonVolatileStatus = (splitStatus.Length == 2) ? splitStatus[1] : "";
             }
         }
+        public override string ToString()
+        {
+            return $"{HealthPercentage}% {NonVolatileStatus}";
+        }
     }
     public class PokemonSet
     {
@@ -350,7 +354,6 @@ namespace ParsersAndData
                                 break;
                         }
                     }
-                    pokemonSet.ExplorationStatus = exploration ? new ExplorationStatus() : null;
                 }
             }
             // Shuffle items if auto-item
@@ -460,10 +463,11 @@ namespace ParsersAndData
                     }
                 }
             }
-            // Finally, just print all
+            // Finally, just print all and define some extra stuff needed regardless of auto-
             for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
             {
                 PokemonSet mon = Teamsheet[i];
+                mon.ExplorationStatus = exploration ? new ExplorationStatus() : null;
                 Console.WriteLine($"\t\tSet for {mon.ToString()}");
                 Console.WriteLine("");
             }

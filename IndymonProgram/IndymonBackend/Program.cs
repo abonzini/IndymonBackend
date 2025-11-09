@@ -8,6 +8,7 @@ namespace IndymonBackend
         public DataContainers DataContainer { get; set; }
         public TournamentManager TournamentManager { get; set; }
         public TournamentHistory TournamentHistory { get; set; }
+        public ExplorationManager ExplorationManager { get; set; }
         public string MasterDirectory { get; set; }
         public string SheetId { get; set; }
         public string TrainerDataTab { get; set; }
@@ -89,6 +90,10 @@ namespace IndymonBackend
                     case "6":
                         _allData.TournamentManager.FinaliseTournament();
                         break;
+                    case "7":
+                        _allData.ExplorationManager = new ExplorationManager(_allData.DataContainer);
+                        _allData.ExplorationManager.InitializeExploration();
+                        break;
                     default:
                         break;
                 }
@@ -110,6 +115,8 @@ namespace IndymonBackend
             if (_allData.DataContainer.TeraItemData == null) Console.WriteLine("WARNING: Tera item data not initialised yet");
             if (_allData.DataContainer.EvItemData == null) Console.WriteLine("WARNING: Ev item data not initialised yet");
             if (_allData.DataContainer.NatureItemData == null) Console.WriteLine("WARNING: Nature item data not initialised yet");
+            if (_allData.DataContainer.MoveItemData == null) Console.WriteLine("WARNING: Move item data not initialised yet");
+            if (_allData.DataContainer.Dungeons == null) Console.WriteLine("WARNING: Dungeon data not initialised yet");
             Console.ResetColor();
         }
         /// <summary>
@@ -124,7 +131,10 @@ namespace IndymonBackend
                 "4 - Update tournament participant's team sheets\n" +
                 "5 - Input tournament data\n" +
                 "6 - Finalize tournament. Animation + export new tournament data\n" +
-                "7 - Generate exploration results\n"
+                "7 - Generate exploration, choose place, player, etc\n" +
+                "8 - Simulate current exploration\n" +
+                "9 - Animate resolved exploration\n" +
+                "10 - Resolve finished exploration (if needed, e.g. move to next dungeon)\n"
                 );
         }
         /// <summary>
@@ -227,6 +237,7 @@ namespace IndymonBackend
                 }
                 if (Directory.Exists(dungeonDirectory)) // Import all dungeon files and parse
                 {
+                    Console.WriteLine("Loading dungeon data");
                     _allData.DataContainer.Dungeons = new Dictionary<string, Dungeon>();
                     foreach (string file in Directory.EnumerateFiles(dungeonDirectory))
                     {

@@ -1,5 +1,5 @@
 For game proper:
-7 - Generate exploration command. Select player and location (numbers). Then, starts generating resulting rooms, one by one evaluates and prints what is going on (debug style)
-7 - For battles, generates random enemy team and applies items also randomly, don't give a shit
-7 - Then animation stage, goes bit by bit, prints in game style
-7 - And finally an exploration follow up stage where it picks up without resetting mons 
+8 - Starts generating resulting rooms, one by one evaluates and prints what is going on (debug style)
+8 - For battles, generates random enemy team and applies items also randomly, don't give a shit
+9 - Then animation stage, goes bit by bit, prints in game style
+10 - And finally an exploration follow up stage where it picks up without resetting mons 

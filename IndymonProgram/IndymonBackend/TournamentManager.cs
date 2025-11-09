@@ -186,7 +186,7 @@ namespace IndymonBackend
             OngoingTournament.ShuffleWithSeeds(Seeds);
             // Reset the tournament if one was already in progress
             OngoingTournament.ResetTournament();
-            // Ok not bad, next step is to update participant team sheet if needed, and generate the import pokepaste
+            // Ok not bad, next step is to update participant team sheet if needed
             foreach (string participantName in OngoingTournament.Participants)
             {
                 // Try to find the participant
@@ -197,7 +197,6 @@ namespace IndymonBackend
                 else throw new Exception("Trainer not found!?");
                 participant.DefineSets(_backEndData, OngoingTournament.NMons, true, false); // Gets the team for everyone
             }
-            // Finally, ready to save the pokepaste
         }
         /// <summary>
         /// Starts the tourn proper, will ask for input of scores
