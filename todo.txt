@@ -1,4 +1,0 @@
-For game proper:
-Debug 8 a bit more
-9 - Then animation stage, goes bit by bit, prints in game style
-10 - And finally an exploration follow up stage where it picks up without resetting mons 

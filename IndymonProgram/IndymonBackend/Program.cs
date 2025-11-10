@@ -27,7 +27,9 @@ namespace IndymonBackend
         {
             string FILE_NAME = "indy.mon";
             string TOURN_CSV = "tournament_stats.csv";
-            Console.WriteLine("Indymon manager program");
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Indymon manager program ☺");
             Console.CursorVisible = false;
             if (args.Length == 0) // File not included, need to ask for it
             {
@@ -48,6 +50,7 @@ namespace IndymonBackend
             string InputString;
             do
             {
+                Console.ForegroundColor = ConsoleColor.White;
                 PrintWarnings();
                 MainMenuInstructions();
                 InputString = Console.ReadLine();
@@ -97,6 +100,21 @@ namespace IndymonBackend
                     case "8":
                         _allData.ExplorationManager.ExecuteExploration();
                         break;
+                    case "9":
+                        _allData.ExplorationManager.AnimateExploration();
+                        break;
+                    case "10":
+                        if (_allData.ExplorationManager.NextDungeon != "")
+                        {
+                            _allData.ExplorationManager.InitializeNextDungeon();
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("ERROR. Can't do next dungeon because there isn't any!");
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -127,6 +145,7 @@ namespace IndymonBackend
         /// </summary>
         static void MainMenuInstructions()
         {
+            Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("0 - Save to indy.mon\n" +
                 "1 - Load mechanics data from folder\n" +
                 "2 - Fetch trainer data and tournament history from online sheet\n" +

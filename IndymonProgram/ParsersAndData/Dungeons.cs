@@ -52,10 +52,10 @@ namespace ParsersAndData
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public ConsoleColor RoomColor { get; set; } = ConsoleColor.White;
-        public char NeCornerTile { get; set; }
-        public char NwCornerTile { get; set; }
-        public char SeCornerTile { get; set; }
-        public char SwCornerTile { get; set; }
+        public char NeWallTile { get; set; }
+        public char NwWallTile { get; set; }
+        public char SeWallTile { get; set; }
+        public char SwWallTile { get; set; }
         public char EWallTile { get; set; }
         public char WWallTile { get; set; }
         public char NWallTile { get; set; }
@@ -64,8 +64,6 @@ namespace ParsersAndData
         public char WWallPassageTile { get; set; }
         public char NWallPassageTile { get; set; }
         public char SWallPassageTile { get; set; }
-        public char EWallShortcutTile { get; set; }
-        public char WWallShortcutTile { get; set; }
         public char NWallShortcutTile { get; set; }
         public char SWallShortcutTile { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]

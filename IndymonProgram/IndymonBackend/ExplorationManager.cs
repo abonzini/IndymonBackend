@@ -3,7 +3,7 @@ using ShowdownBot;
 
 namespace IndymonBackend
 {
-    public enum ExplorationCommandOptions
+    public enum ExplorationStepType
     {
         NOP, // No operation, just a pause
         PRINT_STRING,
@@ -20,17 +20,17 @@ namespace IndymonBackend
         WEST,
         EAST
     }
-    public class ExplorationCommands // All needed to make an animation
+    public class ExplorationStep // All needed to make an animation
     {
-        public ExplorationCommandOptions Command { get; set; } // Which command
+        public ExplorationStepType Type { get; set; } // Which command
         public string Message { get; set; } // For printing string
         public string Param1 { get; set; } // Strings containing $1 will be replaced by this
-        public (int, int) CoordSourceRoom { get; set; } // Coord of the source room when moving
-        public (int, int) CoordDestRoom { get; set; } // Coord of destination room when moving
+        public (int, int) SourceCoord { get; set; } // Coord of the source room when moving
+        public (int, int) DestCoord { get; set; } // Coord of destination room when moving
         public int MillisecondsWait { get; set; }
         public override string ToString()
         {
-            return Command.ToString();
+            return Type.ToString();
         }
     }
     public class ExplorationManager
@@ -41,7 +41,7 @@ namespace IndymonBackend
         public string Trainer { get; set; }
         public string NextDungeon { get; set; }
         public bool ExplorationFinished { get; set; } = false;
-        public List<ExplorationCommands> Commands { get; set; }
+        public List<ExplorationStep> ExplorationSteps { get; set; }
         Dungeon _dungeonDetails = null;
         public ExplorationManager(DataContainers backEndData)
         {
@@ -57,7 +57,7 @@ namespace IndymonBackend
         }
         public void InitializeExploration()
         {
-            Commands = new List<ExplorationCommands>(); // Start from scratch!
+            ExplorationSteps = new List<ExplorationStep>(); // Start from scratch!
             // First ask organizer to choose dungeon
             List<string> options = _backEndData.Dungeons.Keys.ToList();
             Console.WriteLine("Creating a brand new exploration, which dungeon?");
@@ -79,6 +79,13 @@ namespace IndymonBackend
             TrainerData trainerData = _backEndData.TrainerData[Trainer];
             trainerData.DefineSets(_backEndData, int.MaxValue, true, true); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status)
         }
+        public void InitializeNextDungeon()
+        {
+            if (NextDungeon == "") throw new Exception("NO NEXT DUNGEON!");
+            ExplorationSteps = new List<ExplorationStep>();
+            Dungeon = NextDungeon;
+            // Keep trainer as is
+        }
         class ExplorationPrizes
         {
             public Dictionary<string, int>[] MonsFound =
@@ -96,6 +103,7 @@ namespace IndymonBackend
         const int SHINY_CHANCE = 1000; // Chance for a shiny (1 in 1000)
         const int DUNGEON_NUMBER_OF_FLOORS = 3; // Hardcoded for now unless we need to make it flexible later on
         const int DUNGEON_ROOMS_PER_FLOOR = 5;
+        #region EXECUTION
         /// <summary>
         /// Begins an exploration, starts a simulation
         /// </summary>
@@ -116,6 +124,7 @@ namespace IndymonBackend
             {
                 for (int room = 0; room < DUNGEON_ROOMS_PER_FLOOR; room++) // Begin the iteration of all rooms
                 {
+                    ClearConsoleCommand(); // Clears mini console to leave space for new event's message
                     DrawRoomCommand(floor, room); // Will draw the room
                     DrawConnectRoomCommand(prevCoord.Item1, prevCoord.Item2, floor, room, usedShortcut); // Draws previous connection too
                     DrawMoveCharacterCommand(prevCoord.Item1, prevCoord.Item2, floor, room); // Put character there
@@ -188,6 +197,7 @@ namespace IndymonBackend
                     else // Normal room implies a normal event from the possibility list
                     {
                         RoomEvent nextEvent = possibleEvents[_rng.Next(possibleEvents.Count)]; // Get a random event
+                        Console.WriteLine($"Event: {nextEvent.ToString()}");
                         roomSuccess = ExecuteEvent(nextEvent, floor, prizes, trainerData);
                         possibleEvents.Remove(nextEvent); // Remove from event pool
                     }
@@ -202,6 +212,46 @@ namespace IndymonBackend
         ExplorationEnd:
             // Return to normal
             Console.CursorVisible = false;
+            Console.WriteLine("Exploration end.");
+            Console.WriteLine("Items: ");
+            foreach (KeyValuePair<string, int> kvp in prizes.ItemsFound)
+            {
+                Console.Write($"{kvp.Key} x{kvp.Value}, ");
+            }
+            Console.WriteLine("");
+            Console.WriteLine("Mons");
+            if (prizes.MonsFound[0].Count > 0)
+            {
+                foreach (KeyValuePair<string, int> kvp in prizes.MonsFound[0])
+                {
+                    Console.Write($"{kvp.Key} x{kvp.Value}, ");
+                }
+                Console.WriteLine("(POKE BALL)");
+            }
+            if (prizes.MonsFound[1].Count > 0)
+            {
+                foreach (KeyValuePair<string, int> kvp in prizes.MonsFound[1])
+                {
+                    Console.Write($"{kvp.Key} x{kvp.Value}, ");
+                }
+                Console.WriteLine("(GREAT BALL)");
+            }
+            if (prizes.MonsFound[2].Count > 0)
+            {
+                foreach (KeyValuePair<string, int> kvp in prizes.MonsFound[2])
+                {
+                    Console.Write($"{kvp.Key} x{kvp.Value}, ");
+                }
+                Console.WriteLine("(ULTRA BALL)");
+            }
+            if (prizes.MonsFound[3].Count > 0)
+            {
+                foreach (KeyValuePair<string, int> kvp in prizes.MonsFound[3])
+                {
+                    Console.Write($"{kvp.Key} x{kvp.Value}, ");
+                }
+                Console.WriteLine("(MASTER BALL)");
+            }
         }
         /// <summary>
         /// Executes an event of the many possible in room
@@ -214,7 +264,6 @@ namespace IndymonBackend
         bool ExecuteEvent(RoomEvent roomEvent, int floor, ExplorationPrizes prizes, TrainerData trainerData)
         {
             bool roomCleared = true;
-            ClearConsoleCommand(); // Clears mini console to leave space for new event's message
             switch (roomEvent.EventType)
             {
                 case RoomEventType.CAMPING:
@@ -530,9 +579,9 @@ namespace IndymonBackend
         /// <param name="message">String to add</param>
         void GenericMessageCommand(string message)
         {
-            Commands.Add(new ExplorationCommands()
+            ExplorationSteps.Add(new ExplorationStep()
             {
-                Command = ExplorationCommandOptions.PRINT_STRING,
+                Type = ExplorationStepType.PRINT_STRING,
                 Message = message,
                 MillisecondsWait = STANDARD_MESSAGE_PAUSE
             });
@@ -543,9 +592,9 @@ namespace IndymonBackend
         /// <param name="wait">Wait in milliseconds</param>
         void NopWithWaitCommand(int wait)
         {
-            Commands.Add(new ExplorationCommands()
+            ExplorationSteps.Add(new ExplorationStep()
             {
-                Command = ExplorationCommandOptions.NOP,
+                Type = ExplorationStepType.NOP,
                 MillisecondsWait = wait
             });
         }
@@ -554,9 +603,9 @@ namespace IndymonBackend
         /// </summary>
         void ClearConsoleCommand()
         {
-            Commands.Add(new ExplorationCommands()
+            ExplorationSteps.Add(new ExplorationStep()
             {
-                Command = ExplorationCommandOptions.CLEAR_CONSOLE,
+                Type = ExplorationStepType.CLEAR_CONSOLE,
             });
         }
         /// <summary>
@@ -566,10 +615,10 @@ namespace IndymonBackend
         /// <param name="room">Room number (0-5)</param>
         void DrawRoomCommand(int floor, int room)
         {
-            Commands.Add(new ExplorationCommands()
+            ExplorationSteps.Add(new ExplorationStep()
             {
-                Command = ExplorationCommandOptions.DRAW_ROOM,
-                CoordDestRoom = (floor, room)
+                Type = ExplorationStepType.DRAW_ROOM,
+                DestCoord = (floor, room)
             });
         }
         /// <summary>
@@ -582,11 +631,11 @@ namespace IndymonBackend
         /// <param name="isShortcut">If will draw shortcut or passage</param>
         void DrawConnectRoomCommand(int floor1, int room1, int floor2, int room2, bool isShortcut)
         {
-            Commands.Add(new ExplorationCommands()
+            ExplorationSteps.Add(new ExplorationStep()
             {
-                Command = isShortcut ? ExplorationCommandOptions.CONNECT_ROOMS_SHORTCUT : ExplorationCommandOptions.CONNECT_ROOMS_PASSAGE,
-                CoordSourceRoom = (floor1, room1),
-                CoordDestRoom = (floor2, room2)
+                Type = isShortcut ? ExplorationStepType.CONNECT_ROOMS_SHORTCUT : ExplorationStepType.CONNECT_ROOMS_PASSAGE,
+                SourceCoord = (floor1, room1),
+                DestCoord = (floor2, room2)
             });
         }
         /// <summary>
@@ -598,11 +647,11 @@ namespace IndymonBackend
         /// <param name="room2">coord of dest room</param>
         void DrawMoveCharacterCommand(int floor1, int room1, int floor2, int room2)
         {
-            Commands.Add(new ExplorationCommands()
+            ExplorationSteps.Add(new ExplorationStep()
             {
-                Command = ExplorationCommandOptions.MOVE_CHARACTER,
-                CoordSourceRoom = (floor1, room1),
-                CoordDestRoom = (floor2, room2)
+                Type = ExplorationStepType.MOVE_CHARACTER,
+                SourceCoord = (floor1, room1),
+                DestCoord = (floor2, room2)
             });
         }
         /// <summary>
@@ -647,5 +696,274 @@ namespace IndymonBackend
             if (monList.ContainsKey(mon)) monList[mon]++;
             else monList.Add(mon, 1);
         }
+        #endregion
+        #region ANIMATION
+        int ROOM_WIDTH = 3;
+        int ROOM_HEIGHT = 3;
+        /// <summary>
+        /// Animates the resulting exploration
+        /// </summary>
+        public void AnimateExploration()
+        {
+            Console.WriteLine("Write anything to begin. Better start recording now");
+            Console.ReadLine();
+            Console.Clear();
+            _dungeonDetails = _backEndData.Dungeons[Dungeon]; // Obtain dungeon back end data just in case it's not there yet
+            int consoleLineStart = (DUNGEON_NUMBER_OF_FLOORS * ROOM_HEIGHT) + DUNGEON_NUMBER_OF_FLOORS + 1; // Rooms + spaces between, above and below
+            int consoleOffset = consoleLineStart; // Where console currently at
+            string emptyLine = new string(' ', Console.WindowWidth);
+            foreach (ExplorationStep nextStep in ExplorationSteps) // Now, will do event one by one...
+            {
+                switch (nextStep.Type)
+                {
+                    case ExplorationStepType.PRINT_STRING:
+                        Console.ForegroundColor = ConsoleColor.White; // Reset console just in case
+                        Console.SetCursorPosition(0, consoleOffset);
+                        Console.WriteLine($"> {nextStep.Message}"); // Write message
+                        consoleOffset = Console.CursorTop; // New console location
+                        break;
+                    case ExplorationStepType.CLEAR_CONSOLE:
+                        for (int line = consoleLineStart; line <= consoleOffset; line++) // Clear all that console had printed until now
+                        {
+                            Console.SetCursorPosition(0, line);
+                            Console.Write(emptyLine);
+                        }
+                        consoleOffset = consoleLineStart;
+                        break;
+                    case ExplorationStepType.DRAW_ROOM:
+                        DrawRoom(nextStep.DestCoord.Item1, nextStep.DestCoord.Item2);
+                        break;
+                    case ExplorationStepType.MOVE_CHARACTER:
+                        DrawCharacter(nextStep.SourceCoord.Item1, nextStep.SourceCoord.Item2, nextStep.DestCoord.Item1, nextStep.DestCoord.Item2);
+                        break;
+                    case ExplorationStepType.CONNECT_ROOMS_PASSAGE:
+                        ConnectPassage(nextStep.SourceCoord.Item1, nextStep.SourceCoord.Item2, nextStep.DestCoord.Item1, nextStep.DestCoord.Item2);
+                        break;
+                    case ExplorationStepType.CONNECT_ROOMS_SHORTCUT:
+                        ConnectShortcut(nextStep.SourceCoord.Item1, nextStep.SourceCoord.Item2, nextStep.DestCoord.Item1, nextStep.DestCoord.Item2);
+                        break;
+                    default:
+                        break;
+                }
+                if (nextStep.MillisecondsWait > 0)
+                {
+                    Thread.Sleep(nextStep.MillisecondsWait);
+                }
+            }
+            Console.ReadLine();
+        }
+        /// <summary>
+        /// Get the coordinates in console space for a room
+        /// </summary>
+        /// <param name="floor">FLoor of room</param>
+        /// <param name="room">Room</param>
+        /// <returns>The X,Y coord</returns>
+        (int, int) GetRoomCoords(int floor, int room)
+        {
+            // Floor index is 0-2 if goes downwards or 2-0 if upwards
+            int roomY = _dungeonDetails.GoesDownwards ? floor : DUNGEON_NUMBER_OF_FLOORS - floor - 1; // Get the Y coord (vertical)
+            roomY = 1 + ((1 + ROOM_HEIGHT) * floor); // Correct Positioning of room Y tile
+            // Clamp floor to valid numbers, to avoid weird looping outside the edges
+            if (floor >= DUNGEON_NUMBER_OF_FLOORS) floor = DUNGEON_NUMBER_OF_FLOORS - 1;
+            if (floor < 0) floor = 0;
+            // (Room always left to right in top/bottom (even floors), right to left in mid)
+            int roomX = ((floor % 2) == 0) ? room : DUNGEON_ROOMS_PER_FLOOR - room - 1; // Get the X coord (horiz)
+            roomX = 1 + (ROOM_WIDTH * roomX); // This one has no spaces inbetween just an offset if needed
+            return (roomX, roomY);
+        }
+        /// <summary>
+        /// Check whether requested coord is valid (inside of picture)
+        /// </summary>
+        /// <param name="floor">Which floor</param>
+        /// <param name="room">Which room</param>
+        /// <returns></returns>
+        bool IsRoomValid(int floor, int room)
+        {
+            if (floor < 0 || floor >= DUNGEON_NUMBER_OF_FLOORS)
+            {
+                return false;
+            }
+            if (room < 0 || floor >= DUNGEON_ROOMS_PER_FLOOR)
+            {
+                return false;
+            }
+            return true;
+        }
+        /// <summary>
+        /// Draws the required room for this dungeon
+        /// </summary>
+        /// <param name="floor">Floor room is in</param>
+        /// <param name="room">Room number</param>
+        void DrawRoom(int floor, int room)
+        {
+            (int X, int Y) = GetRoomCoords(floor, room);
+            // Now i have coord X, Y to draw room
+            DungeonFloor floorData = _dungeonDetails.Floors[floor]; // Obtain room drawing data
+            Console.ForegroundColor = floorData.RoomColor; // Set color
+            // Draw 8 things
+            Console.SetCursorPosition(X, Y);
+            Console.Write(floorData.NwWallTile);
+            Console.SetCursorPosition(X + 1, Y);
+            Console.Write(floorData.NWallTile);
+            Console.SetCursorPosition(X + 2, Y);
+            Console.Write(floorData.NeWallTile);
+            Console.SetCursorPosition(X, Y + 1);
+            Console.Write(floorData.WWallTile);
+            Console.SetCursorPosition(X + 2, Y + 1);
+            Console.Write(floorData.EWallTile);
+            Console.SetCursorPosition(X, Y + 2);
+            Console.Write(floorData.SwWallTile);
+            Console.SetCursorPosition(X + 1, Y + 2);
+            Console.Write(floorData.SWallTile);
+            Console.SetCursorPosition(X + 2, Y + 2);
+            Console.Write(floorData.SeWallTile);
+        }
+        /// <summary>
+        /// Moves character from one room to another
+        /// </summary>
+        /// <param name="sourceFloor">Where from (floor)</param>
+        /// <param name="sourceRoom">Where from (room)</param>
+        /// <param name="destFloor">Where to (floor)</param>
+        /// <param name="destRoom">Where to (room)</param>
+        void DrawCharacter(int sourceFloor, int sourceRoom, int destFloor, int destRoom)
+        {
+            Console.ForegroundColor = ConsoleColor.White; // Set color back to white, for character
+            // Delete current character first
+            if (IsRoomValid(sourceFloor, sourceRoom))
+            {
+                (int fromX, int fromY) = GetRoomCoords(sourceFloor, sourceRoom);
+                Console.SetCursorPosition(fromX + 1, fromY + 1);
+                Console.Write(" ");
+            }
+            // Draw new character now
+            if (IsRoomValid(destFloor, destRoom))
+            {
+                (int toX, int toY) = GetRoomCoords(destFloor, destRoom);
+                Console.SetCursorPosition(toX + 1, toY + 1);
+                Console.Write("☺");
+            }
+        }
+        /// <summary>
+        /// Connects 2 rooms with passage (typical), from->to
+        /// </summary>
+        /// <param name="sourceFloor">Where from (floor)</param>
+        /// <param name="sourceRoom">Where from (room)</param>
+        /// <param name="destFloor">Where to (floor)</param>
+        /// <param name="destRoom">Where to (room)</param>
+        void ConnectPassage(int sourceFloor, int sourceRoom, int destFloor, int destRoom)
+        {
+            // In passage, rooms are just altered in a very simple way, by just modifying its wall closest to the other room (always adjacent)
+            // A vertical passage is then drawn connecting 2 rooms in different floors
+            // First, get room coords (no matter if invalid, just to check who's above what
+            (int fromX, int fromY) = GetRoomCoords(sourceFloor, sourceRoom);
+            (int toX, int toY) = GetRoomCoords(destFloor, destRoom);
+            // Then, draw for first room, if needed
+            DungeonFloor sourceFloorData = null, destFloorData = null;
+            if (IsRoomValid(sourceFloor, sourceRoom))
+            {
+                sourceFloorData = _dungeonDetails.Floors[sourceFloor];
+                Console.ForegroundColor = sourceFloorData.RoomColor;
+                // Room is valid, so I need to modify it's corresponding wall depending where it moves to
+                if (fromX < toX) { Console.SetCursorPosition(fromX + 2, fromY + 1); Console.Write(sourceFloorData.EWallPassageTile); } // Conenct east
+                else if (fromX > toX) { Console.SetCursorPosition(fromX, fromY + 1); Console.Write(sourceFloorData.WWallPassageTile); } // Connect west
+                else if (fromY < toY) { Console.SetCursorPosition(fromX + 1, fromY + 2); Console.Write(sourceFloorData.SWallPassageTile); } // Connect south
+                else if (fromY > toY) { Console.SetCursorPosition(fromX + 1, fromY); Console.Write(sourceFloorData.NWallPassageTile); } // Connect north
+                else { } // Should never happen
+            }
+            // Same for dest room
+            if (IsRoomValid(destFloor, destRoom))
+            {
+                destFloorData = _dungeonDetails.Floors[destFloor];
+                Console.ForegroundColor = destFloorData.RoomColor;
+                // Room is valid, so I need to modify it's corresponding wall depending where it moves to
+                if (toX < fromX) { Console.SetCursorPosition(toX + 2, toY + 1); Console.Write(destFloorData.EWallPassageTile); } // Conenct east
+                else if (toX > fromX) { Console.SetCursorPosition(toX, toY + 1); Console.Write(destFloorData.WWallPassageTile); } // Connect west
+                else if (toY < fromY) { Console.SetCursorPosition(toX + 1, toY + 2); Console.Write(destFloorData.SWallPassageTile); } // Connect south
+                else if (toY > fromY) { Console.SetCursorPosition(toX + 1, toY); Console.Write(destFloorData.NWallPassageTile); } // Connect north
+                else { } // Should never happen
+            }
+            // Finally, if the passage occurs between floors, need also to connect them as floors have a gap
+            if (fromY != toY)
+            {
+                int topCoord = Math.Min(fromY, toY); // Which one is higher, don't really care, just connect them
+                DungeonFloor floorDataToUse = sourceFloorData ?? destFloorData; // Use always the source floor unless it didn't exist in which case use the other one idk
+                Console.ForegroundColor = floorDataToUse.PassageColor;
+                Console.SetCursorPosition(fromX + 1, topCoord + 3); // X should be same for both rooms (?!?!?!) and then draw ourside of room, use top room for ref
+                Console.Write(floorDataToUse.VerticalPassageTile);
+            }
+        }
+        /// <summary>
+        /// Connects 2 rooms with shortcut (special), from->to
+        /// </summary>
+        /// <param name="sourceFloor">Where from (floor)</param>
+        /// <param name="sourceRoom">Where from (room)</param>
+        /// <param name="destFloor">Where to (floor)</param>
+        /// <param name="destRoom">Where to (room)</param>
+        void ConnectShortcut(int sourceFloor, int sourceRoom, int destFloor, int destRoom)
+        {
+            // In shortcut, rooms are first altered in a very simple way, by just modifying its wall closest to the other room (always adjacent)
+            // Shortcut is then drawn. This always involves a change in floors so shortcut will need to be drawn iteratively
+            // First, get room coords (no matter if invalid, just to check who's above what)
+            (int fromX, int fromY) = GetRoomCoords(sourceFloor, sourceRoom);
+            (int toX, int toY) = GetRoomCoords(destFloor, destRoom);
+            // Then, draw for first room, if needed
+            DungeonFloor sourceFloorData = null, destFloorData = null;
+            if (IsRoomValid(sourceFloor, sourceRoom))
+            {
+                sourceFloorData = _dungeonDetails.Floors[sourceFloor];
+                Console.ForegroundColor = sourceFloorData.RoomColor;
+                // Room is valid, so I need to modify it's corresponding wall depending where it moves to
+                // This time, it's only up-down so just compare floors
+                if (fromY < toY) { Console.SetCursorPosition(fromX + 1, fromY + 2); Console.Write(sourceFloorData.SWallShortcutTile); } // Connect south
+                else if (fromY > toY) { Console.SetCursorPosition(fromX + 1, fromY); Console.Write(sourceFloorData.NWallShortcutTile); } // Connect north
+                else { } // Should never happen
+            }
+            // Same for dest room
+            if (IsRoomValid(destFloor, destRoom))
+            {
+                destFloorData = _dungeonDetails.Floors[destFloor];
+                Console.ForegroundColor = destFloorData.RoomColor;
+                // Room is valid, so I need to modify it's corresponding wall depending where it moves to
+                // This time, it's only up-down so just compare floors
+                if (toY < fromY) { Console.SetCursorPosition(toX + 1, toY + 2); Console.Write(destFloorData.SWallShortcutTile); } // Connect south
+                else if (toY > fromY) { Console.SetCursorPosition(toX + 1, toY); Console.Write(destFloorData.NWallShortcutTile); } // Connect north
+                else { } // Should never happen
+            }
+            // Finally, if the passage occurs between floors, need also to connect them as floors have a gap
+            if (fromY != toY)
+            {
+                DungeonFloor floorDataToUse = sourceFloorData ?? destFloorData; // Use always the source floor unless it didn't exist in which case use the other one idk
+                int shortcutY = Math.Min(fromY, toY) + 3; // Shorcut to be between rooms (floors)
+                int leftShortcutX = Math.Min(fromX, toX) + 1;
+                int rightShortcutX = Math.Max(fromX, toX) + 1;
+                char firstTile, lastTile, middleTile;
+                if (fromX < toX) // Left -> right
+                {
+                    firstTile = floorDataToUse.NwShortcutTile;
+                    lastTile = floorDataToUse.SeShortcutTile;
+                    middleTile = floorDataToUse.HorizontalShortcutTile;
+                }
+                else if (fromX > toX) // Right -> left
+                {
+                    firstTile = floorDataToUse.SwShortcutTile;
+                    lastTile = floorDataToUse.NeShortcutTile;
+                    middleTile = floorDataToUse.HorizontalShortcutTile;
+                }
+                else // Just up, which is just in end of dungeon
+                {
+                    firstTile = lastTile = middleTile = floorDataToUse.VerticalShortcutTile;
+                }
+                // Ok we done, new just draw the shortcut
+                Console.ForegroundColor = floorDataToUse.ShortcutColor;
+                Console.SetCursorPosition(leftShortcutX, shortcutY);
+                while (Console.CursorLeft <= rightShortcutX)
+                {
+                    if (Console.CursorLeft == leftShortcutX) Console.WriteLine(firstTile);
+                    else if (Console.CursorLeft == rightShortcutX) Console.WriteLine(lastTile);
+                    else Console.WriteLine(middleTile);
+                }
+            }
+        }
+        #endregion
     }
 }
