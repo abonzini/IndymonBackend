@@ -13,6 +13,7 @@ namespace ParsersAndData
         public HashSet<string> Abilities { get; set; } = new HashSet<string>();
         public string Prevo = "";
         public string OriginalForm = "";
+        public HashSet<string> Evos { get; set; } = new HashSet<string>();
         public HashSet<string> Moves { get; set; } = new HashSet<string>();
         public HashSet<string> DamagingStabs { get; set; } = new HashSet<string>();
         public HashSet<string> AiMoveBanlist { get; set; } = new HashSet<string>();
@@ -73,6 +74,14 @@ namespace ParsersAndData
                 if (monValues.HasProperty("baseSpecies"))
                 {
                     nextPokemon.OriginalForm = monValues.Get("baseSpecies").AsString().ToLower();
+                }
+                if (monValues.HasProperty("evos"))
+                {
+                    JsArray typesArray = monValues.Get("evos").AsArray();
+                    for (int i = 0; i < typesArray.Length; i++)
+                    {
+                        nextPokemon.Evos.Add(typesArray.Get(i).AsString().ToLower());
+                    }
                 }
                 // Finally add to result
                 result.Add(nextPokemon.TagName, nextPokemon);

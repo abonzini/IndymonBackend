@@ -435,10 +435,10 @@ namespace ParsersAndData
 
                                     }
                                 }
-                                // Otherwise there's no other checks, item has to be decent
+                                // Otherwise there's no other checks, will do some personalized checks and go for it
                                 else
                                 {
-                                    itemIsUseless &= false;
+                                    itemIsUseless &= IsSpecificItemUseless(itemCandidate.Name, pokemonSet, backEndData);
                                 }
                                 // So if the item is ok, ill allow it
                                 if (itemIsUseless)
@@ -471,6 +471,82 @@ namespace ParsersAndData
                 Console.WriteLine($"\t\tSet for {mon.ToString()}");
                 Console.WriteLine("");
             }
+        }
+        /// <summary>
+        /// Manual hardcoded check for specific items
+        /// </summary>
+        /// <param name="itemName">Item Name</param>
+        /// <param name="pokemonSet">Pokemon we're checking</param>
+        /// <returns>Whether the item would be useless or not</returns>
+        bool IsSpecificItemUseless(string itemName, PokemonSet pokemonSet, DataContainers backEndData)
+        {
+            List<string> usefulMoves = new List<string>();
+            List<string> usefulAbilities = new List<string>();
+            switch (itemName.ToLower())
+            {
+                case "power herb":
+                    usefulMoves = ["bounce", "dig", "dive", "electro shot", "fly", "freeze shock", "geomancy", "ice burn", "meteor beam", "phantom force", "razor wind", "shadow force", "skull bash", "sky attack", "sky drop", "solar beam", "solar blade"];
+                    break;
+                case "terrain extender":
+                    usefulMoves = ["electric terrain", "grassy terrain", "psychic terrain", "misty terrain"];
+                    usefulAbilities = ["electric surge", "hadron engine", "grassy surge", "seed sower", "misty surge", "psychic surge"];
+                    break;
+                case "big root":
+                    usefulMoves = ["absorb", "bitter blade", "bouncy bubble", "drain punch", "draining kiss", "dream eater", "giga drain", "horn leech", "leech life", "leech seed", "matcha gotcha", "mega drain", "oblivion wing", "parabolic charge", "strength sap"];
+                    break;
+                case "eviolite": // This one is special, just checks if evos
+                    if (backEndData.Dex[pokemonSet.Species].Evos.Count > 0) // Mon can evolve, all good
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                case "flame orb":
+                    usefulMoves = ["facade", "psycho shift", "trick", "switcheroo", "fling"];
+                    usefulAbilities = ["flare boost", "guts", "marvel scale", "quick feet", "klutz"];
+                    break;
+                case "toxic orb":
+                    usefulMoves = ["facade", "psycho shift", "trick", "switcheroo", "fling"];
+                    usefulAbilities = ["poison heal", "guts", "marvel scale", "quick feet", "toxic boost", "klutz"];
+                    break;
+                case "iron ball":
+                case "lagging tail":
+                case "sticky barb":
+                    usefulMoves = ["trick", "switcheroo", "fling"];
+                    usefulAbilities = ["klutz"];
+                    break;
+                case "damp rock":
+                    usefulMoves = ["rain dance"];
+                    usefulAbilities = ["drizzle"];
+                    break;
+                case "heat rock":
+                    usefulMoves = ["sunny day"];
+                    usefulAbilities = ["drought", "orichalcum pulse"];
+                    break;
+                case "icy rock":
+                    usefulMoves = ["hail", "snowscape", "chilly reception"];
+                    usefulAbilities = ["snow warning"];
+                    break;
+                case "smooth rock":
+                    usefulMoves = ["sandstorm"];
+                    usefulAbilities = ["sand stream", "sand spit"];
+                    break;
+                default:
+                    return false; // No flags, means item is NOT USELESS
+            }
+            // If reach here, check all move/abilities candidates, see if item would help me
+            bool isUseful = false;
+            foreach (string move in usefulMoves)
+            {
+                if (pokemonSet.Moves.Contains(move)) { isUseful |= true; break; }
+            }
+            foreach (string ability in usefulAbilities)
+            {
+                if (pokemonSet.Ability == ability) { isUseful |= true; break; }
+            }
+            return isUseful;
         }
         /// <summary>
         /// Gets team pokepaste

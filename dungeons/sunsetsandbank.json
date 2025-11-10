@@ -1,0 +1,275 @@
+{
+  "Name": "Sunset Sandbank",
+  "GoesDownwards": false,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "Something buried in the sand glimmers. You find a $1, lucky you!",
+      "PostEventString": "You pick it up and continue on your way."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "As the dusk approaches, stronger Pokemon begin to hunt. A $1 attacks you.",
+      "PostEventString": "After defeating the wild Pokemon, you pick up the $1 it was holding."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "Deep in the water, you see a glowing crystal. A voice sounds in your mind: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "You hear a second voice: WILL YE GIVE AN ITEM FOR EVOLUTION? What do you do?"
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "Nothing like the relaxing sunset to forget all of your troubles. You lie in the sand alongside your Pokemon.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "Nothing like the relaxing sunset to forget all of your troubles. You lie in the sand alongside your Pokemon.",
+      "PostEventString": "Your Pokemon have recovered from their status conditions."
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "In the distance, you see a $1 following you. I has been doing so for miles. It's pretending not to like you, but it's clear it wants to have an adventure.",
+      "PostEventString": "It will probably help you during your battles."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "The wind picks up, sand blows in your face. It's coarse and rough and irritating and it gets everywhere.",
+      "PostEventString": "You trip trying to find a place to get cover. Your Pokemon sustain some damage."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "As it gets darker, it also gets cold...",
+      "PostEventString": "It was nice and refreshing before, but after taking a swim at the sea, some Pokemon are starting to feel frostbite.",
+	  "SpecialParams": "frz"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "A challenger is wating for you. The sun is in your face: Before you can even react, you're thrust into a fight!",
+      "PostEventString": "Truly a duel for the ages... But it's time to move on."
+    },
+	{
+      "EventType": "ARCHAEOLOGIST",
+      "PreEventString": "An member of the Pokemon Research Society is sunbathing.",
+      "PostEventString": "He's reading a plate, but it's clear they don't really understand what it says. 'Well maybe you'll have better luck'"
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "A Team Paradox grunt is on a makeshift kiosk selling bootleg Move Disks.",
+      "PostEventString": "When he sees you' he starts getting nervous. ''I'm leaving soon, I swear''. He gaves you a Move Disk for your silence."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Tentacool",
+		"Slowpoke",
+		"Seel",
+		"Shellder",
+		"Krabby",
+		"Horsea",
+		"Staryu",
+		"Qwilfish",
+		"Corsola",
+		"Remoraid",
+		"Mantyke",
+		"Wingull",
+		"Spheal",
+		"Shellos",
+		"Basculin",
+		"Binacle",
+		"Skrelp",
+		"Clauncher",
+		"Sandygast",
+		"Arrokuda",
+		"Finizen"
+	],
+	[
+		"Dewgong",
+		"Kingler",
+		"Seadra",
+		"Lapras",
+		"Qwilfish-Hisui",
+		"Corsola-Galar",
+		"Cursola",
+		"Octillery",
+		"Mantine",
+		"Sealeo",
+		"Basculin-White-Striped",
+		"Barbaracle",
+		"Clawitzer",
+		"Palossand",
+		"Pyukumuku",
+		"Palafin"
+	],
+	[
+		"Tentacruel",
+		"Slowbro",
+		"Slowking",
+		"Cloyster",
+		"Kingdra",
+		"Starmie",
+		"Pelipper",
+		"Walrein",
+		"Gastrodon",
+		"Basculegion",
+		"Basculegion-F",
+		"Dhelmise",
+		"Barraskewda"
+	],
+	[
+		"Phione",
+		"Manaphy"
+	]
+  ],
+  "CommonItems": [
+		"Steel Tera Shard",
+		"Dark Tera Shard",
+		"Flying Tera Shard",
+		"Rock Tera Shard",
+		"Fighting Tera Shard",
+		"Dragon Tera Shard",
+		"Ghost Tera Shard",
+		"Fire Tera Shard",
+		"Psychic Tera Shard",
+		"Water Tera Shard",
+		"Grass Tera Shard",
+		"Fairy Tera Shard",
+		"Ground Tera Shard",
+		"Bug Tera Shard",
+		"Ice Tera Shard",
+		"Electric Tera Shard",
+		"Poison Tera Shard",
+		"Normal Tera Shard",
+		"Stellar Tera Shard",
+		"Rindo Berry",
+		"Wacan Berry"
+  ],
+  "RareItems": [
+		"Eviolite",
+		"Flame Orb",
+		"Toxic Orb",
+		"Life Orb",
+		"Mystic Water",
+		"Shell Bell",
+		"Soft Sand",
+		"Sticky Barb",
+		"Poison Barb",
+		"Adrenaline Orb"
+  ],
+  "Floors": [
+    {
+      "RoomColor": "Yellow",
+      "NeWallTile": "╮",
+      "NwWallTile": "╭",
+      "SeWallTile": " ",
+      "SwWallTile": " ",
+      "EWallTile": "│",
+      "WWallTile": "│",
+      "NWallTile": "─",
+      "SWallTile": " ",
+	  "EWallPassageTile": "╰",
+      "WWallPassageTile": "╯",
+      "NWallPassageTile": "▓",
+      "SWallPassageTile": "▓",
+      "NWallShortcutTile": "▒",
+      "SWallShortcutTile": "▒",
+      "PassageColor": "Yellow",
+      "VerticalPassageTile": "▓",
+      "ShortcutColor": "Blue",
+      "NeShortcutTile": "≋",
+      "NwShortcutTile": "≋",
+      "SeShortcutTile": "≋",
+      "SwShortcutTile": "≋",
+      "HorizontalShortcutTile": "≋",
+      "VerticalShortcutTile": "≋",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": "Surf"
+		}
+	  ],
+	  "ShortcutClue": "You could probably swim across to reach the sandbank quicker.",
+	  "ShortcutResolution": "Your Pokemon surf, you reached the distant sandbanks."
+    },
+	{
+      "RoomColor": "DarkYellow",
+      "NeWallTile": "╮",
+      "NwWallTile": "╭",
+      "SeWallTile": "╯",
+      "SwWallTile": "╰",
+      "EWallTile": "│",
+      "WWallTile": "│",
+      "NWallTile": "─",
+      "SWallTile": "─",
+	  "EWallPassageTile": "│",
+      "WWallPassageTile": "│",
+      "NWallPassageTile": "─",
+      "SWallPassageTile": "─",
+      "NWallShortcutTile": "▒",
+      "SWallShortcutTile": "▒",
+      "PassageColor": "Blue",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "Blue",
+      "NeShortcutTile": "↻",
+      "NwShortcutTile": "↺",
+      "SeShortcutTile": "↻",
+      "SwShortcutTile": "↺",
+      "HorizontalShortcutTile": "@",
+      "VerticalShortcutTile": "@",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": "Whirlpool"
+		}
+	  ],
+	  "ShortcutClue": "You can swim across to the next sandbanks, but the currents are strong and whirlpools are forming...",
+	  "ShortcutResolution": "Your Pokemon used Whirlpool to cross safely."
+    },
+	{
+      "RoomColor": "Blue",
+      "NeWallTile": "░",
+      "NwWallTile": "░",
+      "SeWallTile": "░",
+      "SwWallTile": "░",
+      "EWallTile": "░",
+      "WWallTile": "░",
+      "NWallTile": "░",
+      "SWallTile": "░",
+	  "EWallPassageTile": "░",
+      "WWallPassageTile": "░",
+      "NWallPassageTile": "░",
+      "SWallPassageTile": "░",
+      "NWallShortcutTile": "░",
+      "SWallShortcutTile": "░",
+      "PassageColor": "Blue",
+      "VerticalPassageTile": "░",
+      "ShortcutColor": "DarkBlue",
+      "NeShortcutTile": "◉",
+      "NwShortcutTile": "◉",
+      "SeShortcutTile": "◉",
+      "SwShortcutTile": "◉",
+      "HorizontalShortcutTile": "◉",
+      "VerticalShortcutTile": "◉",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": "Dive"
+		}
+	  ],
+	  "ShortcutClue": "In this spot, you can't see the sea floor. Just a dark abbyss below.",
+	  "ShortcutResolution": "You used dive. What will expect you deep below?."
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "Even though it's dusk, you suddenly don't fell cold anymore. The sea begins to shine as your heart feels warm...",
+    "PostEventString": "The spirit of the sea bids you farewell. Deep inside, you know you just made a new friend ♥"
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "Nothing like the relaxing sunset to forget all of your troubles. It's a perfect place for a picnic.",
+    "PostEventString": "But now it's time to move on..."
+  },
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

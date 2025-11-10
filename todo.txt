@@ -1,0 +1,9 @@
+Complete all 5 dungeons:
+-cave
+-mountain
+finalize sheet
+-rules
+-town/torun lineup
+-shop
+-item glossary
+-npcs

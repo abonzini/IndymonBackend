@@ -174,7 +174,7 @@ namespace IndymonBackend
                         {
                             EventType = RoomEventType.POKEMON_BATTLE,
                             PreEventString = "Suddenly, wild pokemon attack!",
-                            PostEventString = $"You won the battle and obtained multiple items that the wild Pokemon were holding."
+                            PostEventString = $"You won the battle and obtained multiple items that the wild Pokemon were holding ($1)."
                         }; // Wild pokemon encounter event
                         roomSuccess = ExecuteEvent(pokemonEvent, floor, prizes, trainerData);
                     }
@@ -443,7 +443,8 @@ namespace IndymonBackend
                         else
                         {
                             Console.WriteLine("Player won");
-                            GenericMessageCommand(roomEvent.PostEventString);
+                            string postMessage = roomEvent.PostEventString.Replace("$1", string.Join(',', items));
+                            GenericMessageCommand(postMessage);
                             foreach (string item in items) // Add all items to prizes
                             {
                                 AddItemPrize(item, prizes);

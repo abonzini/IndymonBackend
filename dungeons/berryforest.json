@@ -1,0 +1,301 @@
+{
+  "Name": "Berry Forest",
+  "GoesDownwards": false,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "You find $1 hidden inside a hollow log.",
+      "PostEventString": "You pick it up and continue on your way."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "While walking, you feel something is watching you. Suddenly, a huge $1 jumps and attacks you!",
+      "PostEventString": "After defeating the attacker, you pick up the $1 it was holding."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "Shining in the middle of a clearing, you find a giant glowing crystal. Suddenly, you hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "The crystal has a slot where you may put an item, and a pedestal where a pokemon can stand on. What will you do?"
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "You find a pile of berries on the floor. You and your Pokemon dig in.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "You find a pile of berries on the floor. You and your Pokemon dig in.",
+      "PostEventString": "Your Pokemon have recovered from their status conditions."
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "A happy $1 follows you for a while.",
+      "PostEventString": "It's in a really good mood, and wants to join your team!"
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "You find a pile of berries on the floor. You and your Pokemon dig in.",
+      "PostEventString": "The berries were poisonous! Your Pokemon lose a bit of HP."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "You find a pile of berries on the floor. You and your Pokemon dig in.",
+      "PostEventString": "However, some of them were in a bad state. Some Pokemon got food poisoning...",
+	  "SpecialParams": "psn"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "A shady figure approaches you in the forest.",
+      "PostEventString": "After defeating the trainer, you go on your way."
+    },
+	{
+      "EventType": "ARCHAEOLOGIST",
+      "PreEventString": "Deep in the forest, you see some ruins.",
+      "PostEventString": "They're the ruins of an old shrine, and in a central altar you find a plate."
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "A shady figure approaches you in the forest.",
+      "PostEventString": "It's a member of Team Paradox! They give you a move disk. 'First one's free!'"
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Caterpie",
+		"Weedle",
+		"Pikachu",
+		"Oddish",
+		"Paras",
+		"Venonat",
+		"Ledyba",
+		"Ledian",
+		"Spinarak",
+		"Wurmple",
+		"Seedot",
+		"Shroomish",
+		"Burmy",
+		"Sewaddle",
+		"Venipede",
+		"Deerling",
+		"Foongus",
+		"Scatterbug",
+		"Fomantis",
+		"Morelull",
+		"Tarountula"
+	],
+	[
+		"Butterfree",
+		"Gloom",
+		"Parasect",
+		"Pinsir",
+		"Ariados",
+		"Yanma",
+		"Beautifly",
+		"Nuzleaf",
+		"Mothim",
+		"Swadloon",
+		"Whirlipede",
+		"Sawsbuck",
+		"Ferroseed",
+		"Vivillon",
+		"Lurantis",
+		"Shiinotic",
+		"Spidops",
+		"Applin"
+	],
+	[
+		"Beedrill",
+		"Raichu",
+		"Vileplume",
+		"Venomoth",
+		"Scyther",
+		"Dustox",
+		"Shiftry",
+		"Breloom",
+		"Wormadam",
+		"Yanmega",
+		"Leavanny",
+		"Scolipede",
+		"Amoonguss",
+		"Ferrothorn",
+		"Flapple",
+		"Appletun",
+		"Dipplin"
+	],
+	[
+		"Xerneas",
+		"Celebi"
+	]
+  ],
+  "CommonItems": [
+		"Aguav Berry",
+		"Apicot Berry",
+		"Aspear Berry",
+		"Cheri Berry",
+		"Chesto Berry",
+		"Chilan Berry",
+		"Custap Berry",
+		"Enigma Berry",
+		"Figy Berry",
+		"Ganlon Berry",
+		"Iapapa Berry",
+		"Jaboca Berry",
+		"Kee Berry",
+		"Lansat Berry",
+		"Leppa Berry",
+		"Liechi Berry",
+		"Lum Berry",
+		"Mago Berry",
+		"Maranga Berry",
+		"Micle Berry",
+		"Oran Berry",
+		"Pecha Berry",
+		"Persim Berry",
+		"Petaya Berry",
+		"Rawst Berry",
+		"Rowap Berry",
+		"Salac Berry",
+		"Sitrus Berry",
+		"Starf Berry",
+		"Wiki Berry",
+		"Coba Berry",
+		"Occa Berry",
+		"Kebia Berry"
+  ],
+  "RareItems": [
+		"Absorb Bulb",
+		"Big Root",
+		"Electric Seed",
+		"Psychic Seed",
+		"Misty Seed",
+		"Grassy Seed",
+		"Leftovers",
+		"Luminous Moss",
+		"Miracle Seed",
+		"Silver Powder"
+  ],
+  "Floors": [
+    {
+      "RoomColor": "DarkGreen",
+      "NeWallTile": "♣",
+      "NwWallTile": "♣",
+      "SeWallTile": " ",
+      "SwWallTile": " ",
+      "EWallTile": "♣",
+      "WWallTile": "♣",
+      "NWallTile": "♣",
+      "SWallTile": " ",
+	  "EWallPassageTile": " ",
+      "WWallPassageTile": " ",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": "✿",
+      "SWallShortcutTile": "✿",
+      "PassageColor": "Green",
+      "VerticalPassageTile": "|",
+      "ShortcutColor": "Red",
+      "NeShortcutTile": "✿",
+      "NwShortcutTile": "✿",
+      "SeShortcutTile": "✿",
+      "SwShortcutTile": "✿",
+      "HorizontalShortcutTile": "✿",
+      "VerticalShortcutTile": "✿",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": "Cut"
+		}
+	  ],
+	  "ShortcutClue": "Dense shrubs block your way.",
+	  "ShortcutResolution": "You used cut to make a way through a flowery passage."
+    },
+	{
+      "RoomColor": "Green",
+      "NeWallTile": "⚘",
+      "NwWallTile": "⚘",
+      "SeWallTile": "⚘",
+      "SwWallTile": "⚘",
+      "EWallTile": "⚘",
+      "WWallTile": "⚘",
+      "NWallTile": "⚘",
+      "SWallTile": "⚘",
+	  "EWallPassageTile": "✿",
+      "WWallPassageTile": "✿",
+      "NWallPassageTile": "✿",
+      "SWallPassageTile": "✿",
+      "NWallShortcutTile": "❍",
+      "SWallShortcutTile": "❍",
+      "PassageColor": "Magenta",
+      "VerticalPassageTile": "⚘",
+      "ShortcutColor": "White",
+      "NeShortcutTile": "❍",
+      "NwShortcutTile": "❍",
+      "SeShortcutTile": "❍",
+      "SwShortcutTile": "❍",
+      "HorizontalShortcutTile": "❍",
+      "VerticalShortcutTile": "❍",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": "Bug Bite"
+		},
+		{
+			"ConditionType": "MOVE",
+			"Which": "Incinerate"
+		},
+		{
+			"ConditionType": "ABILITY",
+			"Which": "Gluttony"
+		}
+	  ],
+	  "ShortcutClue": "You find a shortcut by crawling through a hollow tree trunk. However, it is completely full of berries. You need a way to get rid of a lot of berries as fast as possible.",
+	  "ShortcutResolution": "Thanks to your Pokemon's abilities, you managed to get rid of all these berries."
+    },
+	{
+      "RoomColor": "DarkGreen",
+      "NeWallTile": "♣",
+      "NwWallTile": "❦",
+      "SeWallTile": "♣",
+      "SwWallTile": "❦",
+      "EWallTile": "♠",
+      "WWallTile": "♠",
+      "NWallTile": "♠",
+      "SWallTile": "♠",
+	  "EWallPassageTile": "┅",
+      "WWallPassageTile": "┅",
+      "NWallPassageTile": "┇",
+      "SWallPassageTile": "┇",
+      "NWallShortcutTile": "❦",
+      "SWallShortcutTile": "❦",
+      "PassageColor": "Green",
+      "VerticalPassageTile": "┇",
+      "ShortcutColor": "Gray",
+      "NeShortcutTile": "░",
+      "NwShortcutTile": "░",
+      "SeShortcutTile": "░",
+      "SwShortcutTile": "░",
+      "HorizontalShortcutTile": "░",
+      "VerticalShortcutTile": "░",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": "Defog"
+		}
+	  ],
+	  "ShortcutClue": "The forest starts to become creepy, and the wai forward is covered in fog.",
+	  "ShortcutResolution": "You used defog to find a way through the forest's edge."
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "You arrive at a clearing. The sun barely shining through the trees. The forest guardian is watching you, and eager to fight.",
+    "PostEventString": "The forest's guardian recognizes your power. It allows you to move forward, through the passage it was protecting."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "You find a clearing in the forest. The air is pure, it's a perfect place for a picnic.",
+    "PostEventString": "But now it's time to move on..."
+  },
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}
