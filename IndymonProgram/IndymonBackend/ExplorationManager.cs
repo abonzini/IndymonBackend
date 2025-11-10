@@ -101,7 +101,7 @@ namespace IndymonBackend
         /// </summary>
         public void ExecuteExploration()
         {
-            // Jus to help debug
+            // Just to help debug
             Console.Clear();
             Console.CursorVisible = true;
             // Set up exploration
@@ -285,11 +285,11 @@ namespace IndymonBackend
                     break;
                 case RoomEventType.HEAL:
                     {
-                        Console.WriteLine("A heal of 50% of all mons");
+                        Console.WriteLine("A heal of 33% of all mons");
                         GenericMessageCommand(roomEvent.PreEventString);
                         foreach (PokemonSet mon in trainerData.Teamsheet)
                         {
-                            mon.ExplorationStatus.HealthPercentage += 50;
+                            mon.ExplorationStatus.HealthPercentage += 33;
                             if (mon.ExplorationStatus.HealthPercentage > 100)
                             {
                                 mon.ExplorationStatus.HealthPercentage = 100;
@@ -300,11 +300,11 @@ namespace IndymonBackend
                     break;
                 case RoomEventType.DAMAGE_TRAP:
                     {
-                        Console.WriteLine("A damage trap of 33% to all mons");
+                        Console.WriteLine("A damage trap of 25% to all mons");
                         GenericMessageCommand(roomEvent.PreEventString);
                         foreach (PokemonSet mon in trainerData.Teamsheet)
                         {
-                            mon.ExplorationStatus.HealthPercentage -= 50;
+                            mon.ExplorationStatus.HealthPercentage -= 25;
                             if (mon.ExplorationStatus.HealthPercentage <= 0)
                             {
                                 mon.ExplorationStatus.HealthPercentage = 1;

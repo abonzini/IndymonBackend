@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "In the middle of a field, you find a giant glowing crystal. Suddenly, you hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "The crystal has an offering altar, where you may put an item. What will you do?"
+      "PostEventString": "The crystal has a slot where you may put an item, and a pedestal where a pokemon can stand on. What will you do?"
     },
 	{
       "EventType": "HEAL",
