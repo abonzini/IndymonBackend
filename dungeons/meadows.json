@@ -29,7 +29,7 @@
     },
 	{
       "EventType": "JOINER",
-      "PreEventString": "In the distance, you find a lonely $1... Its family has left it behind...",
+      "PreEventString": "While walking, you find a lonely $1... It looks scared...",
       "PostEventString": "After seeing you, he wants to join you and your team!"
     },
 	{
@@ -39,8 +39,8 @@
     },
 	{
       "EventType": "STATUS_TRAP",
-      "PreEventString": "You try to help an injured Vulpix, but it gets scared and uses Will-O-Wisp before running away.",
-      "PostEventString": "You wish you had burn heal...",
+      "PreEventString": "While walking, you find a lonely Vulpix... It looks scared...",
+      "PostEventString": "You approach it, but it uses Will-O-Wisp and runs away. You better have burn heal!",
 	  "SpecialParams": "brn"
     },
 	{
