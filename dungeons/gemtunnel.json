@@ -1,0 +1,285 @@
+{
+  "Name": "Gem Tunnel",
+  "GoesDownwards": true,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "Hidden under a rock, you find $1.",
+      "PostEventString": "You pick it up and continue on your way."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "You accidentally step over a sleeping $1. It's really angry!",
+      "PostEventString": "The attacker runs away, leaving $1 behind."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "You find a giant glowing crystal. It looks unlike all other gems you've seen so far. You hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "What will you do?"
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "Your Pokemon find cave moss in the tunnel's wall. It is said that it can be a very potent medicine.",
+      "PostEventString": "Your Pokemon eat some of the cave moss. Although it's very bitter, your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "Your Pokemon find cave moss in the tunnel's wall. It is said that it can be a very potent medicine.",
+      "PostEventString": "Your Pokemon eat some of the cave moss. Although it's very bitter, your Pokemon have recovered from status conditions."
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "A $1 is scared. It may have gotten lost in the tunnel.",
+      "PostEventString": "You let it go with you. Hopefully you can help it find the way out."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "A cloud of Zubat comes out of nowhere! They leave bites all over your Pokemon before flying away.",
+      "PostEventString": "Your team has sustained some damage during the encounter."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "Your Pokemon find cave moss in the tunnel's wall. It is said that it can be a very potent medicine.",
+      "PostEventString": "It was the wrong species! The bitterness is overwhelming and your Pokemon may be paralyzed."
+	  "SpecialParams": "par"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "Even deep in the tunnels, there's still trainers trying to battle. Doesn't seem you'll get awat from this one.",
+      "PostEventString": "After defeating the trainer, you go on your way."
+    },
+	{
+      "EventType": "ARCHAEOLOGIST",
+      "PreEventString": "A member of the Archaeological Society is in the tunnel digging for fossils.",
+      "PostEventString": "'No luck yet...', she says. 'But I found this plate. You can keep it''."
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "6 members of Team Paradox are hanging out in the tunnels. They seem to be doing something shady.",
+      "PostEventString": "One of them gives you a Move Disk as long as you go away."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Sandshrew",
+		"Zubat",
+		"Geodude-Alola",
+		"Geodude",
+		"Cubone",
+		"Gligar",
+		"Phanpy",
+		"Whismur",
+		"Aron",
+		"Roggenrola",
+		"Diglett",
+		"Diglett-Alola",
+		"Woobat",
+		"Drilbur",
+		"Rolycoly",
+		"Nacli"
+	],
+	[
+		"Sandslash",
+		"Golbat",
+		"Graveler-Alola",
+		"Graveler",
+		"Onix",
+		"Loudred",
+		"Sableye",
+		"Mawile",
+		"Lairon",
+		"Boldore",
+		"Dugtrio-Alola",
+		"Swoobat",
+		"Carbink",
+		"Carkol",
+		"Naclstack"
+	],
+	[
+		"Crobat",
+		"Golem",
+		"Golem-Alola",
+		"Marowak",
+		"Gliscor",
+		"Donphan",
+		"Exploud",
+		"Aggron",
+		"Gigalith",
+		"Dugtrio",
+		"Excadrill",
+		"Coalossal",
+		"Garganacl"
+	],
+	[
+		"Uxie",
+		"Mesprit",
+		"Azelf"
+	]
+  ],
+  "CommonItems": [
+		"Steel Gem",
+		"Dark Gem",
+		"Flying Gem",
+		"Rock Gem",
+		"Fighting Gem",
+		"Dragon Gem",
+		"Ghost Gem",
+		"Fire Gem",
+		"Psychic Gem",
+		"Water Gem",
+		"Grass Gem",
+		"Fairy Gem",
+		"Ground Gem",
+		"Bug Gem",
+		"Ice Gem",
+		"Electric Gem",
+		"Poison Gem",
+		"Normal Gem",
+		"Passho Berry",
+		"Yache Berry",
+		"Babiri Berry"
+  ],
+  "RareItems": [
+		"Damp Rock",
+		"Float Stone",
+		"Hard Stone",
+		"Heat Rock",
+		"Icy Rock",
+		"Lagging Tail",
+		"Metal Coat",
+		"Soft Sand",
+		"Smooth Rock"
+  ],
+  "Floors": [
+    {
+      "RoomColor": "DarkYellow",
+      "NeWallTile": "┌",
+      "NwWallTile": "┐",
+      "SeWallTile": "─",
+      "SwWallTile": "─",
+      "EWallTile": "└",
+      "WWallTile": "┘",
+      "NWallTile": "─",
+      "SWallTile": "─",
+	  "EWallPassageTile": "└",
+      "WWallPassageTile": "┘",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "DarkYellow",
+      "VerticalPassageTile": "║",
+      "ShortcutColor": "DarkYellow",
+      "NeShortcutTile": "◍",
+      "NwShortcutTile": "◍",
+      "SeShortcutTile": "◍",
+      "SwShortcutTile": "◍",
+      "HorizontalShortcutTile": "◍",
+      "VerticalShortcutTile": "◍",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": "Rock Smash"
+		}
+	  ],
+	  "ShortcutClue": "There's a smaller tunnel that you could crawl on, but it's completely filled with rocks.",
+	  "ShortcutResolution": "Your Pokemon used Rock Smash and cleared the way."
+    },
+	{
+      "RoomColor": "DarkYellow",
+      "NeWallTile": "∨",
+      "NwWallTile": "∨",
+      "SeWallTile": "─",
+      "SwWallTile": "─",
+      "EWallTile": " ",
+      "WWallTile": " ",
+      "NWallTile": "∨",
+      "SWallTile": "─",
+	  "EWallPassageTile": " ",
+      "WWallPassageTile": " ",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "DarkYellow",
+      "VerticalPassageTile": "║",
+      "ShortcutColor": "DarkGray",
+      "NeShortcutTile": "●",
+      "NwShortcutTile": "●",
+      "SeShortcutTile": "●",
+      "SwShortcutTile": "●",
+      "HorizontalShortcutTile": "●",
+      "VerticalShortcutTile": "●",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": "Dig"
+		}
+	  ],
+	  "ShortcutClue": "The soil in this area is soft. You may be able to dig a hole.",
+	  "ShortcutResolution": "Your Pokemon dug a hole and found a passage leading you down below."
+    },
+	{
+      "RoomColor": "Cyan",
+      "NeWallTile": "♦",
+      "NwWallTile": "✦",
+      "SeWallTile": "─",
+      "SwWallTile": "─",
+      "EWallTile": " ",
+      "WWallTile": " ",
+      "NWallTile": "◈",
+      "SWallTile": "─",
+	  "EWallPassageTile": "✧",
+      "WWallPassageTile": "◊",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": "◊",
+      "SWallShortcutTile": "◊",
+      "PassageColor": "Magenta",
+      "VerticalPassageTile": " ",
+      "ShortcutColor": "Magenta",
+      "NeShortcutTile": "✦",
+      "NwShortcutTile": "✦",
+      "SeShortcutTile": "✦",
+      "SwShortcutTile": "✦",
+      "HorizontalShortcutTile": "✦",
+      "VerticalShortcutTile": "✦",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": "Power Gem"
+		},
+		{
+			"ConditionType": "MOVE",
+			"Which": "Diamond Storm"
+		},
+		{
+			"ConditionType": "POKEMON",
+			"Which": "Diancie"
+		},
+		{
+			"ConditionType": "POKEMON",
+			"Which": "Sableye"
+		},
+		{
+			"ConditionType": "POKEMON",
+			"Which": "Carbink"
+		}
+	  ],
+	  "ShortcutClue": "You see a wall made of dense diamonds and gemstones. It's magnificent. You also see a way out refracted through the crystals. But you'll need a Pokemon that can understand gemstones perfectly to find a way through safely.",
+	  "ShortcutResolution": "Your partner Pokemon shines bright like a diamond. It helped you find the way."
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "You finally find an underground lake, and the gemstones embedded on the wall are reflected on the surface. In the center, a small Pokemon looks at you. It wants to test what lies within your heart.",
+    "PostEventString": "Through battle, you and the Pokemon are in sync for just a second. The creature is satisfied, and gives you $1 as a sign of respect."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "Even though it's dark, rest is important. You should find some time for a picnic.",
+    "PostEventString": "But now it's time to move on..."
+  },
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

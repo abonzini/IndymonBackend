@@ -480,12 +480,12 @@ namespace IndymonBackend
                 case RoomEventType.NPC_BATTLE:
                     {
                         TrainerData randomNpc = _backEndData.NpcData.Values.ToList()[_rng.Next(_backEndData.NpcData.Values.Count)]; // Get random npc
-                        randomNpc.DefineSets(_backEndData, 6, true, false); // Get into a trainer fight
+                        randomNpc.DefineSets(_backEndData, 3, true, false); // Get into a trainer fight
                         Console.WriteLine($"Fighting {randomNpc.Name}");
                         string npcString = roomEvent.PreEventString.Replace("$1", randomNpc.Name);
                         GenericMessageCommand(npcString); // Prints the message but we know it could have a $1
                         Console.Write("Encounter resolution: ");
-                        int remainingMons = ResolveEncounter(trainerData, randomNpc);
+                        int remainingMons = ResolveEncounter(trainerData, randomNpc, 3); // 3 Mon only for opp
                         if (remainingMons == 0) // Means player lost
                         {
                             Console.WriteLine("Player lost");
@@ -660,14 +660,15 @@ namespace IndymonBackend
         /// </summary>
         /// <param name="epxlorer">P1</param>
         /// <param name="encounter">P2</param>
+        /// <param name="nMons">P2 number of mons</param>
         /// <returns>How many mons P1 has left (0 means defeat)</returns>
-        int ResolveEncounter(TrainerData epxlorer, TrainerData encounter)
+        int ResolveEncounter(TrainerData epxlorer, TrainerData encounter, int nMons = int.MaxValue)
         {
             (int cursorX, int cursorY) = Console.GetCursorPosition(); // Just in case I need to write in same place
             Console.Write("About to simulate bots...");
             Console.ReadLine();
             BotBattle automaticBattle = new BotBattle(_backEndData); // Generate bot host
-            (int explorerLeft, _) = automaticBattle.SimulateBotBattle(epxlorer, encounter, int.MaxValue, int.MaxValue); // Initiate battle
+            (int explorerLeft, _) = automaticBattle.SimulateBotBattle(epxlorer, encounter, int.MaxValue, nMons); // Initiate battle
             Console.SetCursorPosition(cursorX, cursorY);
             Console.Write($"Explorer left with {explorerLeft} mons. GET THE REPLAY");
             return explorerLeft;

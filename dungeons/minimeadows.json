@@ -62,50 +62,39 @@
   "PokemonEachFloor": [
 	[
 		"Rattata",
-		"Rattata-Alola",
 		"Nidoran-F",
 		"Nidoran-M",
 		"Vulpix",
 		"Growlithe",
-		"Meowth",
 		"Ponyta",
 		"Doduo",
-		"Sentret",
 		"Mareep",
-		"Poochyena",
 		"Zigzagoon",
 		"Skitty",
 		"Electrike",
 		"Shinx",
 		"Patrat",
-		"Lillipup",
 		"Blitzle",
-		"Skiddo",
 		"Helioptile",
 		"Mudbray",
-		"Nickit",
 		"Wooloo",
-		"Tandemaus"
+		"Tandemaus",
+		"Litleo"
 	],
 	[
 		"Raticate",
-		"Raticate-Alola",
 		"Nidorina",
-		"Persian",
 		"Girafarig",
 		"Rapidash",
-		"Furret",
 		"Flaaffy",
 		"Stantler",
 		"Delcatty",
 		"Luxio",
 		"Watchog",
-		"Herdier",
-		"Gogoat",
 		"Heatmor",
-		"Thievul",
 		"Dubwool",
-		"Maushold"
+		"Maushold",
+		"Pyroar"
 	],
 	[
 		"Dodrio",
@@ -116,18 +105,17 @@
 		"Ninetales",
 		"Rhyhorn",
 		"Tauros-Paldea-Blaze",
-		"Mightyena",
 		"Linoone",
 		"Manectric",
 		"Zangoose",
 		"Seviper",
 		"Luxray",
-		"Stoutland",
 		"Unfezant",
 		"Zebstrika",
 		"Bouffalant",
 		"Heliolisk",
-		"Mudsdale"
+		"Mudsdale",
+		"Kangaskhan"
 	],
 	[
 		"Raikou",
@@ -273,7 +261,7 @@
   ],
   "BossEvent": {
     "EventType": "BOSS",
-    "PreEventString": "Before you stands a mighty creature. The alpha of the meadows. You'll need to face it to continue.",
+    "PreEventString": "Before you stands a mighty creature. The boss of the meadows. You'll need to face it to continue.",
     "PostEventString": "You've beaten the legendary Pokemon, the way ahead is clear."
   },
   "CampingEvent": {

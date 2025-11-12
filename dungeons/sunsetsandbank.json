@@ -62,7 +62,6 @@
   "PokemonEachFloor": [
 	[
 		"Tentacool",
-		"Slowpoke",
 		"Seel",
 		"Shellder",
 		"Krabby",
@@ -90,7 +89,6 @@
 		"Lapras",
 		"Qwilfish-Hisui",
 		"Corsola-Galar",
-		"Cursola",
 		"Octillery",
 		"Mantine",
 		"Sealeo",
@@ -102,9 +100,8 @@
 		"Palafin"
 	],
 	[
+		"Cursola",
 		"Tentacruel",
-		"Slowbro",
-		"Slowking",
 		"Cloyster",
 		"Kingdra",
 		"Starmie",
@@ -114,7 +111,8 @@
 		"Basculegion",
 		"Basculegion-F",
 		"Dhelmise",
-		"Barraskewda"
+		"Barraskewda",
+		"Alomomola"
 	],
 	[
 		"Phione",
@@ -262,8 +260,8 @@
   ],
   "BossEvent": {
     "EventType": "BOSS",
-    "PreEventString": "Even though it's dusk, you suddenly don't fell cold anymore. The sea begins to shine as your heart feels warm...",
-    "PostEventString": "The spirit of the sea bids you farewell. Deep inside, you know you just made a new friend ♥"
+    "PreEventString": "Even though it's getting dark, you suddenly don't feel cold anymore. The sea begins to shine as your heart feels warm...",
+    "PostEventString": "The angel of the sea bids you farewell. It gives you $1 as a sign of your eternal friendship ♥"
   },
   "CampingEvent": {
     "EventType": "CAMPING",

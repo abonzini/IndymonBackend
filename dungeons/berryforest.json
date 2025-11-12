@@ -76,8 +76,6 @@
 		"Burmy",
 		"Sewaddle",
 		"Venipede",
-		"Deerling",
-		"Foongus",
 		"Scatterbug",
 		"Fomantis",
 		"Morelull",
@@ -95,7 +93,6 @@
 		"Mothim",
 		"Swadloon",
 		"Whirlipede",
-		"Sawsbuck",
 		"Ferroseed",
 		"Vivillon",
 		"Lurantis",
@@ -116,7 +113,6 @@
 		"Yanmega",
 		"Leavanny",
 		"Scolipede",
-		"Amoonguss",
 		"Ferrothorn",
 		"Flapple",
 		"Appletun",
@@ -282,14 +278,14 @@
 				"Which": "Defog"
 		}
 	  ],
-	  "ShortcutClue": "The forest starts to become creepy, and the wai forward is covered in fog.",
+	  "ShortcutClue": "The forest starts to get a little creepy, and the way forward is covered in fog.",
 	  "ShortcutResolution": "You used defog to find a way through the forest's edge."
     }
   ],
   "BossEvent": {
     "EventType": "BOSS",
     "PreEventString": "You arrive at a clearing. The sun barely shining through the trees. The forest guardian is watching you, and eager to fight.",
-    "PostEventString": "The forest's guardian recognizes your power. It allows you to move forward, through the passage it was protecting."
+    "PostEventString": "The forest's guardian recognizes your power and gives you $1. It allows you to move forward through the passage it was protecting."
   },
   "CampingEvent": {
     "EventType": "CAMPING",

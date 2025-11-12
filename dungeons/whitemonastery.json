@@ -1,0 +1,290 @@
+{
+  "Name": "White Monastery",
+  "GoesDownwards": false,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "There's a golden chest on a nearby peak.",
+      "PostEventString": "Whith a lot of effort, you manage to climb and retrieve the treasure."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "A strong challenger approaches! $1 attacks you.",
+      "PostEventString": "You feel both of you have grown stronger today. The Pokemon gives you it's prized $1."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "You reach a remote temple. There's a glowing gem in the center: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "WILL YE GIVE AN ITEM FOR EVOLUTION? It asks. There's an offering urn and a pedestal where a pokemon may stand."
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "You meditate under the waterfall.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "You meditate under the waterfall.",
+      "PostEventString": "Your mind is clear and your Pokemon have grown healthier. They are unburdened from their status conditions."
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "A $1 looks you in the eye. It wants to become stronger, no matter the cost.",
+      "PostEventString": "It will join you and prove itself."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "There's a golden chest on a nearby peak.",
+      "PostEventString": "Unfortunately, you don't make it. You fall and injure yourself and your Pokemon."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "You meditate under the waterfall.",
+      "PostEventString": "It was freezing! Bad idea!",
+	  "SpecialParams": "frz"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "These sacred grounds are not only meant for Pokemon. Trainers also need to get stronger. A fellow trainer is ready to battle you.",
+      "PostEventString": "You feel both of you have grown stronger today."
+    },
+	{
+      "EventType": "ARCHAEOLOGIST",
+      "PreEventString": "An member of the Pokemon Research Society is also training.",
+      "PostEventString": "She's studying the sacred plates, looking for the secrets of life and death. She also gives you a plate, it's useless to her."
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "On a dark corner, you see a Team Paradox grunt.",
+      "PostEventString": "He tells you: ''Why train, just get Move Disks''. Gives you a free one, on the house."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Pidgey",
+		"Spearow",
+		"Mankey",
+		"Growlithe-Hisui",
+		"Machop",
+		"Tyrogue",
+		"Makuhita",
+		"Meditite",
+		"Starly",
+		"Timburr",
+		"Darumaka",
+		"Mienfoo",
+		"Rufflet",
+		"Fletchling",
+		"Pancham",
+		"Stufful",
+		"Jangmo-o",
+		"Rookidee",
+		"Kubfu"
+	],
+	[
+		"Pidgeotto",
+		"Fearow",
+		"Primeape",
+		"Machoke",
+		"Hitmonchan",
+		"Sneasel-Hisui",
+		"Medicham",
+		"Staravia",
+		"Gurdurr",
+		"Throh",
+		"Sawk",
+		"Braviary",
+		"Fletchinder",
+		"Pangoro",
+		"Bewear",
+		"Passimian",
+		"Hakamo-o",
+		"Corvisquire",
+		"Bombirdier"
+	],
+	[
+		"Pidgeot",
+		"Annihilape",
+		"Arcanine-Hisui",
+		"Machamp",
+		"Hitmontop",
+		"Hitmonlee",
+		"Sneasler",
+		"Hariyama",
+		"Staraptor",
+		"Conkeldurr",
+		"Darmanitan",
+		"Mienshao",
+		"Talonflame",
+		"Drampa",
+		"Kommo-o",
+		"Corviknight"
+	],
+	[
+		"Cobalion",
+		"Terrakion",
+		"Virizion"
+	]
+  ],
+  "CommonItems": [
+		"Health Feather",
+		"Muscle Feather",
+		"Resist Feather",
+		"Genius Feather",
+		"Clever Feather",
+		"Swift Feather",
+		"Scout Feather",
+		"Wall Feather",
+		"Scholar Feather",
+		"Force-Field Feather",
+		"Athlete Feather",
+		"Bruiser Feather",
+		"Danger Feather",
+		"Zen Feather",
+		"Assassin Feather",
+		"Phantom Feather",
+		"Tank Feather",
+		"Guardian Feather",
+		"Amnesia Feather",
+		"Sniper Feather",
+		"Mystic Feather"
+		"Payapa Berry",
+		"Charti Berry",
+		"Roseli Berry",
+  ],
+  "RareItems": [
+		"Rainbow Feather",
+		"Air Balloon",
+		"Fairy Feather",
+		"Iron Ball",
+		"King's Rock",
+		"Quick Claw",
+		"Sharp Beak",
+		"Black Belt",
+		"Expert Belt"
+  ],
+  "Floors": [
+    {
+      "RoomColor": "White",
+      "NeWallTile": "▙",
+      "NwWallTile": "▟",
+      "SeWallTile": "│",
+      "SwWallTile": "│",
+      "EWallTile": "│",
+      "WWallTile": "│",
+      "NWallTile": "▉",
+      "SWallTile": " ",
+	  "EWallPassageTile": "├",
+      "WWallPassageTile": "┤",
+      "NWallPassageTile": "▉",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": "▉",
+      "SWallShortcutTile": " ",
+      "PassageColor": "DarkYellow",
+      "VerticalPassageTile": "▤",
+      "ShortcutColor": "Cyan",
+      "NeShortcutTile": "╮",
+      "NwShortcutTile": "╭",
+      "SeShortcutTile": "╯",
+      "SwShortcutTile": "╰",
+      "HorizontalShortcutTile": "─",
+      "VerticalShortcutTile": "│",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": "Strength"
+		},
+		{
+			"ConditionType": "MOVE",
+			"Which": "Heal Bell"
+		},
+		{
+			"ConditionType": "POKEMON",
+			"Which": "Bronzong"
+		}
+	  ],
+	  "ShortcutClue": "Before you is a massive bell. A sign says: 'Those with the strength to ring the bell will find the way forward'.",
+	  "ShortcutResolution": "As the bell rings, a magical passage opens up."
+    },
+	{
+      "RoomColor": "White",
+      "NeWallTile": "╗",
+      "NwWallTile": "╔",
+      "SeWallTile": "╝",
+      "SwWallTile": "╚",
+      "EWallTile": "║",
+      "WWallTile": "║",
+      "NWallTile": "═",
+      "SWallTile": "═",
+	  "EWallPassageTile": "╠",
+      "WWallPassageTile": "╣",
+      "NWallPassageTile": "╩",
+      "SWallPassageTile": "╦",
+      "NWallShortcutTile": "╩",
+      "SWallShortcutTile": "╤",
+      "PassageColor": "White",
+      "VerticalPassageTile": "║",
+      "ShortcutColor": "DarkGray",
+      "NeShortcutTile": "▪",
+      "NwShortcutTile": "▪",
+      "SeShortcutTile": "▪",
+      "SwShortcutTile": "▪",
+      "HorizontalShortcutTile": "▪",
+      "VerticalShortcutTile": "▪",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": "Rock Climb"
+		}
+	  ],
+	  "ShortcutClue": "Before you is the white face of a cliff. The summit is ahead, you may be able to climb the rocks, if you're brave enough.",
+	  "ShortcutResolution": "You have defeated the mighty mountain. You're almost at the summit."
+    },
+	{
+      "RoomColor": "DarkGray",
+      "NeWallTile": "▲",
+      "NwWallTile": "▲",
+      "SeWallTile": "▲",
+      "SwWallTile": "▲",
+      "EWallTile": "▲",
+      "WWallTile": "▲",
+      "NWallTile": "▲",
+      "SWallTile": "▲",
+	  "EWallPassageTile": "⌒",
+      "WWallPassageTile": "⌒",
+      "NWallPassageTile": "⌒",
+      "SWallPassageTile": "⌒",
+      "NWallShortcutTile": "▲",
+      "SWallShortcutTile": "▲",
+      "PassageColor": "DarkGray",
+      "VerticalPassageTile": "∧",
+      "ShortcutColor": "White",
+      "NeShortcutTile": "∽",
+      "NwShortcutTile": "∽",
+      "SeShortcutTile": "∽",
+      "SwShortcutTile": "∽",
+      "HorizontalShortcutTile": "∽",
+      "VerticalShortcutTile": "∽",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": "Fly"
+		}
+	  ],
+	  "ShortcutClue": "You can't believe what you see. In the distance, there's a floating castle on the clouds.",
+	  "ShortcutResolution": "You fly into the unknown, into a place few have even seen."
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "Nothing left to be said. Time to show $1 how much you've progressed.",
+    "PostEventString": "You have passed your trial. Take this $1, you've earned it."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "Proper recovery and rest are just as important as training itself. It's time to take a small break.",
+    "PostEventString": "But now it's time to move on..."
+  },
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}
