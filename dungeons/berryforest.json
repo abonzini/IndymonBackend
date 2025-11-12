@@ -49,14 +49,14 @@
       "PostEventString": "After defeating the trainer, you go on your way."
     },
 	{
-      "EventType": "ARCHAEOLOGIST",
+      "EventType": "RESEARCHER",
       "PreEventString": "Deep in the forest, you see some ruins.",
       "PostEventString": "They're the ruins of an old shrine, and in a central altar you find a plate."
     },
 	{
       "EventType": "PARADOX",
       "PreEventString": "A shady figure approaches you in the forest.",
-      "PostEventString": "It's a member of Team Paradox! They give you a move disk. 'First one's free!'"
+      "PostEventString": "It's a member of Team Paradox! They give you a $1. 'First one's free!'"
     }
   ],
   "PokemonEachFloor": [

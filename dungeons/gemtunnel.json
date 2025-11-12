@@ -40,8 +40,8 @@
 	{
       "EventType": "STATUS_TRAP",
       "PreEventString": "Your Pokemon find cave moss in the tunnel's wall. It is said that it can be a very potent medicine.",
-      "PostEventString": "It was the wrong species! The bitterness is overwhelming and your Pokemon may be paralyzed."
-	  "SpecialParams": "par"
+      "PostEventString": "It was the wrong species! The bitterness is overwhelming and your Pokemon may be paralyzed.",
+      "SpecialParams": "par"
     },
 	{
       "EventType": "NPC_BATTLE",
@@ -49,14 +49,14 @@
       "PostEventString": "After defeating the trainer, you go on your way."
     },
 	{
-      "EventType": "ARCHAEOLOGIST",
-      "PreEventString": "A member of the Archaeological Society is in the tunnel digging for fossils.",
+      "EventType": "RESEARCHER",
+      "PreEventString": "A member of the Pokemon Research Society is in the tunnel digging for fossils.",
       "PostEventString": "'No luck yet...', she says. 'But I found this plate. You can keep it''."
     },
 	{
       "EventType": "PARADOX",
       "PreEventString": "6 members of Team Paradox are hanging out in the tunnels. They seem to be doing something shady.",
-      "PostEventString": "One of them gives you a Move Disk as long as you go away."
+      "PostEventString": "One of them gives you $1 as long as you go away."
     }
   ],
   "PokemonEachFloor": [

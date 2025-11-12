@@ -232,6 +232,7 @@ namespace IndymonBackend
     }
     public abstract class Tournament
     {
+        protected bool _official = true;
         public int NPlayers { get; set; } = 0;
         public int NMons { get; set; } = 3;
         public List<string> Participants { get; set; } = new List<string>();
@@ -434,12 +435,29 @@ namespace IndymonBackend
         /// <param name="backend">Backend for extra data</param>
         protected void SetTournamentWinner(string winnerName, TournamentHistory leaderboard, DataContainers backend)
         {
+            if (!_official) return; // Non official tournaments are not tallied
             List<PlayerAndStats> winnerLocation = null;
             if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
             else if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?
             else { } // Never mind then
             PlayerAndStats winnerStats = winnerLocation?.FirstOrDefault(p => (p.Name == winnerName));
             if (winnerStats != null) winnerStats.TournamentWins++;
+        }
+        /// <summary>
+        /// Checks if certain tournaments are official or not (just to set official tournament wins)
+        /// </summary>
+        protected void AskIfOfficial()
+        {
+            Console.WriteLine("Is this an official (sanctioned) tournament? Y/n");
+            string response = Console.ReadLine();
+            if (response.Trim().ToLower() == "n")
+            {
+                _official = false;
+            }
+            else
+            {
+                _official = true;
+            }
         }
     }
     public class ElimTournament : Tournament
@@ -453,6 +471,7 @@ namespace IndymonBackend
         public int[] SeedOrder { get; set; }
         public override void RequestAdditionalInfo()
         {
+            AskIfOfficial();
         }
         public override void ResetTournament()
         {
@@ -757,6 +776,7 @@ namespace IndymonBackend
         public List<TournamentMatch> MatchHistory { get; set; } = null;
         public override void RequestAdditionalInfo()
         {
+            AskIfOfficial();
         }
         public override void ResetTournament()
         {

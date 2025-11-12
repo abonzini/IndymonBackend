@@ -326,11 +326,25 @@ namespace IndymonBackend
                     }
                     break;
                 case RoomEventType.EVO:
-                case RoomEventType.ARCHAEOLOGIST:
-                case RoomEventType.PARADOX:
                     Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
                     GenericMessageCommand(roomEvent.PreEventString);
+                    AddItemPrize("EVOLUTION OPPORTUNITY", prizes);
                     GenericMessageCommand(roomEvent.PostEventString);
+                    break;
+                case RoomEventType.RESEARCHER:
+                    Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
+                    GenericMessageCommand(roomEvent.PreEventString);
+                    AddItemPrize("RANDOM PLATE", prizes);
+                    GenericMessageCommand(roomEvent.PostEventString);
+                    break;
+                case RoomEventType.PARADOX:
+                    Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
+                    string obtainedDisk = _backEndData.MoveItemData.Keys.ToList()[_rng.Next(_backEndData.MoveItemData.Count)]; // Get random move disk
+                    string messageString = roomEvent.PreEventString.Replace("$1", obtainedDisk);
+                    GenericMessageCommand(messageString);
+                    AddItemPrize("obtainedDisk", prizes);
+                    messageString = roomEvent.PostEventString.Replace("$1", obtainedDisk);
+                    GenericMessageCommand(messageString);
                     break;
                 case RoomEventType.HEAL:
                     {

@@ -49,14 +49,14 @@
       "PostEventString": "So annoying... If you wanted a trainer battle you could've participated in a tournament."
     },
 	{
-      "EventType": "ARCHAEOLOGIST",
+      "EventType": "RESEARCHER",
       "PreEventString": "An member of the Pokemon Research Society is busy exploring some stool samples.",
       "PostEventString": "''Can't you see I'm busy?'' They say, they give you a plate they found on the ground, and send you on your way."
     },
 	{
       "EventType": "PARADOX",
-      "PreEventString": "In the mud, you find an old backpack. It has the P logo, from team Paradox.",
-      "PostEventString": "Theres no ID inside, but you find an old Move Disk."
+      "PreEventString": "In the mud, you find an old backpack. It has the Team Paradox logo, from team Paradox.",
+      "PostEventString": "Theres no ID inside, but you find an old $1."
     }
   ],
   "PokemonEachFloor": [

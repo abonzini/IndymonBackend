@@ -49,14 +49,14 @@
       "PostEventString": "Truly a duel for the ages... But it's time to move on."
     },
 	{
-      "EventType": "ARCHAEOLOGIST",
+      "EventType": "RESEARCHER",
       "PreEventString": "An member of the Pokemon Research Society is sunbathing.",
       "PostEventString": "He's reading a plate, but it's clear they don't really understand what it says. 'Well maybe you'll have better luck'"
     },
 	{
       "EventType": "PARADOX",
       "PreEventString": "A Team Paradox grunt is on a makeshift kiosk selling bootleg Move Disks.",
-      "PostEventString": "When he sees you' he starts getting nervous. ''I'm leaving soon, I swear''. He gaves you a Move Disk for your silence."
+      "PostEventString": "When he sees you' he starts getting nervous. ''I'm leaving soon, I swear''. He gaves you a $1 for your silence."
     }
   ],
   "PokemonEachFloor": [

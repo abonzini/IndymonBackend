@@ -18,7 +18,7 @@ namespace ParsersAndData
         DAMAGE_TRAP, // Trap deals 25% hp damage
         STATUS_TRAP, // Each mon 33% has a chance of getting a status effect
         NPC_BATTLE, // A trainer npc battles you
-        ARCHAEOLOGIST, // Archaeologist gives you a random plate
+        RESEARCHER, // RESEARCHER gives you a random plate
         PARADOX, // Paradox Team member gives you a TR
     }
     public class RoomEvent
