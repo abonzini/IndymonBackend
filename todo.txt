@@ -1,4 +1,2 @@
+-glossary
 -shop
--item glossary
--npcs
-- Exploration with no team preview

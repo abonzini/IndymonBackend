@@ -18,7 +18,7 @@ namespace ShowdownBot
         /// <param name="nMons1">Number of mons in first player team</param>
         /// <param name="nMons2">Number of mons in second player team</param>
         /// <returns>The score</returns>
-        public (int, int) SimulateBotBattle(TrainerData player1, TrainerData player2, int nMons1, int nMons2)
+        public (int, int) SimulateBotBattle(TrainerData player1, TrainerData player2, int nMons1, int nMons2, string gameType)
         {
             BasicShowdownBot acceptBot = new BasicShowdownBot(_backend);
             acceptBot.Verbose = false;
@@ -39,7 +39,7 @@ namespace ShowdownBot
             }
             // Now I challenge
             Thread.Sleep(10);
-            challengeBot.Challenge(acceptBot.BotName, "Custom Game", nMons1);
+            challengeBot.Challenge(acceptBot.BotName, gameType, nMons1);
             while ((acceptBot.GetState() != BotState.GAME_DONE) || (challengeBot.GetState() != BotState.GAME_DONE))
             {
                 if (acceptBot.GetState() == BotState.BEING_CHALLENGED)

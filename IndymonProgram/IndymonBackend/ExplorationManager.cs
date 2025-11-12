@@ -668,7 +668,8 @@ namespace IndymonBackend
             Console.Write("About to simulate bots...");
             Console.ReadLine();
             BotBattle automaticBattle = new BotBattle(_backEndData); // Generate bot host
-            (int explorerLeft, _) = automaticBattle.SimulateBotBattle(epxlorer, encounter, int.MaxValue, nMons); // Initiate battle
+            string challengeString = "gen9customgame@@@!Team Preview,OHKO Clause,Evasion Moves Clause,Accuracy Moves Clause,Moody Clause";
+            (int explorerLeft, _) = automaticBattle.SimulateBotBattle(epxlorer, encounter, int.MaxValue, nMons, challengeString); // Initiate battle
             Console.SetCursorPosition(cursorX, cursorY);
             Console.Write($"Explorer left with {explorerLeft} mons. GET THE REPLAY");
             return explorerLeft;

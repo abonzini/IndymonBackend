@@ -95,7 +95,7 @@ namespace ShowdownBot
                 string command = "|/utm " + packedTeamData;
                 byte[] commandBytes = Encoding.UTF8.GetBytes(command);
                 _socket.SendAsync(new ArraySegment<byte>(commandBytes), WebSocketMessageType.Text, true, default).Wait();
-                command = $"|/challenge {opponentName}, {format}";
+                command = $"|/challenge {opponentName},{format}";
                 commandBytes = Encoding.UTF8.GetBytes(command);
                 _socket.SendAsync(new ArraySegment<byte>(commandBytes), WebSocketMessageType.Text, true, default).Wait();
                 CurrentState = BotState.IN_FIGHT; // Opp wont reject

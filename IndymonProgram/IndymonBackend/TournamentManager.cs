@@ -303,7 +303,8 @@ namespace IndymonBackend
                     TrainerData p1 = Utilities.GetTrainerByName(match.Player1, backendData);
                     TrainerData p2 = Utilities.GetTrainerByName(match.Player2, backendData);
                     BotBattle automaticBattle = new BotBattle(backendData);
-                    (match.Score1, match.Score2) = automaticBattle.SimulateBotBattle(p1, p2, NMons, NMons);
+                    string challengeString = "gen9customgame@@@OHKO Clause,Evasion Moves Clause,Accuracy Moves Clause,Moody Clause";
+                    (match.Score1, match.Score2) = automaticBattle.SimulateBotBattle(p1, p2, NMons, NMons, challengeString);
                     Console.SetCursorPosition(cursorX, cursorY);
                     Console.Write($"{match.Score1}-{match.Score2} GET THE REPLAY");
                 }
