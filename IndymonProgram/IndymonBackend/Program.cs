@@ -319,7 +319,7 @@ namespace IndymonBackend
             using HttpClient client = new HttpClient();
             string csv = client.GetStringAsync(url).GetAwaiter().GetResult();
             // Trainer card format
-            const int xSize = 10, ySize = 18; // Dimensions of the trainer cards in row-col
+            const int xSize = 11, ySize = 19; // Dimensions of the trainer cards in row-col (includes left-top padding)
             int verticalAmount, horizontalAmount;
             string[] rows = csv.Split("\n");
             // Verify vertical cards
@@ -333,10 +333,10 @@ namespace IndymonBackend
             trainerData.Clear(); // Empty list, will load from scratch
             for (int cardY = 0; cardY < verticalAmount; cardY++)
             {
-                int offsetY = cardY * ySize;
+                int offsetY = cardY * ySize + 1; // Add the +1 to start csv processign after margin
                 for (int cardX = 0; cardX < horizontalAmount; cardX++)
                 {
-                    int offsetX = cardX * xSize;
+                    int offsetX = cardX * xSize + 1; // Add the +1 to start csv processign after margin
                     // Now parse all
                     // Row 0, contains picture, Name, auto-flags
                     csvFields = rows[offsetY + 0].Split(",");
