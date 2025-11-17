@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "You reach a remote temple. There's a glowing gem in the center: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "WILL YE GIVE AN ITEM FOR EVOLUTION? It asks. There's an offering urn and a pedestal where a pokemon may stand."
+      "PostEventString": "You decided to come back here after your exploration finishes."
     },
 	{
       "EventType": "HEAL",
@@ -40,7 +40,7 @@
 	{
       "EventType": "STATUS_TRAP",
       "PreEventString": "You meditate under the waterfall.",
-      "PostEventString": "It was freezing! Bad idea!",
+      "PostEventString": "The water was freezing! Bad idea! One of your Pokemon now has frostbite.",
 	  "SpecialParams": "frz"
     },
 	{

@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "You find a giant glowing crystal. It looks unlike all other gems you've seen so far. You hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "What will you do?"
+      "PostEventString": "You decided to come back here after your exploration finishes."
     },
 	{
       "EventType": "HEAL",
@@ -40,7 +40,7 @@
 	{
       "EventType": "STATUS_TRAP",
       "PreEventString": "Your Pokemon find cave moss in the tunnel's wall. It is said that it can be a very potent medicine.",
-      "PostEventString": "It was the wrong species! The bitterness is overwhelming and your Pokemon may be paralyzed.",
+      "PostEventString": "It was the wrong species! The bitterness is overwhelming and one your Pokemon got paralyzed.",
       "SpecialParams": "par"
     },
 	{
@@ -76,7 +76,8 @@
 		"Woobat",
 		"Drilbur",
 		"Rolycoly",
-		"Nacli"
+		"Nacli",
+        "Noibat"
 	],
 	[
 		"Sandslash",
@@ -108,7 +109,8 @@
 		"Dugtrio",
 		"Excadrill",
 		"Coalossal",
-		"Garganacl"
+		"Garganacl",
+        "Noivern"
 	],
 	[
 		"Uxie",

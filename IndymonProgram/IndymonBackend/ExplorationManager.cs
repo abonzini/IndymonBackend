@@ -389,16 +389,28 @@ namespace IndymonBackend
                     break;
                 case RoomEventType.STATUS_TRAP:
                     {
-                        Console.WriteLine("A trap that has a 33% chance of statusing a mon");
+                        Console.WriteLine("A trap that has will status one mon");
                         string status = roomEvent.SpecialParams;
+                        List<PokemonSet> possibleMons = new List<PokemonSet>();
                         GenericMessageCommand(roomEvent.PreEventString);
                         foreach (PokemonSet mon in trainerData.Teamsheet)
                         {
-                            if (_rng.Next(100) < 33) // 33% chance
+                            if (mon.ExplorationStatus.NonVolatileStatus == "")
                             {
-                                mon.ExplorationStatus.NonVolatileStatus = status;
+                                possibleMons.Add(mon);
                             }
                         }
+                        // Choose a mon without status as priority otherwise any mon will have it overriden
+                        PokemonSet statusedMon;
+                        if (possibleMons.Count > 0)
+                        {
+                            statusedMon = possibleMons[_rng.Next(possibleMons.Count - 1)];
+                        }
+                        else
+                        {
+                            statusedMon = trainerData.Teamsheet[_rng.Next(trainerData.Teamsheet.Count)];
+                        }
+                        statusedMon.ExplorationStatus.NonVolatileStatus = status;
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
@@ -509,6 +521,7 @@ namespace IndymonBackend
                         else
                         {
                             Console.WriteLine("Player won");
+                            AddItemPrize("Some 2 IMP", prizes);
                             GenericMessageCommand(roomEvent.PostEventString);
                         }
                     }

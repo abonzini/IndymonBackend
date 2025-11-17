@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "In the middle of a field, you find a giant glowing crystal. Suddenly, you hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "The crystal has a slot where you may put an item, and a pedestal where a pokemon can stand on. What will you do?"
+      "PostEventString": "You decided to come back here after your exploration finishes."
     },
 	{
       "EventType": "HEAL",
@@ -30,7 +30,7 @@
 	{
       "EventType": "JOINER",
       "PreEventString": "While walking, you find a lonely $1... It looks scared...",
-      "PostEventString": "After seeing you, he wants to join you and your team!"
+      "PostEventString": "You offer to protect it. It is shy but ends up joining the exploration team!"
     },
 	{
       "EventType": "DAMAGE_TRAP",

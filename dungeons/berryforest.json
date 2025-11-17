@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "Shining in the middle of a clearing, you find a giant glowing crystal. Suddenly, you hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "The crystal has a slot where you may put an item, and a pedestal where a pokemon can stand on. What will you do?"
+      "PostEventString": "You decided to come back here after your exploration finishes."
     },
 	{
       "EventType": "HEAL",
@@ -40,7 +40,7 @@
 	{
       "EventType": "STATUS_TRAP",
       "PreEventString": "You find a pile of berries on the floor. You and your Pokemon dig in.",
-      "PostEventString": "However, some of them were in a bad state. Some Pokemon got food poisoning...",
+      "PostEventString": "However, some of them were in a bad state. One of your Pokemon got food poisoning...",
 	  "SpecialParams": "psn"
     },
 	{

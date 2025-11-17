@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "Deep in the water, you see a glowing crystal. A voice sounds in your mind: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "You hear a second voice: WILL YE GIVE AN ITEM FOR EVOLUTION? What do you do?"
+      "PostEventString": "You decided to come back here after your exploration finishes."
     },
 	{
       "EventType": "HEAL",
@@ -39,8 +39,8 @@
     },
 	{
       "EventType": "STATUS_TRAP",
-      "PreEventString": "As it gets darker, it also gets cold...",
-      "PostEventString": "It was nice and refreshing before, but after taking a swim at the sea, some Pokemon are starting to feel frostbite.",
+      "PreEventString": "As you walk knee-deep in the water, it starts to get cold as the sun sets...",
+      "PostEventString": "A Pokemon in your team has frostbite due to the cold water.",
 	  "SpecialParams": "frz"
     },
 	{
