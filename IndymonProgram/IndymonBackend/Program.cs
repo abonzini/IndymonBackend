@@ -340,7 +340,7 @@ namespace IndymonBackend
                     // Now parse all
                     // Row 0, contains picture, Name, auto-flags
                     csvFields = rows[offsetY + 0].Split(",");
-                    string trainerName = csvFields[offsetX + 2].Trim().ToLower();
+                    string trainerName = csvFields[offsetX + 2].Split('(')[0].Trim().ToLower(); // Trainer now keeps the left of whatever's on (
                     if (trainerName == "") continue;
                     TrainerData newTrainer = new TrainerData();
                     newTrainer.Name = trainerName;
