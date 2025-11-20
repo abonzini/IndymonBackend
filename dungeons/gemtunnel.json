@@ -77,7 +77,8 @@
 		"Drilbur",
 		"Rolycoly",
 		"Nacli",
-        "Noibat"
+        "Noibat",
+		"Nosepass"
 	],
 	[
 		"Sandslash",
@@ -94,7 +95,11 @@
 		"Swoobat",
 		"Carbink",
 		"Carkol",
-		"Naclstack"
+		"Naclstack",
+		"Probopass",
+		"Glimmet",
+		"Rhyhorn",
+		"Rhydon"
 	],
 	[
 		"Crobat",
@@ -110,7 +115,9 @@
 		"Excadrill",
 		"Coalossal",
 		"Garganacl",
-        "Noivern"
+        "Noivern",
+		"Glimmora",
+		"Rhyperior"
 	],
 	[
 		"Uxie",
