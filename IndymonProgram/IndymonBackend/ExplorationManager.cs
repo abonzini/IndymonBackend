@@ -77,7 +77,7 @@ namespace IndymonBackend
             Trainer = options[int.Parse(Console.ReadLine()) - 1];
             // Finally, try to define teamsheet
             TrainerData trainerData = _backEndData.TrainerData[Trainer];
-            trainerData.DefineSets(_backEndData, int.MaxValue, true, true); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status)
+            trainerData.ConfirmSets(_backEndData, int.MaxValue, true, true); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status)
         }
         public void InitializeNextDungeon()
         {
@@ -306,7 +306,7 @@ namespace IndymonBackend
                             AutoTeam = true,
                             Teamsheet = [alphaPokemon], // Only mon in the teamsheet
                         };
-                        alphaTeam.DefineSets(_backEndData, int.MaxValue, false, false); // Randomize enemy team (movesets, etc)
+                        alphaTeam.ConfirmSets(_backEndData, int.MaxValue, false, false); // Randomize enemy team (movesets, etc)
                         Console.Write("Encounter resolution: ");
                         int remainingMons = ResolveEncounter(trainerData, alphaTeam);
                         if (remainingMons == 0) // Means player lost
@@ -457,7 +457,7 @@ namespace IndymonBackend
                             AutoTeam = true,
                             Teamsheet = encounterPokemon,
                         };
-                        wildMonTeam.DefineSets(_backEndData, int.MaxValue, false, false); // Randomize enemy team (movesets, etc)
+                        wildMonTeam.ConfirmSets(_backEndData, int.MaxValue, false, false); // Randomize enemy team (movesets, etc)
                         Console.Write("Encounter resolution: ");
                         int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
                         if (remainingMons == 0) // Means player lost
@@ -506,7 +506,7 @@ namespace IndymonBackend
                 case RoomEventType.NPC_BATTLE:
                     {
                         TrainerData randomNpc = _backEndData.NpcData.Values.ToList()[_rng.Next(_backEndData.NpcData.Values.Count)]; // Get random npc
-                        randomNpc.DefineSets(_backEndData, 3, true, false); // Get into a trainer fight
+                        randomNpc.ConfirmSets(_backEndData, 3, true, false); // Get into a trainer fight
                         Console.WriteLine($"Fighting {randomNpc.Name}");
                         string npcString = roomEvent.PreEventString.Replace("$1", randomNpc.Name);
                         GenericMessageCommand(npcString); // Prints the message but we know it could have a $1
@@ -552,6 +552,14 @@ namespace IndymonBackend
                             {
                                 canTakeShortcut = true;
                                 break;
+                            }
+                            if (_backEndData.MoveItemData.ContainsKey(pokemon.Item.Name.ToLower()))
+                            {
+                                if (_backEndData.MoveItemData[pokemon.Item.Name.ToLower()].Contains(valueToCheck))
+                                {
+                                    canTakeShortcut = true;
+                                    break;
+                                }
                             }
                         }
                         break;

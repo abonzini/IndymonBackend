@@ -68,6 +68,48 @@ namespace ParsersAndData
             return $"{Species}: {Ability}, {string.Join('-', Moves)}, {Item?.Name}";
         }
         /// <summary>
+        /// Triggers randomizing of mon but with some extra manual checks and confirmations. Allows to randomize single mon instrad of whole team
+        /// </summary>
+        /// <param name="backEndData">Back end data needed to choose things accurately</param>
+        /// <param name="smart">Smart randomization uses the AI list</param>
+        public void RandomizeAndVerify(DataContainers backEndData, bool smart)
+        {
+            bool acceptedMon = false;
+            Pokemon pokemonBackendData = backEndData.Dex[Species];
+            while (!acceptedMon)
+            {
+                // Randomize mon, with a 7% chance of each move being empty (1->18%, 2->1.3%, 3->0.003%)
+                RandomizeMon(backEndData, smart, 7); // Randomize mon
+                // Show it to user, user will decide if redo or revise (banning sets for the future)
+                Console.WriteLine($"\t\tSet for {ToString()}");
+                Console.WriteLine("\t\tTo modify AI for future: 5: ban ability. 1-4 ban moves. Otherwise this mon is approved. 0 to reroll the whole thing");
+                string inputString = Console.ReadLine().ToLower();
+                switch (inputString)
+                {
+                    case "5":
+                        pokemonBackendData.AiAbilityBanlist.Add(Ability);
+                        break;
+                    case "1":
+                        pokemonBackendData.AiMoveBanlist.Add(Moves[0]);
+                        break;
+                    case "2":
+                        pokemonBackendData.AiMoveBanlist.Add(Moves[1]);
+                        break;
+                    case "3":
+                        pokemonBackendData.AiMoveBanlist.Add(Moves[2]);
+                        break;
+                    case "4":
+                        pokemonBackendData.AiMoveBanlist.Add(Moves[3]);
+                        break;
+                    case "0":
+                        break; // Rejects te mon
+                    default:
+                        acceptedMon = true;
+                        break;
+                }
+            }
+        }
+        /// <summary>
         /// Randomizes this mon's sets (ability+moves)
         /// </summary>
         /// <param name="backendData">Data to get mon's moves, etc</param>
@@ -308,7 +350,7 @@ namespace ParsersAndData
         /// <param name="nMons">How many mons to perform this operation on</param>
         /// <param name="smart">Whether pokemon are smart (use ai banlist)</param>
         /// <param name="exploration">Whether pokemon need to be initialized as part of an exploration (with hp and status)</param>
-        public void DefineSets(DataContainers backEndData, int nMons, bool smart, bool exploration)
+        public void ConfirmSets(DataContainers backEndData, int nMons, bool smart, bool exploration)
         {
             Console.WriteLine($"\tChecking {Name}'s team");
             // Shuffle teams and sets if auto-team
@@ -320,40 +362,7 @@ namespace ParsersAndData
                 for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
                 {
                     PokemonSet pokemonSet = Teamsheet[i];
-                    bool acceptedMon = false;
-                    Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Species];
-                    while (!acceptedMon)
-                    {
-                        // Randomize mon, with a 7% chance of each move being empty (1->18%, 2->1.3%, 3->0.003%)
-                        pokemonSet.RandomizeMon(backEndData, smart, 7); // Randomize mon
-                        // Show it to user, user will decide if redo or revise (banning sets for the future)
-                        Console.WriteLine($"\t\tSet for {pokemonSet.ToString()}");
-                        Console.WriteLine("\t\tTo modify AI for future: 5: ban ability. 1-4 ban moves. Otherwise this mon is approved. 0 to reroll the whole thing");
-                        string inputString = Console.ReadLine().ToLower();
-                        switch (inputString)
-                        {
-                            case "5":
-                                pokemonBackendData.AiAbilityBanlist.Add(pokemonSet.Ability);
-                                break;
-                            case "1":
-                                pokemonBackendData.AiMoveBanlist.Add(pokemonSet.Moves[0]);
-                                break;
-                            case "2":
-                                pokemonBackendData.AiMoveBanlist.Add(pokemonSet.Moves[1]);
-                                break;
-                            case "3":
-                                pokemonBackendData.AiMoveBanlist.Add(pokemonSet.Moves[2]);
-                                break;
-                            case "4":
-                                pokemonBackendData.AiMoveBanlist.Add(pokemonSet.Moves[3]);
-                                break;
-                            case "0":
-                                break; // Rejects te mon
-                            default:
-                                acceptedMon = true;
-                                break;
-                        }
-                    }
+                    pokemonSet.RandomizeAndVerify(backEndData, smart);
                 }
             }
             // Shuffle items if auto-item

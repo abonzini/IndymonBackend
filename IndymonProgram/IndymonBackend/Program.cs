@@ -384,6 +384,11 @@ namespace IndymonBackend
                                 newMon.Item = newItem;
                             }
                         }
+                        // Emergency check, ensure mon is legal (ability + atleast one move)
+                        if (newMon.Ability == "" || !newMon.Moves.Any(m => m != "")) // If no ability or no non-"" move, then there's a problem!
+                        {
+                            newMon.RandomizeAndVerify(_allData.DataContainer, true); // Randomize + verify that mon has a set
+                        }
                         newTrainer.Teamsheet.Add(newMon);
                     }
                     // Then, row 14 contains the 1-use consumable items
