@@ -394,8 +394,8 @@ namespace IndymonBackend
                     csvFields = rows[offsetY + 14].Split(",");
                     for (int item = 0; item < 8; item++)
                     {
-                        // First field is the trainer data label, not an actual item
-                        string nextItem = csvFields[offsetX + 1 + item].Trim().ToLower();
+                        // First 2 fields is the trainer data label, not an actual item
+                        string nextItem = csvFields[offsetX + 2 + item].Trim().ToLower();
                         if (nextItem == "") break; // End if no more items
                         // Otherwise add to bag
                         newTrainer.BattleItems.Add(new Item() { Name = nextItem, Uses = 1 }); // Always 1 use these ones
@@ -404,11 +404,11 @@ namespace IndymonBackend
                     csvFields = rows[offsetY + 15].Split(",");
                     for (int item = 0; item < 4; item++)
                     {
-                        // First field is the trainer data label, not an actual item
-                        string nextItem = csvFields[offsetX + 1 + (2 * item)].Trim().ToLower();
+                        // First 2 fields is the trainer data label, not an actual item
+                        string nextItem = csvFields[offsetX + 2 + (2 * item)].Trim().ToLower();
                         if (nextItem == "") break; // End if no more items
                         // Otherwise add to bag
-                        int usesNumber = int.Parse(csvFields[offsetX + 2 + (2 * item)]);
+                        int usesNumber = int.Parse(csvFields[offsetX + 3 + (2 * item)]);
                         newTrainer.BattleItems.Add(new Item() { Name = nextItem, Uses = usesNumber }); // Always 1 use these ones
                     }
                     trainerData.Add(newTrainer.Name, newTrainer);
