@@ -56,7 +56,6 @@ namespace ParsersAndData
     {
         public string NickName { get; set; }
         public string Species { get; set; }
-        public string Gender { get; set; }
         public bool Shiny { get; set; }
         public string Ability { get; set; }
         public string[] Moves { get; set; } = new string[4];
@@ -257,8 +256,7 @@ namespace ParsersAndData
             // Now to assemble the final pokepaste
             StringBuilder resultBuilder = new StringBuilder();
             string pokemonName = (NickName != "") ? $"{NickName} ({Species})" : Species;
-            string nameString = (Gender != "") ? $"{pokemonName} ({Gender.ToUpper()})" : pokemonName;
-            resultBuilder.Append((GetBattleItem(backEndData) != "") ? $"{nameString} @ {GetBattleItem(backEndData)}\n" : $"{nameString}\n"); // Name
+            resultBuilder.Append((GetBattleItem(backEndData) != "") ? $"{pokemonName} @ {GetBattleItem(backEndData)}\n" : $"{pokemonName}\n"); // Name
             if (GetNature(backEndData) != "") resultBuilder.Append($"{GetNature(backEndData)} Nature\n"); // Add nature if there
             if (GetTera(backEndData) != "") resultBuilder.Append($"Tera Type: {GetTera(backEndData)}\n"); // Add tera if there
             int[] evs = GetEvs(backEndData); // Load ev one by one
@@ -313,7 +311,7 @@ namespace ParsersAndData
             packedStrings.Add(string.Join(",", setMoves));
             packedStrings.Add(GetNature(backEndData));
             packedStrings.Add(string.Join(",", GetEvs(backEndData)));
-            packedStrings.Add(Gender);
+            packedStrings.Add("");
             packedStrings.Add(""); // No IVs I don't care
             packedStrings.Add(Shiny ? "S" : ""); // Depending if shiny
             packedStrings.Add(""); // Always lvl 100

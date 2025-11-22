@@ -100,7 +100,7 @@ namespace IndymonBackend
         }
         const int STANDARD_MESSAGE_PAUSE = 3000; // Show text for this amount of time
         const int DRAW_ROOM_PAUSE = 1000; // Show text for this amount of time
-        const int SHINY_CHANCE = 1000; // Chance for a shiny (1 in 1000)
+        const int SHINY_CHANCE = 500; // Chance for a shiny (1 in 500)
         const int DUNGEON_NUMBER_OF_FLOORS = 3; // Hardcoded for now unless we need to make it flexible later on
         const int DUNGEON_ROOMS_PER_FLOOR = 5;
         #region EXECUTION

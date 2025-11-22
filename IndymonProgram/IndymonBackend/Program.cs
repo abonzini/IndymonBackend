@@ -359,7 +359,6 @@ namespace IndymonBackend
                         newMon.Shiny = (csvFields[offsetX + 0].Trim().ToLower() == "true");
                         // Then, check the other row for the rest
                         csvFields = rows[offsetY + 2 + (2 * mon)].Split(",");
-                        newMon.Gender = csvFields[offsetX + 0].Trim().ToLower();
                         newMon.NickName = csvFields[offsetX + 2].Trim().ToLower();
                         if (!newTrainer.AutoTeam) // Check if moves and ability are actually relevant
                         {
