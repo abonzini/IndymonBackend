@@ -382,12 +382,20 @@ namespace ParsersAndData
                     // Then, shuffle all items
                     Random _rng = new Random();
                     Utilities.ShuffleList(BattleItems, 0, BattleItems.Count, _rng);
+                    // Each item will be accepted with a probability P so that the system tries to ensure a specific desired amount (e.g. 4)
+                    // However if items is less that this, still try to use them sometimes with a set probability
+                    const int DESIRED_FINAL_NUMBER_OF_ITEMS = 4;
+                    const int BASE_ACCEPTANCE_CHANCE = 20;
+                    int itemAcceptanceChance;
+                    if ((BattleItems.Count - DESIRED_FINAL_NUMBER_OF_ITEMS) > nMons) itemAcceptanceChance = 100; // Since even if all mons equipped it won't reach the desired, just guarantee use
+                    if (BattleItems.Count <= DESIRED_FINAL_NUMBER_OF_ITEMS) itemAcceptanceChance = BASE_ACCEPTANCE_CHANCE; // Minimum chance to always use something, sometimes
+                    else itemAcceptanceChance = 100 * (1 - (DESIRED_FINAL_NUMBER_OF_ITEMS / BattleItems.Count)); // Otherwise the chance is given so around DESIRED_FINAL_NUMBER_OF_ITEMS remains
+                    // Now go mon by mon, each mon has the same chance of having an item, will go item by item after
                     for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
                     {
                         PokemonSet pokemonSet = Teamsheet[i];
                         if (BattleItems.Count > 0)
                         {
-                            int itemAcceptanceChance = BattleItems.Count * 20; // 20% per item, so that at 5 items it always tries to use one to keep around 4 ish
                             if (_rng.Next(0, 100) < itemAcceptanceChance) // Randomly, try to assign one of the items to the pokemon
                             {
                                 Item itemCandidate = null;
@@ -395,7 +403,7 @@ namespace ParsersAndData
                                 {
                                     itemCandidate = BattleItems[itemIdx];
                                     bool itemIsUseless = true; // Item starts useless
-                                                               // If offensive item, (i.e. item that boosts a type), then ensure mon is packing a move of that type...
+                                    // If offensive item, (i.e. item that boosts a type), then ensure mon is packing a move of that type...
                                     if (backEndData.OffensiveItemData.TryGetValue(itemCandidate.Name, out HashSet<string> offensiveTypes))
                                     {
                                         foreach (string move in pokemonSet.Moves)
@@ -523,14 +531,18 @@ namespace ParsersAndData
                 case "flame orb":
                     usefulMoves = ["facade", "psycho shift", "trick", "switcheroo", "fling"];
                     usefulAbilities = ["flare boost", "guts", "marvel scale", "quick feet", "klutz"];
+                    if (backEndData.Dex[pokemonSet.Species].Types.Contains("fire")) { return false; } // Fire types have no use for this even if guts
                     break;
                 case "toxic orb":
                     usefulMoves = ["facade", "psycho shift", "trick", "switcheroo", "fling"];
                     usefulAbilities = ["poison heal", "guts", "marvel scale", "quick feet", "toxic boost", "klutz"];
+                    if (backEndData.Dex[pokemonSet.Species].Types.Contains("poison")) { return false; } // Poison types have no use for this even if guts
                     break;
                 case "iron ball":
+                    usefulMoves = ["trick", "switcheroo", "fling", "trick room"];
+                    usefulAbilities = ["klutz"];
+                    break;
                 case "lagging tail":
-                case "sticky barb":
                     usefulMoves = ["trick", "switcheroo", "fling"];
                     usefulAbilities = ["klutz"];
                     break;
@@ -553,17 +565,22 @@ namespace ParsersAndData
                 default:
                     return false; // No flags, means item is NOT USELESS
             }
-            // If reach here, check all move/abilities candidates, see if item would help me
-            bool isUseful = false;
+            // If reach here, check all move/abilities candidates, see if item would help the pokemon somehow
             foreach (string move in usefulMoves)
             {
-                if (pokemonSet.Moves.Contains(move)) { isUseful |= true; break; }
+                if (pokemonSet.Moves.Contains(move))
+                {
+                    return true;
+                }
             }
             foreach (string ability in usefulAbilities)
             {
-                if (pokemonSet.Ability == ability) { isUseful |= true; break; }
+                if (pokemonSet.Ability == ability)
+                {
+                    return true;
+                }
             }
-            return isUseful;
+            return false;
         }
         /// <summary>
         /// Gets team pokepaste
