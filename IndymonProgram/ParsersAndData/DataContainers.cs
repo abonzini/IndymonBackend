@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System.Text;
 
 namespace ParsersAndData
 {
@@ -80,8 +82,8 @@ namespace ParsersAndData
                 // Randomize mon, with a 7% chance of each move being empty (1->18%, 2->1.3%, 3->0.003%)
                 RandomizeMon(backEndData, smart, 7); // Randomize mon
                 // Show it to user, user will decide if redo or revise (banning sets for the future)
-                Console.WriteLine($"\t\tSet for {ToString()}");
-                Console.WriteLine("\t\tTo modify AI for future: 5: ban ability. 1-4 ban moves. Otherwise this mon is approved. 0 to reroll the whole thing");
+                Console.WriteLine($"\tSet for {ToString()}");
+                Console.WriteLine("\tTo modify AI for future: 5: ban ability. 1-4 ban moves. Otherwise this mon is approved. 0 to reroll the whole thing");
                 string inputString = Console.ReadLine().ToLower();
                 switch (inputString)
                 {
@@ -118,9 +120,13 @@ namespace ParsersAndData
         {
             Random _rng = new Random();
             Pokemon pokemonBackendData = backendData.Dex[Species];
+            // Get data, remove hardcoded banned stuff
             HashSet<string> legalAbilities = pokemonBackendData.Abilities.ToHashSet();
+            RemoveBannedAbilities(legalAbilities);
             HashSet<string> legalMoves = pokemonBackendData.Moves.ToHashSet();
+            RemoveBannedMoves(legalMoves);
             HashSet<string> legalStabs = pokemonBackendData.DamagingStabs.ToHashSet();
+            RemoveBannedMoves(legalStabs);
             if (smart)
             {
                 legalAbilities.ExceptWith(pokemonBackendData.AiAbilityBanlist);
@@ -149,6 +155,33 @@ namespace ParsersAndData
                     legalMoves.Remove(Moves[1]);
                 }
             }
+        }
+        /// <summary>
+        /// Removes banned abilities from a set
+        /// </summary>
+        /// <param name="abilities">Set with abilities</param>
+        static void RemoveBannedAbilities(HashSet<string> abilities)
+        {
+            // Useless
+            abilities.Remove("pickup");
+            abilities.Remove("run away");
+            // Clauses
+            abilities.Remove("moody");
+        }
+        /// <summary>
+        /// Removes banned moves from a set
+        /// </summary>
+        /// <param name="moves">Set with abilities</param>
+        static void RemoveBannedMoves(HashSet<string> moves)
+        {
+            // Removed because useless
+            moves.Remove("frustration");
+            moves.Remove("splash");
+            // Clauses
+            moves.Remove("sand attack");
+            moves.Remove("double team");
+            moves.Remove("minimize");
+            moves.Remove("hidden power");
         }
         /// <summary>
         /// Gets the pokemon nature (if any)
@@ -329,13 +362,14 @@ namespace ParsersAndData
             return string.Join("|", packedStrings); // Join them together with |
         }
     }
+    [JsonConverter(typeof(StringEnumConverter))]
     [Flags]
     public enum TeambuildSettings
     {
         NONE = 0,
         EXPLORATION = 1,
         SMART = 2,
-        MONOTYPE = 3
+        MONOTYPE = 4
     }
     public class TrainerData
     {
@@ -357,7 +391,7 @@ namespace ParsersAndData
         /// <param name="settings">Settings for teambuilding</param>
         public void ConfirmSets(DataContainers backEndData, int nMons, TeambuildSettings settings)
         {
-            Console.WriteLine($"\tChecking {Name}'s team");
+            Console.WriteLine($"Checking {Name}'s team");
             bool defined = false;
             Random _rng = new Random();
             while (!defined)
@@ -385,20 +419,20 @@ namespace ParsersAndData
                                     validMons[type] = [mon];
                                 }
                             }
-                            // Then, get the ones that can be used, for nMons, need to find the list that can be used as monotype
-                            List<List<PokemonSet>> validMonotypes = validMons.Values.Where(l => l.Count >= nMons).ToList();
-                            if (validMonotypes.Count == 0) throw new Exception("This player can't be monotype!");
-                            // Finally, choose a random type
-                            List<PokemonSet> chosenTypeSet = validMonotypes[_rng.Next(validMonotypes.Count)]; // Chose random type
-                            Utilities.ShuffleList(chosenTypeSet, 0, chosenTypeSet.Count, _rng); // Shuffle the mons
-                            // Finally, reorder teamsheet with those mons first
-                            for (int i = 0; i < chosenTypeSet.Count; i++)
+                        }
+                        // Then, get the ones that can be used, for nMons, need to find the list that can be used as monotype
+                        List<List<PokemonSet>> validMonotypes = validMons.Values.Where(l => l.Count >= nMons).ToList();
+                        if (validMonotypes.Count == 0) throw new Exception("This player can't be monotype!");
+                        // Finally, choose a random type
+                        List<PokemonSet> chosenTypeSet = validMonotypes[_rng.Next(validMonotypes.Count)]; // Chose random type
+                        Utilities.ShuffleList(chosenTypeSet, 0, chosenTypeSet.Count, _rng); // Shuffle the mons
+                        // Finally, reorder teamsheet with those mons first
+                        for (int i = 0; i < chosenTypeSet.Count; i++)
+                        {
+                            int currentIndex = Teamsheet.IndexOf(chosenTypeSet[i]); // Find where mon currently at, will become i
+                            if (i != currentIndex)
                             {
-                                int currentIndex = Teamsheet.IndexOf(chosenTypeSet[i]); // Find where mon currently at, will become i
-                                if (i != currentIndex)
-                                {
-                                    (Teamsheet[i], Teamsheet[currentIndex]) = (Teamsheet[currentIndex], Teamsheet[i]); // Swap
-                                }
+                                (Teamsheet[i], Teamsheet[currentIndex]) = (Teamsheet[currentIndex], Teamsheet[i]); // Swap
                             }
                         }
                     }
@@ -456,6 +490,7 @@ namespace ParsersAndData
                     for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
                     {
                         PokemonSet pokemonSet = Teamsheet[i];
+                        Console.WriteLine($"\tItem for {pokemonSet.Species}");
                         if (BattleItems.Count > 0)
                         {
                             if (_rng.Next(0, 100) < itemAcceptanceChance) // Randomly, try to assign one of the items to the pokemon
@@ -464,77 +499,27 @@ namespace ParsersAndData
                                 for (int itemIdx = 0; itemIdx < BattleItems.Count; itemIdx++) // Will try an item, one by one
                                 {
                                     itemCandidate = BattleItems[itemIdx];
-                                    bool itemIsUseless = true; // Item starts useless
-                                    // If offensive item, (i.e. item that boosts a type), then ensure mon is packing a move of that type...
-                                    if (backEndData.OffensiveItemData.TryGetValue(itemCandidate.Name, out HashSet<string> offensiveTypes))
-                                    {
-                                        foreach (string move in pokemonSet.Moves)
-                                        {
-                                            if (move != "")
-                                            {
-                                                // Check the move
-                                                Move moveData = backEndData.MoveData[move];
-                                                if (moveData.Damaging && offensiveTypes.Contains(moveData.Type))
-                                                {
-                                                    itemIsUseless &= false; // Flag item as useful now
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    // Otherwise, it may be a defensive item, which may help resisting super effective types...
-                                    else if (backEndData.DefensiveItemData.TryGetValue(itemCandidate.Name, out HashSet<string> defensiveTypes))
-                                    {
-                                        Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Species]; // Get the mon
-                                        foreach (string damageType in defensiveTypes) // Ensure it will be useful for at least 1 type??
-                                        {
-                                            float damageTaken = 1.0f; // Damage i'd take for this type
-                                            foreach (string type in pokemonBackendData.Types)
-                                            {
-                                                damageTaken *= backEndData.TypeChart[type][damageType];
-                                            }
-                                            if (damageTaken > 1.1f) // If damage from this type is super effective...
-                                            {
-                                                itemIsUseless &= false;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    // Otherwise, it may be a moveset item, which only makes sense if the mon doesn't learn naturally (or already has it!)...
-                                    else if (backEndData.MoveItemData.TryGetValue(itemCandidate.Name, out HashSet<string> learnedMoves))
-                                    {
-                                        Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Species];
-                                        foreach (string learnedMove in learnedMoves) // Check if the move(s) added...
-                                        {
-                                            if (!pokemonBackendData.Moves.Contains(learnedMove) && // ...are not originally learned anyway
-                                                !pokemonBackendData.AiMoveBanlist.Contains(learnedMove) && // ...are not banned
-                                                !pokemonSet.Moves.Contains(learnedMove)) // ...is not already there (???how)
-                                            {
-                                                itemIsUseless &= false; // Then this can be used
-                                            }
-
-                                        }
-                                    }
-                                    // Otherwise there's no other checks, will do some personalized checks and go for it
-                                    else
-                                    {
-                                        itemIsUseless &= IsSpecificItemUseless(itemCandidate.Name, pokemonSet, backEndData);
-                                    }
                                     // So if the item is ok, ill allow it
-                                    if (itemIsUseless)
-                                    {
-                                        itemCandidate = null; // Won't use it
-                                    }
-                                    else
+                                    if (IstemUseful(itemCandidate.Name, pokemonSet, backEndData))
                                     {
                                         break; // Otherwise I found it
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"\t\t{itemCandidate.Name} not useful for {pokemonSet.Species}");
+                                        itemCandidate = null; // Won't use it
                                     }
                                 }
                                 if (itemCandidate != null)
                                 {
+                                    Console.WriteLine($"\t\t{pokemonSet.Species} will use {itemCandidate}");
                                     BattleItems.Remove(itemCandidate);
                                     pokemonSet.Item = itemCandidate;
                                 }
+                            }
+                            else
+                            {
+                                Console.WriteLine($"\t\t{pokemonSet.Species} wont take an item (chance of {itemAcceptanceChance})");
                             }
                         }
                         else
@@ -543,29 +528,93 @@ namespace ParsersAndData
                         }
                     }
                 }
+                Console.WriteLine("");
+                // Finally, just print all and define some extra stuff needed regardless of auto-
+                for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
+                {
+                    PokemonSet mon = Teamsheet[i];
+                    mon.ExplorationStatus = settings.HasFlag(TeambuildSettings.EXPLORATION) ? new ExplorationStatus() : null;
+                    Console.WriteLine($"\tSet for {mon.ToString()}");
+                    Console.WriteLine("");
+                }
                 Console.WriteLine("Do you approve of this team? Y/n");
                 string input = Console.ReadLine();
-                if (input.Trim().ToLower() == "y")
+                if (input.Trim().ToLower() != "n")
                 {
                     defined = true;
                 }
             }
-            // Finally, just print all and define some extra stuff needed regardless of auto-
-            for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
+        }
+        /// <summary>
+        /// Checks if an item is useful for a specific set
+        /// </summary>
+        /// <param name="itemName">Item to check</param>
+        /// <param name="pokemonSet">Set of candidate mon</param>
+        /// <param name="backEndData">Back end where extra data is obtained</param>
+        /// <returns>If item would be useful</returns>
+        static bool IstemUseful(string itemName, PokemonSet pokemonSet, DataContainers backEndData)
+        {
+            // If offensive item, (i.e. item that boosts a type), then ensure mon is packing a move of that type...
+            if (backEndData.OffensiveItemData.TryGetValue(itemName, out HashSet<string> offensiveTypes))
             {
-                PokemonSet mon = Teamsheet[i];
-                mon.ExplorationStatus = settings.HasFlag(TeambuildSettings.EXPLORATION) ? new ExplorationStatus() : null;
-                Console.WriteLine($"\t\tSet for {mon.ToString()}");
-                Console.WriteLine("");
+                foreach (string move in pokemonSet.Moves)
+                {
+                    if (move != "")
+                    {
+                        // Check the move
+                        Move moveData = backEndData.MoveData[move];
+                        if (moveData.Damaging && offensiveTypes.Contains(moveData.Type))
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
+            // Otherwise, it may be a defensive item, which may help resisting super effective types...
+            else if (backEndData.DefensiveItemData.TryGetValue(itemName, out HashSet<string> defensiveTypes))
+            {
+                Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Species]; // Get the mon
+                foreach (string damageType in defensiveTypes) // Ensure it will be useful for at least 1 type??
+                {
+                    float damageTaken = 1.0f; // Damage i'd take for this type
+                    foreach (string type in pokemonBackendData.Types)
+                    {
+                        damageTaken *= backEndData.TypeChart[type][damageType];
+                    }
+                    if (damageTaken > 1.1f) // If damage from this type is super effective...
+                    {
+                        return true;
+                    }
+                }
+            }
+            // Otherwise, it may be a moveset item, which only makes sense if the mon doesn't learn naturally (or already has it!)...
+            else if (backEndData.MoveItemData.TryGetValue(itemName, out HashSet<string> learnedMoves))
+            {
+                Pokemon pokemonBackendData = backEndData.Dex[pokemonSet.Species];
+                foreach (string learnedMove in learnedMoves) // Check if the move(s) added...
+                {
+                    if (!pokemonBackendData.Moves.Contains(learnedMove) && // ...are not originally learned anyway
+                        !pokemonBackendData.AiMoveBanlist.Contains(learnedMove) && // ...are not banned
+                        !pokemonSet.Moves.Contains(learnedMove)) // ...is not already there (???how)
+                    {
+                        return true; // Then this can be used
+                    }
+                }
+            }
+            // Otherwise there's no other checks, will do some personalized checks and go for it
+            else
+            {
+                return IsSpecificItemUseful(itemName, pokemonSet, backEndData);
+            }
+            return false; // No specific check passed so the item is deemed useless
         }
         /// <summary>
         /// Manual hardcoded check for specific items
         /// </summary>
         /// <param name="itemName">Item Name</param>
         /// <param name="pokemonSet">Pokemon we're checking</param>
-        /// <returns>Whether the item would be useless or not</returns>
-        bool IsSpecificItemUseless(string itemName, PokemonSet pokemonSet, DataContainers backEndData)
+        /// <returns>Whether the item would be useful or not</returns>
+        static bool IsSpecificItemUseful(string itemName, PokemonSet pokemonSet, DataContainers backEndData)
         {
             List<string> usefulMoves = new List<string>();
             List<string> usefulAbilities = new List<string>();
@@ -584,11 +633,11 @@ namespace ParsersAndData
                 case "eviolite": // This one is special, just checks if evos
                     if (backEndData.Dex[pokemonSet.Species].Evos.Count > 0) // Mon can evolve, all good
                     {
-                        return false;
+                        return true;
                     }
                     else
                     {
-                        return true;
+                        return false;
                     }
                 case "flame orb":
                     usefulMoves = ["facade", "psycho shift", "trick", "switcheroo", "fling"];
@@ -625,7 +674,7 @@ namespace ParsersAndData
                     usefulAbilities = ["sand stream", "sand spit"];
                     break;
                 default:
-                    return false; // No flags, means item is NOT USELESS
+                    return true; // Item wasn't singled out so it means its always useful
             }
             // If reach here, check all move/abilities candidates, see if item would help the pokemon somehow
             foreach (string move in usefulMoves)
@@ -642,7 +691,7 @@ namespace ParsersAndData
                     return true;
                 }
             }
-            return false;
+            return false; // Singled out item that didn't satisfy checks is useless
         }
         /// <summary>
         /// Gets team pokepaste

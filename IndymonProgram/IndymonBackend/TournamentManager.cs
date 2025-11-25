@@ -159,7 +159,7 @@ namespace IndymonBackend
         {
             // First, shuffle the participants (use seed if needed)
             List<string> Seeds = new List<string>();
-            Console.WriteLine("Want to add specific seeding? Y/N");
+            Console.WriteLine("Want to add specific seeding? y/N");
             string seedInput = Console.ReadLine();
             if (seedInput.Trim().ToLower() == "y") // One last seeding step
             {
@@ -232,9 +232,9 @@ namespace IndymonBackend
     }
     public abstract class Tournament
     {
-        protected bool _official = true;
-        protected bool _firstPart = true;
-        public TeambuildSettings TeamBuildSettings = TeambuildSettings.SMART; // Teams will be smart always in tournaments (human v human)
+        public bool Official { get; set; } = true;
+        public bool FirstInstallment { get; set; } = true;
+        public TeambuildSettings TeamBuildSettings { get; set; } = TeambuildSettings.SMART; // Teams will be smart always in tournaments (human v human)
         public int NPlayers { get; set; } = 0;
         public int NMons { get; set; } = 3;
         public List<string> Participants { get; set; } = new List<string>();
@@ -336,7 +336,7 @@ namespace IndymonBackend
         /// <param name="backend">Backend for data</param>
         protected void RegisterTournamentParticipation(TournamentHistory leaderboard, DataContainers backend)
         {
-            if (!_firstPart) return; // Dont do anything if tournament had already begun
+            if (!FirstInstallment) return; // Dont do anything if tournament had already begun
             foreach (string participant in Participants)
             {
                 List<PlayerAndStats> participantLocation = null;
@@ -438,7 +438,7 @@ namespace IndymonBackend
         /// <param name="backend">Backend for extra data</param>
         protected void SetTournamentWinner(string winnerName, TournamentHistory leaderboard, DataContainers backend)
         {
-            if (!_official) return; // Non official tournaments are not tallied
+            if (!Official) return; // Non official tournaments are not tallied
             List<PlayerAndStats> winnerLocation = null;
             if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
             else if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?
@@ -455,11 +455,11 @@ namespace IndymonBackend
             string response = Console.ReadLine();
             if (response.Trim().ToLower() == "n")
             {
-                _official = false;
+                Official = false;
             }
             else
             {
-                _official = true;
+                Official = true;
             }
         }
         /// <summary>
@@ -467,15 +467,15 @@ namespace IndymonBackend
         /// </summary>
         protected void AskIf2ndPart()
         {
-            Console.WriteLine("Is this a standalone? Y/n (Otherwise a 2nd part of an already staerted tournament)");
+            Console.WriteLine("Is this the first installment of a tournament? Y/n (Otherwise a 2nd part of an already started tournament)");
             string response = Console.ReadLine();
             if (response.Trim().ToLower() == "n")
             {
-                _firstPart = false;
+                FirstInstallment = false;
             }
             else
             {
-                _firstPart = true;
+                FirstInstallment = true;
             }
         }
         /// <summary>
