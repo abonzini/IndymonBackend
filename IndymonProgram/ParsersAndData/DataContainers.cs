@@ -384,6 +384,44 @@ namespace ParsersAndData
             return Name;
         }
         /// <summary>
+        /// Determines whether trainer could participate in a challenge with certain settings
+        /// </summary>
+        /// <param name="backEndData"></param>
+        /// <param name="nMons">How many mons to perform this operation on</param>
+        /// <param name="settings">Settings for teambuilding</param>
+        /// <returns></returns>
+        public bool CanParticipate(DataContainers backEndData, int nMons, TeambuildSettings settings)
+        {
+            // Mon number check
+            if (Teamsheet.Count < nMons) return false;
+            // Monotype check
+            if (settings.HasFlag(TeambuildSettings.MONOTYPE))
+            {
+                Dictionary<string, List<PokemonSet>> validMons = new Dictionary<string, List<PokemonSet>>();
+                foreach (PokemonSet mon in Teamsheet) // Check each mon
+                {
+                    foreach (string type in backEndData.Dex[mon.Species].Types) // Aggregate types
+                    {
+                        // Add mon to the set
+                        if (validMons.ContainsKey(type))
+                        {
+                            validMons[type].Add(mon);
+                        }
+                        else
+                        {
+                            validMons[type] = [mon];
+                        }
+                    }
+                }
+                // Then, get the ones that can be used, for nMons, need to find the list that can be used as monotype
+                List<List<PokemonSet>> validMonotypes = validMons.Values.Where(l => l.Count >= nMons).ToList();
+                if (validMonotypes.Count == 0) return false; // Can't monotype
+                else return true; // Can monotype
+            }
+            // No more checks, team is OK
+            return true;
+        }
+        /// <summary>
         /// Defines a team's team (e.g. movesets, etc), randomizes depending on auto-settings
         /// </summary>
         /// <param name="backEndData"></param>
@@ -493,7 +531,8 @@ namespace ParsersAndData
                         Console.WriteLine($"\tItem for {pokemonSet.Species}");
                         if (BattleItems.Count > 0)
                         {
-                            if (_rng.Next(0, 100) < itemAcceptanceChance) // Randomly, try to assign one of the items to the pokemon
+                            int roll = _rng.Next(0, 100);
+                            if (roll < itemAcceptanceChance) // Randomly, try to assign one of the items to the pokemon
                             {
                                 Item itemCandidate = null;
                                 for (int itemIdx = 0; itemIdx < BattleItems.Count; itemIdx++) // Will try an item, one by one
@@ -519,7 +558,7 @@ namespace ParsersAndData
                             }
                             else
                             {
-                                Console.WriteLine($"\t\t{pokemonSet.Species} wont take an item (chance of {itemAcceptanceChance})");
+                                Console.WriteLine($"\t\t{pokemonSet.Species} wont take an item (roll {roll}<{itemAcceptanceChance})");
                             }
                         }
                         else

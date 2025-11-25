@@ -85,10 +85,10 @@ namespace IndymonBackend
             Console.WriteLine("How many pokemon each team?");
             OngoingTournament.NMons = int.Parse(Console.ReadLine());
             OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
-            // Finally, player selection
-            List<TrainerData> trainers = _backEndData.TrainerData.Values.ToList();
-            List<TrainerData> npcs = _backEndData.NpcData.Values.ToList();
-            List<TrainerData> namedNpcs = _backEndData.NamedNpcData.Values.ToList();
+            // Finally, player selection, pre-filter traines whether they can participate in this event
+            List<TrainerData> trainers = _backEndData.TrainerData.Values.Where(t => t.CanParticipate(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings)).ToList();
+            List<TrainerData> npcs = _backEndData.NpcData.Values.Where(t => t.CanParticipate(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings)).ToList();
+            List<TrainerData> namedNpcs = _backEndData.NamedNpcData.Values.Where(t => t.CanParticipate(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings)).ToList();
             List<TrainerData> currentChosenTrainers = null;
             int remainingPlayersNeeded = OngoingTournament.NPlayers;
             bool randomizeFill = false;
