@@ -196,7 +196,7 @@
 		}
 	  ],
 	  "ShortcutClue": "You see a boulder blocking a natural passage.",
-	  "ShortcutResolution": "Your Pokemon used it's strength to move the boulder away, and find a ramp that leads you downhill."
+	  "ShortcutResolution": "Your $1 lets you move the boulder away. You find a ramp that leads you downhill."
     },
 	{
       "RoomColor": "Yellow",
@@ -229,8 +229,8 @@
 				"Which": "Bulldoze"
 		}
 	  ],
-	  "ShortcutClue": "As the landscape becomes more dry, you start seeing piles of mud and debris which could be opened up to find a shortcut.",
-	  "ShortcutResolution": "Your Pokemon bulldozed through the debris. The path is clear now."
+	  "ShortcutClue": "As the landscape gets more dry, you start seeing piles of mud and debris which could be opened up to find a shortcut.",
+	  "ShortcutResolution": "Your $1 moves the debris away. The path is clear now."
     },
 	{
       "RoomColor": "Green",
@@ -259,12 +259,12 @@
       "VerticalShortcutTile": "⁂",
 	  "ShortcutConditions": [
 		{
-				"ConditionType": "MOVE",
-				"Which": "Water Sport"
+				"ConditionType": "TYPE",
+				"Which": "Electric"
 		}
 	  ],
-	  "ShortcutClue": "There's a lot of suspended dust and sand, doesn't let you see the way ahead.",
-	  "ShortcutResolution": "You and your team used water spray to lower the amount of dust in the air, the way is clear."
+	  "ShortcutClue": "There's a strange hatch buried in the ground. Looks like it leads towards a bunker. You believe a strong electric field may be able to make it open.",
+	  "ShortcutResolution": "Your $1 creates an electric field that briefly deactivates the lock. The hatch opens..."
     }
   ],
   "BossEvent": {

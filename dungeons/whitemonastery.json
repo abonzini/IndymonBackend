@@ -212,7 +212,7 @@
 		}
 	  ],
 	  "ShortcutClue": "Before you is a massive bell. A sign says: 'Those with the strength to ring the bell will find the way forward'.",
-	  "ShortcutResolution": "As the bell rings, a magical passage opens up."
+	  "ShortcutResolution": "As $1 makes the mountains echo, a magical passage opens up."
     },
 	{
       "RoomColor": "White",
@@ -246,7 +246,7 @@
 		}
 	  ],
 	  "ShortcutClue": "Before you is the white face of a cliff. The summit is ahead, you may be able to climb the rocks, if you're brave enough.",
-	  "ShortcutResolution": "You have defeated the mighty mountain. You're almost at the summit."
+	  "ShortcutResolution": "Your $1 has defeated the mighty mountain. You're almost at the summit."
     },
 	{
       "RoomColor": "DarkGray",
@@ -279,8 +279,8 @@
 			"Which": "Fly"
 		}
 	  ],
-	  "ShortcutClue": "You can't believe what you see. In the distance, there's a floating castle on the clouds.",
-	  "ShortcutResolution": "You fly into the unknown, into a place few have even seen."
+	  "ShortcutClue": "You can't believe what you see. In the distance, there's a floating pillar on the clouds.",
+	  "ShortcutResolution": "You used $1 into the unknown, towards a place few have even seen."
     }
   ],
   "BossEvent": {

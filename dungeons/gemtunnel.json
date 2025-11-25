@@ -195,7 +195,7 @@
 		}
 	  ],
 	  "ShortcutClue": "There's a smaller tunnel that you could crawl on, but it's completely filled with rocks.",
-	  "ShortcutResolution": "Your Pokemon used Rock Smash and cleared the way."
+	  "ShortcutResolution": "Your $1 cleared the way."
     },
 	{
       "RoomColor": "DarkYellow",
@@ -229,7 +229,7 @@
 		}
 	  ],
 	  "ShortcutClue": "The soil in this area is soft. You may be able to dig a hole.",
-	  "ShortcutResolution": "Your Pokemon dug a hole and found a passage leading you down below."
+	  "ShortcutResolution": "Your $1 created a passage that leads you down below."
     },
 	{
       "RoomColor": "Cyan",
@@ -279,7 +279,7 @@
 		}
 	  ],
 	  "ShortcutClue": "You see a wall made of dense diamonds and gemstones. It's magnificent. You also see a way out refracted through the crystals. But you'll need a Pokemon that can understand gemstones perfectly to find a way through safely.",
-	  "ShortcutResolution": "Your partner Pokemon shines bright like a diamond. It helped you find the way."
+	  "ShortcutResolution": "Your $1 shines bright like a diamond. It helped you find the way."
     }
   ],
   "BossEvent": {

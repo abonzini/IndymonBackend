@@ -205,7 +205,7 @@
 		}
 	  ],
 	  "ShortcutClue": "Dense shrubs block your way.",
-	  "ShortcutResolution": "You used cut to make a way through a flowery passage."
+	  "ShortcutResolution": "Your $1 allows you to find a shortcut through a flowery passage."
     },
 	{
       "RoomColor": "Green",
@@ -246,8 +246,8 @@
 			"Which": "Gluttony"
 		}
 	  ],
-	  "ShortcutClue": "You find a shortcut by crawling through a hollow tree trunk. However, it is completely full of berries. You need a way to get rid of a lot of berries as fast as possible.",
-	  "ShortcutResolution": "Thanks to your Pokemon's abilities, you managed to get rid of all these berries."
+	  "ShortcutClue": "You find a potential shortcut by crawling through a hollow tree trunk. However, it is completely full of berries. You need a way to get rid of a lot of berries as fast as possible.",
+	  "ShortcutResolution": "Thanks to $1, you managed to get rid of all these berries."
     },
 	{
       "RoomColor": "DarkGreen",
@@ -281,7 +281,7 @@
 		}
 	  ],
 	  "ShortcutClue": "The forest starts to get a little creepy, and the way forward is covered in fog.",
-	  "ShortcutResolution": "You used defog to find a way through the forest's edge."
+	  "ShortcutResolution": "Your $1 makes the way onwards clear."
     }
   ],
   "BossEvent": {

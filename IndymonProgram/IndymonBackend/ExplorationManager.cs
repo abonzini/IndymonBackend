@@ -77,7 +77,7 @@ namespace IndymonBackend
             Trainer = options[int.Parse(Console.ReadLine()) - 1];
             // Finally, try to define teamsheet
             TrainerData trainerData = _backEndData.TrainerData[Trainer];
-            trainerData.ConfirmSets(_backEndData, int.MaxValue, true, true); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status)
+            trainerData.ConfirmSets(_backEndData, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status), if need to randomize, smart
         }
         public void InitializeNextDungeon()
         {
@@ -144,11 +144,12 @@ namespace IndymonBackend
                         // After, need to also check shortcut
                         Console.WriteLine(_dungeonDetails.Floors[floor].ShortcutClue);
                         GenericMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue);
-                        if (VerifyShortcutConditions(_dungeonDetails.Floors[floor].ShortcutConditions, trainerData)) // If shortcut activated
+                        if (VerifyShortcutConditions(_dungeonDetails.Floors[floor].ShortcutConditions, trainerData, out string message)) // If shortcut activated
                         {
                             // After, need to also check shortcut
-                            Console.WriteLine(_dungeonDetails.Floors[floor].ShortcutResolution);
-                            GenericMessageCommand(_dungeonDetails.Floors[floor].ShortcutResolution);
+                            string shortcutString = _dungeonDetails.Floors[floor].ShortcutResolution.Replace("$1", message);
+                            Console.WriteLine(shortcutString);
+                            GenericMessageCommand(shortcutString);
                             if (floor == DUNGEON_NUMBER_OF_FLOORS - 1) // If dungeon was done in last floor, then the dungeon is over...
                             {
                                 DrawConnectRoomCommand(floor, room, floor + 1, room, true); // Connects to invisible next dungeon, shortcut
@@ -306,7 +307,7 @@ namespace IndymonBackend
                             AutoTeam = true,
                             Teamsheet = [alphaPokemon], // Only mon in the teamsheet
                         };
-                        alphaTeam.ConfirmSets(_backEndData, int.MaxValue, false, false); // Randomize enemy team (movesets, etc)
+                        alphaTeam.ConfirmSets(_backEndData, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
                         Console.Write("Encounter resolution: ");
                         int remainingMons = ResolveEncounter(trainerData, alphaTeam);
                         if (remainingMons == 0) // Means player lost
@@ -457,7 +458,7 @@ namespace IndymonBackend
                             AutoTeam = true,
                             Teamsheet = encounterPokemon,
                         };
-                        wildMonTeam.ConfirmSets(_backEndData, int.MaxValue, false, false); // Randomize enemy team (movesets, etc)
+                        wildMonTeam.ConfirmSets(_backEndData, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
                         Console.Write("Encounter resolution: ");
                         int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
                         if (remainingMons == 0) // Means player lost
@@ -506,7 +507,7 @@ namespace IndymonBackend
                 case RoomEventType.NPC_BATTLE:
                     {
                         TrainerData randomNpc = _backEndData.NpcData.Values.ToList()[_rng.Next(_backEndData.NpcData.Values.Count)]; // Get random npc
-                        randomNpc.ConfirmSets(_backEndData, 3, true, false); // Get into a trainer fight
+                        randomNpc.ConfirmSets(_backEndData, 3, TeambuildSettings.SMART); // Get into a trainer fight
                         Console.WriteLine($"Fighting {randomNpc.Name}");
                         string npcString = roomEvent.PreEventString.Replace("$1", randomNpc.Name);
                         GenericMessageCommand(npcString); // Prints the message but we know it could have a $1
@@ -536,10 +537,12 @@ namespace IndymonBackend
         /// </summary>
         /// <param name="conditions">Shortcut conditions</param>
         /// <param name="trainerData">Data of trainer</param>
+        /// <param name="message">An extra return indicating the message used (E.g. X used Y)</param>
         /// <returns>Whether shortcut activates or not</returns>
-        bool VerifyShortcutConditions(List<ShortcutCondition> conditions, TrainerData trainerData)
+        bool VerifyShortcutConditions(List<ShortcutCondition> conditions, TrainerData trainerData, out string message)
         {
             bool canTakeShortcut = false;
+            message = "";
             foreach (ShortcutCondition condition in conditions)
             {
                 string valueToCheck = condition.Which.ToLower();
@@ -550,6 +553,7 @@ namespace IndymonBackend
                         {
                             if (pokemon.Moves.Contains(valueToCheck)) // move found
                             {
+                                message = $"{pokemon.NickName}'s {valueToCheck}";
                                 canTakeShortcut = true;
                                 break;
                             }
@@ -557,6 +561,7 @@ namespace IndymonBackend
                             {
                                 if (_backEndData.MoveItemData[pokemon.Item.Name.ToLower()].Contains(valueToCheck))
                                 {
+                                    message = $"{pokemon.NickName}'s {valueToCheck} move disk";
                                     canTakeShortcut = true;
                                     break;
                                 }
@@ -568,6 +573,7 @@ namespace IndymonBackend
                         {
                             if (pokemon.Ability == valueToCheck) // ability found
                             {
+                                message = $"{pokemon.NickName}'s {valueToCheck}";
                                 canTakeShortcut = true;
                                 break;
                             }
@@ -578,6 +584,7 @@ namespace IndymonBackend
                         {
                             if (pokemon.Species == valueToCheck) // species found
                             {
+                                message = $"{pokemon.NickName}";
                                 canTakeShortcut = true;
                                 break;
                             }
@@ -588,6 +595,7 @@ namespace IndymonBackend
                         {
                             if (_backEndData.Dex[pokemon.Species].Types.Contains(valueToCheck)) // type of pokemon found
                             {
+                                message = $"{pokemon.NickName}'s {valueToCheck} type";
                                 canTakeShortcut = true;
                                 break;
                             }
@@ -598,6 +606,7 @@ namespace IndymonBackend
                         {
                             if (pokemon.Item.Name == valueToCheck) // type of pokemon found
                             {
+                                message = $"{pokemon.NickName}'s {valueToCheck}";
                                 canTakeShortcut = true;
                                 break;
                             }

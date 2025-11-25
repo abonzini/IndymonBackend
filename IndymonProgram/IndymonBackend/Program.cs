@@ -359,7 +359,7 @@ namespace IndymonBackend
                         newMon.Shiny = (csvFields[offsetX + 0].Trim().ToLower() == "true");
                         // Then, check the other row for the rest
                         csvFields = rows[offsetY + 2 + (2 * mon)].Split(",");
-                        newMon.NickName = csvFields[offsetX + 2].Trim().ToLower();
+                        newMon.NickName = csvFields[offsetX + 2].Trim().ToLower().Substring(0, 19); // Nickname 19 characters max
                         if (!newTrainer.AutoTeam) // Check if moves and ability are actually relevant
                         {
                             newMon.Ability = csvFields[offsetX + 3].Trim().ToLower();

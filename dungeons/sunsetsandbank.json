@@ -191,7 +191,7 @@
 		}
 	  ],
 	  "ShortcutClue": "You could probably swim across to reach the sandbank quicker.",
-	  "ShortcutResolution": "Your Pokemon surf, you reached the distant sandbanks."
+	  "ShortcutResolution": "Your $1 allows you to reach the distant sandbanks."
     },
 	{
       "RoomColor": "DarkYellow",
@@ -225,7 +225,7 @@
 		}
 	  ],
 	  "ShortcutClue": "You can swim across to the next sandbanks, but the currents are strong and whirlpools are forming...",
-	  "ShortcutResolution": "Your Pokemon used Whirlpool to cross safely."
+	  "ShortcutResolution": "Your $1 lets you cross safely."
     },
 	{
       "RoomColor": "Blue",
@@ -259,7 +259,7 @@
 		}
 	  ],
 	  "ShortcutClue": "In this spot, you can't see the sea floor. Just a dark abbyss below.",
-	  "ShortcutResolution": "You used dive. What will expect you deep below?."
+	  "ShortcutResolution": "Your $1 lets you ride a sea current into the unknown..."
     }
   ],
   "BossEvent": {

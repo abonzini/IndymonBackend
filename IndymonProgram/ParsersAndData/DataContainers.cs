@@ -329,6 +329,14 @@ namespace ParsersAndData
             return string.Join("|", packedStrings); // Join them together with |
         }
     }
+    [Flags]
+    public enum TeambuildSettings
+    {
+        NONE = 0,
+        EXPLORATION = 1,
+        SMART = 2,
+        MONOTYPE = 3
+    }
     public class TrainerData
     {
         public string Avatar { get; set; }
@@ -346,12 +354,12 @@ namespace ParsersAndData
         /// </summary>
         /// <param name="backEndData"></param>
         /// <param name="nMons">How many mons to perform this operation on</param>
-        /// <param name="smart">Whether pokemon are smart (use ai banlist)</param>
-        /// <param name="exploration">Whether pokemon need to be initialized as part of an exploration (with hp and status)</param>
-        public void ConfirmSets(DataContainers backEndData, int nMons, bool smart, bool exploration)
+        /// <param name="settings">Settings for teambuilding</param>
+        public void ConfirmSets(DataContainers backEndData, int nMons, TeambuildSettings settings)
         {
             Console.WriteLine($"\tChecking {Name}'s team");
             bool defined = false;
+            Random _rng = new Random();
             while (!defined)
             {
                 // Shuffle teams and sets if auto-team
@@ -359,11 +367,66 @@ namespace ParsersAndData
                 {
                     // First, shuffle the mons
                     Utilities.ShuffleList(Teamsheet, 0, Teamsheet.Count);
-                    // Then, for each mon, will randomize sets
+                    // In monotype, need to do a quick searching to find which mons can be monotype, and then put random nMons in top
+                    if (settings.HasFlag(TeambuildSettings.MONOTYPE))
+                    {
+                        Dictionary<string, List<PokemonSet>> validMons = new Dictionary<string, List<PokemonSet>>();
+                        foreach (PokemonSet mon in Teamsheet) // Check each mon
+                        {
+                            foreach (string type in backEndData.Dex[mon.Species].Types) // Aggregate types
+                            {
+                                // Add mon to the set
+                                if (validMons.ContainsKey(type))
+                                {
+                                    validMons[type].Add(mon);
+                                }
+                                else
+                                {
+                                    validMons[type] = [mon];
+                                }
+                            }
+                            // Then, get the ones that can be used, for nMons, need to find the list that can be used as monotype
+                            List<List<PokemonSet>> validMonotypes = validMons.Values.Where(l => l.Count >= nMons).ToList();
+                            if (validMonotypes.Count == 0) throw new Exception("This player can't be monotype!");
+                            // Finally, choose a random type
+                            List<PokemonSet> chosenTypeSet = validMonotypes[_rng.Next(validMonotypes.Count)]; // Chose random type
+                            Utilities.ShuffleList(chosenTypeSet, 0, chosenTypeSet.Count, _rng); // Shuffle the mons
+                            // Finally, reorder teamsheet with those mons first
+                            for (int i = 0; i < chosenTypeSet.Count; i++)
+                            {
+                                int currentIndex = Teamsheet.IndexOf(chosenTypeSet[i]); // Find where mon currently at, will become i
+                                if (i != currentIndex)
+                                {
+                                    (Teamsheet[i], Teamsheet[currentIndex]) = (Teamsheet[currentIndex], Teamsheet[i]); // Swap
+                                }
+                            }
+                        }
+                    }
+                    // Then, for each mon, will randomize their sets
                     for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
                     {
                         PokemonSet pokemonSet = Teamsheet[i];
-                        pokemonSet.RandomizeAndVerify(backEndData, smart);
+                        pokemonSet.RandomizeAndVerify(backEndData, settings.HasFlag(TeambuildSettings.SMART));
+                    }
+                }
+                else
+                {
+                    // Some verifications for some specific game modes
+                    if (settings.HasFlag(TeambuildSettings.MONOTYPE)) // Need to ensure that nMons are monotype
+                    {
+                        Dictionary<string, int> typeCount = new Dictionary<string, int>();
+                        for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
+                        {
+                            foreach (string type in backEndData.Dex[Teamsheet[i].Species].Types) // Aggregate types
+                            {
+                                // Add mon to the set
+                                if (typeCount.ContainsKey(type)) typeCount[type]++;
+                                else typeCount[type] = 1;
+                            }
+                            // Then, check if there's any type with a count of nMons (neither more or less?)
+                            if (!typeCount.ContainsValue(nMons)) throw new Exception("This player can't be monotype!");
+                            // Otherwise all good
+                        }
                     }
                 }
                 // Shuffle items if auto-item
@@ -380,7 +443,6 @@ namespace ParsersAndData
                         }
                     }
                     // Then, shuffle all items
-                    Random _rng = new Random();
                     Utilities.ShuffleList(BattleItems, 0, BattleItems.Count, _rng);
                     // Each item will be accepted with a probability P so that the system tries to ensure a specific desired amount (e.g. 4)
                     // However if items is less that this, still try to use them sometimes with a set probability
@@ -492,7 +554,7 @@ namespace ParsersAndData
             for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
             {
                 PokemonSet mon = Teamsheet[i];
-                mon.ExplorationStatus = exploration ? new ExplorationStatus() : null;
+                mon.ExplorationStatus = settings.HasFlag(TeambuildSettings.EXPLORATION) ? new ExplorationStatus() : null;
                 Console.WriteLine($"\t\tSet for {mon.ToString()}");
                 Console.WriteLine("");
             }

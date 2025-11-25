@@ -195,7 +195,7 @@ namespace IndymonBackend
                 else if (_backEndData.NpcData.ContainsKey(participantName)) participant = _backEndData.NpcData[participantName];
                 else if (_backEndData.NamedNpcData.ContainsKey(participantName)) participant = _backEndData.NamedNpcData[participantName];
                 else throw new Exception("Trainer not found!?");
-                participant.ConfirmSets(_backEndData, OngoingTournament.NMons, true, false); // Gets the team for everyone
+                participant.ConfirmSets(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings); // Gets the team for everyone with the settings needed for the tournament
             }
         }
         /// <summary>
@@ -233,6 +233,8 @@ namespace IndymonBackend
     public abstract class Tournament
     {
         protected bool _official = true;
+        protected bool _firstPart = true;
+        public TeambuildSettings TeamBuildSettings = TeambuildSettings.SMART; // Teams will be smart always in tournaments (human v human)
         public int NPlayers { get; set; } = 0;
         public int NMons { get; set; } = 3;
         public List<string> Participants { get; set; } = new List<string>();
@@ -334,6 +336,7 @@ namespace IndymonBackend
         /// <param name="backend">Backend for data</param>
         protected void RegisterTournamentParticipation(TournamentHistory leaderboard, DataContainers backend)
         {
+            if (!_firstPart) return; // Dont do anything if tournament had already begun
             foreach (string participant in Participants)
             {
                 List<PlayerAndStats> participantLocation = null;
@@ -459,6 +462,34 @@ namespace IndymonBackend
                 _official = true;
             }
         }
+        /// <summary>
+        /// Checks if tournament is a 2nd part (e.g. elim after groups) so it doesnt increment counter twice
+        /// </summary>
+        protected void AskIf2ndPart()
+        {
+            Console.WriteLine("Is this a standalone? Y/n (Otherwise a 2nd part of an already staerted tournament)");
+            string response = Console.ReadLine();
+            if (response.Trim().ToLower() == "n")
+            {
+                _firstPart = false;
+            }
+            else
+            {
+                _firstPart = true;
+            }
+        }
+        /// <summary>
+        /// Checks if certain tournaments are monotype or not
+        /// </summary>
+        protected void AskIfMonotype()
+        {
+            Console.WriteLine("Is this a monotype tournament? y/N");
+            string response = Console.ReadLine();
+            if (response.Trim().ToLower() == "y")
+            {
+                TeamBuildSettings |= TeambuildSettings.MONOTYPE; // If so, then this is monotype
+            }
+        }
     }
     public class ElimTournament : Tournament
     {
@@ -472,6 +503,8 @@ namespace IndymonBackend
         public override void RequestAdditionalInfo()
         {
             AskIfOfficial();
+            AskIf2ndPart();
+            AskIfMonotype();
         }
         public override void ResetTournament()
         {
@@ -777,6 +810,8 @@ namespace IndymonBackend
         public override void RequestAdditionalInfo()
         {
             AskIfOfficial();
+            AskIf2ndPart();
+            AskIfMonotype();
         }
         public override void ResetTournament()
         {
@@ -942,6 +977,11 @@ namespace IndymonBackend
         public List<List<List<TournamentMatch>>> MatchHistory { get; set; } = null; // Will go by weeks (list), each week will contain all groups with all matches due that week for that group
         public override void RequestAdditionalInfo()
         {
+            // Ask the typical
+            AskIfOfficial();
+            AskIf2ndPart();
+            AskIfMonotype();
+            // Then group specific
             Console.WriteLine("How many players each group?");
             PlayersPerGroup = int.Parse(Console.ReadLine());
             if ((NPlayers % PlayersPerGroup) != 0)
