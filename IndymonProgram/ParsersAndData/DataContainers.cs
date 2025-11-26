@@ -83,7 +83,7 @@ namespace ParsersAndData
                 RandomizeMon(backEndData, smart, 7); // Randomize mon
                 // Show it to user, user will decide if redo or revise (banning sets for the future)
                 Console.WriteLine($"\tSet for {ToString()}");
-                Console.WriteLine("\tTo modify AI for future: 5: ban ability. 1-4 ban moves. Otherwise this mon is approved. 0 to reroll the whole thing");
+                Console.WriteLine("\tTo modify AI for future: 5: blacklist ability. 1-4 blacklist moves. Otherwise this mon is approved. 0 to reroll the whole thing");
                 string inputString = Console.ReadLine().ToLower();
                 switch (inputString)
                 {
@@ -130,8 +130,11 @@ namespace ParsersAndData
             if (smart)
             {
                 legalAbilities.ExceptWith(pokemonBackendData.AiAbilityBanlist);
+                RemoveUselessAbilities(legalAbilities);
                 legalMoves.ExceptWith(pokemonBackendData.AiMoveBanlist);
+                RemoveUselessMoves(legalMoves);
                 legalStabs.ExceptWith(pokemonBackendData.AiMoveBanlist);
+                RemoveUselessMoves(legalStabs);
             }
             if (GetTera(backendData) != "") // Mons that can tera will be able to use tera blast always, regardless if previously banned move
             {
@@ -157,31 +160,52 @@ namespace ParsersAndData
             }
         }
         /// <summary>
-        /// Removes banned abilities from a set
+        /// Removes banned (clause) abilities from a set
         /// </summary>
         /// <param name="abilities">Set with abilities</param>
         static void RemoveBannedAbilities(HashSet<string> abilities)
         {
-            // Useless
-            abilities.Remove("pickup");
-            abilities.Remove("run away");
-            // Clauses
             abilities.Remove("moody");
         }
         /// <summary>
-        /// Removes banned moves from a set
+        /// Removes banned moves (clause) from a set
         /// </summary>
-        /// <param name="moves">Set with abilities</param>
+        /// <param name="moves">Set with moves</param>
         static void RemoveBannedMoves(HashSet<string> moves)
         {
-            // Removed because useless
-            moves.Remove("frustration");
-            moves.Remove("splash");
-            // Clauses
             moves.Remove("sand attack");
             moves.Remove("double team");
             moves.Remove("minimize");
             moves.Remove("hidden power");
+            moves.Remove("flash");
+            moves.Remove("kinesis");
+            moves.Remove("mud-slap");
+            moves.Remove("smokescreen");
+        }
+        /// <summary>
+        /// Removes useless abilities from a set (so I don't need to blacklist it for every mon)
+        /// </summary>
+        /// <param name="abilities">Set with abilities</param>
+        static void RemoveUselessAbilities(HashSet<string> abilities)
+        {
+            // Useless
+            abilities.Remove("pickup");
+            abilities.Remove("ball fetch");
+            abilities.Remove("honey gather");
+            abilities.Remove("run away");
+            abilities.Remove("telepathy");
+        }
+        /// <summary>
+        /// Removes usaless moves from a set (so I don't need to blacklist it for every mon)
+        /// </summary>
+        /// <param name="moves">Set with moves</param>
+        static void RemoveUselessMoves(HashSet<string> moves)
+        {
+            // Removed because useless
+            moves.Remove("frustration");
+            moves.Remove("splash");
+            moves.Remove("celebrate");
+            moves.Remove("hold hands");
         }
         /// <summary>
         /// Gets the pokemon nature (if any)
