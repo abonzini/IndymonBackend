@@ -1,11 +1,11 @@
-﻿using IndymonBackend;
+﻿using IndymonBackendProgram;
 using ShowdownBot;
 using System.Text.Json;
-namespace SocketTest
+namespace BotTest
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             string indymonFile = "C:\\Users\\augus\\Documents\\Indymon\\IndymonBackEnd\\indy.mon";
             IndymonData dataCont = JsonSerializer.Deserialize<IndymonData>(File.ReadAllText(indymonFile));

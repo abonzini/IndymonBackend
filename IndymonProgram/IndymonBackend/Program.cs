@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using ParsersAndData;
 
-namespace IndymonBackend
+namespace IndymonBackendProgram
 {
     public class IndymonData
     {
@@ -176,14 +176,8 @@ namespace IndymonBackend
                 };
                 _allData = JsonConvert.DeserializeObject<IndymonData>(File.ReadAllText(masterPath), settings);
                 _allData.MasterDirectory = masterPath;
-                if (_allData.TournamentManager != null)
-                {
-                    _allData.TournamentManager.SetBackEndData(_allData.DataContainer, _allData.TournamentHistory);
-                }
-                if (_allData.ExplorationManager != null)
-                {
-                    _allData.ExplorationManager.SetBackEndData(_allData.DataContainer);
-                }
+                _allData.TournamentManager?.SetBackEndData(_allData.DataContainer, _allData.TournamentHistory);
+                _allData.ExplorationManager?.SetBackEndData(_allData.DataContainer);
             }
             else
             {
@@ -342,11 +336,13 @@ namespace IndymonBackend
                     csvFields = rows[offsetY + 0].Split(",");
                     string trainerName = csvFields[offsetX + 2].Split('(')[0].Trim().ToLower(); // Trainer now keeps the left of whatever's on (
                     if (trainerName == "") continue;
-                    TrainerData newTrainer = new TrainerData();
-                    newTrainer.Name = trainerName;
-                    newTrainer.Avatar = csvFields[offsetX + 0].Trim().ToLower();
-                    newTrainer.AutoItem = (csvFields[offsetX + 7].Trim().ToLower() == "true");
-                    newTrainer.AutoTeam = (csvFields[offsetX + 9].Trim().ToLower() == "true");
+                    TrainerData newTrainer = new TrainerData
+                    {
+                        Name = trainerName,
+                        Avatar = csvFields[offsetX + 0].Trim().ToLower(),
+                        AutoItem = (csvFields[offsetX + 7].Trim().ToLower() == "true"),
+                        AutoTeam = (csvFields[offsetX + 9].Trim().ToLower() == "true")
+                    };
                     // Then, rows 2-13 contain the mons
                     for (int mon = 0; mon < 6; mon++)
                     {
@@ -354,15 +350,17 @@ namespace IndymonBackend
                         csvFields = rows[offsetY + 3 + (2 * mon)].Split(",");
                         string monName = csvFields[offsetX + 2].Trim().ToLower();
                         if (monName == "") break; // If no mon, then I'm done doing mons then
-                        PokemonSet newMon = new PokemonSet();
-                        newMon.Species = monName;
-                        newMon.Shiny = (csvFields[offsetX + 0].Trim().ToLower() == "true");
+                        PokemonSet newMon = new PokemonSet
+                        {
+                            Species = monName,
+                            Shiny = (csvFields[offsetX + 0].Trim().ToLower() == "true")
+                        };
                         // Then, check the other row for the rest
                         csvFields = rows[offsetY + 2 + (2 * mon)].Split(",");
                         newMon.NickName = csvFields[offsetX + 2].Trim().ToLower();
                         if (newMon.NickName.Length > 19) // Sanitize, name has to be shorter than 19
                         {
-                            newMon.NickName = newMon.NickName.Substring(0, 19).Trim();
+                            newMon.NickName = newMon.NickName[..19].Trim();
                         }
                         if (!newTrainer.AutoTeam) // Check if moves and ability are actually relevant
                         {
@@ -390,7 +388,7 @@ namespace IndymonBackend
                         // Emergency check, ensure mon is legal (ability + atleast one move)
                         if (newMon.Ability == "" || !newMon.Moves.Any(m => m != "")) // If no ability or no non-"" move, then there's a problem!
                         {
-                            newMon.RandomizeAndVerify(_allData.DataContainer, true); // Randomize + verify that mon has a set
+                            newMon.RandomizeAndVerify(_allData.DataContainer, TeambuildSettings.SMART); // Randomize + verify that mon has a set (smart)
                         }
                         newTrainer.Teamsheet.Add(newMon);
                     }
@@ -440,13 +438,15 @@ namespace IndymonBackend
             {
                 string[] cols = rows[row].Split(',');
                 string playerName = cols[0].Trim().ToLower(); // Contains player name
-                PlayerAndStats nextPlayer = new PlayerAndStats();
-                nextPlayer.Name = playerName;
-                // Statistics...
-                nextPlayer.TournamentWins = int.Parse(cols[1]);
-                nextPlayer.TournamentsPlayed = int.Parse(cols[2]);
-                nextPlayer.Kills = int.Parse(cols[4]);
-                nextPlayer.Deaths = int.Parse(cols[5]);
+                PlayerAndStats nextPlayer = new PlayerAndStats
+                {
+                    Name = playerName,
+                    // Statistics...
+                    TournamentWins = int.Parse(cols[1]),
+                    TournamentsPlayed = int.Parse(cols[2]),
+                    Kills = int.Parse(cols[4]),
+                    Deaths = int.Parse(cols[5])
+                };
                 // Finally add to the right place
                 if (_allData.DataContainer.TrainerData.ContainsKey(playerName)) // This was an actual player, add to correct array
                 {
@@ -496,8 +496,8 @@ namespace IndymonBackend
         private static string FormatTournamentHistory()
         {
             // Firstly, just sort the lists
-            _allData.TournamentHistory.PlayerStats = _allData.TournamentHistory.PlayerStats.OrderByDescending(c => c.TournamentWins).ThenBy(c => c.Winrate).ThenBy(c => c.Diff).ToList();
-            _allData.TournamentHistory.NpcStats = _allData.TournamentHistory.NpcStats.OrderByDescending(c => c.TournamentWins).ThenBy(c => c.Winrate).ThenBy(c => c.Diff).ToList();
+            _allData.TournamentHistory.PlayerStats = [.. _allData.TournamentHistory.PlayerStats.OrderByDescending(c => c.TournamentWins).ThenBy(c => c.Winrate).ThenBy(c => c.Diff)];
+            _allData.TournamentHistory.NpcStats = [.. _allData.TournamentHistory.NpcStats.OrderByDescending(c => c.TournamentWins).ThenBy(c => c.Winrate).ThenBy(c => c.Diff)];
             // Ok now I need to do multiple row and column csv:
             int nRows = 2 + _allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count; // this is how many rows It'll have (label + players)
             int nColumns = 7 + 3 * (_allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count); // Cols, will be the fixed + 3 per participant

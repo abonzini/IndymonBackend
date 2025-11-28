@@ -4,7 +4,7 @@ namespace ShowdownBot
 {
     public class BotBattle
     {
-        DataContainers _backend;
+        readonly DataContainers _backend;
         public BotBattle(DataContainers backend)
         {
             _backend = backend;
@@ -20,10 +20,14 @@ namespace ShowdownBot
         /// <returns>The score</returns>
         public (int, int) SimulateBotBattle(TrainerData player1, TrainerData player2, int nMons1, int nMons2, string gameType)
         {
-            BasicShowdownBot acceptBot = new BasicShowdownBot(_backend);
-            acceptBot.Verbose = false;
-            BasicShowdownBot challengeBot = new BasicShowdownBot(_backend);
-            challengeBot.Verbose = false;
+            BasicShowdownBot acceptBot = new BasicShowdownBot(_backend)
+            {
+                Verbose = false
+            };
+            BasicShowdownBot challengeBot = new BasicShowdownBot(_backend)
+            {
+                Verbose = false
+            };
             acceptBot.EstablishConnection();
             challengeBot.EstablishConnection();
             while ((acceptBot.GetState() != BotState.CONNECTED) || (challengeBot.GetState() != BotState.CONNECTED))
@@ -60,8 +64,10 @@ namespace ShowdownBot
         /// <returns>This bot score</returns>
         public int SimulateBotBattle(TrainerData player1, int nMons1)
         {
-            BasicShowdownBot acceptBot = new BasicShowdownBot(_backend);
-            acceptBot.Verbose = false;
+            BasicShowdownBot acceptBot = new BasicShowdownBot(_backend)
+            {
+                Verbose = false
+            };
             acceptBot.EstablishConnection();
             while ((acceptBot.GetState() != BotState.CONNECTED))
             {

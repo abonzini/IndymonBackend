@@ -71,15 +71,16 @@ namespace ParsersAndData
         /// Triggers randomizing of mon but with some extra manual checks and confirmations. Allows to randomize single mon instrad of whole team
         /// </summary>
         /// <param name="backEndData">Back end data needed to choose things accurately</param>
-        /// <param name="smart">Smart randomization uses the AI list</param>
-        public void RandomizeAndVerify(DataContainers backEndData, bool smart)
+        /// <param name="settings">Battle settings to ensure team and moveset is up to standard</param>
+        public void RandomizeAndVerify(DataContainers backEndData, TeambuildSettings settings)
         {
+            // TODO: Refactor with all sets (some like LC will define unchangeable things but some as dance off are important!)
             bool acceptedMon = false;
             Pokemon pokemonBackendData = backEndData.Dex[Species];
             while (!acceptedMon)
             {
-                // Randomize mon, with a 7% chance of each move being empty (1->18%, 2->1.3%, 3->0.003%)
-                RandomizeMon(backEndData, smart, 7); // Randomize mon
+                // Randomize mon, with a 10% chance of each move being empty (for 7% was 1->18%, 2->1.3%, 3->0.003% but we changed the method to generate movesets since then)
+                RandomizeMon(backEndData, settings, 10); // Randomize mon
                 // Show it to user, user will decide if redo or revise (banning sets for the future)
                 Console.WriteLine($"\tSet for {ToString()}");
                 Console.WriteLine("\tTo modify AI for future: 5: blacklist ability. 1-4 blacklist moves. Otherwise this mon is approved. 0 to reroll the whole thing");
@@ -112,40 +113,26 @@ namespace ParsersAndData
         /// <summary>
         /// Randomizes this mon's sets (ability+moves)
         /// </summary>
-        /// <param name="backendData">Data to get mon's moves, etc</param>
-        /// <param name="smart">Smart randomizer avoids using moves in the AI banlist</param>
+        /// <param name="backEndData">Data to get mon's moves, etc</param>
+        /// <param name="settings">Smart randomizer avoids using moves in the AI banlist</param>
         /// <param name="switchChance">Chance that the last move is empty (switch)</param>
-        public void RandomizeMon(DataContainers backendData, bool smart, int switchChance)
+        public void RandomizeMon(DataContainers backEndData, TeambuildSettings settings, int switchChance)
         {
+            // TODO: Refactor with all sets (some like LC will define unchangeable things but some as dance off are important!)
             Random _rng = new Random();
-            Pokemon pokemonBackendData = backendData.Dex[Species];
-            // Get data, remove hardcoded banned stuff
-            HashSet<string> legalAbilities = pokemonBackendData.Abilities.ToHashSet();
-            RemoveBannedAbilities(legalAbilities);
-            HashSet<string> legalMoves = pokemonBackendData.Moves.ToHashSet();
-            RemoveBannedMoves(legalMoves);
-            HashSet<string> legalStabs = pokemonBackendData.DamagingStabs.ToHashSet();
-            RemoveBannedMoves(legalStabs);
-            if (smart)
-            {
-                legalAbilities.ExceptWith(pokemonBackendData.AiAbilityBanlist);
-                RemoveUselessAbilities(legalAbilities);
-                legalMoves.ExceptWith(pokemonBackendData.AiMoveBanlist);
-                RemoveUselessMoves(legalMoves);
-                legalStabs.ExceptWith(pokemonBackendData.AiMoveBanlist);
-                RemoveUselessMoves(legalStabs);
-            }
-            if (GetTera(backendData) != "") // Mons that can tera will be able to use tera blast always, regardless if previously banned move
+            Pokemon pokemonBackendData = backEndData.Dex[Species];
+            // Get data, gets a smart set or just legal depending if randomizing is smart
+            HashSet<string> legalAbilities = settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartAbilities() : pokemonBackendData.GetLegalAbilities();
+            HashSet<string> legalMoves = settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartMoves() : pokemonBackendData.GetLegalMoves();
+            HashSet<string> legalStabs = [.. pokemonBackendData.DamagingStabs.Intersect(legalMoves)]; // Legal stabs are the stabs that are legal
+            if (GetTera(backEndData) != "") // Mons that can tera will be able to use tera blast always, regardless if previously banned move
             {
                 legalMoves.Add("tera blast");
             }
             // First, get the mon an ability
             Ability = legalAbilities.ElementAt(_rng.Next(legalAbilities.Count)); // Get a random one
-            // Then, get the mon a stab (move 1)
-            Moves[0] = legalStabs.ElementAt(_rng.Next(legalStabs.Count));
-            legalMoves.Remove(Moves[0]);
-            // Moves 2-4, just get random shit with a chance to switch
-            for (int i = 1; i <= 3; i++)
+            // Moves 1-4, just get random shit with a chance to switch
+            for (int i = 0; i < 4; i++)
             {
                 if (_rng.Next(0, 100) < switchChance) // Empty
                 {
@@ -154,57 +141,42 @@ namespace ParsersAndData
                 else // Otherwise a normal move i guess
                 {
                     Moves[i] = legalMoves.ElementAt(_rng.Next(legalMoves.Count));
-                    legalMoves.Remove(Moves[1]);
+                    legalMoves.Remove(Moves[i]);
                 }
             }
-        }
-        /// <summary>
-        /// Removes banned (clause) abilities from a set
-        /// </summary>
-        /// <param name="abilities">Set with abilities</param>
-        static void RemoveBannedAbilities(HashSet<string> abilities)
-        {
-            abilities.Remove("moody");
-        }
-        /// <summary>
-        /// Removes banned moves (clause) from a set
-        /// </summary>
-        /// <param name="moves">Set with moves</param>
-        static void RemoveBannedMoves(HashSet<string> moves)
-        {
-            moves.Remove("sand attack");
-            moves.Remove("double team");
-            moves.Remove("minimize");
-            moves.Remove("hidden power");
-            moves.Remove("flash");
-            moves.Remove("kinesis");
-            moves.Remove("mud-slap");
-            moves.Remove("smokescreen");
-        }
-        /// <summary>
-        /// Removes useless abilities from a set (so I don't need to blacklist it for every mon)
-        /// </summary>
-        /// <param name="abilities">Set with abilities</param>
-        static void RemoveUselessAbilities(HashSet<string> abilities)
-        {
-            // Useless
-            abilities.Remove("pickup");
-            abilities.Remove("ball fetch");
-            abilities.Remove("honey gather");
-            abilities.Remove("run away");
-            abilities.Remove("telepathy");
-        }
-        /// <summary>
-        /// Removes usaless moves from a set (so I don't need to blacklist it for every mon)
-        /// </summary>
-        /// <param name="moves">Set with moves</param>
-        static void RemoveUselessMoves(HashSet<string> moves)
-        {
-            // Removed because useless
-            moves.Remove("frustration");
-            moves.Remove("splash");
-            moves.Remove("celebrate");
-            moves.Remove("hold hands");
+            // Finally, given moveset I now need to verify it fills the requirements and moves are overwritten accordingly
+            int currentReplacedMove = 0; // Replace the next move
+            if (!Moves.Any(legalStabs.Contains)) // If my moveset doesn't have an element found in legal stabs, need to force one
+            {
+                legalMoves.Add(Moves[currentReplacedMove]); // Re-add the move to the pool
+                Moves[currentReplacedMove] = legalStabs.ElementAt(_rng.Next(legalMoves.Count)); // Add a random stab then
+                currentReplacedMove++; // Move to next target moveslot
+            }
+            // Next, check possible sets for filtering, e.g. dancer
+            if (settings.HasFlag(TeambuildSettings.DANCERS))
+            {
+                HashSet<string> dancingAbilities = SpecificSets.GetDancingAbilities();
+                HashSet<string> dancingMoves = SpecificSets.GetDancingMoves();
+                // Insane check, need to see if I don't have ability or moves already (and moves includes move disk too!)
+                if (!dancingAbilities.Contains(Ability) ||
+                    !dancingMoves.Overlaps(Moves) ||
+                    (Item != null && backEndData.MoveItemData.ContainsKey(Item.Name) && !dancingMoves.Overlaps(backEndData.MoveItemData[Item.Name])))
+                {
+                    // What can I add?
+                    HashSet<string> abilitiesICanUse = [.. legalAbilities.Intersect(dancingAbilities)];
+                    HashSet<string> movesICanUse = [.. legalMoves.Intersect(dancingMoves)];
+                    // I'll try ability first since dancer is good
+                    if (abilitiesICanUse.Count > 0)
+                    {
+                        Ability = abilitiesICanUse.ElementAt(_rng.Next(abilitiesICanUse.Count));
+                    }
+                    else // Just replace a move then, there is bound to be one since otherwise the check would've exploded before
+                    {
+                        Moves[currentReplacedMove] = movesICanUse.ElementAt(_rng.Next(movesICanUse.Count));
+                        currentReplacedMove++;
+                    }
+                }
+            }
         }
         /// <summary>
         /// Gets the pokemon nature (if any)
@@ -229,7 +201,7 @@ namespace ParsersAndData
         /// <returns>Array of the 6ev in order, HP, Atk, Def, SpA, SpD, Spe</returns>
         int[] GetEvs(DataContainers backEndData)
         {
-            int[] evs = { 1, 1, 1, 1, 1, 1 }; // All ev's 1 so the thing doesnt annoy me
+            int[] evs = [1, 1, 1, 1, 1, 1]; // All ev's 1 so the thing doesnt annoy me
             if (Item != null) // EVs also by item
             {
                 if (backEndData.EvItemData.TryGetValue(Item.Name, out HashSet<string> auxItemSet)) // If the item is a nature-setting item
@@ -355,7 +327,7 @@ namespace ParsersAndData
         EXPLORATION = 1,
         SMART = 2,
         MONOTYPE = 4, /// Share one specific type
-        DANCE_OFF = 8 /// Every mon must have -dance aqua step or clangorous soul
+        DANCERS = 8 /// Every mon must have -dance aqua step or clangorous soul
     }
     public class TrainerData
     {
@@ -373,43 +345,89 @@ namespace ParsersAndData
         /// Determines whether trainer could participate in a challenge with certain settings
         /// </summary>
         /// <param name="backEndData"></param>
-        /// <param name="nMons">How many mons to perform this operation on</param>
+        /// <param name="nMons">How many mons are expected in a team</param>
         /// <param name="settings">Settings for teambuilding</param>
-        /// <returns></returns>
-        public bool CanParticipate(DataContainers backEndData, int nMons, TeambuildSettings settings)
+        /// <returns>All of the possible valid team comps that could be chosen for this format. May have more members than nMons so it may need to be shuffled around</returns>
+        public List<List<PokemonSet>> GetValidTeamComps(DataContainers backEndData, int nMons, TeambuildSettings settings)
         {
-            // TODO Redo this to give a list of valid mons, add bool param of like whether it's all the teamsheets (reorder) or first N
             // Mon number check
-            if (Teamsheet.Count < nMons) return false;
-            // Monotype check
+            if (Teamsheet.Count < nMons) return new List<List<PokemonSet>>();
+            // Check if need to try absolutely everythign (npc) or only the first N
+            List<List<PokemonSet>> possibleComps = [AutoTeam ? [.. Teamsheet] : Teamsheet.GetRange(0, nMons),]; // Will contain all posible comps
+            // Now we filter the lists condition by condition
+            // Monotype check, this will be basically monotype at random
             if (settings.HasFlag(TeambuildSettings.MONOTYPE))
             {
-                Dictionary<string, List<PokemonSet>> validMons = new Dictionary<string, List<PokemonSet>>();
-                foreach (PokemonSet mon in Teamsheet) // Check each mon
+                List<List<PokemonSet>> newPossibleComps = new List<List<PokemonSet>>(); // Will contain all resulting possible comps
+                foreach (List<PokemonSet> comp in possibleComps) // Check comp by comp
                 {
-                    foreach (string type in backEndData.Dex[mon.Species].Types) // Aggregate types
+                    Dictionary<string, List<PokemonSet>> validMons = new Dictionary<string, List<PokemonSet>>(); // Will filter by types
+                    foreach (PokemonSet mon in comp) // Check each mon in this comp
                     {
-                        // Add mon to the set
-                        if (validMons.ContainsKey(type))
+                        foreach (string type in backEndData.Dex[mon.Species].Types) // Aggregate the types
                         {
-                            validMons[type].Add(mon);
-                        }
-                        else
-                        {
-                            validMons[type] = [mon];
+                            // Add mon to the set
+                            if (validMons.TryGetValue(type, out List<PokemonSet> foundType))
+                            {
+                                foundType.Add(mon);
+                            }
+                            else
+                            {
+                                validMons[type] = [mon];
+                            }
                         }
                     }
+                    // Then, get the ones that can be used, for nMons, need to find the list that can be used as monotype, add to the possible comps
+                    newPossibleComps.AddRange([.. validMons.Values.Where(l => l.Count >= nMons)]); // Add all monotypes
                 }
-                // Then, get the ones that can be used, for nMons, need to find the list that can be used as monotype
-                List<List<PokemonSet>> validMonotypes = validMons.Values.Where(l => l.Count >= nMons).ToList();
-                if (validMonotypes.Count == 0) return false; // Can't monotype
-                else return true; // Can monotype
+                possibleComps = newPossibleComps; // Replace old filtered with new
             }
-            // No more checks, team is OK
-            return true;
+            if (settings.HasFlag(TeambuildSettings.DANCERS))
+            {
+                HashSet<string> abilitiesToVerify = SpecificSets.GetDancingAbilities();
+                HashSet<string> movesToVerify = SpecificSets.GetDancingMoves();
+                List<List<PokemonSet>> newPossibleComps = new List<List<PokemonSet>>(); // Will contain all resulting possible comps
+                foreach (List<PokemonSet> comp in possibleComps) // Check comp by comp
+                {
+                    List<PokemonSet> filteredComp = new List<PokemonSet>();
+                    foreach (PokemonSet mon in comp) // Mon is valid in certain conditions
+                    {
+                        bool monIsValid = false;
+                        // In here, we need to determine if mon already has a moveset defined or not!
+                        if (AutoTeam) // This means the pokemon will be potentially randomized later so just need to check species data
+                        {
+                            // Check if mon contains ability, move or move disk, considering auto team tries to be "smart"
+                            Pokemon monData = backEndData.Dex[mon.Species];
+                            monIsValid |= abilitiesToVerify.Overlaps(monData.GetSmartAbilities());
+                            monIsValid |= movesToVerify.Overlaps(monData.GetSmartMoves());
+                        }
+                        else // Mon already has a defined set so just check if any is present
+                        {
+                            monIsValid |= abilitiesToVerify.Contains(mon.Ability);
+                            monIsValid |= movesToVerify.Overlaps(mon.Moves);
+                        }
+                        // In any case, even if not naturally learned, the mon may have a move disk equipped that learns it
+                        if (mon.Item != null && !AutoItem && backEndData.MoveItemData.TryGetValue(mon.Item.Name, out HashSet<string> moveDiskMoves))
+                        {
+                            monIsValid |= movesToVerify.Overlaps(moveDiskMoves);
+                        }
+                        // Finished checking dance moves
+                        if (monIsValid)
+                        {
+                            filteredComp.Add(mon);
+                        }
+                    }
+                    if (filteredComp.Count > nMons) // If the resulting filtered comp can form a team, then add it to result
+                    {
+                        newPossibleComps.Add(filteredComp);
+                    }
+                }
+                possibleComps = newPossibleComps; // Replace old filtered with new
+            }
+            return possibleComps; // Return all generated possible comps
         }
         /// <summary>
-        /// Defines a team's team (e.g. movesets, etc), randomizes depending on auto-settings
+        /// Defines a team's team (e.g. movesets, etc), randomizes depending on auto-settings. ASSUMES THE TEAM IS VALID FOR THE DESIRED FORMAT
         /// </summary>
         /// <param name="backEndData"></param>
         /// <param name="nMons">How many mons to perform this operation on</param>
@@ -421,81 +439,9 @@ namespace ParsersAndData
             Random _rng = new Random();
             while (!defined)
             {
-                // TODO: Redo flow. Instead of shuffling-getting and re-shufflign just get once and shuffle in place
-                // If not auto team, would verify and check anyway
-                // Mon randomizer now takes wthe whole enum, so it can fine-randomize
-
-                // Shuffle teams and sets if auto-team
-                if (AutoTeam)
-                {
-                    // First, shuffle the mons
-                    Utilities.ShuffleList(Teamsheet, 0, Teamsheet.Count);
-                    // In monotype, need to do a quick searching to find which mons can be monotype, and then put random nMons in top
-                    if (settings.HasFlag(TeambuildSettings.MONOTYPE))
-                    {
-                        Dictionary<string, List<PokemonSet>> validMons = new Dictionary<string, List<PokemonSet>>();
-                        foreach (PokemonSet mon in Teamsheet) // Check each mon
-                        {
-                            foreach (string type in backEndData.Dex[mon.Species].Types) // Aggregate types
-                            {
-                                // Add mon to the set
-                                if (validMons.ContainsKey(type))
-                                {
-                                    validMons[type].Add(mon);
-                                }
-                                else
-                                {
-                                    validMons[type] = [mon];
-                                }
-                            }
-                        }
-                        // Then, get the ones that can be used, for nMons, need to find the list that can be used as monotype
-                        List<List<PokemonSet>> validMonotypes = validMons.Values.Where(l => l.Count >= nMons).ToList();
-                        if (validMonotypes.Count == 0) throw new Exception("This player can't be monotype!");
-                        // Finally, choose a random type
-                        List<PokemonSet> chosenTypeSet = validMonotypes[_rng.Next(validMonotypes.Count)]; // Chose random type
-                        Utilities.ShuffleList(chosenTypeSet, 0, chosenTypeSet.Count, _rng); // Shuffle the mons
-                        // Finally, reorder teamsheet with those mons first
-                        for (int i = 0; i < chosenTypeSet.Count; i++)
-                        {
-                            int currentIndex = Teamsheet.IndexOf(chosenTypeSet[i]); // Find where mon currently at, will become i
-                            if (i != currentIndex)
-                            {
-                                (Teamsheet[i], Teamsheet[currentIndex]) = (Teamsheet[currentIndex], Teamsheet[i]); // Swap
-                            }
-                        }
-                    }
-                    // Then, for each mon, will randomize their sets
-                    for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
-                    {
-                        PokemonSet pokemonSet = Teamsheet[i];
-                        pokemonSet.RandomizeAndVerify(backEndData, settings.HasFlag(TeambuildSettings.SMART));
-                    }
-                }
-                else
-                {
-                    // Some verifications for some specific game modes
-                    if (settings.HasFlag(TeambuildSettings.MONOTYPE)) // Need to ensure that nMons are monotype
-                    {
-                        Dictionary<string, int> typeCount = new Dictionary<string, int>();
-                        for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
-                        {
-                            foreach (string type in backEndData.Dex[Teamsheet[i].Species].Types) // Aggregate types
-                            {
-                                // Add mon to the set
-                                if (typeCount.ContainsKey(type)) typeCount[type]++;
-                                else typeCount[type] = 1;
-                            }
-                            // Then, check if there's any type with a count of nMons (neither more or less?)
-                            if (!typeCount.ContainsValue(nMons)) throw new Exception("This player can't be monotype!");
-                            // Otherwise all good
-                        }
-                    }
-                }
-                // Shuffle items if auto-item
                 if (AutoItem)
                 {
-                    // First, need to remove all mon's items
+                    // First, need to remove all mon's items, as they are used for some specific checks
                     foreach (PokemonSet monSet in Teamsheet)
                     {
                         Item monsItem = monSet.Item;
@@ -505,6 +451,33 @@ namespace ParsersAndData
                             monSet.Item = null;
                         }
                     }
+                }
+                // Shuffle teams and sets if auto-team
+                if (AutoTeam)
+                {
+                    // First, get all the possible team comps that are legal for this format, choose a random one, and then shuffle the mons
+                    List<List<PokemonSet>> legalComps = GetValidTeamComps(backEndData, nMons, settings);
+                    List<PokemonSet> chosenSet = legalComps[_rng.Next(legalComps.Count)];
+                    Utilities.ShuffleList(chosenSet, 0, chosenSet.Count);
+                    // Now make sure the sets have the mons in order
+                    for (int i = 0; i < chosenSet.Count; i++)
+                    {
+                        int currentIndex = Teamsheet.IndexOf(chosenSet[i]); // Find where mon currently at, will become i
+                        if (i != currentIndex)
+                        {
+                            (Teamsheet[i], Teamsheet[currentIndex]) = (Teamsheet[currentIndex], Teamsheet[i]); // Swap
+                        }
+                    }
+                    // Finally, for each mon, will randomize their sets
+                    for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
+                    {
+                        PokemonSet pokemonSet = Teamsheet[i];
+                        pokemonSet.RandomizeAndVerify(backEndData, settings);
+                    }
+                }
+                // Shuffle items if auto-item
+                if (AutoItem)
+                {
                     // Then, shuffle all items
                     Utilities.ShuffleList(BattleItems, 0, BattleItems.Count, _rng);
                     // Each item will be accepted with a probability P so that the system tries to ensure a specific desired amount (e.g. 4)
@@ -512,8 +485,8 @@ namespace ParsersAndData
                     const int DESIRED_FINAL_NUMBER_OF_ITEMS = 4;
                     const int BASE_ACCEPTANCE_CHANCE = 20;
                     int itemAcceptanceChance;
-                    if ((BattleItems.Count - DESIRED_FINAL_NUMBER_OF_ITEMS) > nMons) itemAcceptanceChance = 100; // Since even if all mons equipped it won't reach the desired, just guarantee use
                     if (BattleItems.Count <= DESIRED_FINAL_NUMBER_OF_ITEMS) itemAcceptanceChance = BASE_ACCEPTANCE_CHANCE; // Minimum chance to always use something, sometimes
+                    else if ((BattleItems.Count - DESIRED_FINAL_NUMBER_OF_ITEMS) > nMons) itemAcceptanceChance = 100; // Since even if all mons equipped it won't reach the desired, just guarantee use
                     else itemAcceptanceChance = 100 * (1 - (DESIRED_FINAL_NUMBER_OF_ITEMS / BattleItems.Count)); // Otherwise the chance is given so around DESIRED_FINAL_NUMBER_OF_ITEMS remains
                     // Now go mon by mon, each mon has the same chance of having an item, will go item by item after
                     for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
@@ -564,7 +537,7 @@ namespace ParsersAndData
                 {
                     PokemonSet mon = Teamsheet[i];
                     mon.ExplorationStatus = settings.HasFlag(TeambuildSettings.EXPLORATION) ? new ExplorationStatus() : null;
-                    Console.WriteLine($"\tSet for {mon.ToString()}");
+                    Console.WriteLine($"\tSet for {mon}");
                     Console.WriteLine("");
                 }
                 Console.WriteLine("Do you approve of this team? Y/n");
@@ -646,7 +619,7 @@ namespace ParsersAndData
         /// <returns>Whether the item would be useful or not</returns>
         static bool IsSpecificItemUseful(string itemName, PokemonSet pokemonSet, DataContainers backEndData)
         {
-            List<string> usefulMoves = new List<string>();
+            List<string> usefulMoves;
             List<string> usefulAbilities = new List<string>();
             switch (itemName.ToLower())
             {

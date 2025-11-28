@@ -18,6 +18,38 @@ namespace ParsersAndData
         public HashSet<string> DamagingStabs { get; set; } = new HashSet<string>();
         public HashSet<string> AiMoveBanlist { get; set; } = new HashSet<string>();
         public HashSet<string> AiAbilityBanlist { get; set; } = new HashSet<string>();
+        /// <summary>
+        /// Returns the set of "smart moves" from this mon
+        /// </summary>
+        /// <returns>The moves the mon can learn excluding illegal, as well as ones blacklisted by AI and useless list</returns>
+        public HashSet<string> GetSmartMoves()
+        {
+            return GetLegalMoves().Except(AiMoveBanlist).Except(SpecificSets.GetUselessMoves()).ToHashSet();
+        }
+        /// <summary>
+        /// Returns the set of legal moves from this mon
+        /// </summary>
+        /// <returns>The moves the mon can learn excluding illegal</returns>
+        public HashSet<string> GetLegalMoves()
+        {
+            return Moves.Except(SpecificSets.GetBannedMoves()).ToHashSet();
+        }
+        /// <summary>
+        /// Returns the set of "smart abilities" from this mon
+        /// </summary>
+        /// <returns>The abilities the mon can learn excluding illegal, as well as ones blacklisted by AI and useless list</returns>
+        public HashSet<string> GetSmartAbilities()
+        {
+            return GetLegalAbilities().Except(AiAbilityBanlist).Except(SpecificSets.GetUselessAbilities()).ToHashSet();
+        }
+        /// <summary>
+        /// Returns the set of legal abilities from this mon
+        /// </summary>
+        /// <returns>The abilities the mon can learn excluding illegal</returns>
+        public HashSet<string> GetLegalAbilities()
+        {
+            return Abilities.Except(SpecificSets.GetBannedAbilities()).ToHashSet();
+        }
         public override string ToString()
         {
             return $"{Name} ({TagName})";

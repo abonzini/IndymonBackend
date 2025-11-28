@@ -1,7 +1,7 @@
 ﻿using ParsersAndData;
 using ShowdownBot;
 
-namespace IndymonBackend
+namespace IndymonBackendProgram
 {
     public class IndividualMu
     {
@@ -86,9 +86,9 @@ namespace IndymonBackend
             OngoingTournament.NMons = int.Parse(Console.ReadLine());
             OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
             // Finally, player selection, pre-filter traines whether they can participate in this event
-            List<TrainerData> trainers = _backEndData.TrainerData.Values.Where(t => t.CanParticipate(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings)).ToList();
-            List<TrainerData> npcs = _backEndData.NpcData.Values.Where(t => t.CanParticipate(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings)).ToList();
-            List<TrainerData> namedNpcs = _backEndData.NamedNpcData.Values.Where(t => t.CanParticipate(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings)).ToList();
+            List<TrainerData> trainers = _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0).ToList();
+            List<TrainerData> npcs = _backEndData.NpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0).ToList();
+            List<TrainerData> namedNpcs = _backEndData.NamedNpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0).ToList();
             List<TrainerData> currentChosenTrainers = null;
             int remainingPlayersNeeded = OngoingTournament.NPlayers;
             bool randomizeFill = false;
@@ -481,13 +481,19 @@ namespace IndymonBackend
         /// <summary>
         /// Checks if certain tournaments are monotype or not
         /// </summary>
-        protected void AskIfMonotype()
+        protected void AskSpecialRulesets()
         {
             Console.WriteLine("Is this a monotype tournament? y/N");
             string response = Console.ReadLine();
             if (response.Trim().ToLower() == "y")
             {
                 TeamBuildSettings |= TeambuildSettings.MONOTYPE; // If so, then this is monotype
+            }
+            Console.WriteLine("Is this a dance-off tournament? y/N");
+            response = Console.ReadLine();
+            if (response.Trim().ToLower() == "y")
+            {
+                TeamBuildSettings |= TeambuildSettings.DANCERS; // If so, then this is dance-off
             }
         }
     }
@@ -504,7 +510,7 @@ namespace IndymonBackend
         {
             AskIfOfficial();
             AskIf2ndPart();
-            AskIfMonotype();
+            AskSpecialRulesets();
         }
         public override void ResetTournament()
         {
@@ -811,7 +817,7 @@ namespace IndymonBackend
         {
             AskIfOfficial();
             AskIf2ndPart();
-            AskIfMonotype();
+            AskSpecialRulesets();
         }
         public override void ResetTournament()
         {
@@ -980,7 +986,7 @@ namespace IndymonBackend
             // Ask the typical
             AskIfOfficial();
             AskIf2ndPart();
-            AskIfMonotype();
+            AskSpecialRulesets();
             // Then group specific
             Console.WriteLine("How many players each group?");
             PlayersPerGroup = int.Parse(Console.ReadLine());

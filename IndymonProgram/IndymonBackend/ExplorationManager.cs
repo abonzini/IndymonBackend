@@ -1,7 +1,7 @@
 ﻿using ParsersAndData;
 using ShowdownBot;
 
-namespace IndymonBackend
+namespace IndymonBackendProgram
 {
     public enum ExplorationStepType
     {
@@ -35,7 +35,7 @@ namespace IndymonBackend
     }
     public class ExplorationManager
     {
-        Random _rng = new Random();
+        readonly Random _rng = new Random();
         DataContainers _backEndData = null;
         public string Dungeon { get; set; }
         public string Trainer { get; set; }
@@ -131,7 +131,7 @@ namespace IndymonBackend
                     NopWithWaitCommand(DRAW_ROOM_PAUSE);
                     prevCoord = (floor, room); // For drawing
                     usedShortcut = false; // Reset shortcut
-                    bool roomSuccess = false;
+                    bool roomSuccess;
                     if (room == 0) // Room 0 is always the beginning of floor, camping event followed by shortcut check
                     {
                         if (floor == 0) // Beginning of adventure!
@@ -198,7 +198,7 @@ namespace IndymonBackend
                     else // Normal room implies a normal event from the possibility list
                     {
                         RoomEvent nextEvent = possibleEvents[_rng.Next(possibleEvents.Count)]; // Get a random event
-                        Console.WriteLine($"Event: {nextEvent.ToString()}");
+                        Console.WriteLine($"Event: {nextEvent}");
                         roomSuccess = ExecuteEvent(nextEvent, floor, prizes, trainerData);
                         possibleEvents.Remove(nextEvent); // Remove from event pool
                     }
@@ -497,7 +497,7 @@ namespace IndymonBackend
                             Species = pokemonSpecies,
                             Shiny = isShiny,
                         };
-                        joiner.RandomizeMon(_backEndData, false, 7); // Random set of moves, 7% switch standard
+                        joiner.RandomizeMon(_backEndData, TeambuildSettings.NONE, 10); // Random set of moves, 10% switch new standard
                         Console.Write("Added to team");
                         trainerData.Teamsheet.Add(joiner);
                         GenericMessageCommand(roomEvent.PostEventString);
@@ -723,10 +723,10 @@ namespace IndymonBackend
         /// </summary>
         /// <param name="item">Item to add</param>
         /// <param name="prizes">Prizes container</param>
-        void AddItemPrize(string item, ExplorationPrizes prizes)
+        static void AddItemPrize(string item, ExplorationPrizes prizes)
         {
             // Add the item to prizes
-            if (prizes.ItemsFound.ContainsKey(item)) prizes.ItemsFound[item]++;
+            if (prizes.ItemsFound.TryGetValue(item, out int previousCount)) prizes.ItemsFound[item] = ++previousCount;
             else prizes.ItemsFound.Add(item, 1);
         }
         /// <summary>
@@ -736,7 +736,7 @@ namespace IndymonBackend
         /// <param name="floor">Which floor to add (0-4), also corresponds to pokeball</param>
         /// <param name="shiny">Mon is shiny</param>
         /// <param name="prizes">Prizes list</param>
-        void AddPokemonPrize(string mon, int floor, bool shiny, ExplorationPrizes prizes)
+        static void AddPokemonPrize(string mon, int floor, bool shiny, ExplorationPrizes prizes)
         {
             if (shiny) mon += "★"; // Add shiny tag too
             Dictionary<string, int> monList = prizes.MonsFound[floor];
