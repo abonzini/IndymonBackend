@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System.Text;
 
 namespace ParsersAndData
 {
@@ -304,44 +303,6 @@ namespace ParsersAndData
             return itemName;
         }
         /// <summary>
-        /// Gets pokepaste for this mon set
-        /// </summary>
-        /// <param name="backEndData">Backend data to check stuff like item effects</param>
-        /// <returns>Pokepaste string</returns>
-        public string GetPokepaste(DataContainers backEndData)
-        {
-            // Now to assemble the final pokepaste
-            StringBuilder resultBuilder = new StringBuilder();
-            string pokemonName = (NickName != "") ? $"{NickName} ({Species})" : Species;
-            resultBuilder.Append((GetBattleItem(backEndData) != "") ? $"{pokemonName} @ {GetBattleItem(backEndData)}\n" : $"{pokemonName}\n"); // Name
-            if (GetNature(backEndData) != "") resultBuilder.Append($"{GetNature(backEndData)} Nature\n"); // Add nature if there
-            if (GetTera(backEndData) != "") resultBuilder.Append($"Tera Type: {GetTera(backEndData)}\n"); // Add tera if there
-            int[] evs = GetEvs(backEndData); // Load ev one by one
-            List<string> allEvStrings = new List<string>();
-            for (int i = 0; i < evs.Length; i++)
-            {
-                string evName = i switch
-                {
-                    0 => "HP",
-                    1 => "Atk",
-                    2 => "Def",
-                    3 => "SpA",
-                    4 => "SpD",
-                    5 => "Spe",
-                    _ => ""
-                };
-                allEvStrings.Add($"{evs[i]} {evName}");
-            }
-            resultBuilder.Append($"EVs: {string.Join(" / ", allEvStrings)}\n");
-            resultBuilder.Append($"Ability: {Ability}\n"); // Ability
-            if (Shiny) resultBuilder.Append("Shiny: Yes\n"); // Shiny
-            foreach (string move in Moves) // Moves
-            {
-                resultBuilder.Append($"- {move}\n");
-            }
-            return resultBuilder.ToString();
-        }
-        /// <summary>
         /// Gets pokemon string in showdown packed format
         /// </summary>
         /// <param name="backEndData">Backend data to check stuff like item effects</param>
@@ -393,7 +354,8 @@ namespace ParsersAndData
         NONE = 0,
         EXPLORATION = 1,
         SMART = 2,
-        MONOTYPE = 4
+        MONOTYPE = 4, /// Share one specific type
+        DANCE_OFF = 8 /// Every mon must have -dance aqua step or clangorous soul
     }
     public class TrainerData
     {
@@ -416,6 +378,7 @@ namespace ParsersAndData
         /// <returns></returns>
         public bool CanParticipate(DataContainers backEndData, int nMons, TeambuildSettings settings)
         {
+            // TODO Redo this to give a list of valid mons, add bool param of like whether it's all the teamsheets (reorder) or first N
             // Mon number check
             if (Teamsheet.Count < nMons) return false;
             // Monotype check
@@ -458,6 +421,10 @@ namespace ParsersAndData
             Random _rng = new Random();
             while (!defined)
             {
+                // TODO: Redo flow. Instead of shuffling-getting and re-shufflign just get once and shuffle in place
+                // If not auto team, would verify and check anyway
+                // Mon randomizer now takes wthe whole enum, so it can fine-randomize
+
                 // Shuffle teams and sets if auto-team
                 if (AutoTeam)
                 {
@@ -755,22 +722,6 @@ namespace ParsersAndData
                 }
             }
             return false; // Singled out item that didn't satisfy checks is useless
-        }
-        /// <summary>
-        /// Gets team pokepaste
-        /// </summary>
-        /// <param name="backEndData">Back end data</param>
-        /// <param name="nMons">first N mons to include</param>
-        /// <returns>The pokepaste string</returns>
-        public string GetPokepaste(DataContainers backEndData, int nMons)
-        {
-            StringBuilder resultBuilder = new StringBuilder();
-            for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
-            {
-                PokemonSet mon = Teamsheet[i];
-                resultBuilder.AppendLine(mon.GetPokepaste(backEndData));
-            }
-            return resultBuilder.ToString();
         }
         /// <summary>
         /// Gets team showdown packed data
