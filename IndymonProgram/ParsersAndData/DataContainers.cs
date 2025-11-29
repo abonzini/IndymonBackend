@@ -55,13 +55,13 @@ namespace ParsersAndData
     }
     public class PokemonSet
     {
-        public string NickName { get; set; }
-        public string Species { get; set; }
-        public bool Shiny { get; set; }
-        public string Ability { get; set; }
-        public string[] Moves { get; set; } = new string[4];
-        public Item Item { get; set; }
-        public ExplorationStatus ExplorationStatus { get; set; }
+        public string NickName { get; set; } = "";
+        public string Species { get; set; } = "";
+        public bool Shiny { get; set; } = false;
+        public string Ability { get; set; } = "";
+        public string[] Moves { get; set; } = ["", "", "", ""];
+        public Item Item { get; set; } = null;
+        public ExplorationStatus ExplorationStatus { get; set; } = null;
 
         public override string ToString()
         {
@@ -74,7 +74,6 @@ namespace ParsersAndData
         /// <param name="settings">Battle settings to ensure team and moveset is up to standard</param>
         public void RandomizeAndVerify(DataContainers backEndData, TeambuildSettings settings)
         {
-            // TODO: Refactor with all sets (some like LC will define unchangeable things but some as dance off are important!)
             bool acceptedMon = false;
             Pokemon pokemonBackendData = backEndData.Dex[Species];
             while (!acceptedMon)
@@ -118,7 +117,6 @@ namespace ParsersAndData
         /// <param name="switchChance">Chance that the last move is empty (switch)</param>
         public void RandomizeMon(DataContainers backEndData, TeambuildSettings settings, int switchChance)
         {
-            // TODO: Refactor with all sets (some like LC will define unchangeable things but some as dance off are important!)
             Random _rng = new Random();
             Pokemon pokemonBackendData = backEndData.Dex[Species];
             // Get data, gets a smart set or just legal depending if randomizing is smart
@@ -134,33 +132,71 @@ namespace ParsersAndData
             // Moves 1-4, just get random shit with a chance to switch
             for (int i = 0; i < 4; i++)
             {
-                if (_rng.Next(0, 100) < switchChance) // Empty
-                {
-                    Moves[i] = "";
-                }
-                else // Otherwise a normal move i guess
+                Moves[i] = ""; // Clean move first
+                if (legalMoves.Count == 0) continue; // If no more moves, continue so I can clear the rest of the moveset but im done
+                if (_rng.Next(0, 100) > switchChance) // Means the next move is not a switch, add something
                 {
                     Moves[i] = legalMoves.ElementAt(_rng.Next(legalMoves.Count));
                     legalMoves.Remove(Moves[i]);
                 }
             }
-            // Finally, given moveset I now need to verify it fills the requirements and moves are overwritten accordingly
-            int currentReplacedMove = 0; // Replace the next move
-            if (!Moves.Any(legalStabs.Contains)) // If my moveset doesn't have an element found in legal stabs, need to force one
+            // If mon has a move disk equipped, ensure it's in the moveset at this point, add at beginning in this case since they need to remain "safe" and not be overwritten
+            int safeMoveIndex = 0; // Moves below this index are safe
+            if ((Item != null) && (backEndData.MoveItemData.TryGetValue(Item.Name, out HashSet<string> overwrittenMoves)))
             {
-                legalMoves.Add(Moves[currentReplacedMove]); // Re-add the move to the pool
-                Moves[currentReplacedMove] = legalStabs.ElementAt(_rng.Next(legalMoves.Count)); // Add a random stab then
-                currentReplacedMove++; // Move to next target moveslot
+                foreach (string newMove in overwrittenMoves)
+                {
+                    Move moveBackEndData = backEndData.MoveData[newMove]; // Find the move
+                    if (moveBackEndData.Damaging && pokemonBackendData.Types.Contains(moveBackEndData.Type)) // If it's a damaging stab, make sure to include it!
+                    {
+                        legalStabs.Add(newMove);
+                    }
+                    Moves[safeMoveIndex] = newMove; // Replace last with move disk's
+                    safeMoveIndex++; // Protect move disk move
+                }
+            }
+            // Finally, given moveset I now need to verify it fills the requirements and moves are overwritten accordingly
+            // Mechanism, theres an index where every move behind that is locked and not replaced, if  anew important move is found, it's moved to the index and saved
+            // Stab check, ensure stab is safe
+            if (!Moves.Any(legalStabs.Contains)) // If my moveset doesn't have an element found in legal stabs may need to add one
+            {
+                if (legalStabs.Count > 0) // But make sure a valid stab exists
+                {
+                    // Replace a move with a stab then
+                    legalMoves.Add(Moves[safeMoveIndex]); // Re-add the move to the pool
+                    Moves[safeMoveIndex] = legalStabs.ElementAt(_rng.Next(legalStabs.Count)); // Add a random stab then
+                    legalMoves.Remove(Moves[safeMoveIndex]);
+                    safeMoveIndex++; // Make the STAB move safe
+                }
+            }
+            else // There's a stab, so I need to make sure it's safe by moving it if not
+            {
+                int firstStabIndex = Array.IndexOf(Moves, Moves.First(legalStabs.Contains)); // First the index of the first legal stab
+                if (firstStabIndex > safeMoveIndex) // Ensure its protected by safe move index
+                {
+                    (Moves[firstStabIndex], Moves[safeMoveIndex]) = (Moves[safeMoveIndex], Moves[firstStabIndex]); // Swap
+                }
+                safeMoveIndex++; // STAB is safe now
             }
             // Next, check possible sets for filtering, e.g. dancer
             if (settings.HasFlag(TeambuildSettings.DANCERS))
             {
                 HashSet<string> dancingAbilities = SpecificSets.GetDancingAbilities();
                 HashSet<string> dancingMoves = SpecificSets.GetDancingMoves();
-                // Insane check, need to see if I don't have ability or moves already (and moves includes move disk too!)
-                if (!dancingAbilities.Contains(Ability) ||
-                    !dancingMoves.Overlaps(Moves) ||
-                    (Item != null && backEndData.MoveItemData.ContainsKey(Item.Name) && !dancingMoves.Overlaps(backEndData.MoveItemData[Item.Name])))
+                // Check if the ability or move is already there
+                if (dancingAbilities.Contains(Ability) || dancingMoves.Overlaps(Moves))
+                {
+                    if (!dancingAbilities.Contains(Ability)) // Then it's a move, protect the move
+                    {
+                        int dancingMoveIndex = Array.IndexOf(Moves, Moves.First(dancingMoves.Contains)); // First the index of the first legal dancing move
+                        if (dancingMoveIndex > safeMoveIndex) // Ensure its protected by safe move index
+                        {
+                            (Moves[dancingMoveIndex], Moves[safeMoveIndex]) = (Moves[safeMoveIndex], Moves[dancingMoveIndex]); // Swap
+                        }
+                        safeMoveIndex++; // Dancing move is safe now
+                    }
+                }
+                else // Need to add it then
                 {
                     // What can I add?
                     HashSet<string> abilitiesICanUse = [.. legalAbilities.Intersect(dancingAbilities)];
@@ -170,10 +206,12 @@ namespace ParsersAndData
                     {
                         Ability = abilitiesICanUse.ElementAt(_rng.Next(abilitiesICanUse.Count));
                     }
-                    else // Just replace a move then, there is bound to be one since otherwise the check would've exploded before
+                    else // Just replace a move then, replace whatever's in the safe move index (everything below is protected)
                     {
-                        Moves[currentReplacedMove] = movesICanUse.ElementAt(_rng.Next(movesICanUse.Count));
-                        currentReplacedMove++;
+                        legalMoves.Add(Moves[safeMoveIndex]);
+                        Moves[safeMoveIndex] = movesICanUse.ElementAt(_rng.Next(movesICanUse.Count));
+                        legalMoves.Remove(Moves[safeMoveIndex]);
+                        safeMoveIndex++;
                     }
                 }
             }
@@ -281,24 +319,13 @@ namespace ParsersAndData
         /// <returns>Pokemon string in showdown packed format</returns>
         public string GetPacked(DataContainers backEndData)
         {
-            // First, keep in mind it may have a move-altering item
-            List<string> setMoves = [.. Moves];
-            if ((Item != null) && (backEndData.MoveItemData.TryGetValue(Item.Name, out HashSet<string> overritenMoves)))
-            {
-                int moveSlot = 3; // Start with last
-                foreach (string newMove in overritenMoves)
-                {
-                    setMoves[moveSlot] = newMove;
-                    moveSlot--;
-                }
-            }
             //NICKNAME|SPECIES|ITEM|ABILITY|MOVES|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS,POKEBALL,HIDDENPOWERTYPE,GIGANTAMAX,DYNAMAXLEVEL,TERATYPE
             List<string> packedStrings = new List<string>();
             packedStrings.Add(NickName);
             packedStrings.Add(Species);
             packedStrings.Add(GetBattleItem(backEndData));
             packedStrings.Add(Ability);
-            packedStrings.Add(string.Join(",", setMoves));
+            packedStrings.Add(string.Join(",", Moves));
             packedStrings.Add(GetNature(backEndData));
             packedStrings.Add(string.Join(",", GetEvs(backEndData)));
             packedStrings.Add("");
@@ -361,24 +388,24 @@ namespace ParsersAndData
                 List<List<PokemonSet>> newPossibleComps = new List<List<PokemonSet>>(); // Will contain all resulting possible comps
                 foreach (List<PokemonSet> comp in possibleComps) // Check comp by comp
                 {
-                    Dictionary<string, List<PokemonSet>> validMons = new Dictionary<string, List<PokemonSet>>(); // Will filter by types
+                    Dictionary<string, List<PokemonSet>> typeContainingMons = new Dictionary<string, List<PokemonSet>>(); // Will filter by types
                     foreach (PokemonSet mon in comp) // Check each mon in this comp
                     {
                         foreach (string type in backEndData.Dex[mon.Species].Types) // Aggregate the types
                         {
                             // Add mon to the set
-                            if (validMons.TryGetValue(type, out List<PokemonSet> foundType))
+                            if (typeContainingMons.TryGetValue(type, out List<PokemonSet> foundType))
                             {
                                 foundType.Add(mon);
                             }
                             else
                             {
-                                validMons[type] = [mon];
+                                typeContainingMons[type] = [mon];
                             }
                         }
                     }
                     // Then, get the ones that can be used, for nMons, need to find the list that can be used as monotype, add to the possible comps
-                    newPossibleComps.AddRange([.. validMons.Values.Where(l => l.Count >= nMons)]); // Add all monotypes
+                    newPossibleComps.AddRange([.. typeContainingMons.Values.Where(l => l.Count >= nMons)]); // Add all monotypes
                 }
                 possibleComps = newPossibleComps; // Replace old filtered with new
             }
@@ -400,16 +427,16 @@ namespace ParsersAndData
                             Pokemon monData = backEndData.Dex[mon.Species];
                             monIsValid |= abilitiesToVerify.Overlaps(monData.GetSmartAbilities());
                             monIsValid |= movesToVerify.Overlaps(monData.GetSmartMoves());
+                            // In any case, even if not naturally learned, the mon may have a move disk equipped that will give it
+                            if (mon.Item != null && !AutoItem && backEndData.MoveItemData.TryGetValue(mon.Item.Name, out HashSet<string> moveDiskMoves))
+                            {
+                                monIsValid |= movesToVerify.Overlaps(moveDiskMoves);
+                            }
                         }
-                        else // Mon already has a defined set so just check if any is present
+                        else // Mon already has a defined set (including move items) so just check if any is present
                         {
                             monIsValid |= abilitiesToVerify.Contains(mon.Ability);
                             monIsValid |= movesToVerify.Overlaps(mon.Moves);
-                        }
-                        // In any case, even if not naturally learned, the mon may have a move disk equipped that learns it
-                        if (mon.Item != null && !AutoItem && backEndData.MoveItemData.TryGetValue(mon.Item.Name, out HashSet<string> moveDiskMoves))
-                        {
-                            monIsValid |= movesToVerify.Overlaps(moveDiskMoves);
                         }
                         // Finished checking dance moves
                         if (monIsValid)
@@ -417,7 +444,7 @@ namespace ParsersAndData
                             filteredComp.Add(mon);
                         }
                     }
-                    if (filteredComp.Count > nMons) // If the resulting filtered comp can form a team, then add it to result
+                    if (filteredComp.Count >= nMons) // If the resulting filtered comp can form a team, then add it to result
                     {
                         newPossibleComps.Add(filteredComp);
                     }
@@ -518,6 +545,16 @@ namespace ParsersAndData
                                     Console.WriteLine($"\t\t{pokemonSet.Species} will use {itemCandidate}");
                                     BattleItems.Remove(itemCandidate);
                                     pokemonSet.Item = itemCandidate;
+                                    // If I just equipped an item that changes set, need to add it
+                                    if (backEndData.MoveItemData.TryGetValue(itemCandidate.Name, out HashSet<string> overwrittenMoves))
+                                    {
+                                        int overWrittenMoveSlot = 3; // Start with last
+                                        foreach (string newMove in overwrittenMoves)
+                                        {
+                                            pokemonSet.Moves[overWrittenMoveSlot] = newMove; // Replace last with move disk's
+                                            overWrittenMoveSlot--;
+                                        }
+                                    }
                                 }
                             }
                             else

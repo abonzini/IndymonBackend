@@ -34,7 +34,7 @@ namespace IndymonBackendProgram
         public Tournament OngoingTournament { get; set; }
         DataContainers _backEndData = null;
         TournamentHistory _leaderboard = null;
-        Random _rng = new Random();
+        readonly Random _rng = new Random();
         public TournamentManager(DataContainers backEndData, TournamentHistory leaderboard)
         {
             _backEndData = backEndData;
@@ -86,9 +86,9 @@ namespace IndymonBackendProgram
             OngoingTournament.NMons = int.Parse(Console.ReadLine());
             OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
             // Finally, player selection, pre-filter traines whether they can participate in this event
-            List<TrainerData> trainers = _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0).ToList();
-            List<TrainerData> npcs = _backEndData.NpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0).ToList();
-            List<TrainerData> namedNpcs = _backEndData.NamedNpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0).ToList();
+            List<TrainerData> trainers = [.. _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
+            List<TrainerData> npcs = [.. _backEndData.NpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
+            List<TrainerData> namedNpcs = [.. _backEndData.NamedNpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
             List<TrainerData> currentChosenTrainers = null;
             int remainingPlayersNeeded = OngoingTournament.NPlayers;
             bool randomizeFill = false;
@@ -120,8 +120,16 @@ namespace IndymonBackendProgram
                 }
                 if (randomizeFill)
                 {
-                    int nextTrainerIndex = _rng.Next(currentChosenTrainers.Count); // Will pick one of them
-                    nextTrainer = currentChosenTrainers[nextTrainerIndex];
+                    if (currentChosenTrainers.Count > 0)
+                    {
+                        int nextTrainerIndex = _rng.Next(currentChosenTrainers.Count); // Will pick one of them
+                        nextTrainer = currentChosenTrainers[nextTrainerIndex];
+                    }
+                    else
+                    {
+                        currentChosenTrainers = null;
+                        randomizeFill = false; // Have to end randomized fill
+                    }
                 }
                 else
                 {
@@ -189,11 +197,10 @@ namespace IndymonBackendProgram
             // Ok not bad, next step is to update participant team sheet if needed
             foreach (string participantName in OngoingTournament.Participants)
             {
-                // Try to find the participant
-                TrainerData participant;
-                if (_backEndData.TrainerData.ContainsKey(participantName)) participant = _backEndData.TrainerData[participantName];
-                else if (_backEndData.NpcData.ContainsKey(participantName)) participant = _backEndData.NpcData[participantName];
-                else if (_backEndData.NamedNpcData.ContainsKey(participantName)) participant = _backEndData.NamedNpcData[participantName];
+                // Try to find the participant in the place where located
+                if (_backEndData.TrainerData.TryGetValue(participantName, out TrainerData participant)) { }
+                else if (_backEndData.NpcData.TryGetValue(participantName, out participant)) { }
+                else if (_backEndData.NamedNpcData.TryGetValue(participantName, out participant)) { }
                 else throw new Exception("Trainer not found!?");
                 participant.ConfirmSets(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings); // Gets the team for everyone with the settings needed for the tournament
             }
@@ -400,8 +407,11 @@ namespace IndymonBackendProgram
                 {
                     p1Stats.Kills += p1Kills;
                     p1Stats.Deaths += p2Kills;
-                    if (!p1Stats.EachMuWr.ContainsKey(match.Player2)) { p1Stats.EachMuWr.Add(match.Player2, new IndividualMu()); }
-                    IndividualMu mu = p1Stats.EachMuWr[match.Player2];
+                    if (!p1Stats.EachMuWr.TryGetValue(match.Player2, out IndividualMu mu))
+                    {
+                        mu = new IndividualMu();
+                        p1Stats.EachMuWr.Add(match.Player2, mu);
+                    }
                     bool playerWon = (match.Winner.Trim().ToLower() == p1Stats.Name.Trim().ToLower());
                     if (playerWon)
                     {
@@ -416,8 +426,12 @@ namespace IndymonBackendProgram
                 {
                     p2Stats.Kills += p2Kills;
                     p2Stats.Deaths += p1Kills;
-                    if (!p2Stats.EachMuWr.ContainsKey(match.Player1)) { p2Stats.EachMuWr.Add(match.Player1, new IndividualMu()); }
-                    IndividualMu mu = p1Stats.EachMuWr[match.Player1];
+                    if (!p2Stats.EachMuWr.TryGetValue(match.Player1, out IndividualMu mu))
+                    {
+                        mu = new IndividualMu();
+                        p2Stats.EachMuWr.Add(match.Player1, mu);
+                    }
+
                     bool playerWon = (match.Winner.Trim().ToLower() == p2Stats.Name.Trim().ToLower());
                     if (playerWon)
                     {
@@ -631,9 +645,11 @@ namespace IndymonBackendProgram
                     }
                     if ((playerProcessed % 2) == 0) // Even players, first of the next match
                     {
-                        TournamentMatch nextMatch = new TournamentMatch();
-                        nextMatch.Player1 = match.Winner;
-                        nextMatch.DrawHelper1 = match.IsBye ? match.DrawHelper1 : CalculateMidPoint(match.DrawHelper1, match.DrawHelper2); // Bye continues in same place, bracket goes to midpoint
+                        TournamentMatch nextMatch = new TournamentMatch
+                        {
+                            Player1 = match.Winner,
+                            DrawHelper1 = match.IsBye ? match.DrawHelper1 : CalculateMidPoint(match.DrawHelper1, match.DrawHelper2) // Bye continues in same place, bracket goes to midpoint
+                        };
                         nextRound.Add(nextMatch);
                     }
                     else // It's the player 2
@@ -845,8 +861,10 @@ namespace IndymonBackendProgram
             if (MatchHistory == null) // Brand new tournament
             {
                 MatchHistory = new List<TournamentMatch>();
-                TournamentMatch firstMatch = new TournamentMatch();
-                firstMatch.Player1 = Participants[0]; // First person is first player
+                TournamentMatch firstMatch = new TournamentMatch
+                {
+                    Player1 = Participants[0] // First person is first player
+                };
                 if (Participants.Count > 1) // One would assume...
                 {
                     firstMatch.Player2 = Participants[1]; // Add the 2nd
@@ -1212,7 +1230,7 @@ namespace IndymonBackendProgram
             for (int group = 0; group < NGroups; group++)
             {
                 int cursorX = (groupTextLength * group) + 1; // this is where the match will begin
-                List<GroupStanding> sortedStandings = groupResults[group].Values.ToList().OrderByDescending(p => p.Wins).ThenByDescending(p => p.Diff).ThenBy(p => p.Name).ToList();
+                List<GroupStanding> sortedStandings = [.. groupResults[group].Values.ToList().OrderByDescending(p => p.Wins).ThenByDescending(p => p.Diff).ThenBy(p => p.Name)];
                 int localY = cursorY;
                 foreach (GroupStanding standing in sortedStandings)
                 {

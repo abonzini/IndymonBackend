@@ -362,12 +362,22 @@ namespace IndymonBackendProgram
                         {
                             newMon.NickName = newMon.NickName[..19].Trim();
                         }
-                        if (!newTrainer.AutoTeam) // Check if moves and ability are actually relevant
+                        if (!newTrainer.AutoTeam) // Load moves and abilities, verify legality on import
                         {
+                            Pokemon monData = _allData.DataContainer.Dex[newMon.Species];
                             newMon.Ability = csvFields[offsetX + 3].Trim().ToLower();
+                            if (!monData.GetLegalAbilities().Contains(newMon.Ability)) throw new Exception($"{newMon.Species} has {newMon.Ability} which is not a legal one");
+                            HashSet<string> monLegalMoves = monData.GetLegalMoves();
                             for (int move = 0; move < 4; move++)
                             {
-                                newMon.Moves[move] = csvFields[offsetX + 4 + move].Trim().ToLower();
+                                string newMove = csvFields[offsetX + 4 + move].Trim().ToLower();
+                                if ((newMove != "") && !monLegalMoves.Contains(newMove)) throw new Exception($"{newMon.Species} has {newMove} which is not a legal one");
+                                newMon.Moves[move] = newMove;
+                            }
+                            // Emergency check, if not in auto team but mon empty, we have a problem, just randomise
+                            if (newMon.Ability == "" || !newMon.Moves.Any(m => m != "")) // If no ability or no non-"" move, then there's a problem!
+                            {
+                                newMon.RandomizeAndVerify(_allData.DataContainer, TeambuildSettings.SMART); // Randomize + verify that mon has a set (smart)
                             }
                         }
                         // Finally, item, check if need to place on mon or back into bag
@@ -376,19 +386,23 @@ namespace IndymonBackendProgram
                         {
                             int usesNumber = int.Parse(csvFields[offsetX + 9]);
                             Item newItem = new Item() { Name = itemName, Uses = usesNumber };
-                            if (newTrainer.AutoTeam || newTrainer.AutoItem) // In this case, goes to bag
+                            if (newTrainer.AutoItem) // In this case, goes to bag
                             {
                                 newTrainer.BattleItems.Add(newItem);
                             }
-                            else
+                            else // Otherwise equip item, may need to "apply item effects"
                             {
                                 newMon.Item = newItem;
+                                if (_allData.DataContainer.MoveItemData.TryGetValue(itemName, out HashSet<string> overwrittenMoves))
+                                {
+                                    int overWrittenMoveSlot = 3; // Start with last
+                                    foreach (string newMove in overwrittenMoves)
+                                    {
+                                        newMon.Moves[overWrittenMoveSlot] = newMove; // Replace last with move disk's
+                                        overWrittenMoveSlot--;
+                                    }
+                                }
                             }
-                        }
-                        // Emergency check, ensure mon is legal (ability + atleast one move)
-                        if (newMon.Ability == "" || !newMon.Moves.Any(m => m != "")) // If no ability or no non-"" move, then there's a problem!
-                        {
-                            newMon.RandomizeAndVerify(_allData.DataContainer, TeambuildSettings.SMART); // Randomize + verify that mon has a set (smart)
                         }
                         newTrainer.Teamsheet.Add(newMon);
                     }

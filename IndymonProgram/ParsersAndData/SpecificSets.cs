@@ -16,7 +16,7 @@
         /// <returns></returns>
         public static HashSet<string> GetBannedMoves()
         {
-            return ["sand attack", "double team", "minimize", "hidden power", "flash", "kinesis", "mud-slap", "smokescreen"];
+            return ["sand attack", "double team", "minimize", "hidden power", "flash", "kinesis", "mud-slap", "smokescreen", "fissure", "horn drill", "guillotine", "sheer cold"];
         }
         /// <summary>
         /// Returns a set of abilities considered useless
@@ -24,7 +24,7 @@
         /// <returns></returns>
         public static HashSet<string> GetUselessAbilities()
         {
-            return ["pickup", "ball fetch", "honey gather", "run away", "telepathy"];
+            return ["pickup", "ball fetch", "honey gather", "run away", "telepathy", "frisk"];
         }
         /// <summary>
         /// Returns a set of moves considered useless
