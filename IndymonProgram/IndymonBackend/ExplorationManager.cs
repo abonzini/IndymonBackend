@@ -214,12 +214,14 @@ namespace IndymonBackendProgram
             // Return to normal
             Console.CursorVisible = false;
             Console.WriteLine("Exploration end.");
+            // Items the trainer found
             Console.WriteLine("Items: ");
             foreach (KeyValuePair<string, int> kvp in prizes.ItemsFound)
             {
                 Console.Write($"{kvp.Key} x{kvp.Value}, ");
             }
             Console.WriteLine("");
+            // Mons the trainer found
             Console.WriteLine("Mons");
             if (prizes.MonsFound[0].Count > 0)
             {
@@ -253,6 +255,8 @@ namespace IndymonBackendProgram
                 }
                 Console.WriteLine("(MASTER BALL)");
             }
+            // Finally, need to examine and tell if trainer used/ran out of items
+            trainerData.ListConsumedItems(int.MaxValue); // No mon limit for explorations...
         }
         /// <summary>
         /// Executes an event of the many possible in room

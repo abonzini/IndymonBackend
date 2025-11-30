@@ -217,7 +217,16 @@ namespace IndymonBackendProgram
         /// </summary>
         public void FinaliseTournament()
         {
+            // First, animate tournament
             OngoingTournament.FinaliseTournament();
+            // Then, a small helper text to show which items were consumed
+            foreach (string pariticpant in OngoingTournament.Participants)
+            {
+                TrainerData trainer = Utilities.GetTrainerByName(pariticpant, _backEndData);
+                Console.WriteLine(trainer.ListConsumedItems(OngoingTournament.NMons));
+            }
+            Console.ReadLine();
+            Console.Clear();
             // Also, ask the tournament to update the sheets
             OngoingTournament.UpdateLeaderboard(_leaderboard, _backEndData);
         }

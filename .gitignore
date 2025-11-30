@@ -58,5 +58,4 @@ nunit-*.xml
 
 # Own thing
 indy.mon
-importable-pokepaste.txt
 tournament_stats.*

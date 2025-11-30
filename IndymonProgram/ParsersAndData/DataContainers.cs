@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Text;
 
 namespace ParsersAndData
 {
@@ -748,6 +749,31 @@ namespace ParsersAndData
                 eachMonPacked.Add(mon.GetPacked(backEndData));
             }
             return string.Join("]", eachMonPacked); // Returns the packed data joined with ]
+        }
+        /// <summary>
+        /// After an event end, lists what items were consumed and the number of remaining uses
+        /// </summary>
+        /// <param name="nMons">First N mons to check</param>
+        /// <returns>The string helping indymon organiser to update the excel sheets</returns>
+        public string ListConsumedItems(int nMons)
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
+            {
+                PokemonSet pokemonSet = Teamsheet[i];
+                if (pokemonSet.Item != null)
+                {
+                    if (pokemonSet.Item.Uses > 1)
+                    {
+                        builder.AppendLine($"{pokemonSet.Species}'s {pokemonSet.Item.Name} now has {pokemonSet.Item.Uses - 1} uses left");
+                    }
+                    else
+                    {
+                        builder.AppendLine($"{pokemonSet.Species}'s {pokemonSet.Item.Name} is now consumed");
+                    }
+                }
+            }
+            return builder.ToString();
         }
     }
 }
