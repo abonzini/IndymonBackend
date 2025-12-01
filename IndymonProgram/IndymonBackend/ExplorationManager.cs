@@ -526,7 +526,7 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
-                            AddItemPrize("Some 2 IMP", prizes);
+                            AddItemPrize($"{randomNpc.Name}'s favor", prizes);
                             GenericMessageCommand(roomEvent.PostEventString);
                         }
                     }
