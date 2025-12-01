@@ -86,9 +86,9 @@ namespace IndymonBackendProgram
             OngoingTournament.NMons = int.Parse(Console.ReadLine());
             OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
             // Finally, player selection, pre-filter traines whether they can participate in this event
-            List<TrainerData> trainers = [.. _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
-            List<TrainerData> npcs = [.. _backEndData.NpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
-            List<TrainerData> namedNpcs = [.. _backEndData.NamedNpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
+            List<TrainerData> trainers = [.. _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
+            List<TrainerData> npcs = [.. _backEndData.NpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
+            List<TrainerData> namedNpcs = [.. _backEndData.NamedNpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
             List<TrainerData> currentChosenTrainers = null;
             int remainingPlayersNeeded = OngoingTournament.NPlayers;
             bool randomizeFill = false;
@@ -202,7 +202,7 @@ namespace IndymonBackendProgram
                 else if (_backEndData.NpcData.TryGetValue(participantName, out participant)) { }
                 else if (_backEndData.NamedNpcData.TryGetValue(participantName, out participant)) { }
                 else throw new Exception("Trainer not found!?");
-                participant.ConfirmSets(_backEndData, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings); // Gets the team for everyone with the settings needed for the tournament
+                participant.ConfirmSets(_backEndData, OngoingTournament.NMons, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings); // Gets the team for everyone with the settings needed for the tournament
             }
         }
         /// <summary>

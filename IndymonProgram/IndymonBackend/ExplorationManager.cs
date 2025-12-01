@@ -59,7 +59,7 @@ namespace IndymonBackendProgram
         {
             ExplorationSteps = new List<ExplorationStep>(); // Start from scratch!
             // First ask organizer to choose dungeon
-            List<string> options = _backEndData.Dungeons.Keys.ToList();
+            List<string> options = [.. _backEndData.Dungeons.Keys];
             Console.WriteLine("Creating a brand new exploration, which dungeon?");
             for (int i = 0; i < options.Count; i++)
             {
@@ -68,16 +68,16 @@ namespace IndymonBackendProgram
             Console.WriteLine("");
             Dungeon = options[int.Parse(Console.ReadLine()) - 1];
             // Then which player
-            options = _backEndData.TrainerData.Keys.ToList();
+            List<TrainerData> trainers = [.. _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART).Count > 0)];
             Console.WriteLine("Which trainer?");
-            for (int i = 0; i < options.Count; i++)
+            for (int i = 0; i < trainers.Count; i++)
             {
-                Console.Write($"{i + 1}: {options[i]}, ");
+                Console.Write($"{i + 1}: {trainers[i].Name}, ");
             }
-            Trainer = options[int.Parse(Console.ReadLine()) - 1];
             // Finally, try to define teamsheet
-            TrainerData trainerData = _backEndData.TrainerData[Trainer];
-            trainerData.ConfirmSets(_backEndData, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status), if need to randomize, smart
+            TrainerData trainerData = trainers[int.Parse(Console.ReadLine()) - 1];
+            Trainer = trainerData.Name;
+            trainerData.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status), if need to randomize, smart
         }
         public void InitializeNextDungeon()
         {
@@ -311,7 +311,7 @@ namespace IndymonBackendProgram
                             AutoTeam = true,
                             Teamsheet = [alphaPokemon], // Only mon in the teamsheet
                         };
-                        alphaTeam.ConfirmSets(_backEndData, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        alphaTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
                         Console.Write("Encounter resolution: ");
                         int remainingMons = ResolveEncounter(trainerData, alphaTeam);
                         if (remainingMons == 0) // Means player lost
@@ -339,7 +339,8 @@ namespace IndymonBackendProgram
                 case RoomEventType.RESEARCHER:
                     Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
                     GenericMessageCommand(roomEvent.PreEventString);
-                    AddItemPrize("RANDOM PLATE", prizes);
+                    List<string> platesList = [.. _backEndData.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
+                    AddItemPrize(platesList[_rng.Next(platesList.Count)], prizes);
                     GenericMessageCommand(roomEvent.PostEventString);
                     break;
                 case RoomEventType.PARADOX:
@@ -422,11 +423,16 @@ namespace IndymonBackendProgram
                 case RoomEventType.POKEMON_BATTLE:
                     // Similar to aplha but there's 6 enemy mons
                     {
+                        const int NUMBER_OF_WILD_POKEMON = 3; // Time to balance-hardcode this
                         Console.WriteLine("Pokemon battle");
                         // Items obtained during the fight (commons)
                         int itemCount = _rng.Next(2, 4); // Either 2 or 3 items
                         List<string> items = new List<string>();
-                        List<string> itemSlots = ["", "", "", "", "", ""]; // These'll be the item slots
+                        List<string> itemSlots = new List<string>(); // These'll be the item slots
+                        for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // All empty items for now
+                        {
+                            itemSlots.Add("");
+                        }
                         for (int i = 0; i < itemCount; i++)
                         {
                             // Prize pool will contain common items
@@ -436,11 +442,11 @@ namespace IndymonBackendProgram
                             items.Add(item);
                         }
                         // Shuffle the items so they go into random slots
-                        Utilities.ShuffleList(itemSlots, 0, 6, _rng); // Shuffle the list
+                        Utilities.ShuffleList(itemSlots, 0, NUMBER_OF_WILD_POKEMON, _rng); // Some items could be left out idc
                         // Add pokemon, some will have random items
                         List<string> pokemonThisFloor = _dungeonDetails.PokemonEachFloor[floor]; // Find the possible mons this floor
                         List<PokemonSet> encounterPokemon = new List<PokemonSet>();
-                        for (int i = 0; i < 6; i++) // Generate party of 6 random mons
+                        for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
                         {
                             string pokemonSpecies = pokemonThisFloor[_rng.Next(pokemonThisFloor.Count)].Trim().ToLower();
                             bool isShiny = (_rng.Next(SHINY_CHANCE) == 1);
@@ -462,7 +468,7 @@ namespace IndymonBackendProgram
                             AutoTeam = true,
                             Teamsheet = encounterPokemon,
                         };
-                        wildMonTeam.ConfirmSets(_backEndData, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        wildMonTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
                         Console.Write("Encounter resolution: ");
                         int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
                         if (remainingMons == 0) // Means player lost
@@ -491,7 +497,7 @@ namespace IndymonBackendProgram
                     // Mon that joins the team for adventures, always catchable
                     {
                         List<string> pokemonThisFloor = _dungeonDetails.PokemonEachFloor[floor]; // Find the possible mons this floor
-                        string pokemonSpecies = pokemonThisFloor[_rng.Next(pokemonThisFloor.Count)]; // Get a random one of these
+                        string pokemonSpecies = pokemonThisFloor[_rng.Next(pokemonThisFloor.Count)].Trim().ToLower(); // Get a random one of these
                         Console.WriteLine($"Joiner {pokemonSpecies}");
                         string alphaString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
                         GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
@@ -511,7 +517,7 @@ namespace IndymonBackendProgram
                 case RoomEventType.NPC_BATTLE:
                     {
                         TrainerData randomNpc = _backEndData.NpcData.Values.ToList()[_rng.Next(_backEndData.NpcData.Values.Count)]; // Get random npc
-                        randomNpc.ConfirmSets(_backEndData, 3, TeambuildSettings.SMART); // Get into a trainer fight
+                        randomNpc.ConfirmSets(_backEndData, 1, 3, TeambuildSettings.SMART); // Get into a trainer fight (they will bring atleast 1 mon at most 3
                         Console.WriteLine($"Fighting {randomNpc.Name}");
                         string npcString = roomEvent.PreEventString.Replace("$1", randomNpc.Name);
                         GenericMessageCommand(npcString); // Prints the message but we know it could have a $1
@@ -560,15 +566,6 @@ namespace IndymonBackendProgram
                                 message = $"{pokemon.NickName}'s {valueToCheck}";
                                 canTakeShortcut = true;
                                 break;
-                            }
-                            if (_backEndData.MoveItemData.ContainsKey(pokemon.Item.Name.ToLower()))
-                            {
-                                if (_backEndData.MoveItemData[pokemon.Item.Name.ToLower()].Contains(valueToCheck))
-                                {
-                                    message = $"{pokemon.NickName}'s {valueToCheck} move disk";
-                                    canTakeShortcut = true;
-                                    break;
-                                }
                             }
                         }
                         break;
@@ -744,13 +741,13 @@ namespace IndymonBackendProgram
         {
             if (shiny) mon += "★"; // Add shiny tag too
             Dictionary<string, int> monList = prizes.MonsFound[floor];
-            if (monList.ContainsKey(mon)) monList[mon]++;
+            if (monList.TryGetValue(mon, out int count)) monList[mon] = ++count;
             else monList.Add(mon, 1);
         }
         #endregion
         #region ANIMATION
-        int ROOM_WIDTH = 3;
-        int ROOM_HEIGHT = 3;
+        readonly int ROOM_WIDTH = 3;
+        readonly int ROOM_HEIGHT = 3;
         /// <summary>
         /// Animates the resulting exploration
         /// </summary>
@@ -813,7 +810,7 @@ namespace IndymonBackendProgram
         {
             // Floor index is 0-2 if goes downwards or 2-0 if upwards
             int roomY = _dungeonDetails.GoesDownwards ? floor : DUNGEON_NUMBER_OF_FLOORS - floor - 1; // Get the Y coord (vertical)
-            roomY = 1 + ((1 + ROOM_HEIGHT) * floor); // Correct Positioning of room Y tile
+            roomY = 1 + ((1 + ROOM_HEIGHT) * roomY); // Correct Positioning of room Y tile
             // Clamp floor to valid numbers, to avoid weird looping outside the edges
             if (floor >= DUNGEON_NUMBER_OF_FLOORS) floor = DUNGEON_NUMBER_OF_FLOORS - 1;
             if (floor < 0) floor = 0;
@@ -828,7 +825,7 @@ namespace IndymonBackendProgram
         /// <param name="floor">Which floor</param>
         /// <param name="room">Which room</param>
         /// <returns></returns>
-        bool IsRoomValid(int floor, int room)
+        static bool IsRoomValid(int floor, int room)
         {
             if (floor < 0 || floor >= DUNGEON_NUMBER_OF_FLOORS)
             {

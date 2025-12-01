@@ -373,15 +373,23 @@ namespace ParsersAndData
         /// Determines whether trainer could participate in a challenge with certain settings
         /// </summary>
         /// <param name="backEndData"></param>
-        /// <param name="nMons">How many mons are expected in a team</param>
+        /// <param name="minNMons">Minimum needed</param>
+        /// <param name="maxNMons">How many mons to perform this operation on</param>
         /// <param name="settings">Settings for teambuilding</param>
         /// <returns>All of the possible valid team comps that could be chosen for this format. May have more members than nMons so it may need to be shuffled around</returns>
-        public List<List<PokemonSet>> GetValidTeamComps(DataContainers backEndData, int nMons, TeambuildSettings settings)
+        public List<List<PokemonSet>> GetValidTeamComps(DataContainers backEndData, int minNMons, int maxNMons, TeambuildSettings settings)
         {
             // Mon number check
-            if (Teamsheet.Count < nMons) return new List<List<PokemonSet>>();
+            if (Teamsheet.Count < minNMons)
+            {
+                return new List<List<PokemonSet>>();
+            }
+            else // Valid, find out how many I actually have tho
+            {
+                maxNMons = Math.Min(maxNMons, Teamsheet.Count);
+            }
             // Check if need to try absolutely everythign (npc) or only the first N
-            List<List<PokemonSet>> possibleComps = [AutoTeam ? [.. Teamsheet] : Teamsheet.GetRange(0, nMons),]; // Will contain all posible comps
+            List<List<PokemonSet>> possibleComps = [AutoTeam ? [.. Teamsheet] : Teamsheet.GetRange(0, maxNMons),]; // Will contain all posible comps
             // Now we filter the lists condition by condition
             // Monotype check, this will be basically monotype at random
             if (settings.HasFlag(TeambuildSettings.MONOTYPE))
@@ -406,7 +414,7 @@ namespace ParsersAndData
                         }
                     }
                     // Then, get the ones that can be used, for nMons, need to find the list that can be used as monotype, add to the possible comps
-                    newPossibleComps.AddRange([.. typeContainingMons.Values.Where(l => l.Count >= nMons)]); // Add all monotypes
+                    newPossibleComps.AddRange([.. typeContainingMons.Values.Where(l => l.Count >= minNMons)]); // Add all monotypes
                 }
                 possibleComps = newPossibleComps; // Replace old filtered with new
             }
@@ -445,7 +453,7 @@ namespace ParsersAndData
                             filteredComp.Add(mon);
                         }
                     }
-                    if (filteredComp.Count >= nMons) // If the resulting filtered comp can form a team, then add it to result
+                    if (filteredComp.Count >= minNMons) // If the resulting filtered comp can form a team, then add it to result
                     {
                         newPossibleComps.Add(filteredComp);
                     }
@@ -458,13 +466,15 @@ namespace ParsersAndData
         /// Defines a team's team (e.g. movesets, etc), randomizes depending on auto-settings. ASSUMES THE TEAM IS VALID FOR THE DESIRED FORMAT
         /// </summary>
         /// <param name="backEndData"></param>
-        /// <param name="nMons">How many mons to perform this operation on</param>
+        /// <param name="minNMons">Minimum needed</param>
+        /// <param name="maxNMons">How many mons to perform this operation on</param>
         /// <param name="settings">Settings for teambuilding</param>
-        public void ConfirmSets(DataContainers backEndData, int nMons, TeambuildSettings settings)
+        public void ConfirmSets(DataContainers backEndData, int minNMons, int maxNMons, TeambuildSettings settings)
         {
             Console.WriteLine($"Checking {Name}'s team");
             bool defined = false;
             Random _rng = new Random();
+            maxNMons = Math.Min(maxNMons, Teamsheet.Count); // No need to deal with infinity numbers if I know how many mons I have max
             while (!defined)
             {
                 if (AutoItem)
@@ -484,7 +494,7 @@ namespace ParsersAndData
                 if (AutoTeam)
                 {
                     // First, get all the possible team comps that are legal for this format, choose a random one, and then shuffle the mons
-                    List<List<PokemonSet>> legalComps = GetValidTeamComps(backEndData, nMons, settings);
+                    List<List<PokemonSet>> legalComps = GetValidTeamComps(backEndData, minNMons, maxNMons, settings);
                     List<PokemonSet> chosenSet = legalComps[_rng.Next(legalComps.Count)];
                     Utilities.ShuffleList(chosenSet, 0, chosenSet.Count);
                     // Now make sure the sets have the mons in order
@@ -497,7 +507,7 @@ namespace ParsersAndData
                         }
                     }
                     // Finally, for each mon, will randomize their sets
-                    for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
+                    for (int i = 0; i < maxNMons; i++)
                     {
                         PokemonSet pokemonSet = Teamsheet[i];
                         pokemonSet.RandomizeAndVerify(backEndData, settings);
@@ -514,10 +524,10 @@ namespace ParsersAndData
                     const int BASE_ACCEPTANCE_CHANCE = 20;
                     int itemAcceptanceChance;
                     if (BattleItems.Count <= DESIRED_FINAL_NUMBER_OF_ITEMS) itemAcceptanceChance = BASE_ACCEPTANCE_CHANCE; // Minimum chance to always use something, sometimes
-                    else if ((BattleItems.Count - DESIRED_FINAL_NUMBER_OF_ITEMS) > nMons) itemAcceptanceChance = 100; // Since even if all mons equipped it won't reach the desired, just guarantee use
+                    else if ((BattleItems.Count - DESIRED_FINAL_NUMBER_OF_ITEMS) > maxNMons) itemAcceptanceChance = 100; // Since even if all mons equipped it won't reach the desired, just guarantee use
                     else itemAcceptanceChance = 100 * (1 - (DESIRED_FINAL_NUMBER_OF_ITEMS / BattleItems.Count)); // Otherwise the chance is given so around DESIRED_FINAL_NUMBER_OF_ITEMS remains
                     // Now go mon by mon, each mon has the same chance of having an item, will go item by item after
-                    for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
+                    for (int i = 0; i < maxNMons; i++)
                     {
                         PokemonSet pokemonSet = Teamsheet[i];
                         Console.WriteLine($"\tItem for {pokemonSet.Species}");
@@ -571,7 +581,7 @@ namespace ParsersAndData
                 }
                 Console.WriteLine("");
                 // Finally, just print all and define some extra stuff needed regardless of auto-
-                for (int i = 0; i < nMons && i < Teamsheet.Count; i++)
+                for (int i = 0; i < maxNMons; i++)
                 {
                     PokemonSet mon = Teamsheet[i];
                     mon.ExplorationStatus = settings.HasFlag(TeambuildSettings.EXPLORATION) ? new ExplorationStatus() : null;

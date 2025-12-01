@@ -60,7 +60,7 @@ namespace ShowdownBot
             {
                 _botTrainer = trainer;
 
-                BotName = $"Indy{_botTrainer.Name}".Replace(" ", "");
+                BotName = $"Indy{_botTrainer.Name}".Replace(" ", "").Replace("?", ""); // Fuck you psy
                 if (BotName.Length > 19) // Sanitize, name has to be shorter than 19 and no spaces
                 {
                     BotName = BotName.Substring(0, 19).Trim();
