@@ -45,7 +45,7 @@
     },
 	{
       "EventType": "NPC_BATTLE",
-      "PreEventString": "These sacred grounds are not only meant for Pokemon. Trainers also need to get stronger. A fellow trainer is ready to battle you.",
+      "PreEventString": "These sacred grounds are not only meant for Pokemon. Trainers also need to get stronger. $1 is ready to battle you.",
       "PostEventString": "You feel both of you have grown stronger today."
     },
 	{

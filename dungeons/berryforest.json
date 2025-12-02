@@ -45,8 +45,8 @@
     },
 	{
       "EventType": "NPC_BATTLE",
-      "PreEventString": "A shady figure approaches you in the forest.",
-      "PostEventString": "After defeating the trainer, you go on your way."
+      "PreEventString": "A shady figure approaches you in the forest. It's $1, and they want to fight!",
+      "PostEventString": "After defeating $1, you go on your way."
     },
 	{
       "EventType": "RESEARCHER",

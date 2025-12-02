@@ -45,8 +45,8 @@
     },
 	{
       "EventType": "NPC_BATTLE",
-      "PreEventString": "You've been challenged by a trainer, who wants to participate in an unsanctioned Pokemon battle!",
-      "PostEventString": "So annoying... If you wanted a trainer battle you could've participated in a tournament."
+      "PreEventString": "You've been challenged by $1, who wants to participate in an unsanctioned Pokemon battle!",
+      "PostEventString": "$1 is happy for the fight, you move on."
     },
 	{
       "EventType": "RESEARCHER",

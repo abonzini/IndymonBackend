@@ -45,7 +45,7 @@
     },
 	{
       "EventType": "NPC_BATTLE",
-      "PreEventString": "A challenger is wating for you. The sun is in your face: Before you can even react, you're thrust into a fight!",
+      "PreEventString": "$1 is wating for you. The sun is shining on your face: Before you can even react, you're thrust into a fight!",
       "PostEventString": "Truly a duel for the ages... But it's time to move on."
     },
 	{

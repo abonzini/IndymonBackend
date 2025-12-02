@@ -521,8 +521,14 @@ namespace IndymonBackendProgram
                         Console.WriteLine($"Fighting {randomNpc.Name}");
                         string npcString = roomEvent.PreEventString.Replace("$1", randomNpc.Name);
                         GenericMessageCommand(npcString); // Prints the message but we know it could have a $1
+                        // Heal first 3 mons
+                        for (int i = 0; i < 3 || i < trainerData.Teamsheet.Count; i++)
+                        {
+                            trainerData.Teamsheet[i].ExplorationStatus.HealthPercentage = 100;
+                            trainerData.Teamsheet[i].ExplorationStatus.NonVolatileStatus = "";
+                        }
                         Console.Write("Encounter resolution: ");
-                        int remainingMons = ResolveEncounter(trainerData, randomNpc, 3); // 3 Mon only for opp
+                        int remainingMons = ResolveEncounter(trainerData, randomNpc, 3); // 3 Mon both players
                         if (remainingMons == 0) // Means player lost
                         {
                             Console.WriteLine("Player lost");
@@ -533,7 +539,8 @@ namespace IndymonBackendProgram
                         {
                             Console.WriteLine("Player won");
                             AddItemPrize($"{randomNpc.Name}'s favor", prizes);
-                            GenericMessageCommand(roomEvent.PostEventString);
+                            npcString = roomEvent.PostEventString.Replace("$1", randomNpc.Name);
+                            GenericMessageCommand(npcString);
                         }
                     }
                     break;
@@ -705,7 +712,7 @@ namespace IndymonBackendProgram
         /// </summary>
         /// <param name="epxlorer">P1</param>
         /// <param name="encounter">P2</param>
-        /// <param name="nMons">P2 number of mons</param>
+        /// <param name="nMons">If this encounter has a specific number of mons (default is all v all)</param>
         /// <returns>How many mons P1 has left (0 means defeat)</returns>
         int ResolveEncounter(TrainerData epxlorer, TrainerData encounter, int nMons = int.MaxValue)
         {
@@ -714,7 +721,7 @@ namespace IndymonBackendProgram
             Console.ReadLine();
             BotBattle automaticBattle = new BotBattle(_backEndData); // Generate bot host
             string challengeString = "gen9customgame@@@!Team Preview,OHKO Clause,Evasion Moves Clause,Moody Clause";
-            (int explorerLeft, _) = automaticBattle.SimulateBotBattle(epxlorer, encounter, int.MaxValue, nMons, challengeString); // Initiate battle
+            (int explorerLeft, _) = automaticBattle.SimulateBotBattle(epxlorer, encounter, nMons, nMons, challengeString); // Initiate battle
             Console.SetCursorPosition(cursorX, cursorY);
             Console.Write($"Explorer left with {explorerLeft} mons. GET THE REPLAY");
             return explorerLeft;

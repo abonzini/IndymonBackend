@@ -46,7 +46,7 @@
 	{
       "EventType": "NPC_BATTLE",
       "PreEventString": "Even deep in the tunnels, there's still trainers trying to battle. Doesn't seem you'll get away from this one.",
-      "PostEventString": "After defeating the trainer, you go on your way."
+      "PostEventString": "After defeating $1, you go on your way."
     },
 	{
       "EventType": "RESEARCHER",
