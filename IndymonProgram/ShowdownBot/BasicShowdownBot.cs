@@ -24,9 +24,9 @@ namespace ShowdownBot
         ClientWebSocket _socket = null;
         public ConsoleColor Color = ConsoleColor.White;
         TrainerData _botTrainer;
-        DataContainers _backend;
+        readonly DataContainers _backend;
         public string BotName;
-        Random _rng = new Random();
+        readonly Random _rng = new Random();
         string BattleName;
         public string Winner;
         public int BotRemainingMons;
@@ -44,7 +44,7 @@ namespace ShowdownBot
             _socket = new ClientWebSocket();
             _socket.ConnectAsync(new Uri("ws://localhost:8000/showdown/websocket"), default).Wait();
             CancellationTokenSource cts = new CancellationTokenSource();
-            Task receiveTask = ReceiveFromSocketAsync(_socket, cts.Token);
+            _ = ReceiveFromSocketAsync(_socket, cts.Token);
         }
         public BotState GetState()
         {
@@ -63,7 +63,7 @@ namespace ShowdownBot
                 BotName = $"Indy{_botTrainer.Name}".Replace(" ", "").Replace("?", ""); // Fuck you psy
                 if (BotName.Length > 19) // Sanitize, name has to be shorter than 19 and no spaces
                 {
-                    BotName = BotName.Substring(0, 19).Trim();
+                    BotName = BotName[..19].Trim();
                 }
                 // Ok try and connect
                 HttpClient client = new HttpClient(); // One use client to get assertion
@@ -211,10 +211,7 @@ namespace ShowdownBot
                 // Get the first mon of that species (may create trouble if there's duplicates, deal with that later)
                 string species = pokemon.details.Split(',')[0].Trim().ToLower(); // Extract name from details
                 PokemonSet pokemonInTeam = _botTrainer.Teamsheet.Where(p => p.Species == species).First();
-                if (pokemonInTeam.ExplorationStatus != null)
-                {
-                    pokemonInTeam.ExplorationStatus.SetStatus(pokemon.condition);
-                }
+                pokemonInTeam.ExplorationStatus?.SetStatus(pokemon.condition);
                 if (pokemon.active) // This is the current mon, definitely
                 {
                     currentPokemon = pokemonInTeam;
