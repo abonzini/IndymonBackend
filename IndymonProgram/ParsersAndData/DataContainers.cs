@@ -124,7 +124,7 @@ namespace ParsersAndData
             HashSet<string> legalAbilities = settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartAbilities() : pokemonBackendData.GetLegalAbilities();
             HashSet<string> legalMoves = settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartMoves() : pokemonBackendData.GetLegalMoves();
             HashSet<string> legalStabs = [.. pokemonBackendData.DamagingStabs.Intersect(legalMoves)]; // Legal stabs are the stabs that are legal
-            if (GetTera(backEndData) != "") // Mons that can tera will be able to use tera blast always, regardless if previously banned move
+            if (GetTera(backEndData) != "" && pokemonBackendData.Moves.Contains("tera blast")) // Mons that can tera will be able to use tera blast regardless if previously banned move
             {
                 legalMoves.Add("tera blast");
             }
