@@ -522,7 +522,7 @@ namespace IndymonBackendProgram
                         string npcString = roomEvent.PreEventString.Replace("$1", randomNpc.Name);
                         GenericMessageCommand(npcString); // Prints the message but we know it could have a $1
                         // Heal first 3 mons
-                        for (int i = 0; i < 3 || i < trainerData.Teamsheet.Count; i++)
+                        for (int i = 0; i < 3 && i < trainerData.Teamsheet.Count; i++)
                         {
                             trainerData.Teamsheet[i].ExplorationStatus.HealthPercentage = 100;
                             trainerData.Teamsheet[i].ExplorationStatus.NonVolatileStatus = "";
