@@ -68,7 +68,15 @@ namespace IndymonBackendProgram
             Console.WriteLine("");
             Dungeon = options[int.Parse(Console.ReadLine()) - 1];
             // Then which player
-            List<TrainerData> trainers = [.. _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART).Count > 0)];
+            Console.WriteLine("Which trainer group? 1 Players, 2 NPCs, 3 Famous NPCs");
+            int choice = int.Parse(Console.ReadLine());
+            List<TrainerData> trainers = choice switch
+            {
+                1 => [.. _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART).Count > 0)],
+                2 => [.. _backEndData.NpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART).Count > 0)],
+                3 => [.. _backEndData.NamedNpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART).Count > 0)],
+                _ => throw new Exception("Invalid trainer group")
+            };
             Console.WriteLine("Which trainer?");
             for (int i = 0; i < trainers.Count; i++)
             {
