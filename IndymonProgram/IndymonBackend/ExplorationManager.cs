@@ -97,6 +97,7 @@ namespace IndymonBackendProgram
                 new Dictionary<string, int>()
             ];
             public Dictionary<string, int> ItemsFound = new Dictionary<string, int>();
+            public List<string> Evolutions = new List<string>();
         }
         const int STANDARD_MESSAGE_PAUSE = 5000; // Show text for this amount of time
         const int DRAW_ROOM_PAUSE = 1000; // Show text for this amount of time
@@ -255,6 +256,15 @@ namespace IndymonBackendProgram
                 }
                 Console.WriteLine("(MASTER BALL)");
             }
+            // Evolved mons
+            Console.WriteLine("Evolutions:");
+            if (prizes.Evolutions.Count > 0)
+            {
+                foreach (string evolvedMon in prizes.Evolutions)
+                {
+                    Console.Write($"{evolvedMon},");
+                }
+            }
             // Finally, need to examine and tell if trainer used/ran out of items
             trainerData.ListConsumedItems(int.MaxValue); // No mon limit for explorations...
         }
@@ -331,10 +341,19 @@ namespace IndymonBackendProgram
                     }
                     break;
                 case RoomEventType.EVO:
-                    Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
-                    GenericMessageCommand(roomEvent.PreEventString);
-                    AddItemPrize("EVOLUTION OPPORTUNITY", prizes);
-                    GenericMessageCommand(roomEvent.PostEventString);
+                    {
+                        GenericMessageCommand(roomEvent.PreEventString);
+                        foreach (PokemonSet mon in trainerData.Teamsheet)
+                        {
+                            Console.WriteLine($"Evolve {mon} ? y/N");
+                            if (Console.ReadLine().Trim().ToLower() == "y")
+                            {
+
+                            }
+                            prizes.Evolutions.Add(mon.NickName);
+                        }
+                        GenericMessageCommand(roomEvent.PostEventString);
+                    }
                     break;
                 case RoomEventType.RESEARCHER:
                     {
