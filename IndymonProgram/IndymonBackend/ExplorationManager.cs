@@ -28,6 +28,7 @@ namespace IndymonBackendProgram
         public (int, int) SourceCoord { get; set; } // Coord of the source room when moving
         public (int, int) DestCoord { get; set; } // Coord of destination room when moving
         public int MillisecondsWait { get; set; }
+        public ConsoleColor ConsoleColor { get; set; } = ConsoleColor.White;
         public override string ToString()
         {
             return Type.ToString();
@@ -151,13 +152,11 @@ namespace IndymonBackendProgram
                         }
                         roomSuccess = ExecuteEvent(_dungeonDetails.CampingEvent, floor, prizes, trainerData); // Executes camping event
                         // After, need to also check shortcut
-                        Console.WriteLine(_dungeonDetails.Floors[floor].ShortcutClue);
-                        GenericMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue);
+                        GenericMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue, ConsoleColor.DarkYellow);
                         if (VerifyShortcutConditions(_dungeonDetails.Floors[floor].ShortcutConditions, trainerData, out string message)) // If shortcut activated
                         {
                             // After, need to also check shortcut
                             string shortcutString = _dungeonDetails.Floors[floor].ShortcutResolution.Replace("$1", message);
-                            Console.WriteLine(shortcutString);
                             GenericMessageCommand(shortcutString);
                             if (floor == DUNGEON_NUMBER_OF_FLOORS - 1) // If dungeon was done in last floor, then the dungeon is over...
                             {
@@ -291,7 +290,7 @@ namespace IndymonBackendProgram
             {
                 case RoomEventType.CAMPING:
                     Console.WriteLine("Camping tile, nothing yet");
-                    GenericMessageCommand(roomEvent.PreEventString);
+                    GenericMessageCommand(roomEvent.PreEventString, ConsoleColor.DarkYellow);
                     // Camping logic would go here?
                     GenericMessageCommand(roomEvent.PostEventString);
                     break;
@@ -350,15 +349,40 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.EVO:
                     {
-                        GenericMessageCommand(roomEvent.PreEventString);
+                        GenericMessageCommand(roomEvent.PreEventString, ConsoleColor.DarkYellow);
                         foreach (PokemonSet mon in trainerData.Teamsheet)
                         {
-                            Console.WriteLine($"Evolve {mon} ? y/N");
-                            if (Console.ReadLine().Trim().ToLower() == "y")
+                            Pokemon baseMon = _backEndData.Dex[mon.Species];
+                            if (baseMon.Evos.Count > 0) // Mon has evos, ask for each
                             {
-
+                                Console.WriteLine($"Evolve {mon} ? y/N");
+                                if (Console.ReadLine().Trim().ToLower() == "y")
+                                {
+                                    List<string> possibleEvos = [.. baseMon.Evos];
+                                    Console.Write($"0 RANDOM,");
+                                    for (int i = 0; i < possibleEvos.Count; i++)
+                                    {
+                                        Console.Write($"{i + 1} {possibleEvos[i]},");
+                                    }
+                                    int choice = int.Parse(Console.ReadLine());
+                                    string chosenMon;
+                                    if (choice == 0) // Random evo
+                                    {
+                                        chosenMon = possibleEvos[_rng.Next(possibleEvos.Count)];
+                                    }
+                                    else
+                                    {
+                                        chosenMon = possibleEvos[choice - 1];
+                                    }
+                                    // Notify all
+                                    string message = mon.NickName != "" ? $"{mon.NickName} ({mon.Species})" : mon.Species;
+                                    message += $" has evolved into {chosenMon}!";
+                                    GenericMessageCommand(message);
+                                    prizes.Evolutions.Add(mon.NickName);
+                                    // Finally, actually do the deed
+                                    mon.Species = chosenMon.Trim().ToLower();
+                                }
                             }
-                            prizes.Evolutions.Add(mon.NickName);
                         }
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
@@ -663,14 +687,16 @@ namespace IndymonBackendProgram
         /// Adds to event queue, a generic message string
         /// </summary>
         /// <param name="message">String to add</param>
-        void GenericMessageCommand(string message)
+        /// <param name="color">Color of string</param>
+        void GenericMessageCommand(string message, ConsoleColor color = ConsoleColor.White)
         {
             Console.WriteLine($"> {message}"); // Important for debug too
             ExplorationSteps.Add(new ExplorationStep()
             {
                 Type = ExplorationStepType.PRINT_STRING,
                 Message = message,
-                MillisecondsWait = STANDARD_MESSAGE_PAUSE
+                MillisecondsWait = STANDARD_MESSAGE_PAUSE,
+                ConsoleColor = color
             });
         }
         /// <summary>
