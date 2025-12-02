@@ -657,6 +657,7 @@ namespace IndymonBackendProgram
         /// <param name="message">String to add</param>
         void GenericMessageCommand(string message)
         {
+            Console.WriteLine($"> {message}"); // Important for debug too
             ExplorationSteps.Add(new ExplorationStep()
             {
                 Type = ExplorationStepType.PRINT_STRING,
