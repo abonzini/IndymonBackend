@@ -98,7 +98,7 @@ namespace IndymonBackendProgram
             ];
             public Dictionary<string, int> ItemsFound = new Dictionary<string, int>();
         }
-        const int STANDARD_MESSAGE_PAUSE = 3000; // Show text for this amount of time
+        const int STANDARD_MESSAGE_PAUSE = 5000; // Show text for this amount of time
         const int DRAW_ROOM_PAUSE = 1000; // Show text for this amount of time
         const int SHINY_CHANCE = 500; // Chance for a shiny (1 in 500)
         const int DUNGEON_NUMBER_OF_FLOORS = 3; // Hardcoded for now unless we need to make it flexible later on
