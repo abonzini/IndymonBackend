@@ -51,12 +51,12 @@
 	{
       "EventType": "RESEARCHER",
       "PreEventString": "An member of the Pokemon Research Society is also training.",
-      "PostEventString": "She's studying the sacred plates, looking for the secrets of life and death. She also gives you a plate, it's useless to her."
+      "PostEventString": "She's trying to study the sacred texts, looking for the secrets of life and death. She also gives you a $1, it's useless to her."
     },
 	{
       "EventType": "PARADOX",
       "PreEventString": "On a dark corner, you see a Team Paradox grunt, holding a $1.",
-      "PostEventString": "He tells you: ''Why train, just get Move Disks''. Gives you a free one, on the house."
+      "PostEventString": "He tells you: ''Why train? Just get Move Disks!''. Gives you a free one, on the house."
     }
   ],
   "PokemonEachFloor": [

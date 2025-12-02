@@ -337,20 +337,26 @@ namespace IndymonBackendProgram
                     GenericMessageCommand(roomEvent.PostEventString);
                     break;
                 case RoomEventType.RESEARCHER:
-                    Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
-                    GenericMessageCommand(roomEvent.PreEventString);
-                    List<string> platesList = [.. _backEndData.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
-                    AddItemPrize(platesList[_rng.Next(platesList.Count)], prizes);
-                    GenericMessageCommand(roomEvent.PostEventString);
+                    {
+                        List<string> platesList = [.. _backEndData.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
+                        string chosenPlate = platesList[_rng.Next(platesList.Count)];
+                        string messageString = roomEvent.PreEventString.Replace("$1", chosenPlate);
+                        GenericMessageCommand(messageString);
+                        AddItemPrize(chosenPlate, prizes);
+                        messageString = roomEvent.PostEventString.Replace("$1", chosenPlate);
+                        GenericMessageCommand(roomEvent.PostEventString);
+                    }
                     break;
                 case RoomEventType.PARADOX:
-                    Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
-                    string obtainedDisk = _backEndData.MoveItemData.Keys.ToList()[_rng.Next(_backEndData.MoveItemData.Count)]; // Get random move disk
-                    string messageString = roomEvent.PreEventString.Replace("$1", obtainedDisk);
-                    GenericMessageCommand(messageString);
-                    AddItemPrize("obtainedDisk", prizes);
-                    messageString = roomEvent.PostEventString.Replace("$1", obtainedDisk);
-                    GenericMessageCommand(messageString);
+                    {
+                        Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
+                        string obtainedDisk = _backEndData.MoveItemData.Keys.ToList()[_rng.Next(_backEndData.MoveItemData.Count)]; // Get random move disk
+                        string messageString = roomEvent.PreEventString.Replace("$1", obtainedDisk);
+                        GenericMessageCommand(messageString);
+                        AddItemPrize("obtainedDisk", prizes);
+                        messageString = roomEvent.PostEventString.Replace("$1", obtainedDisk);
+                        GenericMessageCommand(messageString);
+                    }
                     break;
                 case RoomEventType.HEAL:
                     {

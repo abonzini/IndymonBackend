@@ -51,7 +51,7 @@
 	{
       "EventType": "RESEARCHER",
       "PreEventString": "Deep in the forest, you see some ruins.",
-      "PostEventString": "They're the ruins of an old shrine, and in a central altar you find a plate."
+      "PostEventString": "They're the ruins of an old shrine, and in a central altar you find a $1."
     },
 	{
       "EventType": "PARADOX",

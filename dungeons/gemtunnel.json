@@ -51,7 +51,7 @@
 	{
       "EventType": "RESEARCHER",
       "PreEventString": "A member of the Pokemon Research Society is in the tunnel digging for fossils.",
-      "PostEventString": "'No luck yet...', she says. 'But I found this plate. You can keep it''."
+      "PostEventString": "'No luck yet...', she says. 'But I found this $1. You can keep it''."
     },
 	{
       "EventType": "PARADOX",

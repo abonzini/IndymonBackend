@@ -51,7 +51,7 @@
 	{
       "EventType": "RESEARCHER",
       "PreEventString": "An member of the Pokemon Research Society is busy exploring some stool samples.",
-      "PostEventString": "''Can't you see I'm busy?'' They say, they give you a plate they found on the ground, and send you on your way."
+      "PostEventString": "''Can't you see I'm busy?'' They say, they give you a $1 they found on the ground, and send you on your way."
     },
 	{
       "EventType": "PARADOX",

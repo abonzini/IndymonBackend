@@ -51,7 +51,7 @@
 	{
       "EventType": "RESEARCHER",
       "PreEventString": "An member of the Pokemon Research Society is sunbathing.",
-      "PostEventString": "He's reading a plate, but it's clear they don't really understand what it says. 'Well maybe you'll have better luck'"
+      "PostEventString": "He's reading a $1, but it's clear they don't really understand what it says. 'Well maybe you'll have better luck'"
     },
 	{
       "EventType": "PARADOX",
