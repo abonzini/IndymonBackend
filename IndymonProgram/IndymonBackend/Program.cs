@@ -366,7 +366,7 @@ namespace IndymonBackendProgram
                         {
                             Pokemon monData = _allData.DataContainer.Dex[newMon.Species];
                             newMon.Ability = csvFields[offsetX + 3].Trim().ToLower();
-                            if (!monData.GetLegalAbilities().Contains(newMon.Ability)) throw new Exception($"{newMon.Species} has {newMon.Ability} which is not a legal one");
+                            if (newMon.Ability != "" && !monData.GetLegalAbilities().Contains(newMon.Ability)) throw new Exception($"{newMon.Species} has {newMon.Ability} which is not a legal one");
                             HashSet<string> monLegalMoves = monData.GetLegalMoves();
                             for (int move = 0; move < 4; move++)
                             {
