@@ -7,6 +7,7 @@ namespace IndymonBackendProgram
     {
         NOP, // No operation, just a pause
         PRINT_STRING,
+        PRINT_STRING_INFO,
         CLEAR_CONSOLE,
         DRAW_ROOM,
         MOVE_CHARACTER,
@@ -28,7 +29,6 @@ namespace IndymonBackendProgram
         public (int, int) SourceCoord { get; set; } // Coord of the source room when moving
         public (int, int) DestCoord { get; set; } // Coord of destination room when moving
         public int MillisecondsWait { get; set; }
-        public ConsoleColor ConsoleColor { get; set; } = ConsoleColor.White;
         public override string ToString()
         {
             return Type.ToString();
@@ -152,7 +152,7 @@ namespace IndymonBackendProgram
                         }
                         roomSuccess = ExecuteEvent(_dungeonDetails.CampingEvent, floor, prizes, trainerData); // Executes camping event
                         // After, need to also check shortcut
-                        GenericMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue, ConsoleColor.DarkYellow);
+                        InfoMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue);
                         if (VerifyShortcutConditions(_dungeonDetails.Floors[floor].ShortcutConditions, trainerData, out string message)) // If shortcut activated
                         {
                             // After, need to also check shortcut
@@ -290,7 +290,7 @@ namespace IndymonBackendProgram
             {
                 case RoomEventType.CAMPING:
                     Console.WriteLine("Camping tile, nothing yet");
-                    GenericMessageCommand(roomEvent.PreEventString, ConsoleColor.DarkYellow);
+                    GenericMessageCommand(roomEvent.PreEventString);
                     // Camping logic would go here?
                     GenericMessageCommand(roomEvent.PostEventString);
                     break;
@@ -310,7 +310,7 @@ namespace IndymonBackendProgram
                         string item = _dungeonDetails.RareItems[_rng.Next(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
                         List<string> pokemonNextFloor = _dungeonDetails.PokemonEachFloor[floor + 1]; // Find the possible mons next floor
                         string pokemonSpecies = pokemonNextFloor[_rng.Next(pokemonNextFloor.Count)].Trim().ToLower(); // Get a random one of these
-                        Console.WriteLine($"Alpha {pokemonSpecies} holding {item}");
+                        Console.WriteLine($"Strong {pokemonSpecies} holding {item}");
                         string alphaString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
                         GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
                         bool isShiny = (_rng.Next(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
@@ -343,13 +343,17 @@ namespace IndymonBackendProgram
                             alphaString = roomEvent.PostEventString.Replace("$1", item);
                             GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
                             AddItemPrize(item, prizes); // Add item to prizes
+                            if (roomEvent.EventType == RoomEventType.BOSS) // If boss, you also get boss' favor
+                            {
+                                AddItemPrize($"{pokemonSpecies}'s favor", prizes);
+                            }
                             AddPokemonPrize(pokemonSpecies, floor + 1, isShiny, prizes); // Add alpha mon too
                         }
                     }
                     break;
                 case RoomEventType.EVO:
                     {
-                        GenericMessageCommand(roomEvent.PreEventString, ConsoleColor.DarkYellow);
+                        InfoMessageCommand(roomEvent.PreEventString);
                         foreach (PokemonSet mon in trainerData.Teamsheet)
                         {
                             Pokemon baseMon = _backEndData.Dex[mon.Species];
@@ -481,26 +485,19 @@ namespace IndymonBackendProgram
                     // Similar to aplha but there's 6 enemy mons
                     {
                         const int NUMBER_OF_WILD_POKEMON = 3; // Time to balance-hardcode this
+                        const int ITEMS_PER_WILD_POKEMON = 1;
                         Console.WriteLine("Pokemon battle");
                         // Items obtained during the fight (commons)
-                        int itemCount = _rng.Next(2, 4); // Either 2 or 3 items
+                        int itemCount = NUMBER_OF_WILD_POKEMON * ITEMS_PER_WILD_POKEMON;
                         List<string> items = new List<string>();
-                        List<string> itemSlots = new List<string>(); // These'll be the item slots
-                        for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // All empty items for now
-                        {
-                            itemSlots.Add("");
-                        }
                         for (int i = 0; i < itemCount; i++)
                         {
                             // Prize pool will contain common items
                             string item = _dungeonDetails.CommonItems[_rng.Next(_dungeonDetails.CommonItems.Count)].Trim().ToLower();
-                            itemSlots[i] = item;
                             Console.WriteLine($"Item: {item}");
                             items.Add(item);
                         }
-                        // Shuffle the items so they go into random slots
-                        Utilities.ShuffleList(itemSlots, 0, NUMBER_OF_WILD_POKEMON, _rng); // Some items could be left out idc
-                        // Add pokemon, some will have random items
+                        // Add Pokemon, they will have items
                         List<string> pokemonThisFloor = _dungeonDetails.PokemonEachFloor[floor]; // Find the possible mons this floor
                         List<PokemonSet> encounterPokemon = new List<PokemonSet>();
                         for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
@@ -511,11 +508,17 @@ namespace IndymonBackendProgram
                             {
                                 Species = pokemonSpecies,
                                 Shiny = isShiny,
-                                Item = (itemSlots[i] != "") ? new Item() { Name = itemSlots[i], Uses = 1 } : null, // Give item if has one
+                                Item = (i < itemCount) ? new Item() { Name = items[i], Uses = 1 } : null // If still have items available, give one to mon
                             };
                             Console.WriteLine($"Mon: {pokemonSpecies}");
                             encounterPokemon.Add(pokemon); // Add mon to the set
                         }
+                        if (itemCount < NUMBER_OF_WILD_POKEMON)
+                        {
+                            // If not all Pokemon have items, shuffle the mons so the items are not clumped only at the beginning
+                            Utilities.ShuffleList(encounterPokemon, 0, encounterPokemon.Count, _rng);
+                        }
+                        // Ok now begin event
                         GenericMessageCommand(roomEvent.PreEventString);
                         TrainerData wildMonTeam = new TrainerData() // Create the blank trainer
                         {
@@ -687,16 +690,28 @@ namespace IndymonBackendProgram
         /// Adds to event queue, a generic message string
         /// </summary>
         /// <param name="message">String to add</param>
-        /// <param name="color">Color of string</param>
-        void GenericMessageCommand(string message, ConsoleColor color = ConsoleColor.White)
+        void GenericMessageCommand(string message)
         {
             Console.WriteLine($"> {message}"); // Important for debug too
             ExplorationSteps.Add(new ExplorationStep()
             {
                 Type = ExplorationStepType.PRINT_STRING,
                 Message = message,
-                MillisecondsWait = STANDARD_MESSAGE_PAUSE,
-                ConsoleColor = color
+                MillisecondsWait = STANDARD_MESSAGE_PAUSE
+            });
+        }
+        /// <summary>
+        /// Adds to event queue, a generic message string. Will be informative (i.e. gives clue to a player)
+        /// </summary>
+        /// <param name="message">String to add</param>
+        void InfoMessageCommand(string message)
+        {
+            Console.WriteLine($"> {message}"); // Important for debug too
+            ExplorationSteps.Add(new ExplorationStep()
+            {
+                Type = ExplorationStepType.PRINT_STRING_INFO,
+                Message = message,
+                MillisecondsWait = STANDARD_MESSAGE_PAUSE
             });
         }
         /// <summary>
@@ -833,6 +848,12 @@ namespace IndymonBackendProgram
                 {
                     case ExplorationStepType.PRINT_STRING:
                         Console.ForegroundColor = ConsoleColor.White; // Reset console just in case
+                        Console.SetCursorPosition(0, consoleOffset);
+                        Console.WriteLine($"> {nextStep.Message}"); // Write message
+                        consoleOffset = Console.CursorTop; // New console location
+                        break;
+                    case ExplorationStepType.PRINT_STRING_INFO:
+                        Console.ForegroundColor = ConsoleColor.Yellow; // Sets info color
                         Console.SetCursorPosition(0, consoleOffset);
                         Console.WriteLine($"> {nextStep.Message}"); // Write message
                         consoleOffset = Console.CursorTop; // New console location
