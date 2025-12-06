@@ -118,7 +118,7 @@ namespace ParsersAndData
         /// <param name="switchChance">Chance that the last move is empty (switch)</param>
         public void RandomizeMon(DataContainers backEndData, TeambuildSettings settings, int switchChance)
         {
-            Random _rng = new Random();
+            Random _rng = Utilities.GetRng();
             Pokemon pokemonBackendData = backEndData.Dex[Species];
             // Get data, gets a smart set or just legal depending if randomizing is smart
             HashSet<string> legalAbilities = settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartAbilities() : pokemonBackendData.GetLegalAbilities();
@@ -473,7 +473,7 @@ namespace ParsersAndData
         {
             Console.WriteLine($"Checking {Name}'s team");
             bool defined = false;
-            Random _rng = new Random();
+            Random _rng = Utilities.GetRng();
             maxNMons = Math.Min(maxNMons, Teamsheet.Count); // No need to deal with infinity numbers if I know how many mons I have max
             while (!defined)
             {
@@ -496,7 +496,7 @@ namespace ParsersAndData
                     // First, get all the possible team comps that are legal for this format, choose a random one, and then shuffle the mons
                     List<List<PokemonSet>> legalComps = GetValidTeamComps(backEndData, minNMons, maxNMons, settings);
                     List<PokemonSet> chosenSet = legalComps[_rng.Next(legalComps.Count)];
-                    Utilities.ShuffleList(chosenSet, 0, chosenSet.Count);
+                    Utilities.ShuffleList(chosenSet, 0, chosenSet.Count, Utilities.GetRng());
                     // Now make sure the sets have the mons in order
                     for (int i = 0; i < chosenSet.Count; i++)
                     {

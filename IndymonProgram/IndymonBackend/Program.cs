@@ -336,6 +336,7 @@ namespace IndymonBackendProgram
                     csvFields = rows[offsetY + 0].Split(",");
                     string trainerName = csvFields[offsetX + 2].Split('(')[0].Trim().ToLower(); // Trainer now keeps the left of whatever's on (
                     if (trainerName == "") continue;
+                    Console.WriteLine($"Found {trainerName}");
                     TrainerData newTrainer = new TrainerData
                     {
                         Name = trainerName,
@@ -350,6 +351,7 @@ namespace IndymonBackendProgram
                         csvFields = rows[offsetY + 3 + (2 * mon)].Split(",");
                         string monName = csvFields[offsetX + 2].Trim().ToLower();
                         if (monName == "") break; // If no mon, then I'm done doing mons then
+                        Console.WriteLine($"\tFound {monName}");
                         PokemonSet newMon = new PokemonSet
                         {
                             Species = monName,

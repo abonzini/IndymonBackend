@@ -34,7 +34,6 @@ namespace IndymonBackendProgram
         public Tournament OngoingTournament { get; set; }
         DataContainers _backEndData = null;
         TournamentHistory _leaderboard = null;
-        readonly Random _rng = new Random();
         public TournamentManager(DataContainers backEndData, TournamentHistory leaderboard)
         {
             _backEndData = backEndData;
@@ -122,7 +121,7 @@ namespace IndymonBackendProgram
                 {
                     if (currentChosenTrainers.Count > 0)
                     {
-                        int nextTrainerIndex = _rng.Next(currentChosenTrainers.Count); // Will pick one of them
+                        int nextTrainerIndex = Utilities.GetRng().Next(currentChosenTrainers.Count); // Will pick one of them
                         nextTrainer = currentChosenTrainers[nextTrainerIndex];
                     }
                     else
@@ -300,7 +299,7 @@ namespace IndymonBackendProgram
                 string scoreString = Console.ReadLine();
                 if (scoreString == "0")
                 {
-                    Random _rng = new Random(); // Will randomize result
+                    Random _rng = Utilities.GetRng(); // Will randomize result
                     if (_rng.Next(2) == 0) // Winner was 1
                     {
                         match.Score1 = _rng.Next(1, NMons + 1);
@@ -572,7 +571,7 @@ namespace IndymonBackendProgram
                 }
             }
             // Ok now shuffle everything
-            Utilities.ShuffleList(Participants, 0, Participants.Count);
+            Utilities.ShuffleList(Participants, 0, Participants.Count, Utilities.GetRng());
             // Seeding will involve putting the best first
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
@@ -851,7 +850,7 @@ namespace IndymonBackendProgram
         public override void ShuffleWithSeeds(List<string> Seeds)
         {
             // Shuffle everything
-            Utilities.ShuffleList(Participants, 0, Participants.Count);
+            Utilities.ShuffleList(Participants, 0, Participants.Count, Utilities.GetRng());
             // Seeding in KOH means putting the best in the bottom
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
@@ -1038,7 +1037,7 @@ namespace IndymonBackendProgram
         public override void ShuffleWithSeeds(List<string> Seeds)
         {
             // Shuffle everything
-            Random _rng = new Random();
+            Random _rng = Utilities.GetRng();
             Utilities.ShuffleList(Participants, 0, Participants.Count, _rng);
             // Seeding will involve putting the best first
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
