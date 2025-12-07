@@ -16,7 +16,10 @@
         /// <returns></returns>
         public static HashSet<string> GetBannedMoves()
         {
-            return ["sand attack", "double team", "minimize", "hidden power", "flash", "kinesis", "mud-slap", "smokescreen", "fissure", "horn drill", "guillotine", "sheer cold"];
+            return ["sand attack", "double team", "minimize", // Evasion
+                "hidden power", // Hidden Power
+                "flash", "kinesis", "mud-slap", "smokescreen", // Guaranteed Accuracy 
+                "fissure", "horn drill", "guillotine", "sheer cold"]; // OHKO
         }
         /// <summary>
         /// Returns a set of abilities considered useless
@@ -24,7 +27,9 @@
         /// <returns></returns>
         public static HashSet<string> GetUselessAbilities()
         {
-            return ["pickup", "ball fetch", "honey gather", "run away", "telepathy", "frisk"];
+            return ["pickup", "ball fetch", "honey gather", "run away", // Do nothing
+                "telepathy", // Doubles
+                "frisk"]; // Useless in auto-combat
         }
         /// <summary>
         /// Returns a set of moves considered useless
@@ -33,7 +38,10 @@
         public static HashSet<string> GetUselessMoves()
         {
             // Removed because useless
-            return ["frustration", "splash", "celebrate", "hold hands"];
+            return ["frustration",  // Low damage for no reason
+                "splash", "celebrate", "hold hands", // No effect
+            "snore", "sleep talk", // Most of the time is useless
+            "natural gift"]; // Berry
         }
         /// <summary>
         /// Returns a set of dancing abilities for checking dance off battles

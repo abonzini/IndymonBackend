@@ -7,7 +7,11 @@ namespace IndymonBackendProgram
     {
         public int Wins { get; set; } = 0;
         public int Losses { get; set; } = 0;
-        public float Winrate { get { return (float)Wins / (float)(Losses + Wins); } }
+        public float Winrate { get { return ((Losses + Wins) > 0) ? (float)Wins / (float)(Losses + Wins) : 0.0f; } }
+        public override string ToString()
+        {
+            return $"{Wins} ({Winrate})";
+        }
     }
     public class PlayerAndStats
     {
@@ -217,7 +221,12 @@ namespace IndymonBackendProgram
         public void FinaliseTournament()
         {
             // First, animate tournament
-            OngoingTournament.FinaliseTournament();
+            Console.WriteLine("Animate? Y/n");
+            string input = Console.ReadLine();
+            if (input != "n")
+            {
+                OngoingTournament.FinaliseTournament();
+            }
             // Then, a small helper text to show which items were consumed
             foreach (string pariticpant in OngoingTournament.Participants)
             {
@@ -356,12 +365,12 @@ namespace IndymonBackendProgram
             {
                 List<PlayerAndStats> participantLocation = null;
                 if (backend.TrainerData.ContainsKey(participant)) participantLocation = leaderboard.PlayerStats; // Is it a trainer?
-                else if (backend.TrainerData.ContainsKey(participant)) participantLocation = leaderboard.NpcStats; // Is it NPC?
+                else if (backend.NpcData.ContainsKey(participant)) participantLocation = leaderboard.NpcStats; // Is it NPC?
                 else { } // Never mind then (leave null)
                 if (participantLocation != null) // Add participant if relevant
                 {
                     PlayerAndStats playerStats = participantLocation.FirstOrDefault(p => (p.Name == participant)); // Get data for player
-                    if (playerStats != null) // Player wasn't there, need to add
+                    if (playerStats == null) // Player wasn't there, need to add
                     {
                         PlayerAndStats newPlayer = new PlayerAndStats()
                         {
@@ -392,13 +401,13 @@ namespace IndymonBackendProgram
             // Try to find where P1 is
             List<PlayerAndStats> p1Location = null;
             if (backend.TrainerData.ContainsKey(match.Player1)) p1Location = leaderboard.PlayerStats; // Is it a trainer?
-            else if (backend.TrainerData.ContainsKey(match.Player1)) p1Location = leaderboard.NpcStats; // Is it NPC?
+            else if (backend.NpcData.ContainsKey(match.Player1)) p1Location = leaderboard.NpcStats; // Is it NPC?
             else { } // Never mind then
             List<PlayerAndStats> p2Location = null;
             if (!match.IsBye) // If there's actually a p2...
             {
                 if (backend.TrainerData.ContainsKey(match.Player2)) p2Location = leaderboard.PlayerStats; // Is it a trainer?
-                else if (backend.TrainerData.ContainsKey(match.Player2)) p2Location = leaderboard.NpcStats; // Is it NPC?
+                else if (backend.NpcData.ContainsKey(match.Player2)) p2Location = leaderboard.NpcStats; // Is it NPC?
                 else { } // Never mind then
             }
             // After that is done, guaranteed everything is in place, just update each match stats individually
@@ -463,7 +472,7 @@ namespace IndymonBackendProgram
             if (!Official) return; // Non official tournaments are not tallied
             List<PlayerAndStats> winnerLocation = null;
             if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
-            else if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?
+            else if (backend.NpcData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?
             else { } // Never mind then
             PlayerAndStats winnerStats = winnerLocation?.FirstOrDefault(p => (p.Name == winnerName));
             if (winnerStats != null) winnerStats.TournamentWins++;

@@ -512,8 +512,8 @@ namespace IndymonBackendProgram
         private static string FormatTournamentHistory()
         {
             // Firstly, just sort the lists
-            _allData.TournamentHistory.PlayerStats = [.. _allData.TournamentHistory.PlayerStats.OrderByDescending(c => c.TournamentWins).ThenBy(c => c.Winrate).ThenBy(c => c.Diff)];
-            _allData.TournamentHistory.NpcStats = [.. _allData.TournamentHistory.NpcStats.OrderByDescending(c => c.TournamentWins).ThenBy(c => c.Winrate).ThenBy(c => c.Diff)];
+            _allData.TournamentHistory.PlayerStats = [.. _allData.TournamentHistory.PlayerStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.Winrate).ThenByDescending(c => c.Diff)];
+            _allData.TournamentHistory.NpcStats = [.. _allData.TournamentHistory.NpcStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.Winrate).ThenByDescending(c => c.Diff)];
             // Ok now I need to do multiple row and column csv:
             int nRows = 2 + _allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count; // this is how many rows It'll have (label + players)
             int nColumns = 7 + 3 * (_allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count); // Cols, will be the fixed + 3 per participant
@@ -567,8 +567,16 @@ namespace IndymonBackendProgram
                 xOffset = 7;
                 for (int opp = 0; opp < (_allData.TournamentHistory.PlayerStats.Count); opp++)
                 {
-                    if (opp == player) continue; // Inexistant MU
-                    IndividualMu mu = nextPlayer.EachMuWr[_allData.TournamentHistory.PlayerStats[opp].Name];
+                    if (opp == player) continue; // Inexistant MU (vs themselves?)
+                    string oppName = _allData.TournamentHistory.PlayerStats[opp].Name;
+                    if (!nextPlayer.EachMuWr.TryGetValue(oppName, out IndividualMu mu)) // Also inexistant (not played ever, empty one then)
+                    {
+                        mu = new IndividualMu()
+                        {
+                            Losses = 0,
+                            Wins = 0
+                        };
+                    }
                     nextLine[xOffset + (3 * opp)] = mu.Wins.ToString();
                     nextLine[xOffset + (3 * opp) + 1] = mu.Losses.ToString();
                     nextLine[xOffset + (3 * opp) + 2] = mu.Winrate.ToString();
@@ -576,7 +584,15 @@ namespace IndymonBackendProgram
                 xOffset = 7 + (3 * _allData.TournamentHistory.PlayerStats.Count);
                 for (int opp = 0; opp < (_allData.TournamentHistory.NpcStats.Count); opp++)
                 {
-                    IndividualMu mu = nextPlayer.EachMuWr[_allData.TournamentHistory.NpcStats[opp].Name];
+                    string oppName = _allData.TournamentHistory.NpcStats[opp].Name;
+                    if (!nextPlayer.EachMuWr.TryGetValue(oppName, out IndividualMu mu)) // Also inexistant (not played ever, empty one then)
+                    {
+                        mu = new IndividualMu()
+                        {
+                            Losses = 0,
+                            Wins = 0
+                        };
+                    }
                     nextLine[xOffset + (3 * opp)] = mu.Wins.ToString();
                     nextLine[xOffset + (3 * opp) + 1] = mu.Losses.ToString();
                     nextLine[xOffset + (3 * opp) + 2] = mu.Winrate.ToString();
