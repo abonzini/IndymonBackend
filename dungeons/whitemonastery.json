@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "You reach a remote temple. There's a glowing gem in the center: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "You decided to come back here after your exploration finishes."
+      "PostEventString": "It's time to move on."
     },
 	{
       "EventType": "HEAL",
@@ -45,12 +45,12 @@
     },
 	{
       "EventType": "NPC_BATTLE",
-      "PreEventString": "These sacred grounds are not only meant for Pokemon. Trainers also need to get stronger. $1 is ready to battle you.",
+      "PreEventString": "These sacred grounds are not only meant for Pokemon. Trainers also need to get stronger. $1 is ready to battle you. Your pokemon are fully healed before the battle.",
       "PostEventString": "You feel both of you have grown stronger today."
     },
 	{
       "EventType": "RESEARCHER",
-      "PreEventString": "An member of the Pokemon Research Society is also training.",
+      "PreEventString": "A member of the Pokemon Research Society is also training.",
       "PostEventString": "She's trying to study the sacred texts, looking for the secrets of life and death. She also gives you a $1, it's useless to her."
     },
 	{

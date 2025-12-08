@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "Deep in the water, you see a glowing crystal. A voice sounds in your mind: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "You decided to come back here after your exploration finishes."
+      "PostEventString": "It's time to move on."
     },
 	{
       "EventType": "HEAL",
@@ -29,7 +29,7 @@
     },
 	{
       "EventType": "JOINER",
-      "PreEventString": "In the distance, you see a $1 following you. I has been doing so for miles. It's pretending not to like you, but it's clear it wants to have an adventure.",
+      "PreEventString": "In the distance, you see a $1 following you. It has been doing so for miles. It's pretending not to like you, but it's clear it wants to have an adventure.",
       "PostEventString": "It will probably help you during your battles."
     },
 	{
@@ -45,12 +45,12 @@
     },
 	{
       "EventType": "NPC_BATTLE",
-      "PreEventString": "$1 is wating for you. The sun is shining on your face: Before you can even react, you're thrust into a fight!",
+      "PreEventString": "$1 is wating for you. The sun is shining on your face: Before you can even react, you're thrust into a fight! Your pokemon are fully healed before the battle.",
       "PostEventString": "Truly a duel for the ages... But it's time to move on."
     },
 	{
       "EventType": "RESEARCHER",
-      "PreEventString": "An member of the Pokemon Research Society is sunbathing.",
+      "PreEventString": "A member of the Pokemon Research Society is sunbathing.",
       "PostEventString": "He's reading a $1, but it's clear they don't really understand what it says. 'Well maybe you'll have better luck'"
     },
 	{

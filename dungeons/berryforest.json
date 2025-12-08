@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "Shining in the middle of a clearing, you find a giant glowing crystal. Suddenly, you hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "You decided to come back here after your exploration finishes."
+      "PostEventString": "It's time to move on."
     },
 	{
       "EventType": "HEAL",
@@ -45,7 +45,7 @@
     },
 	{
       "EventType": "NPC_BATTLE",
-      "PreEventString": "A shady figure approaches you in the forest. It's $1, and they want to fight!",
+      "PreEventString": "A shady figure approaches you in the forest. It's $1, and they want to fight! Your pokemon are fully healed before the battle.",
       "PostEventString": "After defeating $1, you go on your way."
     },
 	{
@@ -177,12 +177,12 @@
       "RoomColor": "DarkGreen",
       "NeWallTile": "♣",
       "NwWallTile": "♣",
-      "SeWallTile": " ",
-      "SwWallTile": " ",
+      "SeWallTile": "♣",
+      "SwWallTile": "♣",
       "EWallTile": "♣",
       "WWallTile": "♣",
       "NWallTile": "♣",
-      "SWallTile": " ",
+      "SWallTile": "♣",
 	  "EWallPassageTile": " ",
       "WWallPassageTile": " ",
       "NWallPassageTile": " ",
@@ -204,7 +204,7 @@
 				"Which": "Cut"
 		}
 	  ],
-	  "ShortcutClue": "Dense shrubs block your way.",
+	  "ShortcutClue": "There's an old pathway leading deeper into the forest, but dense shrubs block your way.",
 	  "ShortcutResolution": "Your $1 allows you to find a shortcut through a flowery passage."
     },
 	{

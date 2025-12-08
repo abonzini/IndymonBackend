@@ -15,7 +15,7 @@
 	{
       "EventType": "EVO",
       "PreEventString": "In the middle of a field, you find a giant glowing crystal. Suddenly, you hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "You decided to come back here after your exploration finishes."
+      "PostEventString": "It's time to move on."
     },
 	{
       "EventType": "HEAL",
@@ -45,12 +45,12 @@
     },
 	{
       "EventType": "NPC_BATTLE",
-      "PreEventString": "You've been challenged by $1, who wants to participate in an unsanctioned Pokemon battle!",
+      "PreEventString": "You've been challenged by $1, who wants to participate in an unsanctioned Pokemon battle! Your pokemon are fully healed before the battle.",
       "PostEventString": "$1 is happy for the fight, you move on."
     },
 	{
       "EventType": "RESEARCHER",
-      "PreEventString": "An member of the Pokemon Research Society is busy exploring some stool samples.",
+      "PreEventString": "A member of the Pokemon Research Society is busy exploring some stool samples.",
       "PostEventString": "''Can't you see I'm busy?'' They say, they give you a $1 they found on the ground, and send you on your way."
     },
 	{

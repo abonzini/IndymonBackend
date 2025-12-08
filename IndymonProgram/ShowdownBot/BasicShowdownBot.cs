@@ -2,6 +2,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace ShowdownBot
 {
@@ -26,11 +27,13 @@ namespace ShowdownBot
         TrainerData _botTrainer;
         readonly DataContainers _backend;
         public string BotName;
-        string BattleName;
+        string _selfId;
+        string _battleName;
         public string Winner;
         public int BotRemainingMons;
         GameState _currentGameState;
         public string Challenger;
+        readonly Dictionary<string, PokemonSet> _monsById = new Dictionary<string, PokemonSet>();
         public BasicShowdownBot(DataContainers backend)
         {
             _backend = backend;
@@ -60,9 +63,9 @@ namespace ShowdownBot
                 _botTrainer = trainer;
 
                 BotName = $"Indy{_botTrainer.Name}".Replace(" ", "").Replace("?", ""); // Fuck you psy
-                if (BotName.Length > 19) // Sanitize, name has to be shorter than 19 and no spaces
+                if (BotName.Length > 18) // Sanitize, name has to be shorter than 19 and no spaces
                 {
-                    BotName = BotName[..19].Trim();
+                    BotName = BotName[..18].Trim();
                 }
                 // Ok try and connect
                 HttpClient client = new HttpClient(); // One use client to get assertion
@@ -132,7 +135,14 @@ namespace ShowdownBot
                     Console.WriteLine("Socket received:");
                     Console.WriteLine("\t" + message); // Replace with your handler
                 }
-                ParseResponse(message);
+                try
+                {
+                    ParseResponse(message);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Bot {BotName}, processing message {message} threw an exception: {ex}");
+                }
             }
         }
         private void ParseResponse(string message)
@@ -173,32 +183,138 @@ namespace ShowdownBot
                     CurrentState = BotState.BEING_CHALLENGED;
                 }
             }
+            else if (message.Contains("|nametaken|")) // Name registration error
+            {
+                Console.WriteLine($"NAME BOT REGISTRATION ERROR! {message}");
+            }
             else if (message.Contains("|request|")) // Battle request, bot needs to do a decision
             {
                 if (CurrentState == BotState.IN_FIGHT)
                 {
                     string[] battleData = message.Split('|');
-                    BattleName = battleData[0].Trim('>').Trim();
+                    _battleName = battleData[0].Trim('>').Trim();
                     string state = battleData[2]; // This should be the json
-                    BotDecision(BattleName, state);
+                    BotDecision(_battleName, state);
                 }
-            }
-            else if (message.Contains("|win|")) // Battle ended, no matter who won
-            {
-                Winner = message.Split("|win|")[1].Trim().ToLower();
-                BotRemainingMons = _currentGameState.side.GetAliveMons();
-                if (BotName.ToLower() != Winner)
-                {
-                    BotRemainingMons = 0; // Loser got 0 mon
-                }
-                // Send showteam
-                if (Verbose) Console.WriteLine($"{Winner} won, this bot had {BotRemainingMons} mons remaining");
-                CurrentState = BotState.GAME_DONE;
-                _socket.Dispose();
             }
             else
             {
-                // Skip message I guess
+                // May be actually battle message, so I'll explore further
+                // Will tell me which player ID i am... |player|p1|Indytiago|spark-casual|
+                MatchCollection matches = Regex.Matches(message, @"\|player\|([^|]+)\|([^|]+)");
+                foreach (Match m in matches)
+                {
+                    if (m.Groups[2].Value == BotName) // Found myself
+                    {
+                        _selfId = m.Groups[1].Value;
+                        //Console.WriteLine($"Player debug: {BotName} recognized itself as {_selfId}");
+                    }
+                }
+                // Mon switches in with extra data, capture all types of switching in
+                matches = Regex.Matches(message, @"\|(?:switch|drag|detailschange|replace)\|([^|]+)\|([^|]+)\|([^|]+)");
+                foreach (Match m in matches)
+                {
+                    if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
+                    {
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string monSpecies = m.Groups[2].Value.Trim().ToLower(); // Species of the mon
+                        string status = m.Groups[3].Value.Trim().ToLower(); // Hp status
+                        //Console.WriteLine($"Switch debug: {monId}->{monSpecies}->{status}");
+                        if (!_monsById.TryGetValue(monId, out PokemonSet pokemonInTeam)) // Id not known yet
+                        {
+                            // Try all I can to identify my mon...
+                            pokemonInTeam = _botTrainer.Teamsheet.Where(p => p.NickName == monId || p.Species == monId || p.Species == monSpecies).First();
+                            //Console.WriteLine($"Switch debug added {monId} key");
+                            _monsById.Add(monId, pokemonInTeam);
+                        }
+                        pokemonInTeam.ExplorationStatus?.SetStatus(status);
+                    }
+                }
+                // Mon receives direct damage or hp change
+                matches = Regex.Matches(message, @"\|(?:-damage|-heal)\|([^|]+)\|([^|]+)");
+                foreach (Match m in matches)
+                {
+                    if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
+                    {
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string status = m.Groups[2].Value.Trim().ToLower(); // Hp status
+                        //Console.WriteLine($"Damage debug: {monId}->{status}");
+                        PokemonSet pokemonInTeam = _monsById[monId];
+                        pokemonInTeam.ExplorationStatus?.SetStatus(status);
+                    }
+                }
+                // Mon's HP is changed for some reason (i honestly don't believe this is used)
+                matches = Regex.Matches(message, @"\|(?:-sethp)\|([^|]+)\|([^|]+)");
+                foreach (Match m in matches)
+                {
+                    if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
+                    {
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string status = m.Groups[2].Value.Trim().ToLower(); // Hp (status blank i guess?)
+                        PokemonSet pokemonInTeam = _monsById[monId];
+                        pokemonInTeam.ExplorationStatus?.SetStatus(status);
+                    }
+                }
+                // Mon's nonvolatile status is changed (mon gained status)
+                matches = Regex.Matches(message, @"\|(?:-status)\|([^|]+)\|([^|]+)");
+                foreach (Match m in matches)
+                {
+                    if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
+                    {
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string status = m.Groups[2].Value.Trim().ToLower(); // Non-volatile status
+                        PokemonSet pokemonInTeam = _monsById[monId];
+                        if (pokemonInTeam.ExplorationStatus != null)
+                        {
+                            pokemonInTeam.ExplorationStatus.NonVolatileStatus = status;
+                        }
+                    }
+                }
+                // Mon's nonvolatile status is cured
+                matches = Regex.Matches(message, @"\|(?:-curestatus)\|([^|]+)\|([^|]+)");
+                foreach (Match m in matches)
+                {
+                    if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
+                    {
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string status = m.Groups[2].Value.Trim().ToLower(); // Non-volatile status cured
+                        PokemonSet pokemonInTeam = _monsById[monId];
+                        if (pokemonInTeam.ExplorationStatus != null && pokemonInTeam.ExplorationStatus.NonVolatileStatus == status)
+                        {
+                            pokemonInTeam.ExplorationStatus.NonVolatileStatus = "";
+                        }
+                    }
+                }
+                // Mon's fainted
+                matches = Regex.Matches(message, @"\|(?:faint)\|([^|]+)\|([^|]+)");
+                foreach (Match m in matches)
+                {
+                    if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
+                    {
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        PokemonSet pokemonInTeam = _monsById[monId];
+                        //Console.WriteLine($"Faint debug: {monId}");
+                        if (pokemonInTeam.ExplorationStatus != null)
+                        {
+                            pokemonInTeam.ExplorationStatus.HealthPercentage = 1;
+                            pokemonInTeam.ExplorationStatus.NonVolatileStatus = "";
+                        }
+                    }
+                }
+                // If a player won game, this is relevant to end the simulation
+                if (message.Contains("|win|")) // Battle ended, no matter who won
+                {
+                    Winner = message.Split("|win|")[1].Trim().ToLower();
+                    BotRemainingMons = _currentGameState.side.GetAliveMons();
+                    if (BotName.ToLower() != Winner)
+                    {
+                        BotRemainingMons = 0; // Loser got 0 mon
+                    }
+                    // Send showteam
+                    //Console.WriteLine($"{Winner} won, this bot had {BotRemainingMons} mons remaining");
+                    CurrentState = BotState.GAME_DONE;
+                    _socket.Dispose();
+                }
             }
         }
         private void BotDecision(string battle, string state)
@@ -210,7 +326,6 @@ namespace ShowdownBot
                 // Get the first mon of that species (may create trouble if there's duplicates, deal with that later)
                 string species = pokemon.details.Split(',')[0].Trim().ToLower(); // Extract name from details
                 PokemonSet pokemonInTeam = _botTrainer.Teamsheet.Where(p => p.Species == species).First();
-                pokemonInTeam.ExplorationStatus?.SetStatus(pokemon.condition);
                 if (pokemon.active) // This is the current mon, definitely
                 {
                     currentPokemon = pokemonInTeam;

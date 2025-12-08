@@ -13,6 +13,8 @@ namespace IndymonBackendProgram
         MOVE_CHARACTER,
         CONNECT_ROOMS_PASSAGE,
         CONNECT_ROOMS_SHORTCUT,
+        ADD_INFO_COLUMN,
+        ADD_INFO_VALUE
     }
     public enum CardinalDirections
     {
@@ -24,8 +26,8 @@ namespace IndymonBackendProgram
     public class ExplorationStep // All needed to make an animation
     {
         public ExplorationStepType Type { get; set; } // Which command
-        public string Message { get; set; } // For printing string
-        public string Param1 { get; set; } // Strings containing $1 will be replaced by this
+        public string StringParam { get; set; } // Parameter to pass. Strings containing $1 will be replaced by this
+        public int IntParam { get; set; } // Parameter to pass.
         public (int, int) SourceCoord { get; set; } // Coord of the source room when moving
         public (int, int) DestCoord { get; set; } // Coord of destination room when moving
         public int MillisecondsWait { get; set; }
@@ -129,6 +131,15 @@ namespace IndymonBackendProgram
             // Beginning of expl and event queue
             (int, int) prevCoord = (-1, 0); // Starts from outside i guess
             bool usedShortcut = false; // If a shortcut was used to the new room
+            // Print initial string
+            string auxString = $"Beginning of {trainerData.Name}'s exploration in {Dungeon}";
+            Console.WriteLine(auxString);
+            GenericMessageCommand(auxString); // Begin of exploration string
+            // Adds status table. Pokemon have a max of 18 characters, health and status max 3. Fill the info too
+            AddInfoColumnCommand("Pokemon", 18);
+            AddInfoColumnCommand("Health", 6);
+            AddInfoColumnCommand("Status", 6);
+            UpdateTrainerDataInfo(trainerData);
             for (int floor = 0; floor < DUNGEON_NUMBER_OF_FLOORS; floor++) // Begin the iteration of all floors
             {
                 for (int room = 0; room < DUNGEON_ROOMS_PER_FLOOR; room++) // Begin the iteration of all rooms
@@ -143,12 +154,6 @@ namespace IndymonBackendProgram
                     bool roomSuccess;
                     if (room == 0) // Room 0 is always the beginning of floor, camping event followed by shortcut check
                     {
-                        if (floor == 0) // Beginning of adventure!
-                        {
-                            string auxString = $"Beginning of {trainerData.Name}'s exploration in {Dungeon}";
-                            Console.WriteLine(auxString);
-                            GenericMessageCommand(auxString); // Begin of exploration string
-                        }
                         roomSuccess = ExecuteEvent(_dungeonDetails.CampingEvent, floor, prizes, trainerData); // Executes camping event
                         // After, need to also check shortcut
                         InfoMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue);
@@ -161,7 +166,7 @@ namespace IndymonBackendProgram
                             {
                                 DrawConnectRoomCommand(floor, room, floor + 1, room, true); // Connects to invisible next dungeon, shortcut
                                 DrawMoveCharacterCommand(floor, room, floor + 1, room); // Character dissapears
-                                string auxString = $"You move onward...";
+                                auxString = $"You move onward...";
                                 Console.WriteLine(auxString);
                                 GenericMessageCommand(auxString);
                                 // Also the trypical backend stuff
@@ -193,7 +198,7 @@ namespace IndymonBackendProgram
                         {
                             DrawConnectRoomCommand(floor, room, floor + 1, room, false); // Connects to invisible next dungeon, no shortcut
                             DrawMoveCharacterCommand(floor, room, floor + 1, room); // Character dissapears
-                            string auxString = $"You move onward...";
+                            auxString = $"You move onward...";
                             Console.WriteLine(auxString);
                             GenericMessageCommand(auxString);
                             // Also the trypical backend stuff
@@ -339,6 +344,7 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
+                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                             alphaString = roomEvent.PostEventString.Replace("$1", item);
                             GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
                             AddItemPrize(item, prizes); // Add item to prizes
@@ -384,6 +390,7 @@ namespace IndymonBackendProgram
                                     prizes.Evolutions.Add(mon.NickName);
                                     // Finally, actually do the deed
                                     mon.Species = chosenMon.Trim().ToLower();
+                                    UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                                 }
                             }
                         }
@@ -398,7 +405,7 @@ namespace IndymonBackendProgram
                         GenericMessageCommand(messageString);
                         AddItemPrize(chosenPlate, prizes);
                         messageString = roomEvent.PostEventString.Replace("$1", chosenPlate);
-                        GenericMessageCommand(roomEvent.PostEventString);
+                        GenericMessageCommand(messageString);
                     }
                     break;
                 case RoomEventType.PARADOX:
@@ -424,6 +431,7 @@ namespace IndymonBackendProgram
                                 mon.ExplorationStatus.HealthPercentage = 100;
                             }
                         }
+                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
@@ -439,6 +447,7 @@ namespace IndymonBackendProgram
                                 mon.ExplorationStatus.HealthPercentage = 1;
                             }
                         }
+                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
@@ -450,12 +459,13 @@ namespace IndymonBackendProgram
                         {
                             mon.ExplorationStatus.NonVolatileStatus = "";
                         }
+                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
                 case RoomEventType.STATUS_TRAP:
                     {
-                        Console.WriteLine("A trap that has will status one mon");
+                        Console.WriteLine("A trap that will status one mon");
                         string status = roomEvent.SpecialParams;
                         List<PokemonSet> possibleMons = new List<PokemonSet>();
                         GenericMessageCommand(roomEvent.PreEventString);
@@ -477,6 +487,7 @@ namespace IndymonBackendProgram
                             statusedMon = trainerData.Teamsheet[Utilities.GetRng().Next(trainerData.Teamsheet.Count)];
                         }
                         statusedMon.ExplorationStatus.NonVolatileStatus = status;
+                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
@@ -539,6 +550,7 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
+                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                             string postMessage = roomEvent.PostEventString.Replace("$1", string.Join(',', items));
                             GenericMessageCommand(postMessage);
                             foreach (string item in items) // Add all items to prizes
@@ -565,12 +577,14 @@ namespace IndymonBackendProgram
                         {
                             Species = pokemonSpecies,
                             Shiny = isShiny,
+                            ExplorationStatus = new ExplorationStatus()
                         };
                         joiner.RandomizeMon(_backEndData, TeambuildSettings.NONE, 10); // Random set of moves, 10% switch new standard
                         Console.Write("Added to team");
                         trainerData.Teamsheet.Add(joiner);
                         GenericMessageCommand(roomEvent.PostEventString);
                         AddPokemonPrize(pokemonSpecies, 0, isShiny, prizes); // Add mon to always capturable
+                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                     }
                     break;
                 case RoomEventType.NPC_BATTLE:
@@ -597,6 +611,7 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
+                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                             AddItemPrize($"{randomNpc.Name}'s favor", prizes);
                             npcString = roomEvent.PostEventString.Replace("$1", randomNpc.Name);
                             GenericMessageCommand(npcString);
@@ -607,6 +622,22 @@ namespace IndymonBackendProgram
                     break;
             }
             return roomCleared;
+        }
+        /// <summary>
+        /// Updates all the trainer data in the exploration info table
+        /// </summary>
+        /// <param name="trainerData">Trainer containing the mons</param>
+        void UpdateTrainerDataInfo(TrainerData trainerData)
+        {
+            for (int i = 0; i < trainerData.Teamsheet.Count; i++)
+            {
+                PokemonSet mon = trainerData.Teamsheet[i];
+                Console.WriteLine($"{mon.Species} status is {mon.ExplorationStatus}");
+                // Print stuff
+                ModifyInfoValueCommand(mon.Species, (0, i));
+                ModifyInfoValueCommand(mon.ExplorationStatus.HealthPercentage.ToString(), (1, i));
+                ModifyInfoValueCommand(mon.ExplorationStatus.NonVolatileStatus, (2, i));
+            }
         }
         /// <summary>
         /// Verifies whether a trainer fills the consitions to use a shortcut
@@ -695,7 +726,7 @@ namespace IndymonBackendProgram
             ExplorationSteps.Add(new ExplorationStep()
             {
                 Type = ExplorationStepType.PRINT_STRING,
-                Message = message,
+                StringParam = message,
                 MillisecondsWait = STANDARD_MESSAGE_PAUSE
             });
         }
@@ -709,7 +740,7 @@ namespace IndymonBackendProgram
             ExplorationSteps.Add(new ExplorationStep()
             {
                 Type = ExplorationStepType.PRINT_STRING_INFO,
-                Message = message,
+                StringParam = message,
                 MillisecondsWait = STANDARD_MESSAGE_PAUSE
             });
         }
@@ -781,6 +812,24 @@ namespace IndymonBackendProgram
                 DestCoord = (floor2, room2)
             });
         }
+        void AddInfoColumnCommand(string label, int minWidth)
+        {
+            ExplorationSteps.Add(new ExplorationStep()
+            {
+                Type = ExplorationStepType.ADD_INFO_COLUMN,
+                IntParam = minWidth,
+                StringParam = label
+            });
+        }
+        void ModifyInfoValueCommand(string value, (int, int) tableCoord)
+        {
+            ExplorationSteps.Add(new ExplorationStep()
+            {
+                Type = ExplorationStepType.ADD_INFO_VALUE,
+                DestCoord = tableCoord,
+                StringParam = value
+            });
+        }
         /// <summary>
         /// Resolves an encounter between players, no mon limit
         /// </summary>
@@ -834,6 +883,9 @@ namespace IndymonBackendProgram
         /// </summary>
         public void AnimateExploration()
         {
+            char[] infoTableTemplate = "|".ToCharArray();
+            List<int> infoColOffset = [2]; // First element "would" start from here
+            List<char[]> infoRows = [[.. infoTableTemplate], new string('-', infoTableTemplate.Length).ToCharArray()]; // Starts with the (empty) table header, and a separator
             Console.WriteLine("Write anything to begin. Better start recording now");
             Console.ReadLine();
             Console.Clear();
@@ -848,13 +900,13 @@ namespace IndymonBackendProgram
                     case ExplorationStepType.PRINT_STRING:
                         Console.ForegroundColor = ConsoleColor.White; // Reset console just in case
                         Console.SetCursorPosition(0, consoleOffset);
-                        Console.WriteLine($"> {nextStep.Message}"); // Write message
+                        Console.WriteLine($"> {nextStep.StringParam}"); // Write message
                         consoleOffset = Console.CursorTop; // New console location
                         break;
                     case ExplorationStepType.PRINT_STRING_INFO:
                         Console.ForegroundColor = ConsoleColor.Yellow; // Sets info color
                         Console.SetCursorPosition(0, consoleOffset);
-                        Console.WriteLine($"> {nextStep.Message}"); // Write message
+                        Console.WriteLine($"> {nextStep.StringParam}"); // Write message
                         consoleOffset = Console.CursorTop; // New console location
                         break;
                     case ExplorationStepType.CLEAR_CONSOLE:
@@ -876,6 +928,32 @@ namespace IndymonBackendProgram
                         break;
                     case ExplorationStepType.CONNECT_ROOMS_SHORTCUT:
                         ConnectShortcut(nextStep.SourceCoord.Item1, nextStep.SourceCoord.Item2, nextStep.DestCoord.Item1, nextStep.DestCoord.Item2);
+                        break;
+                    case ExplorationStepType.ADD_INFO_COLUMN:
+                        // Add template for next time
+                        char[] labelSpaces = new string(' ', nextStep.IntParam).ToCharArray();
+                        infoTableTemplate = [.. infoTableTemplate, ' ', .. labelSpaces, ' ', '|']; // Add the new empty template
+                        // Extend title with new label spaces and then the label
+                        infoRows[0] = [.. infoRows[0], ' ', .. labelSpaces, ' ', '|']; // Add the new empty template
+                        // Extend separator
+                        infoRows[1] = new string('-', infoTableTemplate.Length).ToCharArray();
+                        // Add width data
+                        int nextOffset = infoColOffset.Last() + nextStep.IntParam + 3; // Next character would be 3 (for the new _|_ + the len of other label)
+                        infoColOffset.Add(nextOffset);
+                        // Redraw table
+                        UpdateInfoTableField(nextStep.StringParam, (infoColOffset.Count - 2, 0), infoRows, infoColOffset); // Puts the label
+                        RedrawInfoTable(infoRows);
+                        break;
+                    case ExplorationStepType.ADD_INFO_VALUE:
+                        // X (field) and Y (row). First, add rows until satisfied
+                        while ((infoRows.Count - 2) <= nextStep.DestCoord.Item2) // If row not yet present, add new until exist
+                        {
+                            infoRows.Add([.. infoTableTemplate]); // Copy template into new row
+                        }
+                        (int, int) actualTableCoord = (nextStep.DestCoord.Item1, nextStep.DestCoord.Item2 + 2); // The Y offset is because the first 2 rows are not data but labels+sep
+                        UpdateInfoTableField(nextStep.StringParam, actualTableCoord, infoRows, infoColOffset);
+                        // Redraw table
+                        RedrawInfoTable(infoRows);
                         break;
                     default:
                         break;
@@ -1097,6 +1175,52 @@ namespace IndymonBackendProgram
                     else if (Console.CursorLeft == rightShortcutX) Console.WriteLine(lastTile);
                     else Console.WriteLine(middleTile);
                 }
+            }
+        }
+        /// <summary>
+        /// Updates the field of an info table
+        /// </summary>
+        /// <param name="value">Field value</param>
+        /// <param name="coord">Coord of field</param>
+        /// <param name="rows">Table to modify</param>
+        /// <param name="lengths">Item containing table offsets</param>
+        void UpdateInfoTableField(string value, (int, int) coord, List<char[]> rows, List<int> lengths)
+        {
+            char[] rowToModify = rows[coord.Item2]; // Get the row element (after labels and separator)
+            // Overwrite table characters
+            int beginningChar = lengths[coord.Item1];
+            int endChar = lengths[coord.Item1 + 1];
+            for (int i = 0; i < (endChar - beginningChar); i++)
+            {
+                char charToUse;
+                if (i < value.Length) // Still printing string
+                {
+                    charToUse = value[i];
+                }
+                else if ((i >= (endChar - beginningChar) - 3)) // column space ended, can finish here
+                {
+                    break;
+                }
+                else // Fill the rest blank
+                {
+                    charToUse = ' ';
+                }
+                // Ok now print it
+                rowToModify[i + beginningChar] = charToUse;
+            }
+        }
+        /// <summary>
+        /// Updates info table of current exploration
+        /// </summary>
+        /// <param name="rows">Table to print</param>
+        void RedrawInfoTable(List<char[]> rows)
+        {
+            int tableStart = (DUNGEON_ROOMS_PER_FLOOR * ROOM_WIDTH) + (ROOM_WIDTH); // Where the info table starts (leave 1 room separation)
+            // Printing loop
+            for (int i = 0; i < rows.Count; i++)
+            {
+                Console.SetCursorPosition(tableStart, i);
+                Console.Write(new string(rows[i]));
             }
         }
         #endregion
