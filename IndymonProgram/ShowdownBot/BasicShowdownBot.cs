@@ -222,8 +222,9 @@ namespace ShowdownBot
                         //Console.WriteLine($"Switch debug: {monId}->{monSpecies}->{status}");
                         if (!_monsById.TryGetValue(monId, out PokemonSet pokemonInTeam)) // Id not known yet
                         {
-                            // Try all I can to identify my mon...
-                            pokemonInTeam = _botTrainer.Teamsheet.Where(p => p.NickName == monId || p.Species == monId || p.Species == monSpecies).First();
+                            // Try all I can to identify my mon
+                            pokemonInTeam = _botTrainer.Teamsheet.FirstOrDefault(p => p.NickName == monId) // Ideally nickname
+                                ?? _botTrainer.Teamsheet.FirstOrDefault(p => p.Species == monId || p.Species == monSpecies); // Otherwise scramble towards any identifier I can get
                             //Console.WriteLine($"Switch debug added {monId} key");
                             _monsById.Add(monId, pokemonInTeam);
                         }

@@ -570,13 +570,19 @@ namespace IndymonBackendProgram
                         List<string> pokemonThisFloor = _dungeonDetails.PokemonEachFloor[floor]; // Find the possible mons this floor
                         string pokemonSpecies = pokemonThisFloor[Utilities.GetRng().Next(pokemonThisFloor.Count)].Trim().ToLower(); // Get a random one of these
                         Console.WriteLine($"Joiner {pokemonSpecies}");
-                        string alphaString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
-                        GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
+                        string joinerString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
+                        GenericMessageCommand(joinerString); // Prints the message but we know it could have a $1
                         bool isShiny = (Utilities.GetRng().Next(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
+                        string nickName = $"{pokemonSpecies} friend";
+                        if (nickName.Length > 18) // Sanitize, name has to be shorter than 19 and no spaces
+                        {
+                            nickName = nickName[..18].Trim();
+                        }
                         PokemonSet joiner = new PokemonSet()
                         {
                             Species = pokemonSpecies,
                             Shiny = isShiny,
+                            NickName = nickName,
                             ExplorationStatus = new ExplorationStatus()
                         };
                         joiner.RandomizeMon(_backEndData, TeambuildSettings.NONE, 10); // Random set of moves, 10% switch new standard
