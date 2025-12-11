@@ -460,8 +460,10 @@ namespace IndymonBackendProgram
                     // Statistics...
                     TournamentWins = int.Parse(cols[1]),
                     TournamentsPlayed = int.Parse(cols[2]),
-                    Kills = int.Parse(cols[4]),
-                    Deaths = int.Parse(cols[5])
+                    GamesWon = int.Parse(cols[4]),
+                    GamesPlayed = int.Parse(cols[5]),
+                    Kills = int.Parse(cols[7]),
+                    Deaths = int.Parse(cols[8])
                 };
                 // Finally add to the right place
                 if (_allData.DataContainer.TrainerData.ContainsKey(playerName)) // This was an actual player, add to correct array
@@ -482,7 +484,7 @@ namespace IndymonBackendProgram
             {
                 int yOffset = 2; // 2nd row begins
                 string[] cols = rows[yOffset + row].Split(',');
-                int xOffset = 7; // Beginning of "vs trainer" data
+                int xOffset = 10; // Beginning of "vs trainer" data
                 PlayerAndStats thisPlayer = _allData.TournamentHistory.PlayerStats[row]; // Get player owner of this data
                 thisPlayer.EachMuWr = new Dictionary<string, IndividualMu>();
                 for (int col = 0; col < _allData.TournamentHistory.PlayerStats.Count; col++) // Check all players score first
@@ -494,7 +496,7 @@ namespace IndymonBackendProgram
                     int losses = int.Parse(cols[xOffset + (3 * col) + 1]);
                     thisPlayer.EachMuWr.Add(oppName, new IndividualMu { Wins = wins, Losses = losses }); // Add this data to the stats
                 }
-                xOffset = 7 + (3 * _allData.TournamentHistory.PlayerStats.Count); // Offset to NPC data
+                xOffset = 10 + (3 * _allData.TournamentHistory.PlayerStats.Count); // Offset to NPC data
                 for (int col = 0; col < _allData.TournamentHistory.NpcStats.Count; col++) // Check NPC score now
                 {
                     // Get data for this opp
@@ -512,22 +514,22 @@ namespace IndymonBackendProgram
         private static string FormatTournamentHistory()
         {
             // Firstly, just sort the lists
-            _allData.TournamentHistory.PlayerStats = [.. _allData.TournamentHistory.PlayerStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.Winrate).ThenByDescending(c => c.Diff)];
-            _allData.TournamentHistory.NpcStats = [.. _allData.TournamentHistory.NpcStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.Winrate).ThenByDescending(c => c.Diff)];
+            _allData.TournamentHistory.PlayerStats = [.. _allData.TournamentHistory.PlayerStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.GamesWon).ThenByDescending(c => c.Diff)];
+            _allData.TournamentHistory.NpcStats = [.. _allData.TournamentHistory.NpcStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.GamesWon).ThenByDescending(c => c.Diff)];
             // Ok now I need to do multiple row and column csv:
             int nRows = 2 + _allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count; // this is how many rows It'll have (label + players)
-            int nColumns = 7 + 3 * (_allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count); // Cols, will be the fixed + 3 per participant
+            int nColumns = 10 + 3 * (_allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count); // Cols, will be the fixed + 3 per participant
             string[] lines = new string[nRows];
             // First row has names only
             string[] firstLine = new string[nColumns];
             firstLine[0] = "Individual Match History ->";
-            int xOffset = 7; // First part starts from offset (players)
+            int xOffset = 10; // First part starts from offset (players)
             for (int player = 0; player < _allData.TournamentHistory.PlayerStats.Count; player++)
             {
                 firstLine[xOffset + (3 * player)] = $"vs {_allData.TournamentHistory.PlayerStats[player].Name}";
             }
             // Then NPCs
-            xOffset = 7 + (3 * _allData.TournamentHistory.PlayerStats.Count);
+            xOffset = 10 + (3 * _allData.TournamentHistory.PlayerStats.Count);
             for (int player = 0; player < _allData.TournamentHistory.NpcStats.Count; player++)
             {
                 firstLine[xOffset + 3 * player] = $"vs {_allData.TournamentHistory.NpcStats[player].Name}";
@@ -538,12 +540,15 @@ namespace IndymonBackendProgram
             secondLine[0] = "Trainer";
             secondLine[1] = "Tourn. Wins";
             secondLine[2] = "Tourn. Played";
-            secondLine[3] = "WR%";
-            secondLine[4] = "K";
-            secondLine[5] = "D";
-            secondLine[6] = "DIFF";
+            secondLine[3] = "(WR%)";
+            secondLine[4] = "Games Won";
+            secondLine[5] = "Games Played";
+            secondLine[6] = "(WR%)";
+            secondLine[7] = "K";
+            secondLine[8] = "D";
+            secondLine[9] = "DIFF";
             // Then all together
-            xOffset = 7;
+            xOffset = 10;
             for (int player = 0; player < (_allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count); player++)
             {
                 secondLine[xOffset + (3 * player)] = "W";
@@ -561,10 +566,13 @@ namespace IndymonBackendProgram
                 nextLine[1] = nextPlayer.TournamentWins.ToString();
                 nextLine[2] = nextPlayer.TournamentsPlayed.ToString();
                 nextLine[3] = nextPlayer.Winrate.ToString();
-                nextLine[4] = nextPlayer.Kills.ToString();
-                nextLine[5] = nextPlayer.Deaths.ToString();
-                nextLine[6] = nextPlayer.Diff.ToString();
-                xOffset = 7;
+                nextLine[4] = nextPlayer.GamesWon.ToString();
+                nextLine[5] = nextPlayer.GamesPlayed.ToString();
+                nextLine[6] = nextPlayer.GameWinrate.ToString();
+                nextLine[7] = nextPlayer.Kills.ToString();
+                nextLine[8] = nextPlayer.Deaths.ToString();
+                nextLine[9] = nextPlayer.Diff.ToString();
+                xOffset = 10;
                 for (int opp = 0; opp < (_allData.TournamentHistory.PlayerStats.Count); opp++)
                 {
                     if (opp == player) continue; // Inexistant MU (vs themselves?)
@@ -581,7 +589,7 @@ namespace IndymonBackendProgram
                     nextLine[xOffset + (3 * opp) + 1] = mu.Losses.ToString();
                     nextLine[xOffset + (3 * opp) + 2] = mu.Winrate.ToString();
                 }
-                xOffset = 7 + (3 * _allData.TournamentHistory.PlayerStats.Count);
+                xOffset = 10 + (3 * _allData.TournamentHistory.PlayerStats.Count);
                 for (int opp = 0; opp < (_allData.TournamentHistory.NpcStats.Count); opp++)
                 {
                     string oppName = _allData.TournamentHistory.NpcStats[opp].Name;
@@ -609,9 +617,12 @@ namespace IndymonBackendProgram
                 nextLine[1] = nextPlayer.TournamentWins.ToString();
                 nextLine[2] = nextPlayer.TournamentsPlayed.ToString();
                 nextLine[3] = nextPlayer.Winrate.ToString();
-                nextLine[4] = nextPlayer.Kills.ToString();
-                nextLine[5] = nextPlayer.Deaths.ToString();
-                nextLine[6] = nextPlayer.Diff.ToString();
+                nextLine[4] = nextPlayer.GamesWon.ToString();
+                nextLine[5] = nextPlayer.GamesPlayed.ToString();
+                nextLine[6] = nextPlayer.GameWinrate.ToString();
+                nextLine[7] = nextPlayer.Kills.ToString();
+                nextLine[8] = nextPlayer.Deaths.ToString();
+                nextLine[9] = nextPlayer.Diff.ToString();
                 lines[yOffset + player] = string.Join(",", nextLine);
             }
             // ok finally make the master string
