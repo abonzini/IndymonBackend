@@ -425,6 +425,7 @@ namespace IndymonBackendProgram
                 // Update all remaining stats
                 if (p1Stats != null)
                 {
+                    p1Stats.GamesPlayed++;
                     p1Stats.Kills += p1Kills;
                     p1Stats.Deaths += p2Kills;
                     if (!p1Stats.EachMuWr.TryGetValue(match.Player2, out IndividualMu mu))
@@ -435,6 +436,7 @@ namespace IndymonBackendProgram
                     bool playerWon = (match.Winner.Trim().ToLower() == p1Stats.Name.Trim().ToLower());
                     if (playerWon)
                     {
+                        p1Stats.GamesWon++;
                         mu.Wins++;
                     }
                     else
@@ -444,6 +446,7 @@ namespace IndymonBackendProgram
                 }
                 if (p2Stats != null)
                 {
+                    p2Stats.GamesPlayed++;
                     p2Stats.Kills += p2Kills;
                     p2Stats.Deaths += p1Kills;
                     if (!p2Stats.EachMuWr.TryGetValue(match.Player1, out IndividualMu mu))
@@ -455,6 +458,7 @@ namespace IndymonBackendProgram
                     bool playerWon = (match.Winner.Trim().ToLower() == p2Stats.Name.Trim().ToLower());
                     if (playerWon)
                     {
+                        p2Stats.GamesWon++;
                         mu.Wins++;
                     }
                     else
