@@ -306,7 +306,7 @@ namespace ShowdownBot
                 if (message.Contains("|win|")) // Battle ended, no matter who won
                 {
                     Winner = message.Split("|win|")[1].Trim().ToLower();
-                    BotRemainingMons = _currentGameState.side.GetAliveMons();
+                    BotRemainingMons = _currentGameState.Side.GetAliveMons();
                     if (BotName.ToLower() != Winner)
                     {
                         BotRemainingMons = 0; // Loser got 0 mon
@@ -322,30 +322,30 @@ namespace ShowdownBot
         {
             _currentGameState = JsonSerializer.Deserialize<GameState>(state);
             PokemonSet currentPokemon = null;
-            foreach (SidePokemon pokemon in _currentGameState.side.pokemon) // First, need to parse the current mon state and update
+            foreach (SidePokemon pokemon in _currentGameState.Side.Pokemon) // First, need to parse the current mon state and update
             {
                 // Get the first mon of that species (may create trouble if there's duplicates, deal with that later)
-                string species = pokemon.details.Split(',')[0].Trim().ToLower(); // Extract name from details
+                string species = pokemon.Details.Split(',')[0].Trim().ToLower(); // Extract name from details
                 PokemonSet pokemonInTeam = _botTrainer.Teamsheet.Where(p => p.Species == species).First();
-                if (pokemon.active) // This is the current mon, definitely
+                if (pokemon.Active) // This is the current mon, definitely
                 {
                     currentPokemon = pokemonInTeam;
                 }
             }
             string command = "";
             bool forcedSwitch = false;
-            if (_currentGameState.forceSwitch != null)
+            if (_currentGameState.ForceSwitch != null)
             {
-                foreach (bool forceSwitch in _currentGameState.forceSwitch)
+                foreach (bool forceSwitch in _currentGameState.ForceSwitch)
                 {
                     forcedSwitch |= forceSwitch;
                 }
             }
-            if (_currentGameState.wait)
+            if (_currentGameState.Wait)
             {
                 // Dont do anything, just need to wait and dont mess up
             }
-            else if (_currentGameState.teamPreview) // We're in team preview stage, nothing to do but to choose the next mon
+            else if (_currentGameState.TeamPreview) // We're in team preview stage, nothing to do but to choose the next mon
             {
                 command = $"{battle}|/choose default"; // Choose first legal option
             }
@@ -359,14 +359,14 @@ namespace ShowdownBot
                 do
                 {
                     int moveChoice = Utilities.GetRng().Next(0, 4); // 0 -> 3 can be the choice
-                    ActiveOptions playOptions = _currentGameState.active.FirstOrDefault();
+                    ActiveOptions playOptions = _currentGameState.Active.FirstOrDefault();
                     // Move is valid as long its in a valid slot and usable (not disabled, pp)
-                    invalidChoice = moveChoice >= playOptions.moves.Count || playOptions.moves[moveChoice].disabled || (playOptions.moves[moveChoice].pp == 0);
+                    invalidChoice = moveChoice >= playOptions.Moves.Count || playOptions.Moves[moveChoice].Disabled || (playOptions.Moves[moveChoice].Pp == 0);
                     if (invalidChoice) // If choice invalid, may need to switch randomly
                     {
-                        if (!playOptions.trapped) // But only can if not trapped
+                        if (!playOptions.Trapped) // But only can if not trapped
                         {
-                            List<int> switchIns = _currentGameState.side.GetValidSwitchIns();
+                            List<int> switchIns = _currentGameState.Side.GetValidSwitchIns();
                             if (switchIns.Count > 0) // Can switch then, so theres a valid move
                             {
                                 int switchChoice = Utilities.GetRng().Next(0, switchIns.Count);
@@ -379,7 +379,7 @@ namespace ShowdownBot
                     else // try the move then
                     {
                         command = $"{battle}|/choose move {moveChoice + 1}"; // Choose move (slot 1-4)
-                        string possibleTera = _currentGameState.active.First().canTerastallize.Trim().ToLower();
+                        string possibleTera = _currentGameState.Active.First().CanTerastallize.Trim().ToLower();
                         if (possibleTera != "" && (possibleTera == currentPokemon.GetTera(_backend))) // Means the current mon can tera and it's consistent
                         {
                             command += " terastallize";
@@ -388,7 +388,7 @@ namespace ShowdownBot
                 } while (invalidChoice); // Try again until I get a valid option
             }
             // Whatever the choice, send command unless waiting
-            if (!_currentGameState.wait)
+            if (!_currentGameState.Wait)
             {
                 if (Verbose) Console.WriteLine("Sent " + command);
                 byte[] commandBytes = Encoding.UTF8.GetBytes(command);

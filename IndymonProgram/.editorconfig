@@ -251,3 +251,5 @@ dotnet_diagnostic.IDE0090.severity = none
 dotnet_diagnostic.IDE0290.severity = none
 # Disable CA1862 (I respect string invariancy but I don't care)
 dotnet_diagnostic.CA1862.severity = none
+# Disable the regex thing because I do not understand what it means
+dotnet_diagnostic.SYSLIB10.severity = none
