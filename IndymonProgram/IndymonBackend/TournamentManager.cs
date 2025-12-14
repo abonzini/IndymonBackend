@@ -16,7 +16,7 @@ namespace IndymonBackendProgram
     public class PlayerAndStats
     {
         public string Name { get; set; }
-        public Dictionary<string, IndividualMu> EachMuWr { get; set; } = null; // Contains each matchup
+        public Dictionary<string, IndividualMu> EachMuWr { get; set; } = new Dictionary<string, IndividualMu>(); // Contains each matchup
         public int TournamentWins { get; set; } = 0;
         public int TournamentsPlayed { get; set; } = 1;
         public float Winrate { get { return (float)TournamentWins / (float)TournamentsPlayed; } }
