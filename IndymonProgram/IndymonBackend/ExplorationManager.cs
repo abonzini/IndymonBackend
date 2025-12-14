@@ -154,8 +154,7 @@ namespace IndymonBackendProgram
                     bool roomSuccess;
                     if (room == 0) // Room 0 is always the beginning of floor, camping event followed by shortcut check
                     {
-                        roomSuccess = ExecuteEvent(_dungeonDetails.CampingEvent, floor, prizes, trainerData); // Executes camping event
-                        // After, need to also check shortcut
+                        // Check shortcut first
                         InfoMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue);
                         if (VerifyShortcutConditions(_dungeonDetails.Floors[floor].ShortcutConditions, trainerData, out string message)) // If shortcut activated
                         {
@@ -180,6 +179,8 @@ namespace IndymonBackendProgram
                                 break; // Floor is done, can skip all the rooms
                             }
                         }
+                        // If no shortcut taken, can do a camping event at this stage
+                        roomSuccess = ExecuteEvent(_dungeonDetails.CampingEvent, floor, prizes, trainerData);
                     }
                     else if (room == 1) // And first room always a wild pokemon encounter
                     {
