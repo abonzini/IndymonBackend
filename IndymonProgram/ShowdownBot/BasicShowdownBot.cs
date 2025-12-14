@@ -1,7 +1,7 @@
-﻿using ParsersAndData;
+﻿using Newtonsoft.Json;
+using ParsersAndData;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace ShowdownBot
@@ -16,7 +16,6 @@ namespace ShowdownBot
         IN_FIGHT,
         GAME_DONE
     }
-
     public class BasicShowdownBot
     {
         public bool Verbose = true;
@@ -320,7 +319,7 @@ namespace ShowdownBot
         }
         private void BotDecision(string battle, string state)
         {
-            _currentGameState = JsonSerializer.Deserialize<GameState>(state);
+            _currentGameState = JsonConvert.DeserializeObject<GameState>(state);
             PokemonSet currentPokemon = null;
             foreach (SidePokemon pokemon in _currentGameState.Side.Pokemon) // First, need to parse the current mon state and update
             {
