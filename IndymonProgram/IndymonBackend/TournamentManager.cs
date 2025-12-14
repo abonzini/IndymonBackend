@@ -364,6 +364,7 @@ namespace IndymonBackendProgram
         protected void RegisterTournamentParticipation(TournamentHistory leaderboard, DataContainers backend)
         {
             if (!FirstInstallment) return; // Dont do anything if tournament had already begun
+            if (!Official) return; // Non official tournaments are not tallied
             foreach (string participant in Participants)
             {
                 List<PlayerAndStats> participantLocation = null;
@@ -425,9 +426,12 @@ namespace IndymonBackendProgram
                 // Update all remaining stats
                 if (p1Stats != null)
                 {
-                    p1Stats.GamesPlayed++;
-                    p1Stats.Kills += p1Kills;
-                    p1Stats.Deaths += p2Kills;
+                    if (Official) // These only tallied in official
+                    {
+                        p1Stats.GamesPlayed++;
+                        p1Stats.Kills += p1Kills;
+                        p1Stats.Deaths += p2Kills;
+                    }
                     if (!p1Stats.EachMuWr.TryGetValue(match.Player2, out IndividualMu mu))
                     {
                         mu = new IndividualMu();
@@ -436,7 +440,7 @@ namespace IndymonBackendProgram
                     bool playerWon = (match.Winner.Trim().ToLower() == p1Stats.Name.Trim().ToLower());
                     if (playerWon)
                     {
-                        p1Stats.GamesWon++;
+                        if (Official) p1Stats.GamesWon++;
                         mu.Wins++;
                     }
                     else
@@ -446,19 +450,21 @@ namespace IndymonBackendProgram
                 }
                 if (p2Stats != null)
                 {
-                    p2Stats.GamesPlayed++;
-                    p2Stats.Kills += p2Kills;
-                    p2Stats.Deaths += p1Kills;
+                    if (Official) // These only tallied in official
+                    {
+                        p2Stats.GamesPlayed++;
+                        p2Stats.Kills += p2Kills;
+                        p2Stats.Deaths += p1Kills;
+                    }
                     if (!p2Stats.EachMuWr.TryGetValue(match.Player1, out IndividualMu mu))
                     {
                         mu = new IndividualMu();
                         p2Stats.EachMuWr.Add(match.Player1, mu);
                     }
-
                     bool playerWon = (match.Winner.Trim().ToLower() == p2Stats.Name.Trim().ToLower());
                     if (playerWon)
                     {
-                        p2Stats.GamesWon++;
+                        if (Official) p2Stats.GamesWon++;
                         mu.Wins++;
                     }
                     else
