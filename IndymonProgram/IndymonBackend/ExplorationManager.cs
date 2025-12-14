@@ -1191,7 +1191,7 @@ namespace IndymonBackendProgram
         /// <param name="coord">Coord of field</param>
         /// <param name="rows">Table to modify</param>
         /// <param name="lengths">Item containing table offsets</param>
-        void UpdateInfoTableField(string value, (int, int) coord, List<char[]> rows, List<int> lengths)
+        static void UpdateInfoTableField(string value, (int, int) coord, List<char[]> rows, List<int> lengths)
         {
             char[] rowToModify = rows[coord.Item2]; // Get the row element (after labels and separator)
             // Overwrite table characters
