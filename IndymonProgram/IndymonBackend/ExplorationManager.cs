@@ -642,7 +642,7 @@ namespace IndymonBackendProgram
                 Console.WriteLine($"{mon.Species} status is {mon.ExplorationStatus}");
                 // Print stuff
                 ModifyInfoValueCommand(mon.Species, (0, i));
-                ModifyInfoValueCommand(mon.ExplorationStatus.HealthPercentage.ToString(), (1, i));
+                ModifyInfoValueCommand($"{mon.ExplorationStatus.HealthPercentage}%", (1, i));
                 ModifyInfoValueCommand(mon.ExplorationStatus.NonVolatileStatus, (2, i));
             }
         }
@@ -1222,7 +1222,7 @@ namespace IndymonBackendProgram
         /// <param name="rows">Table to print</param>
         void RedrawInfoTable(List<char[]> rows)
         {
-            int tableStart = (DUNGEON_ROOMS_PER_FLOOR * ROOM_WIDTH) + (ROOM_WIDTH); // Where the info table starts (leave 1 room separation)
+            int tableStart = (DUNGEON_ROOMS_PER_FLOOR * ROOM_WIDTH) + (2 * ROOM_WIDTH); // Where the info table starts (leave 2 room separation)
             // Printing loop
             for (int i = 0; i < rows.Count; i++)
             {
