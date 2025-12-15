@@ -883,8 +883,8 @@ namespace IndymonBackendProgram
         }
         #endregion
         #region ANIMATION
-        readonly int ROOM_WIDTH = 3;
-        readonly int ROOM_HEIGHT = 3;
+        readonly int ROOM_WIDTH = 5;
+        readonly int ROOM_HEIGHT = 5;
         /// <summary>
         /// Animates the resulting exploration
         /// </summary>
@@ -1020,23 +1020,30 @@ namespace IndymonBackendProgram
             // Now i have coord X, Y to draw room
             DungeonFloor floorData = _dungeonDetails.Floors[floor]; // Obtain room drawing data
             Console.ForegroundColor = floorData.RoomColor; // Set color
-            // Draw 8 things
+            // Draw corners
             Console.SetCursorPosition(X, Y);
             Console.Write(floorData.NwWallTile);
-            Console.SetCursorPosition(X + 1, Y);
-            Console.Write(floorData.NWallTile);
-            Console.SetCursorPosition(X + 2, Y);
+            Console.SetCursorPosition(X + ROOM_WIDTH - 1, Y);
             Console.Write(floorData.NeWallTile);
-            Console.SetCursorPosition(X, Y + 1);
-            Console.Write(floorData.WWallTile);
-            Console.SetCursorPosition(X + 2, Y + 1);
-            Console.Write(floorData.EWallTile);
-            Console.SetCursorPosition(X, Y + 2);
+            Console.SetCursorPosition(X, Y + ROOM_HEIGHT - 1);
             Console.Write(floorData.SwWallTile);
-            Console.SetCursorPosition(X + 1, Y + 2);
-            Console.Write(floorData.SWallTile);
-            Console.SetCursorPosition(X + 2, Y + 2);
+            Console.SetCursorPosition(X + ROOM_WIDTH - 1, Y + ROOM_HEIGHT - 1);
             Console.Write(floorData.SeWallTile);
+            // Horizontal Walls
+            for (int i = 1; i < ROOM_WIDTH - 1; i++)
+            {
+                Console.SetCursorPosition(X + i, Y);
+                Console.Write(floorData.NWallTile);
+                Console.SetCursorPosition(X + i, Y + ROOM_HEIGHT - 1);
+                Console.Write(floorData.SWallTile);
+            }
+            for (int i = 1; i < ROOM_HEIGHT - 1; i++)
+            {
+                Console.SetCursorPosition(X, Y + i);
+                Console.Write(floorData.WWallTile);
+                Console.SetCursorPosition(X + ROOM_WIDTH - 1, Y + i);
+                Console.Write(floorData.EWallTile);
+            }
         }
         /// <summary>
         /// Moves character from one room to another
@@ -1047,20 +1054,21 @@ namespace IndymonBackendProgram
         /// <param name="destRoom">Where to (room)</param>
         void DrawCharacter(int sourceFloor, int sourceRoom, int destFloor, int destRoom)
         {
+            char playerSymbol = Trainer.ToUpper()[0];
             Console.ForegroundColor = ConsoleColor.White; // Set color back to white, for character
             // Delete current character first
             if (IsRoomValid(sourceFloor, sourceRoom))
             {
                 (int fromX, int fromY) = GetRoomCoords(sourceFloor, sourceRoom);
-                Console.SetCursorPosition(fromX + 1, fromY + 1);
+                Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY + (ROOM_HEIGHT / 2));
                 Console.Write(" ");
             }
             // Draw new character now
             if (IsRoomValid(destFloor, destRoom))
             {
                 (int toX, int toY) = GetRoomCoords(destFloor, destRoom);
-                Console.SetCursorPosition(toX + 1, toY + 1);
-                Console.Write("☺");
+                Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY + (ROOM_HEIGHT / 2));
+                Console.Write(playerSymbol);
             }
         }
         /// <summary>
@@ -1084,10 +1092,10 @@ namespace IndymonBackendProgram
                 sourceFloorData = _dungeonDetails.Floors[sourceFloor];
                 Console.ForegroundColor = sourceFloorData.RoomColor;
                 // Room is valid, so I need to modify it's corresponding wall depending where it moves to
-                if (fromX < toX) { Console.SetCursorPosition(fromX + 2, fromY + 1); Console.Write(sourceFloorData.EWallPassageTile); } // Conenct east
-                else if (fromX > toX) { Console.SetCursorPosition(fromX, fromY + 1); Console.Write(sourceFloorData.WWallPassageTile); } // Connect west
-                else if (fromY < toY) { Console.SetCursorPosition(fromX + 1, fromY + 2); Console.Write(sourceFloorData.SWallPassageTile); } // Connect south
-                else if (fromY > toY) { Console.SetCursorPosition(fromX + 1, fromY); Console.Write(sourceFloorData.NWallPassageTile); } // Connect north
+                if (fromX < toX) { Console.SetCursorPosition(fromX + ROOM_WIDTH - 1, fromY + (ROOM_HEIGHT / 2)); Console.Write(sourceFloorData.EWallPassageTile); } // Conenct east
+                else if (fromX > toX) { Console.SetCursorPosition(fromX, fromY + (ROOM_HEIGHT / 2)); Console.Write(sourceFloorData.WWallPassageTile); } // Connect west
+                else if (fromY < toY) { Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY + ROOM_HEIGHT - 1); Console.Write(sourceFloorData.SWallPassageTile); } // Connect south
+                else if (fromY > toY) { Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY); Console.Write(sourceFloorData.NWallPassageTile); } // Connect north
                 else { } // Should never happen
             }
             // Same for dest room
@@ -1096,10 +1104,10 @@ namespace IndymonBackendProgram
                 destFloorData = _dungeonDetails.Floors[destFloor];
                 Console.ForegroundColor = destFloorData.RoomColor;
                 // Room is valid, so I need to modify it's corresponding wall depending where it moves to
-                if (toX < fromX) { Console.SetCursorPosition(toX + 2, toY + 1); Console.Write(destFloorData.EWallPassageTile); } // Conenct east
-                else if (toX > fromX) { Console.SetCursorPosition(toX, toY + 1); Console.Write(destFloorData.WWallPassageTile); } // Connect west
-                else if (toY < fromY) { Console.SetCursorPosition(toX + 1, toY + 2); Console.Write(destFloorData.SWallPassageTile); } // Connect south
-                else if (toY > fromY) { Console.SetCursorPosition(toX + 1, toY); Console.Write(destFloorData.NWallPassageTile); } // Connect north
+                if (toX < fromX) { Console.SetCursorPosition(toX + ROOM_WIDTH - 1, toY + (ROOM_HEIGHT / 2)); Console.Write(destFloorData.EWallPassageTile); } // Conenct east
+                else if (toX > fromX) { Console.SetCursorPosition(toX, toY + (ROOM_HEIGHT / 2)); Console.Write(destFloorData.WWallPassageTile); } // Connect west
+                else if (toY < fromY) { Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY + ROOM_HEIGHT - 1); Console.Write(destFloorData.SWallPassageTile); } // Connect south
+                else if (toY > fromY) { Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY); Console.Write(destFloorData.NWallPassageTile); } // Connect north
                 else { } // Should never happen
             }
             // Finally, if the passage occurs between floors, need also to connect them as floors have a gap
@@ -1108,7 +1116,7 @@ namespace IndymonBackendProgram
                 int topCoord = Math.Min(fromY, toY); // Which one is higher, don't really care, just connect them
                 DungeonFloor floorDataToUse = sourceFloorData ?? destFloorData; // Use always the source floor unless it didn't exist in which case use the other one idk
                 Console.ForegroundColor = floorDataToUse.PassageColor;
-                Console.SetCursorPosition(fromX + 1, topCoord + 3); // X should be same for both rooms (?!?!?!) and then draw ourside of room, use top room for ref
+                Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), topCoord + ROOM_HEIGHT); // X should be same for both rooms (?!?!?!) and then draw ourside of room, use top room for ref
                 Console.Write(floorDataToUse.VerticalPassageTile);
             }
         }
@@ -1134,8 +1142,8 @@ namespace IndymonBackendProgram
                 Console.ForegroundColor = sourceFloorData.RoomColor;
                 // Room is valid, so I need to modify it's corresponding wall depending where it moves to
                 // This time, it's only up-down so just compare floors
-                if (fromY < toY) { Console.SetCursorPosition(fromX + 1, fromY + 2); Console.Write(sourceFloorData.SWallShortcutTile); } // Connect south
-                else if (fromY > toY) { Console.SetCursorPosition(fromX + 1, fromY); Console.Write(sourceFloorData.NWallShortcutTile); } // Connect north
+                if (fromY < toY) { Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY + ROOM_HEIGHT - 1); Console.Write(sourceFloorData.SWallShortcutTile); } // Connect south
+                else if (fromY > toY) { Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY); Console.Write(sourceFloorData.NWallShortcutTile); } // Connect north
                 else { } // Should never happen
             }
             // Same for dest room
@@ -1145,15 +1153,15 @@ namespace IndymonBackendProgram
                 Console.ForegroundColor = destFloorData.RoomColor;
                 // Room is valid, so I need to modify it's corresponding wall depending where it moves to
                 // This time, it's only up-down so just compare floors
-                if (toY < fromY) { Console.SetCursorPosition(toX + 1, toY + 2); Console.Write(destFloorData.SWallShortcutTile); } // Connect south
-                else if (toY > fromY) { Console.SetCursorPosition(toX + 1, toY); Console.Write(destFloorData.NWallShortcutTile); } // Connect north
+                if (toY < fromY) { Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY + ROOM_HEIGHT - 1); Console.Write(destFloorData.SWallShortcutTile); } // Connect south
+                else if (toY > fromY) { Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY); Console.Write(destFloorData.NWallShortcutTile); } // Connect north
                 else { } // Should never happen
             }
             // Finally, if the passage occurs between floors, need also to connect them as floors have a gap
             if (fromY != toY)
             {
                 DungeonFloor floorDataToUse = sourceFloorData ?? destFloorData; // Use always the source floor unless it didn't exist in which case use the other one idk
-                int shortcutY = Math.Min(fromY, toY) + 3; // Shorcut to be between rooms (floors)
+                int shortcutY = Math.Min(fromY, toY) + ROOM_HEIGHT; // Shorcut to be between rooms (floors)
                 int leftShortcutX = Math.Min(fromX, toX) + 1;
                 int rightShortcutX = Math.Max(fromX, toX) + 1;
                 char firstTile, lastTile, middleTile;
@@ -1222,7 +1230,7 @@ namespace IndymonBackendProgram
         /// <param name="rows">Table to print</param>
         void RedrawInfoTable(List<char[]> rows)
         {
-            int tableStart = (DUNGEON_ROOMS_PER_FLOOR * ROOM_WIDTH) + (2 * ROOM_WIDTH); // Where the info table starts (leave 2 room separation)
+            int tableStart = (DUNGEON_ROOMS_PER_FLOOR * ROOM_WIDTH) + (ROOM_WIDTH); // Where the info table starts (leave 1 room separation)
             // Printing loop
             for (int i = 0; i < rows.Count; i++)
             {
