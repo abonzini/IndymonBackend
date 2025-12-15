@@ -29,7 +29,7 @@
         {
             return ["pickup", "ball fetch", "honey gather", "run away", // Do nothing
                 "telepathy", // Doubles
-                "frisk"]; // Useless in auto-combat
+                "frisk", "forewarn"]; // Useless in auto-combat
         }
         /// <summary>
         /// Returns a set of moves considered useless
@@ -41,7 +41,8 @@
             return ["frustration",  // Low damage for no reason
                 "splash", "celebrate", "hold hands", // No effect
             "snore", "sleep talk", // Most of the time is useless
-            "natural gift"]; // Berry
+            "natural gift", "fling",
+            "tackle", "scratch", "pound"]; // Low level normals
         }
         /// <summary>
         /// Returns a set of dancing abilities for checking dance off battles
