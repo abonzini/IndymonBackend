@@ -41,7 +41,8 @@
             return ["frustration",  // Low damage for no reason
                 "splash", "celebrate", "hold hands", // No effect
             "snore", "sleep talk", // Most of the time is useless
-            "natural gift", "fling",
+            "ally switch", "follow me", // Doubles
+            "natural gift", "fling", "belch", // Too item-dependant
             "tackle", "scratch", "pound"]; // Low level normals
         }
         /// <summary>
