@@ -171,6 +171,7 @@
 		"Black Belt",
 		"Expert Belt"
   ],
+  "BossItem": "Dawn Stone",
   "Floors": [
     {
       "RoomColor": "White",

@@ -349,9 +349,9 @@ namespace IndymonBackendProgram
                             alphaString = roomEvent.PostEventString.Replace("$1", item);
                             GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
                             AddItemPrize(item, prizes); // Add item to prizes
-                            if (roomEvent.EventType == RoomEventType.BOSS) // If boss, you also get boss' favor
+                            if (roomEvent.EventType == RoomEventType.BOSS && _dungeonDetails.BossItem != "") // If boss, you also get the boss special prize (if any)
                             {
-                                AddItemPrize($"{pokemonSpecies}'s favor", prizes);
+                                AddItemPrize(_dungeonDetails.BossItem, prizes);
                             }
                             AddPokemonPrize(pokemonSpecies, floor + 1, isShiny, prizes); // Add alpha mon too
                         }

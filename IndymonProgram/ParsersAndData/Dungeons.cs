@@ -89,6 +89,7 @@ namespace ParsersAndData
         public List<List<string>> PokemonEachFloor { get; set; }
         public List<string> CommonItems { get; set; }
         public List<string> RareItems { get; set; }
+        public string BossItem { get; set; }
         public List<DungeonFloor> Floors { get; set; }
         public RoomEvent BossEvent { get; set; }
         public RoomEvent CampingEvent { get; set; }

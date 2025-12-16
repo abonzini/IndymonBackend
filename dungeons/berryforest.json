@@ -172,6 +172,7 @@
 		"Miracle Seed",
 		"Silver Powder"
   ],
+  "BossItem": "Leaf Stone",
   "Floors": [
     {
       "RoomColor": "DarkGreen",

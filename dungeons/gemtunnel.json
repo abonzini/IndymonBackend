@@ -162,6 +162,7 @@
 		"Soft Sand",
 		"Smooth Rock"
   ],
+  "BossItem": "Moon Stone",
   "Floors": [
     {
       "RoomColor": "DarkYellow",

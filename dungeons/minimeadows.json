@@ -163,6 +163,7 @@
 	"Magnet",
 	"Terrain Extender"
   ],
+  "BossItem": "Sun Stone",
   "Floors": [
     {
       "RoomColor": "DarkGreen",

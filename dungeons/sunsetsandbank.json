@@ -160,6 +160,7 @@
 		"Poison Barb",
 		"Adrenaline Orb"
   ],
+  "BossItem": "Water Stone",
   "Floors": [
     {
       "RoomColor": "Yellow",
