@@ -63,7 +63,14 @@ namespace ParsersAndData
         public string[] Moves { get; set; } = ["", "", "", ""];
         public Item Item { get; set; } = null;
         public ExplorationStatus ExplorationStatus { get; set; } = null;
-
+        /// <summary>
+        /// How is the mon called in "normal conversation"
+        /// </summary>
+        /// <returns>How the mon will appear in screens</returns>
+        public string GetInformalName()
+        {
+            return (NickName != "") ? NickName : Species;
+        }
         public override string ToString()
         {
             return $"{Species}: {Ability}, {string.Join('-', Moves)}, {Item?.Name}";

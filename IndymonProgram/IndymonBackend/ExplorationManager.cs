@@ -639,7 +639,7 @@ namespace IndymonBackendProgram
             for (int i = 0; i < trainerData.Teamsheet.Count; i++)
             {
                 PokemonSet mon = trainerData.Teamsheet[i];
-                Console.WriteLine($"{mon.Species} status is {mon.ExplorationStatus}");
+                Console.WriteLine($"{mon.GetInformalName()} status is {mon.ExplorationStatus}");
                 // Print stuff
                 ModifyInfoValueCommand(mon.Species, (0, i));
                 ModifyInfoValueCommand($"{mon.ExplorationStatus.HealthPercentage}%", (1, i));
@@ -667,7 +667,7 @@ namespace IndymonBackendProgram
                         {
                             if (pokemon.Moves.Contains(valueToCheck)) // move found
                             {
-                                message = $"{pokemon.NickName}'s {valueToCheck}";
+                                message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
                                 canTakeShortcut = true;
                                 break;
                             }
@@ -678,7 +678,7 @@ namespace IndymonBackendProgram
                         {
                             if (pokemon.Ability == valueToCheck) // ability found
                             {
-                                message = $"{pokemon.NickName}'s {valueToCheck}";
+                                message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
                                 canTakeShortcut = true;
                                 break;
                             }
@@ -689,7 +689,7 @@ namespace IndymonBackendProgram
                         {
                             if (pokemon.Species == valueToCheck) // species found
                             {
-                                message = $"{pokemon.NickName}";
+                                message = $"{pokemon.GetInformalName()}";
                                 canTakeShortcut = true;
                                 break;
                             }
@@ -700,7 +700,7 @@ namespace IndymonBackendProgram
                         {
                             if (_backEndData.Dex[pokemon.Species].Types.Contains(valueToCheck)) // type of pokemon found
                             {
-                                message = $"{pokemon.NickName}'s {valueToCheck} type";
+                                message = $"{pokemon.GetInformalName()}'s {valueToCheck} type";
                                 canTakeShortcut = true;
                                 break;
                             }
@@ -711,7 +711,7 @@ namespace IndymonBackendProgram
                         {
                             if (pokemon.Item.Name == valueToCheck) // type of pokemon found
                             {
-                                message = $"{pokemon.NickName}'s {valueToCheck}";
+                                message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
                                 canTakeShortcut = true;
                                 break;
                             }
