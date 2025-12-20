@@ -366,7 +366,7 @@ namespace IndymonBackendProgram
                         string obtainedDisk = _backEndData.MoveItemData.Keys.ToList()[Utilities.GetRng().Next(_backEndData.MoveItemData.Count)]; // Get random move disk
                         string messageString = roomEvent.PreEventString.Replace("$1", obtainedDisk);
                         GenericMessageCommand(messageString);
-                        AddCommonItemPrize("obtainedDisk", prizes);
+                        AddCommonItemPrize(obtainedDisk, prizes);
                         messageString = roomEvent.PostEventString.Replace("$1", obtainedDisk);
                         GenericMessageCommand(messageString);
                     }
