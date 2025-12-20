@@ -1162,19 +1162,19 @@ namespace IndymonBackendProgram
             {
                 DungeonFloor floorDataToUse = sourceFloorData ?? destFloorData; // Use always the source floor unless it didn't exist in which case use the other one idk
                 int shortcutY = Math.Min(fromY, toY) + ROOM_HEIGHT; // Shorcut to be between rooms (floors)
-                int leftShortcutX = Math.Min(fromX, toX) + 1;
-                int rightShortcutX = Math.Max(fromX, toX) + 1;
+                int leftShortcutX = Math.Min(fromX, toX) + (ROOM_WIDTH/2);
+                int rightShortcutX = Math.Max(fromX, toX) + (ROOM_WIDTH / 2);
                 char firstTile, lastTile, middleTile;
                 if (fromX < toX) // Left -> right
                 {
-                    firstTile = floorDataToUse.NwShortcutTile;
-                    lastTile = floorDataToUse.SeShortcutTile;
+                    firstTile = floorDataToUse.SwShortcutTile;
+                    lastTile = floorDataToUse.NeShortcutTile;
                     middleTile = floorDataToUse.HorizontalShortcutTile;
                 }
                 else if (fromX > toX) // Right -> left
                 {
-                    firstTile = floorDataToUse.SwShortcutTile;
-                    lastTile = floorDataToUse.NeShortcutTile;
+                    firstTile = floorDataToUse.SeShortcutTile;
+                    lastTile = floorDataToUse.NwShortcutTile;
                     middleTile = floorDataToUse.HorizontalShortcutTile;
                 }
                 else // Just up, which is just in end of dungeon
@@ -1186,9 +1186,9 @@ namespace IndymonBackendProgram
                 Console.SetCursorPosition(leftShortcutX, shortcutY);
                 while (Console.CursorLeft <= rightShortcutX)
                 {
-                    if (Console.CursorLeft == leftShortcutX) Console.WriteLine(firstTile);
-                    else if (Console.CursorLeft == rightShortcutX) Console.WriteLine(lastTile);
-                    else Console.WriteLine(middleTile);
+                    if (Console.CursorLeft == leftShortcutX) Console.Write(firstTile);
+                    else if (Console.CursorLeft == rightShortcutX) Console.Write(lastTile);
+                    else Console.Write(middleTile);
                 }
             }
         }
