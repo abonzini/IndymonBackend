@@ -1,5 +1,6 @@
 ﻿using ParsersAndData;
 using ShowdownBot;
+using System.Text;
 
 namespace IndymonBackendProgram
 {
@@ -106,8 +107,8 @@ namespace IndymonBackendProgram
                 new Dictionary<string, int>(),
                 new Dictionary<string, int>()
             ];
-            public Dictionary<string, int> ItemsFound = new Dictionary<string, int>();
-            public List<string> Evolutions = new List<string>();
+            public Dictionary<string, int> CommonItems = new Dictionary<string, int>();
+            public Dictionary<string, int> RareItems = new Dictionary<string, int>();
         }
         const int STANDARD_MESSAGE_PAUSE = 5000; // Show text for this amount of time
         const int DRAW_ROOM_PAUSE = 1000; // Show text for this amount of time
@@ -227,56 +228,7 @@ namespace IndymonBackendProgram
             // Return to normal
             Console.CursorVisible = false;
             Console.WriteLine("Exploration end.");
-            // Items the trainer found
-            Console.WriteLine("Items: ");
-            foreach (KeyValuePair<string, int> kvp in prizes.ItemsFound)
-            {
-                Console.Write($"{kvp.Key} x{kvp.Value}, ");
-            }
-            Console.WriteLine("");
-            // Mons the trainer found
-            Console.WriteLine("Mons");
-            if (prizes.MonsFound[0].Count > 0)
-            {
-                foreach (KeyValuePair<string, int> kvp in prizes.MonsFound[0])
-                {
-                    Console.Write($"{kvp.Key} x{kvp.Value}, ");
-                }
-                Console.WriteLine("(POKE BALL)");
-            }
-            if (prizes.MonsFound[1].Count > 0)
-            {
-                foreach (KeyValuePair<string, int> kvp in prizes.MonsFound[1])
-                {
-                    Console.Write($"{kvp.Key} x{kvp.Value}, ");
-                }
-                Console.WriteLine("(GREAT BALL)");
-            }
-            if (prizes.MonsFound[2].Count > 0)
-            {
-                foreach (KeyValuePair<string, int> kvp in prizes.MonsFound[2])
-                {
-                    Console.Write($"{kvp.Key} x{kvp.Value}, ");
-                }
-                Console.WriteLine("(ULTRA BALL)");
-            }
-            if (prizes.MonsFound[3].Count > 0)
-            {
-                foreach (KeyValuePair<string, int> kvp in prizes.MonsFound[3])
-                {
-                    Console.Write($"{kvp.Key} x{kvp.Value}, ");
-                }
-                Console.WriteLine("(MASTER BALL)");
-            }
-            // Evolved mons
-            Console.WriteLine("Evolutions:");
-            if (prizes.Evolutions.Count > 0)
-            {
-                foreach (string evolvedMon in prizes.Evolutions)
-                {
-                    Console.Write($"{evolvedMon},");
-                }
-            }
+            SaveExplorationOutcome(prizes);
             // Finally, need to examine and tell if trainer used/ran out of items
             trainerData.ListConsumedItems(int.MaxValue); // No mon limit for explorations...
         }
@@ -306,7 +258,7 @@ namespace IndymonBackendProgram
                         string itemString = roomEvent.PreEventString.Replace("$1", itemFound);
                         GenericMessageCommand(itemString); // Prints the message but we know it could have a $1
                         GenericMessageCommand(roomEvent.PostEventString);
-                        AddItemPrize(itemFound, prizes);
+                        AddRareItemPrize(itemFound, prizes);
                     }
                     break;
                 case RoomEventType.BOSS: // Boss fight, identical to alpha, will fetch next floor anyway, which if floor 3, it's boss
@@ -348,10 +300,10 @@ namespace IndymonBackendProgram
                             UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
                             alphaString = roomEvent.PostEventString.Replace("$1", item);
                             GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                            AddItemPrize(item, prizes); // Add item to prizes
+                            AddRareItemPrize(item, prizes); // Add item to prizes
                             if (roomEvent.EventType == RoomEventType.BOSS && _dungeonDetails.BossItem != "") // If boss, you also get the boss special prize (if any)
                             {
-                                AddItemPrize(_dungeonDetails.BossItem, prizes);
+                                AddRareItemPrize(_dungeonDetails.BossItem, prizes);
                             }
                             AddPokemonPrize(pokemonSpecies, floor + 1, isShiny, prizes); // Add alpha mon too
                         }
@@ -388,7 +340,6 @@ namespace IndymonBackendProgram
                                     string message = mon.NickName != "" ? $"{mon.NickName} ({mon.Species})" : mon.Species;
                                     message += $" has evolved into {chosenMon}!";
                                     GenericMessageCommand(message);
-                                    prizes.Evolutions.Add(mon.NickName);
                                     // Finally, actually do the deed
                                     mon.Species = chosenMon.Trim().ToLower();
                                     UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
@@ -404,7 +355,7 @@ namespace IndymonBackendProgram
                         string chosenPlate = platesList[Utilities.GetRng().Next(platesList.Count)];
                         string messageString = roomEvent.PreEventString.Replace("$1", chosenPlate);
                         GenericMessageCommand(messageString);
-                        AddItemPrize(chosenPlate, prizes);
+                        AddCommonItemPrize(chosenPlate, prizes);
                         messageString = roomEvent.PostEventString.Replace("$1", chosenPlate);
                         GenericMessageCommand(messageString);
                     }
@@ -415,7 +366,7 @@ namespace IndymonBackendProgram
                         string obtainedDisk = _backEndData.MoveItemData.Keys.ToList()[Utilities.GetRng().Next(_backEndData.MoveItemData.Count)]; // Get random move disk
                         string messageString = roomEvent.PreEventString.Replace("$1", obtainedDisk);
                         GenericMessageCommand(messageString);
-                        AddItemPrize("obtainedDisk", prizes);
+                        AddCommonItemPrize("obtainedDisk", prizes);
                         messageString = roomEvent.PostEventString.Replace("$1", obtainedDisk);
                         GenericMessageCommand(messageString);
                     }
@@ -556,7 +507,7 @@ namespace IndymonBackendProgram
                             GenericMessageCommand(postMessage);
                             foreach (string item in items) // Add all items to prizes
                             {
-                                AddItemPrize(item, prizes);
+                                AddCommonItemPrize(item, prizes);
                             }
                             foreach (PokemonSet pokemonSpecies in encounterPokemon)
                             {
@@ -619,7 +570,7 @@ namespace IndymonBackendProgram
                         {
                             Console.WriteLine("Player won");
                             UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            AddItemPrize($"{randomNpc.Name}'s favor", prizes);
+                            AddRareItemPrize($"{randomNpc.Name}'s favor", prizes);
                             npcString = roomEvent.PostEventString.Replace("$1", randomNpc.Name);
                             GenericMessageCommand(npcString);
                         }
@@ -629,6 +580,56 @@ namespace IndymonBackendProgram
                     break;
             }
             return roomCleared;
+        }
+        /// <summary>
+        /// Saves exploration outcome in a txt file for quick copying
+        /// </summary>
+        /// <param name="prizeData">Data of obtained stuff</param>
+        void SaveExplorationOutcome(ExplorationPrizes prizeData)
+        {
+            string explFile = $"{Trainer}_exploration.txt";
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine($"__{Trainer} has obtained the following items:__");
+            builder.AppendLine();
+            List<string> nextCollection = new List<string>();
+            // Attach commons (or empty list) items
+            foreach (KeyValuePair<string, int> commonItemData in prizeData.CommonItems)
+            {
+                nextCollection.Add($"{commonItemData.Key} x{commonItemData.Value}");
+            }
+            builder.Append("**Commons: **||");
+            if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
+            else builder.Append(new string('.', Utilities.GetRng().Next(15, 30)));
+            builder.AppendLine("||");
+            // Attach rares (or empty list) items
+            nextCollection = new List<string>();
+            foreach (KeyValuePair<string, int> rareItemData in prizeData.RareItems)
+            {
+                nextCollection.Add($"{rareItemData.Key} x{rareItemData.Value}");
+            }
+            builder.Append("**Rares: **||");
+            if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
+            else builder.Append(new string('.', Utilities.GetRng().Next(15, 30)));
+            builder.AppendLine("||");
+            builder.AppendLine();
+            // Then the pokemon one by one
+            builder.AppendLine($"__Catchable Pokemon (As many as you want as long as you have the corresponding poke-ball):__");
+            builder.AppendLine();
+            string[] pokeBallData = ["Poke ball or better", "Great ball or better", "Ultra ball or better", "Master ball"];
+            for (int i = 0; i < prizeData.MonsFound.Length; i++)
+            {
+                nextCollection = new List<string>();
+                builder.Append($"**Floor {i + 1} ({pokeBallData[i]}): **||");
+                foreach (KeyValuePair<string, int> monData in prizeData.MonsFound[i])
+                {
+                    nextCollection.Add($"{monData.Key} x{monData.Value}");
+                }
+                if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
+                else builder.Append(new string('.', Utilities.GetRng().Next(15, 30)));
+                builder.AppendLine("||");
+            }
+            // String done, save into file
+            File.WriteAllText(explFile, builder.ToString());
         }
         /// <summary>
         /// Updates all the trainer data in the exploration info table
@@ -857,15 +858,26 @@ namespace IndymonBackendProgram
             return explorerLeft;
         }
         /// <summary>
-        /// Adds item to prize pool
+        /// Adds item to common prize pool
         /// </summary>
         /// <param name="item">Item to add</param>
         /// <param name="prizes">Prizes container</param>
-        static void AddItemPrize(string item, ExplorationPrizes prizes)
+        static void AddCommonItemPrize(string item, ExplorationPrizes prizes)
         {
             // Add the item to prizes
-            if (prizes.ItemsFound.TryGetValue(item, out int previousCount)) prizes.ItemsFound[item] = ++previousCount;
-            else prizes.ItemsFound.Add(item, 1);
+            if (prizes.CommonItems.TryGetValue(item, out int previousCount)) prizes.CommonItems[item] = ++previousCount;
+            else prizes.CommonItems.Add(item, 1);
+        }
+        /// <summary>
+        /// Adds item to common prize pool
+        /// </summary>
+        /// <param name="item">Item to add</param>
+        /// <param name="prizes">Prizes container</param>
+        static void AddRareItemPrize(string item, ExplorationPrizes prizes)
+        {
+            // Add the item to prizes
+            if (prizes.RareItems.TryGetValue(item, out int previousCount)) prizes.RareItems[item] = ++previousCount;
+            else prizes.RareItems.Add(item, 1);
         }
         /// <summary>
         /// Add pokemon to prize pool
@@ -1162,7 +1174,7 @@ namespace IndymonBackendProgram
             {
                 DungeonFloor floorDataToUse = sourceFloorData ?? destFloorData; // Use always the source floor unless it didn't exist in which case use the other one idk
                 int shortcutY = Math.Min(fromY, toY) + ROOM_HEIGHT; // Shorcut to be between rooms (floors)
-                int leftShortcutX = Math.Min(fromX, toX) + (ROOM_WIDTH/2);
+                int leftShortcutX = Math.Min(fromX, toX) + (ROOM_WIDTH / 2);
                 int rightShortcutX = Math.Max(fromX, toX) + (ROOM_WIDTH / 2);
                 char firstTile, lastTile, middleTile;
                 if (fromX < toX) // Left -> right
