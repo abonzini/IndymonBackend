@@ -599,7 +599,7 @@ namespace IndymonBackendProgram
             }
             builder.Append("**Commons: **||");
             if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
-            else builder.Append(new string('.', Utilities.GetRng().Next(15, 30)));
+            else builder.Append(new string('M', Utilities.GetRng().Next(15, 30)));
             builder.AppendLine("||");
             // Attach rares (or empty list) items
             nextCollection = new List<string>();
@@ -609,7 +609,7 @@ namespace IndymonBackendProgram
             }
             builder.Append("**Rares: **||");
             if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
-            else builder.Append(new string('.', Utilities.GetRng().Next(15, 30)));
+            else builder.Append(new string('M', Utilities.GetRng().Next(15, 30)));
             builder.AppendLine("||");
             builder.AppendLine();
             // Then the pokemon one by one
@@ -625,7 +625,7 @@ namespace IndymonBackendProgram
                     nextCollection.Add($"{monData.Key} x{monData.Value}");
                 }
                 if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
-                else builder.Append(new string('.', Utilities.GetRng().Next(15, 30)));
+                else builder.Append(new string('M', Utilities.GetRng().Next(15, 30)));
                 builder.AppendLine("||");
             }
             // String done, save into file
