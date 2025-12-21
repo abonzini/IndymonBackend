@@ -324,12 +324,10 @@ namespace ShowdownBot
             PokemonSet currentPokemon = null;
             foreach (SidePokemon pokemon in _currentGameState.Side.Pokemon) // First, need to parse the current mon state and update
             {
-                // Get the first mon of that species (may create trouble if there's duplicates, deal with that later)
-                string species = pokemon.Details.Split(',')[0].Trim().ToLower(); // Extract name from details
-                PokemonSet pokemonInTeam = _botTrainer.Teamsheet.Where(p => p.Species == species).First();
                 if (pokemon.Active) // This is the current mon, definitely
                 {
-                    currentPokemon = pokemonInTeam;
+                    string monId = pokemon.Ident.Split(':')[1].Trim().ToLower(); // Id(ent) of the mon in question
+                    currentPokemon = _monsById[monId]; // Find wtf mon am i referring to, this is also the active pokemon btw
                     if (currentPokemon.ExplorationStatus != null)
                     {
                         // Means the active field also has data of the moves current PP, load here
