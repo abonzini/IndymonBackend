@@ -34,6 +34,7 @@ namespace ParsersAndData
     {
         public int HealthPercentage { get; set; } = 100;
         public string NonVolatileStatus { get; set; } = "";
+        public int[] MovePp { get; set; } = [1000, 1000, 1000, 1000]; // Starts with a big value idc
         public void SetStatus(string status)
         {
             if (status.ToLower() == "0 fnt")
@@ -333,14 +334,26 @@ namespace ParsersAndData
             packedStrings.Add(Species);
             packedStrings.Add(GetBattleItem(backEndData));
             packedStrings.Add(Ability);
-            packedStrings.Add(string.Join(",", Moves));
+            List<string> movesWithUses = new List<string>();
+            if (ExplorationStatus != null) // In this case, moves have PP
+            {
+                for (int i = 0; i < Moves.Length; i++)
+                {
+                    movesWithUses.Add($"{Moves[i]}#{ExplorationStatus.MovePp[i]}"); // Add move with the number of recorded uses
+                }
+            }
+            else // Otherwise just good old moves
+            {
+                movesWithUses = [.. Moves];
+            }
+            packedStrings.Add(string.Join(",", movesWithUses));
             packedStrings.Add(GetNature(backEndData));
             packedStrings.Add(string.Join(",", GetEvs(backEndData)));
             packedStrings.Add("");
             packedStrings.Add(""); // No IVs I don't care
             packedStrings.Add(Shiny ? "S" : ""); // Depending if shiny
             packedStrings.Add(""); // Always lvl 100
-            string lastPackedString = $",,,,,{GetTera(backEndData)}"; // Add the "remaining" useless stuff needed for  tera, etc
+            string lastPackedString = $",,,,,{GetTera(backEndData)}"; // Add the "remaining" useless stuff needed for tera, etc
             if (ExplorationStatus != null) // This is new, status will be ,%health,status condition too after the tera, so it can be picked up from a modified showdown
             {
                 lastPackedString += $",{ExplorationStatus.HealthPercentage}";

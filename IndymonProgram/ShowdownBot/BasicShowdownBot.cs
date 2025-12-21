@@ -330,6 +330,15 @@ namespace ShowdownBot
                 if (pokemon.Active) // This is the current mon, definitely
                 {
                     currentPokemon = pokemonInTeam;
+                    if (currentPokemon.ExplorationStatus != null)
+                    {
+                        // Means the active field also has data of the moves current PP, load here
+                        foreach (AvailableMove move in _currentGameState.Active[0].Moves)
+                        {
+                            int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Trim().ToLower());
+                            currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
+                        }
+                    }
                 }
             }
             string command = "";
@@ -358,7 +367,7 @@ namespace ShowdownBot
                 bool invalidChoice;
                 do
                 {
-                    int moveChoice = RandomNumberGenerator.GetInt32(0,4); // 0 -> 3 can be the choice
+                    int moveChoice = RandomNumberGenerator.GetInt32(0, 4); // 0 -> 3 can be the choice
                     ActiveOptions playOptions = _currentGameState.Active.FirstOrDefault();
                     // Move is valid as long its in a valid slot and usable (not disabled, pp)
                     invalidChoice = moveChoice >= playOptions.Moves.Count || playOptions.Moves[moveChoice].Disabled || (playOptions.Moves[moveChoice].Pp == 0);
