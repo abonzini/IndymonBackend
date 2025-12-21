@@ -588,7 +588,7 @@ namespace IndymonBackendProgram
         /// <param name="prizeData">Data of obtained stuff</param>
         void SaveExplorationOutcome(ExplorationPrizes prizeData)
         {
-            string explFile = $"{Trainer}_exploration.txt";
+            string explFile = $"expl_result.txt";
             StringBuilder builder = new StringBuilder();
             builder.AppendLine($"__{Trainer} has obtained the following items:__");
             builder.AppendLine();
