@@ -300,7 +300,7 @@
 				"Which": "Wave Incense"
 		}
 	  ],
-	  "ShortcutClue": "There's a strange hatch buried in the ground. It has an electric security system. You think a strong enough wave signal may override it.",
+	  "ShortcutClue": "There's a strange hatch buried in the ground. It has an electric security system. You think a strong enough wave or signal may override it.",
 	  "ShortcutResolution": "Your $1 overwhelms the security system. The hatch opens..."
     }
   ],
