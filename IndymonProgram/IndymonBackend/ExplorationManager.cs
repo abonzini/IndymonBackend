@@ -1,5 +1,6 @@
 ﻿using ParsersAndData;
 using ShowdownBot;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace IndymonBackendProgram
