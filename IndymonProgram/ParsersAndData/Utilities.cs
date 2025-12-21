@@ -8,14 +8,13 @@
         /// <param name="list">List to shuffle</param>
         /// <param name="offset">Which index to start the shuffle</param>
         /// <param name="number">How many elements will be shuffled starting from the index</param>
-        /// <param name="rng">Random number generator for shuffling</param>
-        public static void ShuffleList<T>(List<T> list, int offset, int number, Random rng)
+        public static void ShuffleList<T>(List<T> list, int offset, int number)
         {
             int n = number;
             while (n > 1) // Fischer yates
             {
                 n--;
-                int k = rng.Next(n + 1);
+                int k = Random.Shared.Next(n + 1);
                 (list[offset + k], list[offset + n]) = (list[offset + n], list[offset + k]); // Swap
             }
         }
@@ -32,15 +31,6 @@
             else if (backendData.NamedNpcData.TryGetValue(name, out result)) { }
             else throw new Exception("Trainer not found!?");
             return result;
-        }
-        static readonly Random rng = new Random();
-        /// <summary>
-        /// Returns the singleton RNG to avoid repeated (fast!) calls to new Random()
-        /// </summary>
-        /// <returns>The RNG</returns>
-        public static Random GetRng()
-        {
-            return rng;
         }
     }
 }

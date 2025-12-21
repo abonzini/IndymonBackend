@@ -357,7 +357,7 @@ namespace ShowdownBot
                 bool invalidChoice;
                 do
                 {
-                    int moveChoice = Utilities.GetRng().Next(0, 4); // 0 -> 3 can be the choice
+                    int moveChoice = Random.Shared.Next(0, 4); // 0 -> 3 can be the choice
                     ActiveOptions playOptions = _currentGameState.Active.FirstOrDefault();
                     // Move is valid as long its in a valid slot and usable (not disabled, pp)
                     invalidChoice = moveChoice >= playOptions.Moves.Count || playOptions.Moves[moveChoice].Disabled || (playOptions.Moves[moveChoice].Pp == 0);
@@ -368,7 +368,7 @@ namespace ShowdownBot
                             List<int> switchIns = _currentGameState.Side.GetValidSwitchIns();
                             if (switchIns.Count > 0) // Can switch then, so theres a valid move
                             {
-                                int switchChoice = Utilities.GetRng().Next(0, switchIns.Count);
+                                int switchChoice = Random.Shared.Next(0, switchIns.Count);
                                 int switchedInMon = switchIns[switchChoice];
                                 command = $"{battle}|/choose switch {switchedInMon}"; // Switch to random mon
                                 invalidChoice = false; // Move valid after all
