@@ -211,7 +211,7 @@ namespace IndymonBackendProgram
                     }
                     else // Normal room implies a normal event from the possibility list
                     {
-                        RoomEvent nextEvent = possibleEvents[Random.Shared.Next(possibleEvents.Count)]; // Get a random event
+                        RoomEvent nextEvent = possibleEvents[RandomNumberGenerator.GetInt32(possibleEvents.Count)]; // Get a random event
                         Console.WriteLine($"Event: {nextEvent}");
                         roomSuccess = ExecuteEvent(nextEvent, floor, prizes, trainerData);
                         possibleEvents.Remove(nextEvent); // Remove from event pool
@@ -253,7 +253,7 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.TREASURE: // Find an item in the floor, free rare item
                     {
-                        string itemFound = _dungeonDetails.RareItems[Random.Shared.Next(_dungeonDetails.RareItems.Count)]; // Find a random rare item
+                        string itemFound = _dungeonDetails.RareItems[RandomNumberGenerator.GetInt32(_dungeonDetails.RareItems.Count)]; // Find a random rare item
                         Console.WriteLine($"Finds {itemFound}");
                         string itemString = roomEvent.PreEventString.Replace("$1", itemFound);
                         GenericMessageCommand(itemString); // Prints the message but we know it could have a $1
@@ -271,14 +271,14 @@ namespace IndymonBackendProgram
                         }
                         else
                         {
-                            item = _dungeonDetails.RareItems[Random.Shared.Next(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
+                            item = _dungeonDetails.RareItems[RandomNumberGenerator.GetInt32(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
                         }
                         List<string> pokemonNextFloor = _dungeonDetails.PokemonEachFloor[floor + 1]; // Find the possible mons next floor
-                        string pokemonSpecies = pokemonNextFloor[Random.Shared.Next(pokemonNextFloor.Count)].Trim().ToLower(); // Get a random one of these
+                        string pokemonSpecies = pokemonNextFloor[RandomNumberGenerator.GetInt32(pokemonNextFloor.Count)].Trim().ToLower(); // Get a random one of these
                         Console.WriteLine($"Strong {pokemonSpecies} holding {item}");
                         string alphaString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
                         GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Random.Shared.Next(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
+                        bool isShiny = (RandomNumberGenerator.GetInt32(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
                         PokemonSet alphaPokemon = new PokemonSet()
                         {
                             Species = pokemonSpecies,
@@ -334,7 +334,7 @@ namespace IndymonBackendProgram
                                     string chosenMon;
                                     if (choice == 0) // Random evo
                                     {
-                                        chosenMon = possibleEvos[Random.Shared.Next(possibleEvos.Count)];
+                                        chosenMon = possibleEvos[RandomNumberGenerator.GetInt32(possibleEvos.Count)];
                                     }
                                     else
                                     {
@@ -356,7 +356,7 @@ namespace IndymonBackendProgram
                 case RoomEventType.RESEARCHER:
                     {
                         List<string> platesList = [.. _backEndData.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
-                        string chosenPlate = platesList[Random.Shared.Next(platesList.Count)];
+                        string chosenPlate = platesList[RandomNumberGenerator.GetInt32(platesList.Count)];
                         string messageString = roomEvent.PreEventString.Replace("$1", chosenPlate);
                         GenericMessageCommand(messageString);
                         AddCommonItemPrize(chosenPlate, prizes);
@@ -367,7 +367,7 @@ namespace IndymonBackendProgram
                 case RoomEventType.PARADOX:
                     {
                         Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
-                        string obtainedDisk = _backEndData.MoveItemData.Keys.ToList()[Random.Shared.Next(_backEndData.MoveItemData.Count)]; // Get random move disk
+                        string obtainedDisk = _backEndData.MoveItemData.Keys.ToList()[RandomNumberGenerator.GetInt32(_backEndData.MoveItemData.Count)]; // Get random move disk
                         string messageString = roomEvent.PreEventString.Replace("$1", obtainedDisk);
                         GenericMessageCommand(messageString);
                         AddCommonItemPrize(obtainedDisk, prizes);
@@ -436,11 +436,11 @@ namespace IndymonBackendProgram
                         PokemonSet statusedMon;
                         if (possibleMons.Count > 0)
                         {
-                            statusedMon = possibleMons[Random.Shared.Next(possibleMons.Count - 1)];
+                            statusedMon = possibleMons[RandomNumberGenerator.GetInt32(possibleMons.Count - 1)];
                         }
                         else
                         {
-                            statusedMon = trainerData.Teamsheet[Random.Shared.Next(trainerData.Teamsheet.Count)];
+                            statusedMon = trainerData.Teamsheet[RandomNumberGenerator.GetInt32(trainerData.Teamsheet.Count)];
                         }
                         statusedMon.ExplorationStatus.NonVolatileStatus = status;
                         UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
@@ -459,7 +459,7 @@ namespace IndymonBackendProgram
                         for (int i = 0; i < itemCount; i++)
                         {
                             // Prize pool will contain common items
-                            string item = _dungeonDetails.CommonItems[Random.Shared.Next(_dungeonDetails.CommonItems.Count)].Trim().ToLower();
+                            string item = _dungeonDetails.CommonItems[RandomNumberGenerator.GetInt32(_dungeonDetails.CommonItems.Count)].Trim().ToLower();
                             Console.WriteLine($"Item: {item}");
                             items.Add(item);
                         }
@@ -468,8 +468,8 @@ namespace IndymonBackendProgram
                         List<PokemonSet> encounterPokemon = new List<PokemonSet>();
                         for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
                         {
-                            string pokemonSpecies = pokemonThisFloor[Random.Shared.Next(pokemonThisFloor.Count)].Trim().ToLower();
-                            bool isShiny = (Random.Shared.Next(SHINY_CHANCE) == 1);
+                            string pokemonSpecies = pokemonThisFloor[RandomNumberGenerator.GetInt32(pokemonThisFloor.Count)].Trim().ToLower();
+                            bool isShiny = (RandomNumberGenerator.GetInt32(SHINY_CHANCE) == 1);
                             PokemonSet pokemon = new PokemonSet()
                             {
                                 Species = pokemonSpecies,
@@ -524,11 +524,11 @@ namespace IndymonBackendProgram
                     // Mon that joins the team for adventures, always catchable
                     {
                         List<string> pokemonThisFloor = _dungeonDetails.PokemonEachFloor[floor]; // Find the possible mons this floor
-                        string pokemonSpecies = pokemonThisFloor[Random.Shared.Next(pokemonThisFloor.Count)].Trim().ToLower(); // Get a random one of these
+                        string pokemonSpecies = pokemonThisFloor[RandomNumberGenerator.GetInt32(pokemonThisFloor.Count)].Trim().ToLower(); // Get a random one of these
                         Console.WriteLine($"Joiner {pokemonSpecies}");
                         string joinerString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
                         GenericMessageCommand(joinerString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Random.Shared.Next(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
+                        bool isShiny = (RandomNumberGenerator.GetInt32(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
                         string nickName = $"{pokemonSpecies} friend";
                         if (nickName.Length > 18) // Sanitize, name has to be shorter than 19 and no spaces
                         {
@@ -551,7 +551,7 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.NPC_BATTLE:
                     {
-                        TrainerData randomNpc = _backEndData.NpcData.Values.ToList()[Random.Shared.Next(_backEndData.NpcData.Values.Count)]; // Get random npc
+                        TrainerData randomNpc = _backEndData.NpcData.Values.ToList()[RandomNumberGenerator.GetInt32(_backEndData.NpcData.Values.Count)]; // Get random npc
                         int nMons = Math.Min(randomNpc.Teamsheet.Count, trainerData.Teamsheet.Count); // Fight with the highest legal fair count
                         randomNpc.ConfirmSets(_backEndData, nMons, nMons, TeambuildSettings.SMART); // Get into a trainer fight (they will bring atleast 1 mon at most 3
                         Console.WriteLine($"Fighting {randomNpc.Name}");
@@ -604,7 +604,7 @@ namespace IndymonBackendProgram
             }
             builder.Append("**Commons: **||");
             if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
-            else builder.Append(new string('M', Random.Shared.Next(15, 30)));
+            else builder.Append(new string('M', RandomNumberGenerator.GetInt32(15, 30)));
             builder.AppendLine("||");
             // Attach rares (or empty list) items
             nextCollection = new List<string>();
@@ -614,7 +614,7 @@ namespace IndymonBackendProgram
             }
             builder.Append("**Rares: **||");
             if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
-            else builder.Append(new string('M', Random.Shared.Next(15, 30)));
+            else builder.Append(new string('M', RandomNumberGenerator.GetInt32(15, 30)));
             builder.AppendLine("||");
             builder.AppendLine();
             // Then the pokemon one by one
@@ -630,7 +630,7 @@ namespace IndymonBackendProgram
                     nextCollection.Add($"{monData.Key} x{monData.Value}");
                 }
                 if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
-                else builder.Append(new string('M', Random.Shared.Next(15, 30)));
+                else builder.Append(new string('M', RandomNumberGenerator.GetInt32(15, 30)));
                 builder.AppendLine("||");
             }
             // String done, save into file

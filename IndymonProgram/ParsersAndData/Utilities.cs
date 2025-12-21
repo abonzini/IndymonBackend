@@ -1,4 +1,6 @@
-﻿namespace ParsersAndData
+﻿using System.Security.Cryptography;
+
+namespace ParsersAndData
 {
     public static class Utilities
     {
@@ -14,7 +16,7 @@
             while (n > 1) // Fischer yates
             {
                 n--;
-                int k = Random.Shared.Next(n + 1);
+                int k = RandomNumberGenerator.GetInt32(n + 1);
                 (list[offset + k], list[offset + n]) = (list[offset + n], list[offset + k]); // Swap
             }
         }

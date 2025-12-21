@@ -128,7 +128,7 @@ namespace IndymonBackendProgram
                 {
                     if (currentChosenTrainers.Count > 0)
                     {
-                        int nextTrainerIndex = Random.Shared.Next(currentChosenTrainers.Count); // Will pick one of them
+                        int nextTrainerIndex = RandomNumberGenerator.GetInt32(currentChosenTrainers.Count); // Will pick one of them
                         nextTrainer = currentChosenTrainers[nextTrainerIndex];
                     }
                     else
@@ -311,15 +311,15 @@ namespace IndymonBackendProgram
                 string scoreString = Console.ReadLine();
                 if (scoreString == "0")
                 {
-                    if (Random.Shared.Next(2) == 0) // Winner was 1
+                    if (RandomNumberGenerator.GetInt32(2) == 0) // Winner was 1
                     {
-                        match.Score1 = Random.Shared.Next(1, NMons + 1);
+                        match.Score1 = RandomNumberGenerator.GetInt32(1, NMons + 1);
                         match.Score2 = 0;
                     }
                     else // Winner was 2
                     {
                         match.Score1 = 0;
-                        match.Score2 = Random.Shared.Next(1, NMons + 1);
+                        match.Score2 = RandomNumberGenerator.GetInt32(1, NMons + 1);
                     }
                     Console.Write($"{match.Score1}-{match.Score2}");
                 }
