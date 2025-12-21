@@ -260,12 +260,48 @@
       "VerticalShortcutTile": "▢",
 	  "ShortcutConditions": [
 		{
-				"ConditionType": "TYPE",
-				"Which": "Electric"
+				"ConditionType": "MOVE",
+				"Which": "Signal Beam"
+		},
+		{
+				"ConditionType": "MOVE",
+				"Which": "Heat Wave"
+		},
+		{
+				"ConditionType": "MOVE",
+				"Which": "Shock Wave"
+		},
+		{
+				"ConditionType": "MOVE",
+				"Which": "Sludge Wave"
+		},
+		{
+				"ConditionType": "MOVE",
+				"Which": "Thunder Wave"
+		},
+		{
+				"ConditionType": "MOVE",
+				"Which": "Wave Crash"
+		},
+		{
+				"ConditionType": "MOVE",
+				"Which": "Vacuum Wave"
+		},
+		{
+				"ConditionType": "MOVE",
+				"Which": "Thousand Waves"
+		},
+		{
+				"ConditionType": "MOVE",
+				"Which": "Psywave"
+		},
+		{
+				"ConditionType": "ITEM",
+				"Which": "Wave Incense"
 		}
 	  ],
-	  "ShortcutClue": "There's a strange hatch buried in the ground. Looks like it leads towards a bunker. You believe a strong electric field may be able to make it open.",
-	  "ShortcutResolution": "Your $1 creates an electric field that briefly deactivates the lock. The hatch opens..."
+	  "ShortcutClue": "There's a strange hatch buried in the ground. It has an electric security system. You think a strong enough wave signal may override it.",
+	  "ShortcutResolution": "Your $1 overwhelms the security system. The hatch opens..."
     }
   ],
   "BossEvent": {
