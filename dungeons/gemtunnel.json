@@ -285,8 +285,8 @@
   ],
   "BossEvent": {
     "EventType": "BOSS",
-    "PreEventString": "You finally find an underground lake, and the gemstones embedded on the wall are reflected on the surface. In the center, a small Pokemon looks at you. It wants to test what lies within your heart.",
-    "PostEventString": "Through battle, you and the Pokemon are in sync for just a second. The creature is satisfied, and gives you $1 as a sign of respect."
+    "PreEventString": "You finally find an underground lake. The gemstones embedded on the wall are reflected on the surface. In the center, a small Pokemon looks at you. It wants to test what lies within your heart.",
+    "PostEventString": "The creature is satisfied, and gives you $1 as a sign of respect."
   },
   "CampingEvent": {
     "EventType": "CAMPING",

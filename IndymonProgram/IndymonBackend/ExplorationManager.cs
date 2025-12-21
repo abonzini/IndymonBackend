@@ -264,7 +264,15 @@ namespace IndymonBackendProgram
                 case RoomEventType.BOSS: // Boss fight, identical to alpha, will fetch next floor anyway, which if floor 3, it's boss
                 case RoomEventType.ALPHA: // Find a frenzied mon from a floor above, boss will have a rare item if defeated
                     {
-                        string item = _dungeonDetails.RareItems[Random.Shared.Next(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
+                        string item;
+                        if (roomEvent.EventType == RoomEventType.BOSS && _dungeonDetails.BossItem != "") // If boss, you also get the boss special prize (if any)
+                        {
+                            item = _dungeonDetails.BossItem;
+                        }
+                        else
+                        {
+                            item = _dungeonDetails.RareItems[Random.Shared.Next(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
+                        }
                         List<string> pokemonNextFloor = _dungeonDetails.PokemonEachFloor[floor + 1]; // Find the possible mons next floor
                         string pokemonSpecies = pokemonNextFloor[Random.Shared.Next(pokemonNextFloor.Count)].Trim().ToLower(); // Get a random one of these
                         Console.WriteLine($"Strong {pokemonSpecies} holding {item}");
@@ -301,10 +309,6 @@ namespace IndymonBackendProgram
                             alphaString = roomEvent.PostEventString.Replace("$1", item);
                             GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
                             AddRareItemPrize(item, prizes); // Add item to prizes
-                            if (roomEvent.EventType == RoomEventType.BOSS && _dungeonDetails.BossItem != "") // If boss, you also get the boss special prize (if any)
-                            {
-                                AddRareItemPrize(_dungeonDetails.BossItem, prizes);
-                            }
                             AddPokemonPrize(pokemonSpecies, floor + 1, isShiny, prizes); // Add alpha mon too
                         }
                     }
