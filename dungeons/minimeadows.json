@@ -230,7 +230,7 @@
 				"Which": "Bulldoze"
 		}
 	  ],
-	  "ShortcutClue": "As the landscape gets more dry, you start seeing piles of mud and debris which could be opened up to find a shortcut.",
+	  "ShortcutClue": "As the landscape gets more dry, you see piles of mud and debris which could be cleared to find a shortcut.",
 	  "ShortcutResolution": "Your $1 moves the debris away. The path is clear now."
     },
 	{
