@@ -47,6 +47,10 @@ namespace ParsersAndData
         [JsonConverter(typeof(StringEnumConverter))]
         public ShortcutConditionType ConditionType { get; set; }
         public string Which { get; set; }
+        public override string ToString()
+        {
+            return $"{ConditionType.ToString()} -> {Which}";
+        }
     }
     public class DungeonFloor
     {

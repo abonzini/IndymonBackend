@@ -676,7 +676,7 @@ namespace IndymonBackendProgram
                         }
                         break;
                     case ShortcutConditionType.ABILITY:
-                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has move, all good
+                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has ability, all good
                         {
                             if (pokemon.Ability == valueToCheck) // ability found
                             {
@@ -687,7 +687,7 @@ namespace IndymonBackendProgram
                         }
                         break;
                     case ShortcutConditionType.POKEMON:
-                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has move, all good
+                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon is there, all good
                         {
                             if (pokemon.Species == valueToCheck) // species found
                             {
@@ -698,7 +698,7 @@ namespace IndymonBackendProgram
                         }
                         break;
                     case ShortcutConditionType.TYPE:
-                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has move, all good
+                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has type, all good
                         {
                             if (_backEndData.Dex[pokemon.Species].Types.Contains(valueToCheck)) // type of pokemon found
                             {
@@ -709,9 +709,9 @@ namespace IndymonBackendProgram
                         }
                         break;
                     case ShortcutConditionType.ITEM:
-                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has move, all good
+                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has item, all good
                         {
-                            if (pokemon.Item.Name == valueToCheck) // type of pokemon found
+                            if (pokemon.Item != null && pokemon.Item.Name == valueToCheck) // type of pokemon found
                             {
                                 message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
                                 canTakeShortcut = true;
