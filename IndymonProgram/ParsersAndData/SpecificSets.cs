@@ -40,8 +40,8 @@
             // Removed because useless
             return ["frustration",  // Low damage for no reason
                 "splash", "celebrate", "hold hands", // No effect
-            "snore", "sleep talk", // Most of the time is useless
-            "ally switch", "follow me", // Doubles
+            "snore", "sleep talk", "dream eater", "swallow", "spit up", // Most of the time is useless
+            "ally switch", "follow me", "helping hand", // Doubles
             "natural gift", "fling", "belch", // Too item-dependant
             "tackle", "scratch", "pound"]; // Low level normals
         }

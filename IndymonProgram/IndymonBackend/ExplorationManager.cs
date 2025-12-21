@@ -285,7 +285,7 @@ namespace IndymonBackendProgram
                             AutoTeam = true,
                             Teamsheet = [alphaPokemon], // Only mon in the teamsheet
                         };
-                        alphaTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        alphaTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.SMART); // Randomize enemy team (movesets, etc), boss/alpha is a bit smarter than normal dungeon mon
                         Console.Write("Encounter resolution: ");
                         int remainingMons = ResolveEncounter(trainerData, alphaTeam);
                         if (remainingMons == 0) // Means player lost
