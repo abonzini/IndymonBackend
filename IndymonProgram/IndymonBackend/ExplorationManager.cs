@@ -563,10 +563,6 @@ namespace IndymonBackendProgram
                         {
                             trainerData.Teamsheet[i].ExplorationStatus.HealthPercentage = 100;
                             trainerData.Teamsheet[i].ExplorationStatus.NonVolatileStatus = "";
-                            for (int j = 0; j < trainerData.Teamsheet[i].ExplorationStatus.MovePp.Length; j++) // Moves have a recovered PP
-                            {
-                                trainerData.Teamsheet[i].ExplorationStatus.MovePp[j] = 1000; // Restore to a huge number
-                            }
                         }
                         Console.Write("Encounter resolution: ");
                         int remainingMons = ResolveEncounter(trainerData, randomNpc, nMons); // 3 Mon both players
