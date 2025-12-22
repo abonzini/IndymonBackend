@@ -323,7 +323,9 @@ namespace ShowdownBot
             _currentGameState = JsonConvert.DeserializeObject<GameState>(state);
             PokemonSet currentPokemon = null;
             // Identify current pokemon only in states it's needed (wait, team preview, forceswitch, non-active states don't get them)
-            if (_currentGameState.Active != null || !_currentGameState.Wait || !_currentGameState.TeamPreview) // Some requests (wait?) don't have active mon data which is weird but idk
+            if (_currentGameState.Active != null &&
+                !_currentGameState.Wait &&
+                !_currentGameState.TeamPreview) // Some requests (wait?) don't have active mon data which is weird but idk
             {
                 foreach (SidePokemon pokemon in _currentGameState.Side.Pokemon) // Will parse the current mon state and update
                 {
