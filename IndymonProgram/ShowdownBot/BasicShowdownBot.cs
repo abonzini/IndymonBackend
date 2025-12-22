@@ -330,11 +330,14 @@ namespace ShowdownBot
                     currentPokemon = _monsById[monId]; // Find wtf mon am i referring to, this is also the active pokemon btw
                     if (currentPokemon.ExplorationStatus != null)
                     {
-                        // Means the active field also has data of the moves current PP, load here
-                        foreach (AvailableMove move in _currentGameState.Active[0].Moves)
+                        if (_currentGameState.Active != null) // Some requests (wait?) don't have active mon data which is weird but idk
                         {
-                            int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Trim().ToLower());
-                            currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
+                            // Means the active field also has data of the moves current PP, load here
+                            foreach (AvailableMove move in _currentGameState.Active[0].Moves)
+                            {
+                                int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Trim().ToLower());
+                                currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
+                            }
                         }
                     }
                 }
