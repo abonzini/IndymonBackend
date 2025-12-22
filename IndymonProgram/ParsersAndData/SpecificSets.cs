@@ -40,10 +40,10 @@
             // Removed because useless
             return ["frustration",  // Low damage for no reason
                 "splash", "celebrate", "hold hands", // No effect
-            "snore", "sleep talk", "dream eater", "nightmare", "swallow", "spit up", // Most of the time is useless
-            "ally switch", "follow me", "helping hand", // Doubles
-            "natural gift", "fling", "belch", // Too item-dependant
-            "tackle", "scratch", "pound"]; // Low level normals
+                "snore", "sleep talk", "dream eater", "nightmare", "swallow", "spit up", // Most of the time is useless
+                "ally switch", "follow me", "helping hand", // Doubles
+                "natural gift", "fling", "belch", // Too item-dependant
+                "tackle", "scratch", "pound"]; // Low level normals
         }
         /// <summary>
         /// Returns a set of dancing abilities for checking dance off battles
