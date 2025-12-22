@@ -42,8 +42,9 @@
                 "splash", "celebrate", "hold hands", // No effect
                 "snore", "sleep talk", "dream eater", "nightmare", "swallow", "spit up", // Most of the time is useless
                 "ally switch", "follow me", "helping hand", // Doubles
-                "natural gift", "fling", "belch", // Too item-dependant
-                "tackle", "scratch", "pound"]; // Low level normals
+                "natural gift", "fling", "belch", "poltergeist", // Too item-dependant
+                "tackle", "scratch", "pound",
+                "ember", "water gun"]; // Low levels
         }
         /// <summary>
         /// Returns a set of dancing abilities for checking dance off battles

@@ -322,15 +322,16 @@ namespace ShowdownBot
         {
             _currentGameState = JsonConvert.DeserializeObject<GameState>(state);
             PokemonSet currentPokemon = null;
-            foreach (SidePokemon pokemon in _currentGameState.Side.Pokemon) // First, need to parse the current mon state and update
+            // Identify current pokemon only in states it's needed (wait, team preview, forceswitch, non-active states don't get them)
+            if (_currentGameState.Active != null || !_currentGameState.Wait || !_currentGameState.TeamPreview) // Some requests (wait?) don't have active mon data which is weird but idk
             {
-                if (pokemon.Active) // This is the current mon, definitely
+                foreach (SidePokemon pokemon in _currentGameState.Side.Pokemon) // Will parse the current mon state and update
                 {
-                    string monId = pokemon.Ident.Split(':')[1].Trim().ToLower(); // Id(ent) of the mon in question
-                    currentPokemon = _monsById[monId]; // Find wtf mon am i referring to, this is also the active pokemon btw
-                    if (currentPokemon.ExplorationStatus != null)
+                    if (pokemon.Active) // This is the current mon, definitely
                     {
-                        if (_currentGameState.Active != null) // Some requests (wait?) don't have active mon data which is weird but idk
+                        string monId = pokemon.Ident.Split(':')[1].Trim().ToLower(); // Id(ent) of the mon in question
+                        currentPokemon = _monsById[monId]; // Find wtf mon am i referring to, this is also the active pokemon btw
+                        if (currentPokemon.ExplorationStatus != null)
                         {
                             // Means the active field also has data of the moves current PP, load here
                             foreach (AvailableMove move in _currentGameState.Active[0].Moves)
