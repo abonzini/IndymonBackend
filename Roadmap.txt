@@ -15,27 +15,23 @@ White Monastery -> Justice -> Dawn Stone
 	Glacier -> Regice
 
 // REWoRK
-ok so, instead of eac h mon legal stabs do each type stabs and assign intersections mon vs each of types
-add tera type as stab
+Ability + Moves are now weighted, e.g. Tackle 100, Surf 100. Weight is modified for damage (more damage BP*Stat = more chance), and beneficial effects by particular cases
 
-check:
-item pre check -> mod+equip (manually here or auto item too) -> Non-conditional items or definer items (e.g. if lagging tail here it favors specific moves), if 
+Mon can take items (of any type, seen separately) before or after set, considering same P of taking item before, so that
+P1 (pre set) = P/2
+P2 (post set) = (P/2)/(1-P1)
 
-moveset define, a bit more complex it can be, maybe scoring them or w/e
+Pre and post item acceptance is different, a pre item implies set may be biased towards item, e.g. favoring consume abilities, recycle if berry, etc, rest if chesto and so on, same as favored abilities
+So, take item and thsi will modify weights
 
-last item define, (if auto item), etc
+Later on, ability + move selection starts to take place, moves are initially pushed to fulfill conditions such as
+1 - Move Disks
+2 - Legal stab
+3 - Format rules
+With the corresponding weights, it'll be a system of intersection and unions to determine what is possible and then score wise.
+Rest of slots are filled, while random pick influences future weights (e.g. rest gives snore a high chance, etc), Normalize gives all moves stab, etc
 
-=> Algo:
-legal stab is 100
-moves of interest, e.g. if rest then the sleeps, if chesto then rest, etc
-
-=> Def need better move data parsing no matter what (redo move importer and stop using csv) but also extract properties (sound, contact, whatever), BP, and use it for complex scoring
-
-=> Is item useful would have been item->moves->yes/no but more importatnyl item is linked with moves/ability and so, 
-lsit [move/score] -> water gun, 0, rest 10
-chesto: water gun, 0, rest 20 etc
-better move importer too
-etc
-As a move is decided (one by one), this may affect other moves too=> algorithm is based on scoring moves against ability and/or item, and other moves as It goes along. Result is a set with random stuff but may contain good stuff too
-The moveset first tries to make sure to get the requirements (e.g. stabs and filter stuff) and only then fills with random remaining
-Finally one last item pass to decide if an item is useful to use afterwards given chances too
+Finally, taking item post set involves only adding items that are useful, this would include plate only if multipliers, MOD only if helps, etc
+This results in a "smart" but random set with decent coverage, etc. Eventually more item sets can be added and modified and so on.
+This may be computationally more crazy but may be cool too so why not.
+It is the amin focus of S2, a great teambuilder
