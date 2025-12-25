@@ -35,3 +35,9 @@ Finally, taking item post set involves only adding items that are useful, this w
 This results in a "smart" but random set with decent coverage, etc. Eventually more item sets can be added and modified and so on.
 This may be computationally more crazy but may be cool too so why not.
 It is the amin focus of S2, a great teambuilder
+
+// TODO
+
+- Reparse all
+- Battle algorithm
+- Etc

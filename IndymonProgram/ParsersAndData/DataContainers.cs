@@ -95,7 +95,7 @@ namespace ParsersAndData
                 Console.WriteLine("\tTo modify AI for future: 5: blacklist ability. 1-4 blacklist moves. Otherwise this mon is approved. 0 to reroll the whole thing");
                 string inputString = Console.ReadLine().ToLower();
                 switch (inputString)
-                {
+                {/*
                     case "5":
                         pokemonBackendData.AiAbilityBanlist.Add(Ability);
                         break;
@@ -110,7 +110,7 @@ namespace ParsersAndData
                         break;
                     case "4":
                         pokemonBackendData.AiMoveBanlist.Add(Moves[3]);
-                        break;
+                        break;*/
                     case "0":
                         break; // Rejects te mon
                     default:
@@ -129,9 +129,9 @@ namespace ParsersAndData
         {
             Pokemon pokemonBackendData = backEndData.Dex[Species];
             // Get data, gets a smart set or just legal depending if randomizing is smart
-            HashSet<string> legalAbilities = settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartAbilities() : pokemonBackendData.GetLegalAbilities();
-            HashSet<string> legalMoves = settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartMoves() : pokemonBackendData.GetLegalMoves();
-            HashSet<string> legalStabs = [.. pokemonBackendData.DamagingStabs.Intersect(legalMoves)]; // Legal stabs are the stabs that are legal
+            HashSet<string> legalAbilities = null;// settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartAbilities() : pokemonBackendData.GetLegalAbilities();
+            HashSet<string> legalMoves = null;//settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartMoves() : pokemonBackendData.GetLegalMoves();
+            HashSet<string> legalStabs = null;//[.. pokemonBackendData.DamagingStabs.Intersect(legalMoves)]; // Legal stabs are the stabs that are legal
             if (GetTera(backEndData) != "" && pokemonBackendData.Moves.Contains("tera blast")) // Mons that can tera will be able to use tera blast regardless if previously banned move
             {
                 legalMoves.Add("tera blast");
@@ -454,8 +454,8 @@ namespace ParsersAndData
                         {
                             // Check if mon contains ability, move or move disk, considering auto team tries to be "smart"
                             Pokemon monData = backEndData.Dex[mon.Species];
-                            monIsValid |= abilitiesToVerify.Overlaps(monData.GetSmartAbilities());
-                            monIsValid |= movesToVerify.Overlaps(monData.GetSmartMoves());
+                            //monIsValid |= abilitiesToVerify.Overlaps(monData.GetSmartAbilities());
+                            //monIsValid |= movesToVerify.Overlaps(monData.GetSmartMoves());
                             // In any case, even if not naturally learned, the mon may have a move disk equipped that will give it
                             if (mon.Item != null && !AutoItem && backEndData.MoveItemData.TryGetValue(mon.Item.Name, out HashSet<string> moveDiskMoves))
                             {
@@ -664,7 +664,7 @@ namespace ParsersAndData
                 foreach (string learnedMove in learnedMoves) // Check if the move(s) added...
                 {
                     if (!pokemonBackendData.Moves.Contains(learnedMove) && // ...are not originally learned anyway
-                        !pokemonBackendData.AiMoveBanlist.Contains(learnedMove) && // ...are not banned
+                                                                           //!pokemonBackendData.AiMoveBanlist.Contains(learnedMove) && // ...are not banned
                         !pokemonSet.Moves.Contains(learnedMove)) // ...is not already there (???how)
                     {
                         return true; // Then this can be used

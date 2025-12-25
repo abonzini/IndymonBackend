@@ -128,16 +128,8 @@ namespace IndymonBackendProgram
         static void PrintWarnings()
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            if (_allData.DataContainer.Dex == null) Console.WriteLine("WARNING: Pokemon data not initialised yet");
-            if (_allData.DataContainer.TypeChart == null) Console.WriteLine("WARNING: Type chart not initialised yet");
-            if (_allData.DataContainer.MoveData == null) Console.WriteLine("WARNING: Move data not initialised yet");
-            if (_allData.DataContainer.OffensiveItemData == null) Console.WriteLine("WARNING: Offensive item data not initialised yet");
-            if (_allData.DataContainer.DefensiveItemData == null) Console.WriteLine("WARNING: Defensive item data not initialised yet");
-            if (_allData.DataContainer.TeraItemData == null) Console.WriteLine("WARNING: Tera item data not initialised yet");
-            if (_allData.DataContainer.EvItemData == null) Console.WriteLine("WARNING: Ev item data not initialised yet");
-            if (_allData.DataContainer.NatureItemData == null) Console.WriteLine("WARNING: Nature item data not initialised yet");
-            if (_allData.DataContainer.MoveItemData == null) Console.WriteLine("WARNING: Move item data not initialised yet");
-            if (_allData.DataContainer.Dungeons == null) Console.WriteLine("WARNING: Dungeon data not initialised yet");
+            if (_allData.DataContainer.Dex == null) Console.WriteLine("WARNING: Pokemon data not initialized yet");
+            if (_allData.DataContainer.TrainerData.Count == 0) Console.WriteLine("WARNING: Trainer data not initialised yet");
             Console.ResetColor();
         }
         /// <summary>
@@ -184,7 +176,7 @@ namespace IndymonBackendProgram
                 Console.WriteLine("No indymon file. Will just try to import backend data");
                 string learnsetPath = Path.Combine(directory, "learnsets.ts");
                 string dexPath = Path.Combine(directory, "pokedex.ts");
-                string movesPath = Path.Combine(directory, "moves.csv");
+                string movesPath = Path.Combine(directory, "moves.ts");
                 string typeChartFile = Path.Combine(directory, "typechart.ts");
                 string defItemFile = Path.Combine(directory, "defensiveitems.csv");
                 string offItemFile = Path.Combine(directory, "offensiveitems.csv");
@@ -194,76 +186,44 @@ namespace IndymonBackendProgram
                 string moveItemFile = Path.Combine(directory, "moveitems.csv");
                 string googleSheetsFile = Path.Combine(directory, "google_sheets_data.txt");
                 string dungeonDirectory = Path.Combine(directory, "dungeons");
-                if (File.Exists(dexPath))
+                // First, retrieve all mons
+                Dictionary<string, Pokemon> monData = DexParser.ParseDexFile(dexPath);
+                // Then, get their movesets
+                MovesetParser.ParseMovests(learnsetPath, monData);
+                // Then, use the proper name lookup and make evos/forms inherit movesets
+                monData = Cleanups.NameAndMovesetCleanup(monData);
+                // Finally, parse move data
+                Dictionary<string, Move> moveData = MoveParser.ParseMoves(movesPath);
+                // And clean up names in mons, obtain STAB
+                Cleanups.MoveDataCleanup(monData, moveData);
+                // Finally clean moves themselves
+                moveData = Cleanups.MoveListCleanup(moveData);
+                Console.WriteLine("Loaded dex and moves correctly");
+                _allData.DataContainer.Dex = monData;
+                _allData.DataContainer.MoveData = moveData;
+                // Typechart
+                _allData.DataContainer.TypeChart = TypeChartParser.ParseTypechartFile(typeChartFile);
+                // Indymon custom items
+                _allData.DataContainer.DefensiveItemData = ItemParser.ParseItemAndEffects(defItemFile);
+                _allData.DataContainer.OffensiveItemData = ItemParser.ParseItemAndEffects(offItemFile);
+                _allData.DataContainer.TeraItemData = ItemParser.ParseItemAndEffects(teraItemFile);
+                _allData.DataContainer.EvItemData = ItemParser.ParseItemAndEffects(evItemFile);
+                _allData.DataContainer.NatureItemData = ItemParser.ParseItemAndEffects(natureItemFile);
+                _allData.DataContainer.MoveItemData = ItemParser.ParseItemAndEffects(moveItemFile);
+                // Google sheets
+                string[] lines = File.ReadAllLines(googleSheetsFile);
+                _allData.SheetId = lines[0];
+                _allData.TrainerDataTab = lines[1];
+                _allData.NpcDataTab = lines[2];
+                _allData.NamedNpcDataTab = lines[3];
+                _allData.TournamentDataTab = lines[4];
+                // Dungeons
+                Console.WriteLine("Loading dungeon data");
+                _allData.DataContainer.Dungeons = new Dictionary<string, Dungeon>();
+                foreach (string file in Directory.EnumerateFiles(dungeonDirectory))
                 {
-                    // First, retrieve all mons
-                    Dictionary<string, Pokemon> monData = DexParser.ParseDexFile(dexPath);
-                    // Then, get their movesets
-                    if (File.Exists(learnsetPath))
-                    {
-                        MovesetParser.ParseMovests(learnsetPath, monData);
-                        // Then, use the proper name lookup and make evos/forms inherit movesets
-                        monData = Cleanups.NameAndMovesetCleanup(monData);
-                        if (File.Exists(movesPath))
-                        {
-                            // Finally, parse move data
-                            Dictionary<string, Move> moveData = MoveParser.ParseMoves(movesPath);
-                            // And clean up names in mons, obtain STAB
-                            Cleanups.MoveDataCleanup(monData, moveData);
-                            // Finally clean moves themselves
-                            moveData = Cleanups.MoveListCleanup(moveData);
-                            Console.WriteLine("Loaded dex and moves correctly");
-                            _allData.DataContainer.Dex = monData;
-                            _allData.DataContainer.MoveData = moveData;
-                        }
-                    }
-                }
-                if (File.Exists(typeChartFile))
-                {
-                    _allData.DataContainer.TypeChart = TypeChartParser.ParseTypechartFile(typeChartFile);
-                }
-                if (File.Exists(defItemFile))
-                {
-                    _allData.DataContainer.DefensiveItemData = ItemParser.ParseItemAndEffects(defItemFile);
-                }
-                if (File.Exists(offItemFile))
-                {
-                    _allData.DataContainer.OffensiveItemData = ItemParser.ParseItemAndEffects(offItemFile);
-                }
-                if (File.Exists(teraItemFile))
-                {
-                    _allData.DataContainer.TeraItemData = ItemParser.ParseItemAndEffects(teraItemFile);
-                }
-                if (File.Exists(evItemFile))
-                {
-                    _allData.DataContainer.EvItemData = ItemParser.ParseItemAndEffects(evItemFile);
-                }
-                if (File.Exists(natureItemFile))
-                {
-                    _allData.DataContainer.NatureItemData = ItemParser.ParseItemAndEffects(natureItemFile);
-                }
-                if (File.Exists(moveItemFile))
-                {
-                    _allData.DataContainer.MoveItemData = ItemParser.ParseItemAndEffects(moveItemFile);
-                }
-                if (File.Exists(googleSheetsFile))
-                {
-                    string[] lines = File.ReadAllLines(googleSheetsFile);
-                    _allData.SheetId = lines[0];
-                    _allData.TrainerDataTab = lines[1];
-                    _allData.NpcDataTab = lines[2];
-                    _allData.NamedNpcDataTab = lines[3];
-                    _allData.TournamentDataTab = lines[4];
-                }
-                if (Directory.Exists(dungeonDirectory)) // Import all dungeon files and parse
-                {
-                    Console.WriteLine("Loading dungeon data");
-                    _allData.DataContainer.Dungeons = new Dictionary<string, Dungeon>();
-                    foreach (string file in Directory.EnumerateFiles(dungeonDirectory))
-                    {
-                        Dungeon nextDungeon = JsonConvert.DeserializeObject<Dungeon>(File.ReadAllText(file));
-                        _allData.DataContainer.Dungeons.Add(nextDungeon.Name, nextDungeon);
-                    }
+                    Dungeon nextDungeon = JsonConvert.DeserializeObject<Dungeon>(File.ReadAllText(file));
+                    _allData.DataContainer.Dungeons.Add(nextDungeon.Name, nextDungeon);
                 }
             }
             _allData.MasterDirectory = directory;
@@ -368,12 +328,12 @@ namespace IndymonBackendProgram
                         {
                             Pokemon monData = _allData.DataContainer.Dex[newMon.Species];
                             newMon.Ability = csvFields[offsetX + 3].Trim().ToLower();
-                            if (newMon.Ability != "" && !monData.GetLegalAbilities().Contains(newMon.Ability)) throw new Exception($"{newMon.Species} has {newMon.Ability} which is not a legal one");
-                            HashSet<string> monLegalMoves = monData.GetLegalMoves();
+                            //if (newMon.Ability != "" && !monData.GetLegalAbilities().Contains(newMon.Ability)) throw new Exception($"{newMon.Species} has {newMon.Ability} which is not a legal one");
+                            //HashSet<string> monLegalMoves = monData.GetLegalMoves();
                             for (int move = 0; move < 4; move++)
                             {
                                 string newMove = csvFields[offsetX + 4 + move].Trim().ToLower();
-                                if ((newMove != "") && !monLegalMoves.Contains(newMove)) throw new Exception($"{newMon.Species} has {newMove} which is not a legal one");
+                                //if ((newMove != "") && !monLegalMoves.Contains(newMove)) throw new Exception($"{newMon.Species} has {newMove} which is not a legal one");
                                 newMon.Moves[move] = newMove;
                             }
                             // Emergency check, if not in auto team but mon empty, we have a problem, just randomise
