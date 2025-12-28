@@ -5,13 +5,13 @@ Berry Forest -> Shaymin/Celebi -> Leaf Stone
 	Haunted Mansion -> Marshadow/Spectrier -> Shiny Stone
 	Pond -> Registeel
 Gem Cave -> Lake Spirits -> Moon Stone
-	Magma -> Moltres/Chi Yu -> Fire Stone
+	Magma -> Moltres/Heatran -> Fire Stone
 	Apricorn Forest -> Regirock
 Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone 
-	Underwater -> Tapu Fini/Articuno -> Water Stone
+	Underwater -> Tapu Fini/Volcanion -> Water Stone
 	Faraway Island -> Regidrago 
 White Monastery -> Justice -> Dawn Stone
-	Sky Tower -> Chien Pao/Glastrier -> Ice Stone
+	Sky Tower -> Chien Pao/Articuno -> Ice Stone
 	Glacier -> Regice
 
 // REWoRK
