@@ -9,7 +9,8 @@ namespace IndymonBackendProgram
     {
         NOP, // No operation, just a pause
         PRINT_STRING,
-        PRINT_STRING_INFO,
+        PRINT_CLUE,
+        PRINT_EVOLUTION,
         CLEAR_CONSOLE,
         DRAW_ROOM,
         MOVE_CHARACTER,
@@ -72,22 +73,7 @@ namespace IndymonBackendProgram
             Console.WriteLine("");
             Dungeon = options[int.Parse(Console.ReadLine()) - 1];
             // Then which player
-            Console.WriteLine("Which trainer group? 1 Players, 2 NPCs, 3 Famous NPCs");
-            int choice = int.Parse(Console.ReadLine());
-            List<TrainerData> trainers = choice switch
-            {
-                1 => [.. _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART).Count > 0)],
-                2 => [.. _backEndData.NpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART).Count > 0)],
-                3 => [.. _backEndData.NamedNpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART).Count > 0)],
-                _ => throw new Exception("Invalid trainer group")
-            };
-            Console.WriteLine("Which trainer?");
-            for (int i = 0; i < trainers.Count; i++)
-            {
-                Console.Write($"{i + 1}: {trainers[i].Name}, ");
-            }
-            // Finally, try to define teamsheet
-            TrainerData trainerData = trainers[int.Parse(Console.ReadLine()) - 1];
+            TrainerData trainerData = Utilities.ChooseOneTrainerDialog(TeambuildSettings.EXPLORATION | TeambuildSettings.SMART, _backEndData);
             Trainer = trainerData.Name;
             trainerData.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status), if need to randomize, smart
         }
@@ -157,7 +143,7 @@ namespace IndymonBackendProgram
                     if (room == 0) // Room 0 is always the beginning of floor, camping event followed by shortcut check
                     {
                         // Check shortcut first
-                        InfoMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue);
+                        ClueMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue);
                         if (VerifyShortcutConditions(_dungeonDetails.Floors[floor].ShortcutConditions, trainerData, out string message)) // If shortcut activated
                         {
                             // After, need to also check shortcut
@@ -316,7 +302,7 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.EVO:
                     {
-                        InfoMessageCommand(roomEvent.PreEventString);
+                        EvolutionMessageCommand(roomEvent.PreEventString);
                         foreach (PokemonSet mon in trainerData.Teamsheet)
                         {
                             Pokemon baseMon = _backEndData.Dex[mon.Species];
@@ -666,66 +652,70 @@ namespace IndymonBackendProgram
             message = "";
             foreach (ShortcutCondition condition in conditions)
             {
-                string valueToCheck = condition.Which.ToLower();
-                switch (condition.ConditionType)
+                foreach (string eachOne in condition.Which)
                 {
-                    case ShortcutConditionType.MOVE:
-                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has move, all good
-                        {
-                            if (pokemon.Moves.Contains(valueToCheck)) // move found
+                    string valueToCheck = eachOne.ToLower();
+                    switch (condition.ConditionType)
+                    {
+                        case ShortcutConditionType.MOVE:
+                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has move, all good
                             {
-                                message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
-                                canTakeShortcut = true;
-                                break;
+                                if (pokemon.Moves.Contains(valueToCheck)) // move found
+                                {
+                                    message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
+                                    canTakeShortcut = true;
+                                    break;
+                                }
                             }
-                        }
-                        break;
-                    case ShortcutConditionType.ABILITY:
-                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has ability, all good
-                        {
-                            if (pokemon.Ability == valueToCheck) // ability found
+                            break;
+                        case ShortcutConditionType.ABILITY:
+                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has ability, all good
                             {
-                                message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
-                                canTakeShortcut = true;
-                                break;
+                                if (pokemon.Ability == valueToCheck) // ability found
+                                {
+                                    message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
+                                    canTakeShortcut = true;
+                                    break;
+                                }
                             }
-                        }
-                        break;
-                    case ShortcutConditionType.POKEMON:
-                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon is there, all good
-                        {
-                            if (pokemon.Species == valueToCheck) // species found
+                            break;
+                        case ShortcutConditionType.POKEMON:
+                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon is there, all good
                             {
-                                message = $"{pokemon.GetInformalName()}";
-                                canTakeShortcut = true;
-                                break;
+                                if (pokemon.Species == valueToCheck) // species found
+                                {
+                                    message = $"{pokemon.GetInformalName()}";
+                                    canTakeShortcut = true;
+                                    break;
+                                }
                             }
-                        }
-                        break;
-                    case ShortcutConditionType.TYPE:
-                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has type, all good
-                        {
-                            if (_backEndData.Dex[pokemon.Species].Types.Contains(valueToCheck)) // type of pokemon found
+                            break;
+                        case ShortcutConditionType.TYPE:
+                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has type, all good
                             {
-                                message = $"{pokemon.GetInformalName()}'s {valueToCheck} type";
-                                canTakeShortcut = true;
-                                break;
+                                if (_backEndData.Dex[pokemon.Species].Types.Contains(valueToCheck)) // type of pokemon found
+                                {
+                                    message = $"{pokemon.GetInformalName()}'s {valueToCheck} type";
+                                    canTakeShortcut = true;
+                                    break;
+                                }
                             }
-                        }
-                        break;
-                    case ShortcutConditionType.ITEM:
-                        foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has item, all good
-                        {
-                            if (pokemon.Item != null && pokemon.Item.Name == valueToCheck) // type of pokemon found
+                            break;
+                        case ShortcutConditionType.ITEM:
+                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has item, all good
                             {
-                                message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
-                                canTakeShortcut = true;
-                                break;
+                                if (pokemon.Item != null && pokemon.Item.Name == valueToCheck) // type of pokemon found
+                                {
+                                    message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
+                                    canTakeShortcut = true;
+                                    break;
+                                }
                             }
-                        }
-                        break;
-                    default:
-                        break;
+                            break;
+                        default:
+                            break;
+                    }
+                    if (canTakeShortcut) break; // Only need to find one
                 }
             }
             return canTakeShortcut;
@@ -748,12 +738,26 @@ namespace IndymonBackendProgram
         /// Adds to event queue, a generic message string. Will be informative (i.e. gives clue to a player)
         /// </summary>
         /// <param name="message">String to add</param>
-        void InfoMessageCommand(string message)
+        void ClueMessageCommand(string message)
         {
             Console.WriteLine($"> {message}"); // Important for debug too
             ExplorationSteps.Add(new ExplorationStep()
             {
-                Type = ExplorationStepType.PRINT_STRING_INFO,
+                Type = ExplorationStepType.PRINT_CLUE,
+                StringParam = message,
+                MillisecondsWait = STANDARD_MESSAGE_PAUSE
+            });
+        }
+        /// <summary>
+        /// Adds to event queue, a generic message regarding pokemon evolution
+        /// </summary>
+        /// <param name="message">String to add</param>
+        void EvolutionMessageCommand(string message)
+        {
+            Console.WriteLine($"> {message}"); // Important for debug too
+            ExplorationSteps.Add(new ExplorationStep()
+            {
+                Type = ExplorationStepType.PRINT_EVOLUTION,
                 StringParam = message,
                 MillisecondsWait = STANDARD_MESSAGE_PAUSE
             });
@@ -857,7 +861,9 @@ namespace IndymonBackendProgram
             Console.Write("About to simulate bots...");
             Console.ReadLine();
             BotBattle automaticBattle = new BotBattle(_backEndData); // Generate bot host
-            string challengeString = "gen9customgame@@@!Team Preview,OHKO Clause,Evasion Moves Clause,Moody Clause";
+            // The challenge string may contain dungeon-specific rules (besides the mandatory ones)
+            List<string> showdownRules = ["!Team Preview", "OHKO Clause", "Evasion Moves Clause", "Moody Clause", .. _dungeonDetails.CustomShowdownRules];
+            string challengeString = $"gen9customgame@@@{string.Join(",", showdownRules)}"; // Assemble resulting challenge string
             (int explorerLeft, _) = automaticBattle.SimulateBotBattle(epxlorer, encounter, nMons, nMons, challengeString); // Initiate battle
             Console.SetCursorPosition(cursorX, cursorY);
             Console.Write($"Explorer left with {explorerLeft} mons. GET THE REPLAY");
@@ -928,8 +934,14 @@ namespace IndymonBackendProgram
                         Console.WriteLine($"> {nextStep.StringParam}"); // Write message
                         consoleOffset = Console.CursorTop; // New console location
                         break;
-                    case ExplorationStepType.PRINT_STRING_INFO:
+                    case ExplorationStepType.PRINT_CLUE:
                         Console.ForegroundColor = ConsoleColor.Yellow; // Sets info color
+                        Console.SetCursorPosition(0, consoleOffset);
+                        Console.WriteLine($"> {nextStep.StringParam}"); // Write message
+                        consoleOffset = Console.CursorTop; // New console location
+                        break;
+                    case ExplorationStepType.PRINT_EVOLUTION:
+                        Console.ForegroundColor = ConsoleColor.Magenta; // Sets info color
                         Console.SetCursorPosition(0, consoleOffset);
                         Console.WriteLine($"> {nextStep.StringParam}"); // Write message
                         consoleOffset = Console.CursorTop; // New console location

@@ -1,6 +1,6 @@
 ﻿using IndymonBackendProgram;
+using Newtonsoft.Json;
 using ShowdownBot;
-using System.Text.Json;
 namespace BotTest
 {
     internal class Program
@@ -8,10 +8,13 @@ namespace BotTest
         static void Main()
         {
             string indymonFile = "C:\\Users\\augus\\Documents\\Indymon\\IndymonBackEnd\\indy.mon";
-            IndymonData dataCont = JsonSerializer.Deserialize<IndymonData>(File.ReadAllText(indymonFile));
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+            };
+            IndymonData dataCont = JsonConvert.DeserializeObject<IndymonData>(File.ReadAllText(indymonFile), settings);
             BotBattle battle = new BotBattle(dataCont.DataContainer);
-            //Console.WriteLine(battle.SimulateBotBattle("bot", "bot2", 2, 2));
-            battle.SimulateBotBattle(dataCont.DataContainer.NpcData["npc 1"], 3);
+            battle.SimulateBotBattle(dataCont.DataContainer.TrainerData["tiago"], 3);
         }
     }
 }

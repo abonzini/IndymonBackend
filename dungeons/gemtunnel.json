@@ -192,10 +192,10 @@
 	  "ShortcutConditions": [
 		{
 			"ConditionType": "MOVE",
-			"Which": "Rock Smash"
+			"Which": ["Rock Smash"]
 		}
 	  ],
-	  "ShortcutClue": "There's a smaller tunnel that you could crawl on, but it's completely filled with rocks.",
+	  "ShortcutClue": "There's a smaller tunnel that you could crawl on, but it's completely filled with brittle rocks.",
 	  "ShortcutResolution": "Your $1 cleared the way."
     },
 	{
@@ -226,7 +226,7 @@
 	  "ShortcutConditions": [
 		{
 			"ConditionType": "MOVE",
-			"Which": "Dig"
+			"Which": ["Dig"]
 		}
 	  ],
 	  "ShortcutClue": "The soil in this area is soft. You may be able to dig a hole.",
@@ -260,23 +260,11 @@
 	  "ShortcutConditions": [
 		{
 			"ConditionType": "MOVE",
-			"Which": "Power Gem"
-		},
-		{
-			"ConditionType": "MOVE",
-			"Which": "Diamond Storm"
+			"Which": ["Power Gem", "Diamond Storm", "Rock Polish"]
 		},
 		{
 			"ConditionType": "POKEMON",
-			"Which": "Diancie"
-		},
-		{
-			"ConditionType": "POKEMON",
-			"Which": "Sableye"
-		},
-		{
-			"ConditionType": "POKEMON",
-			"Which": "Carbink"
+			"Which": ["Diancie", "Sableye", "Carbink"]
 		}
 	  ],
 	  "ShortcutClue": "You see a wall made of dense diamonds and gemstones. It's magnificent. You also see a way out refracted through the crystals. But you'll need a Pokemon that can understand gemstones perfectly to find a way through safely.",
@@ -285,7 +273,7 @@
   ],
   "BossEvent": {
     "EventType": "BOSS",
-    "PreEventString": "You finally find an underground lake. The gemstones embedded on the wall are reflected on the surface. In the center, a small Pokemon looks at you. It wants to test what lies within your heart.",
+    "PreEventString": "You finally find the end of the tunnel. There's an underground lake. The gemstones embedded on the wall are reflected on the surface. In the center, a small Pokemon looks at you. It wishes to see what your heart holds.",
     "PostEventString": "The creature is satisfied, and gives you $1 as a sign of respect."
   },
   "CampingEvent": {
@@ -293,6 +281,7 @@
     "PreEventString": "Even though it's dark, rest is important. You should find some time for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
+  "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

@@ -60,7 +60,7 @@
         /// <returns></returns>
         public static HashSet<string> GetDancingMoves()
         {
-            return ["aqua step", "clangorous soul", "victory dance", "revelation dance", "swords dance", "petal dance", "rain dance", "feather dance", "teeter dance", "dragon dance", "lunar dance", "quiver dance", "fiery dance"];
+            return ["aqua step", "clangorous soul", "victory dance", "revelation dance", "swords dance", "petal dance", "feather dance", "teeter dance", "dragon dance", "lunar dance", "quiver dance", "fiery dance"];
         }
     }
 }

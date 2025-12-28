@@ -46,10 +46,10 @@ namespace ParsersAndData
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public ShortcutConditionType ConditionType { get; set; }
-        public string Which { get; set; }
+        public List<string> Which { get; set; } = new List<string>();
         public override string ToString()
         {
-            return $"{ConditionType.ToString()} -> {Which}";
+            return $"{ConditionType} -> {Which}";
         }
     }
     public class DungeonFloor
@@ -99,6 +99,7 @@ namespace ParsersAndData
         public RoomEvent CampingEvent { get; set; }
         public string NextDungeon { get; set; }
         public string NextDungeonShortcut { get; set; }
+        public List<string> CustomShowdownRules { get; set; }
         public override string ToString()
         {
             return Name;
