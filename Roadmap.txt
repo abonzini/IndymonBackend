@@ -1,4 +1,4 @@
-Mini Meadows -> Raikou/Entei -> Sun Stone
+Mini Meadows -> Raikou/Entei/Thundurus(both)-> Sun Stone
 	Power Plant -> Zapdos/Zeraora -> Thunder Stone
 	Desert -> Regieleki
 Berry Forest -> Shaymin/Celebi -> Leaf Stone
@@ -11,7 +11,7 @@ Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone
 	Underwater -> Tapu Fini/Volcanion -> Water Stone
 	Faraway Island -> Regidrago 
 White Monastery -> Justice -> Dawn Stone
-	Sky Tower -> Chien Pao/Articuno -> Ice Stone
+	Sky Tower -> Enamorus(both)/Articuno/ArticunoGalar -> Ice Stone
 	Glacier -> Regice
 
 // REWoRK
