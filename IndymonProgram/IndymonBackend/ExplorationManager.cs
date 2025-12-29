@@ -244,7 +244,8 @@ namespace IndymonBackendProgram
                         Console.WriteLine($"Finds {itemFound}");
                         string itemString = roomEvent.PreEventString.Replace("$1", itemFound);
                         GenericMessageCommand(itemString); // Prints the message but we know it could have a $1
-                        GenericMessageCommand(roomEvent.PostEventString);
+                        itemString = roomEvent.PostEventString.Replace("$1", itemFound);
+                        GenericMessageCommand(itemString);
                         AddRareItemPrize(itemFound, prizes);
                     }
                     break;
@@ -406,6 +407,32 @@ namespace IndymonBackendProgram
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
+                case RoomEventType.BIG_HEAL:
+                    {
+                        Console.WriteLine("Single big heal to a mon");
+                        PokemonSet mon = trainerData.Teamsheet.OrderBy(p => p.ExplorationStatus.HealthPercentage).FirstOrDefault();
+                        mon.ExplorationStatus.HealthPercentage = 100;
+                        string message = roomEvent.PreEventString.Replace("$1", mon.GetInformalName());
+                        GenericMessageCommand(roomEvent.PreEventString);
+                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                        message = roomEvent.PostEventString.Replace("$1", mon.GetInformalName());
+                        GenericMessageCommand(message);
+                    }
+                    break;
+                case RoomEventType.PP_HEAL:
+                    {
+                        Console.WriteLine("Cures all mons PP");
+                        GenericMessageCommand(roomEvent.PreEventString);
+                        foreach (PokemonSet mon in trainerData.Teamsheet)
+                        {
+                            for (int i = 0; i < mon.ExplorationStatus.MovePp.Length; i++) // Restores 3 pp to each move
+                            {
+                                mon.ExplorationStatus.MovePp[i] += 3;
+                            }
+                        }
+                        GenericMessageCommand(roomEvent.PostEventString);
+                    }
+                    break;
                 case RoomEventType.STATUS_TRAP:
                     {
                         Console.WriteLine("A trap that will status one mon");
@@ -431,7 +458,8 @@ namespace IndymonBackendProgram
                         }
                         statusedMon.ExplorationStatus.NonVolatileStatus = status;
                         UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                        GenericMessageCommand(roomEvent.PostEventString);
+                        string postMessage = roomEvent.PostEventString.Replace("$1", statusedMon.GetInformalName());
+                        GenericMessageCommand(postMessage);
                     }
                     break;
                 case RoomEventType.POKEMON_BATTLE:
@@ -503,6 +531,110 @@ namespace IndymonBackendProgram
                             foreach (PokemonSet pokemonSpecies in encounterPokemon)
                             {
                                 AddPokemonPrize(pokemonSpecies.Species, floor, pokemonSpecies.Shiny, prizes); // Add all mons
+                            }
+                        }
+                    }
+                    break;
+                case RoomEventType.SWARM:
+                    // Similar to aplha but there's 6 enemy mons
+                    {
+                        const int NUMBER_OF_WILD_POKEMON = 6; // Time to balance-hardcode this
+                        Console.WriteLine("Swarm battle");
+                        // Items obtained during the fight (commons)
+                        List<string> pokemonThisFloor = _dungeonDetails.PokemonEachFloor[0]; // Always from first floor
+                        List<PokemonSet> encounterPokemon = new List<PokemonSet>();
+                        for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
+                        {
+                            string pokemonSpecies = pokemonThisFloor[RandomNumberGenerator.GetInt32(pokemonThisFloor.Count)].Trim().ToLower();
+                            bool isShiny = (RandomNumberGenerator.GetInt32(SHINY_CHANCE) == 1);
+                            int level = RandomNumberGenerator.GetInt32(60, 76); // Lvl between 60-75
+                            PokemonSet pokemon = new PokemonSet()
+                            {
+                                Species = pokemonSpecies,
+                                Shiny = isShiny,
+                                Level = level,
+                            };
+                            Console.WriteLine($"Mon: {pokemonSpecies} lvl {level}");
+                            encounterPokemon.Add(pokemon); // Add mon to the set
+                        }
+                        // Ok now begin event
+                        GenericMessageCommand(roomEvent.PreEventString);
+                        TrainerData wildMonTeam = new TrainerData() // Create the blank trainer
+                        {
+                            Avatar = "unknown",
+                            Name = "wild babies",
+                            AutoItem = false,
+                            AutoTeam = true,
+                            Teamsheet = encounterPokemon,
+                        };
+                        wildMonTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        Console.Write("Encounter resolution: ");
+                        int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
+                        if (remainingMons == 0) // Means player lost
+                        {
+                            Console.WriteLine("Player lost");
+                            roomCleared = false; // Failure at clearing room
+                            GenericMessageCommand($"You blacked out...");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Player won");
+                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                            GenericMessageCommand(roomEvent.PostEventString);
+                            foreach (PokemonSet pokemonSpecies in encounterPokemon)
+                            {
+                                AddPokemonPrize(pokemonSpecies.Species, 0, pokemonSpecies.Shiny, prizes); // Add all mons (they're floor 0)
+                            }
+                        }
+                    }
+                    break;
+                case RoomEventType.UNOWN:
+                    // Weird one, select 6 unowns, give them random moves
+                    {
+                        const int NUMBER_OF_WILD_POKEMON = 6; // Time to balance-hardcode this
+                        Console.WriteLine("Unown battle");
+                        // Items obtained during the fight (commons)
+                        List<PokemonSet> encounterPokemon = new List<PokemonSet>();
+                        for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
+                        {
+                            char letter = (char)RandomNumberGenerator.GetInt32('A', 'Z' + 1); // Shoudl give me a random letter lol
+                            string pokemonSpecies = (letter == 'A') ? $"Unown" : $"Unown-{letter}"; // Unown or Unown-*
+                            bool isShiny = (RandomNumberGenerator.GetInt32(SHINY_CHANCE) == 1);
+                            PokemonSet pokemon = new PokemonSet()
+                            {
+                                Species = pokemonSpecies,
+                                Shiny = isShiny,
+                            };
+                            Console.WriteLine($"Mon: {pokemonSpecies}");
+                            encounterPokemon.Add(pokemon); // Add mon to the set
+                        }
+                        // Ok now begin event
+                        GenericMessageCommand(roomEvent.PreEventString);
+                        TrainerData wildMonTeam = new TrainerData() // Create the blank trainer
+                        {
+                            Avatar = "unknown",
+                            Name = "sybols",
+                            AutoItem = false,
+                            AutoTeam = true,
+                            Teamsheet = encounterPokemon,
+                        };
+                        wildMonTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        Console.Write("Encounter resolution: ");
+                        int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
+                        if (remainingMons == 0) // Means player lost
+                        {
+                            Console.WriteLine("Player lost");
+                            roomCleared = false; // Failure at clearing room
+                            GenericMessageCommand($"You blacked out...");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Player won");
+                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                            GenericMessageCommand(roomEvent.PostEventString);
+                            foreach (PokemonSet pokemonSpecies in encounterPokemon)
+                            {
+                                AddPokemonPrize(pokemonSpecies.Species, 0, pokemonSpecies.Shiny, prizes); // Add all unowns (they're floor 0)
                             }
                         }
                     }

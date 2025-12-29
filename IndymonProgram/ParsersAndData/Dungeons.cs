@@ -20,6 +20,10 @@ namespace ParsersAndData
         NPC_BATTLE, // A trainer npc battles you
         RESEARCHER, // RESEARCHER gives you a random plate
         PARADOX, // Paradox Team member gives you a TR
+        SWARM, // Fight 6 lvl 60-75 from first floor
+        BIG_HEAL, // One specific mon heals a lot
+        PP_HEAL, // 3PP heal
+        UNOWN, // Unown event, 6 random unown with wacky moves
     }
     public class RoomEvent
     {

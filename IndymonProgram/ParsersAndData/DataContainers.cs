@@ -63,6 +63,7 @@ namespace ParsersAndData
         public bool Shiny { get; set; } = false;
         public string Ability { get; set; } = "";
         public string[] Moves { get; set; } = ["", "", "", ""];
+        public int Level { get; set; } = 100;
         public Item Item { get; set; } = null;
         public ExplorationStatus ExplorationStatus { get; set; } = null;
         /// <summary>
@@ -127,7 +128,15 @@ namespace ParsersAndData
         /// <param name="switchChance">Chance that the last move is empty (switch)</param>
         public void RandomizeMon(DataContainers backEndData, TeambuildSettings settings, int switchChance)
         {
-            Pokemon pokemonBackendData = backEndData.Dex[Species];
+            Pokemon pokemonBackendData;
+            if (Species.ToLower().Contains("unown")) // Weird case because the species is always unown even if many aesthetic formes that are not in the dex
+            {
+                pokemonBackendData = backEndData.Dex["unown"];
+            }
+            else
+            {
+                pokemonBackendData = backEndData.Dex[Species];
+            }
             // Get data, gets a smart set or just legal depending if randomizing is smart
             HashSet<string> legalAbilities = settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartAbilities() : pokemonBackendData.GetLegalAbilities();
             HashSet<string> legalMoves = settings.HasFlag(TeambuildSettings.SMART) ? pokemonBackendData.GetSmartMoves() : pokemonBackendData.GetLegalMoves();
@@ -135,6 +144,11 @@ namespace ParsersAndData
             if (GetTera(backEndData) != "" && pokemonBackendData.Moves.Contains("tera blast")) // Mons that can tera will be able to use tera blast regardless if previously banned move
             {
                 legalMoves.Add("tera blast");
+            }
+            if (Species.ToLower().Contains("unown")) // And then again, weird mechanic because I can only allow the moves that start with the unown letter
+            {
+                char letter = Species.ToLower().Last();
+                legalMoves.IntersectWith(legalMoves.Where(m => m.StartsWith(letter))); // Reduce  
             }
             // First, get the mon an ability
             Ability = legalAbilities.ElementAt(RandomNumberGenerator.GetInt32(legalAbilities.Count)); // Get a random one
@@ -352,7 +366,7 @@ namespace ParsersAndData
             packedStrings.Add("");
             packedStrings.Add(""); // No IVs I don't care
             packedStrings.Add(Shiny ? "S" : ""); // Depending if shiny
-            packedStrings.Add(""); // Always lvl 100
+            packedStrings.Add(Level.ToString()); // Mon level is "usually" 100
             string lastPackedString = $",,,,,{GetTera(backEndData)}"; // Add the "remaining" useless stuff needed for tera, etc
             if (ExplorationStatus != null) // This is new, status will be ,%health,status condition too after the tera, so it can be picked up from a modified showdown
             {
@@ -375,7 +389,7 @@ namespace ParsersAndData
         EXPLORATION = 1,
         SMART = 2,
         MONOTYPE = 4, /// Share one specific type
-        DANCERS = 8 /// Every mon must have -dance aqua step or clangorous soul
+        DANCERS = 8, /// Every mon must have -dance aqua step or clangorous soul
     }
     public class TrainerData
     {

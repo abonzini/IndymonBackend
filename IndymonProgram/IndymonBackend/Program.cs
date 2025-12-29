@@ -292,6 +292,14 @@ namespace IndymonBackendProgram
                             Console.WriteLine("Loaded dex and moves correctly");
                             _allData.DataContainer.Dex = monData;
                             _allData.DataContainer.MoveData = moveData;
+                            // There's one last weird detail, Unowns in this game actually have all moves with their corresponding letter, so need to add all moves and then filter
+                            // Same as mons with sketch so...
+                            List<Pokemon> allMoveMons = monData.Values.Where(p => p.Name.ToLower().Contains("unown") || p.Moves.Contains("sketch")).ToList();
+                            HashSet<string> allMoves = moveData.Keys.ToHashSet(); // Get a nice hash with all moves
+                            foreach (Pokemon mon in allMoveMons)
+                            {
+                                mon.Moves = allMoves; // This mon now learns all moves
+                            }
                         }
                     }
                 }
