@@ -1329,14 +1329,14 @@ namespace IndymonBackendProgram
                 char firstTile, lastTile, middleTile;
                 if (fromX < toX) // Left -> right
                 {
-                    firstTile = floorDataToUse.SwShortcutTile;
-                    lastTile = floorDataToUse.NeShortcutTile;
+                    firstTile = floorDataToUse.NwShortcutTile;
+                    lastTile = floorDataToUse.SeShortcutTile;
                     middleTile = floorDataToUse.HorizontalShortcutTile;
                 }
                 else if (fromX > toX) // Right -> left
                 {
-                    firstTile = floorDataToUse.SeShortcutTile;
-                    lastTile = floorDataToUse.NwShortcutTile;
+                    firstTile = floorDataToUse.NeShortcutTile;
+                    lastTile = floorDataToUse.SwShortcutTile;
                     middleTile = floorDataToUse.HorizontalShortcutTile;
                 }
                 else // Just up, which is just in end of dungeon

@@ -239,12 +239,12 @@
       "PassageColor": "Cyan",
       "VerticalPassageTile": "▒",
       "ShortcutColor": "White",
-      "NeShortcutTile": "𓆙",
-      "NwShortcutTile": "𓆙",
-      "SeShortcutTile": "𓆙",
-      "SwShortcutTile": "𓆙",
-      "HorizontalShortcutTile": "𓆙",
-      "VerticalShortcutTile": "𓆙",
+      "NeShortcutTile": "龍",
+      "NwShortcutTile": "龍",
+      "SeShortcutTile": "龍",
+      "SwShortcutTile": "龍",
+      "HorizontalShortcutTile": "龍",
+      "VerticalShortcutTile": "龍",
 	  "ShortcutConditions": [
 		{
 			"ConditionType": "MOVE",
