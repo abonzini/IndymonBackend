@@ -26,10 +26,12 @@
         OPP_SLEEP, // Moves that need opponent to be asleep
         OPP_PARALYSIS, // Moves that require opponent to be paralyzed
         GIVE_ITEM, // Moves that give item to enemy and/or discard item from owner,
-        CRITICAL, // Sniper
+        CRITICAL, // Sniper, self debuff
         NEED_OPP_ITEM, // Moves that need opp to have an item to be useful
         POSITIVE_STAT_BOOST, // Moves that appreciate many stat boosts
-        SETUP_STATUS // Setup status moves
+        SETUP_STATUS, // Setup status moves
+        NO_MISS, // Moves that don't miss
+        SELF_DEBUFF, // Debuff user (contrary, sure crit)
     }
     public enum MoveCategory
     {
