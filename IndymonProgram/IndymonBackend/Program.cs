@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using ParsersAndData;
+using System.Security.Cryptography;
 
 namespace IndymonBackendProgram
 {
@@ -115,6 +116,80 @@ namespace IndymonBackendProgram
                             Console.ForegroundColor = ConsoleColor.White;
                         }
                         break;
+                    case "11":
+                        {
+                            TrainerData chosenTrainer = Utilities.ChooseOneTrainerDialog(TeambuildSettings.NONE, _allData.DataContainer);
+                            string obtainedMon = chosenTrainer.Teamsheet[RandomNumberGenerator.GetInt32(chosenTrainer.Teamsheet.Count)].Species;
+                            Console.WriteLine($"Obtained child version of {obtainedMon}");
+                        }
+                        break;
+                    case "12":
+                        {
+                            List<string> options = [.. _allData.DataContainer.Dungeons.Keys];
+                            Console.WriteLine("Which dungeon?");
+                            for (int i = 0; i < options.Count; i++)
+                            {
+                                Console.Write($"{i + 1}: {options[i]}, ");
+                            }
+                            Console.WriteLine("");
+                            string dungeon = options[int.Parse(Console.ReadLine()) - 1];
+                            Dungeon theDungeon = _allData.DataContainer.Dungeons[dungeon];
+                            Console.WriteLine("Which type of reward?\n" +
+                                "\t1 - Trainer: 2 commons, 1 disk/plate\n" +
+                                "\t2 - Gym Leader: 2 commons, 1 disk/plate, 1 rare\n" +
+                                "\t3 - Elite 4: 4 commons, 1 disk/plate, 1 rare\n" +
+                                "\t4 - Champion: 4 commons, 1 disk/plate, 2 rares");
+                            string choice = Console.ReadLine();
+                            int nCommons = 0, nRares = 0;
+                            bool isDisk = (RandomNumberGenerator.GetInt32(100000) % 2 == 0); // Random even/odd
+                            switch (choice)
+                            {
+                                case "1":
+                                    nCommons = 2;
+                                    nRares = 0;
+                                    break;
+                                case "2":
+                                    nCommons = 2;
+                                    nRares = 1;
+                                    break;
+                                case "3":
+                                    nCommons = 4;
+                                    nRares = 1;
+                                    break;
+                                case "4":
+                                    nCommons = 4;
+                                    nRares = 2;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            List<string> commons = new List<string>();
+                            for (int i = 0; i < nCommons; i++)
+                            {
+                                string item = theDungeon.CommonItems[RandomNumberGenerator.GetInt32(theDungeon.CommonItems.Count)];
+                                commons.Add(item);
+                            }
+                            if (isDisk)
+                            {
+                                string obtainedDisk = _allData.DataContainer.MoveItemData.Keys.ToList()[RandomNumberGenerator.GetInt32(_allData.DataContainer.MoveItemData.Count)]; // Get random move disk
+                                commons.Add(obtainedDisk);
+                            }
+                            else
+                            {
+                                List<string> platesList = [.. _allData.DataContainer.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
+                                string chosenPlate = platesList[RandomNumberGenerator.GetInt32(platesList.Count)];
+                                commons.Add(chosenPlate);
+                            }
+                            List<string> rares = new List<string>();
+                            for (int i = 0; i < nRares; i++)
+                            {
+                                string item = theDungeon.RareItems[RandomNumberGenerator.GetInt32(theDungeon.RareItems.Count)];
+                                rares.Add(item);
+                            }
+                            Console.WriteLine($"Commmon items: {string.Join(",", commons)}");
+                            Console.WriteLine($"Rare items: {string.Join(",", rares)}");
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -148,7 +223,9 @@ namespace IndymonBackendProgram
                 "7 - Generate exploration, choose place, player, etc\n" +
                 "8 - Simulate current exploration\n" +
                 "9 - Animate resolved exploration\n" +
-                "10 - Resolve finished exploration (if needed, e.g. move to next dungeon)\n"
+                "10 - Resolve finished exploration (if needed, e.g. move to next dungeon)\n" +
+                "11 - Random Pokemon from trainer (Favor resolution)\n" +
+                "12 - Random exploration rewards (tiered favor resolutions)\n"
                 );
         }
         /// <summary>
@@ -474,8 +551,8 @@ namespace IndymonBackendProgram
         private static string FormatTournamentHistory()
         {
             // Firstly, just sort the lists
-            _allData.TournamentHistory.PlayerStats = [.. _allData.TournamentHistory.PlayerStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.GamesWon).ThenByDescending(c => c.Diff)];
-            _allData.TournamentHistory.NpcStats = [.. _allData.TournamentHistory.NpcStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.GamesWon).ThenByDescending(c => c.Diff)];
+            _allData.TournamentHistory.PlayerStats = [.. _allData.TournamentHistory.PlayerStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.GameWinrate).ThenByDescending(c => c.Diff)];
+            _allData.TournamentHistory.NpcStats = [.. _allData.TournamentHistory.NpcStats.OrderByDescending(c => c.TournamentWins).ThenByDescending(c => c.GameWinrate).ThenByDescending(c => c.Diff)];
             // Ok now I need to do multiple row and column csv:
             int nRows = 2 + _allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count; // this is how many rows It'll have (label + players)
             int nColumns = 10 + 3 * (_allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count); // Cols, will be the fixed + 3 per participant

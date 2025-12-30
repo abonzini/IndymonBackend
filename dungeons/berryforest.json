@@ -202,10 +202,10 @@
 	  "ShortcutConditions": [
 		{
 				"ConditionType": "MOVE",
-				"Which": "Cut"
+				"Which": ["Aerial Ace", "Air Cutter", "Air Slash", "Aqua Cutter", "Ceaseless Edge", "Fury Cutter", "Leaf Blade", "Night Slash", "Psycho Cut", "Razor Shell", "Sacred Sword", "Slash", "Solar Blade", "Stone Axe", "X-Scissor", "Behemoth Blade", "Bitter Blade", "Cross Poison", "Cut", "Kowtow Cleave", "Mighty Cleave", "Population Bomb", "Psyblade", "Razor Leaf", "Secret Sword", "Tachyon Cutter"]
 		}
 	  ],
-	  "ShortcutClue": "There's an old pathway leading deeper into the forest, but dense shrubs block your way.",
+	  "ShortcutClue": "There's an old pathway leading deeper into the forest, but dense shrubs that need to be cut down block your way.",
 	  "ShortcutResolution": "Your $1 allows you to find a shortcut through a flowery passage."
     },
 	{
@@ -236,15 +236,11 @@
 	  "ShortcutConditions": [
 		{
 			"ConditionType": "MOVE",
-			"Which": "Bug Bite"
-		},
-		{
-			"ConditionType": "MOVE",
-			"Which": "Incinerate"
+			"Which": ["Bug Bite", "Incinerate", "Pluck"]
 		},
 		{
 			"ConditionType": "ABILITY",
-			"Which": "Gluttony"
+			"Which": ["Gluttony"]
 		}
 	  ],
 	  "ShortcutClue": "You find a potential shortcut by crawling through a hollow tree trunk. However, it is completely full of berries. You need a way to get rid of a lot of berries as fast as possible.",
@@ -278,7 +274,7 @@
 	  "ShortcutConditions": [
 		{
 				"ConditionType": "MOVE",
-				"Which": "Defog"
+				"Which": ["Defog"]
 		}
 	  ],
 	  "ShortcutClue": "The forest starts to get a little creepy, and the way forward is covered in fog.",
@@ -295,6 +291,7 @@
     "PreEventString": "You find a clearing in the forest. The air is pure, it's a perfect place for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
+  "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

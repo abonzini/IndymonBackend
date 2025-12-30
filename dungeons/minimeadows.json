@@ -193,10 +193,10 @@
 	  "ShortcutConditions": [
 		{
 				"ConditionType": "MOVE",
-				"Which": "Strength"
+				"Which": ["Strength"]
 		}
 	  ],
-	  "ShortcutClue": "You see a boulder blocking a natural passage.",
+	  "ShortcutClue": "You see a boulder blocking a natural passage, you'll need to push it aside.",
 	  "ShortcutResolution": "Your $1 lets you move the boulder away. You find a ramp that leads you downhill."
     },
 	{
@@ -227,7 +227,7 @@
 	  "ShortcutConditions": [
 		{
 				"ConditionType": "MOVE",
-				"Which": "Bulldoze"
+				"Which": ["Bulldoze"]
 		}
 	  ],
 	  "ShortcutClue": "As the landscape gets more dry, you see piles of mud and debris which could be cleared to find a shortcut.",
@@ -261,46 +261,14 @@
 	  "ShortcutConditions": [
 		{
 				"ConditionType": "MOVE",
-				"Which": "Signal Beam"
-		},
-		{
-				"ConditionType": "MOVE",
-				"Which": "Heat Wave"
-		},
-		{
-				"ConditionType": "MOVE",
-				"Which": "Shock Wave"
-		},
-		{
-				"ConditionType": "MOVE",
-				"Which": "Sludge Wave"
-		},
-		{
-				"ConditionType": "MOVE",
-				"Which": "Thunder Wave"
-		},
-		{
-				"ConditionType": "MOVE",
-				"Which": "Wave Crash"
-		},
-		{
-				"ConditionType": "MOVE",
-				"Which": "Vacuum Wave"
-		},
-		{
-				"ConditionType": "MOVE",
-				"Which": "Thousand Waves"
-		},
-		{
-				"ConditionType": "MOVE",
-				"Which": "Psywave"
+				"Which": ["Signal Beam", "Heat Wave", "Shock Wave", "Sludge Wave", "Thunder Wave", "Wave Crash", "Vacuum Wave", "Thousand Waves", "Psywave"]
 		},
 		{
 				"ConditionType": "ITEM",
-				"Which": "Wave Incense"
+				"Which": ["Wave Incense"]
 		}
 	  ],
-	  "ShortcutClue": "There's a strange hatch buried in the ground. It has an electric security system. You think a strong enough wave or signal may override it.",
+	  "ShortcutClue": "There's a strange hatch buried in the ground. It has an electric security system. You think a strong enough WAVE or SIGNAL may override it.",
 	  "ShortcutResolution": "Your $1 overwhelms the security system. The hatch opens..."
     }
   ],
@@ -314,6 +282,7 @@
     "PreEventString": "The sun is shining and there's a gentle breeze. A perfect place for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
+  "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

@@ -190,10 +190,10 @@
 	  "ShortcutConditions": [
 		{
 				"ConditionType": "MOVE",
-				"Which": "Surf"
+				"Which": ["Surf"]
 		}
 	  ],
-	  "ShortcutClue": "You could probably swim across to reach the sandbank quicker.",
+	  "ShortcutClue": "You could probably swim across to reach ahead faster.",
 	  "ShortcutResolution": "Your $1 allows you to reach the distant sandbanks."
     },
 	{
@@ -224,10 +224,10 @@
 	  "ShortcutConditions": [
 		{
 				"ConditionType": "MOVE",
-				"Which": "Whirlpool"
+				"Which": ["Whirlpool"]
 		}
 	  ],
-	  "ShortcutClue": "You can swim across to the next sandbanks, but the currents are strong and whirlpools are forming...",
+	  "ShortcutClue": "You can swim across to the next set of sandbanks, but the currents are strong and whirlpools are forming...",
 	  "ShortcutResolution": "Your $1 lets you cross safely."
     },
 	{
@@ -258,7 +258,7 @@
 	  "ShortcutConditions": [
 		{
 			"ConditionType": "MOVE",
-			"Which": "Dive"
+			"Which": ["Dive"]
 		}
 	  ],
 	  "ShortcutClue": "In this spot, you can't see the sea floor. Just a dark abbyss below.",
@@ -275,6 +275,7 @@
     "PreEventString": "Nothing like the relaxing sunset to forget all of your troubles. It's a perfect place for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
+  "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

@@ -20,6 +20,10 @@ namespace ParsersAndData
         NPC_BATTLE, // A trainer npc battles you
         RESEARCHER, // RESEARCHER gives you a random plate
         PARADOX, // Paradox Team member gives you a TR
+        SWARM, // Fight 6 lvl 60-75 from first floor
+        BIG_HEAL, // One specific mon heals a lot
+        PP_HEAL, // 3PP heal
+        UNOWN, // Unown event, 6 random unown with wacky moves
     }
     public class RoomEvent
     {
@@ -46,10 +50,10 @@ namespace ParsersAndData
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public ShortcutConditionType ConditionType { get; set; }
-        public string Which { get; set; }
+        public List<string> Which { get; set; } = new List<string>();
         public override string ToString()
         {
-            return $"{ConditionType.ToString()} -> {Which}";
+            return $"{ConditionType} -> {Which}";
         }
     }
     public class DungeonFloor
@@ -99,6 +103,7 @@ namespace ParsersAndData
         public RoomEvent CampingEvent { get; set; }
         public string NextDungeon { get; set; }
         public string NextDungeonShortcut { get; set; }
+        public List<string> CustomShowdownRules { get; set; }
         public override string ToString()
         {
             return Name;

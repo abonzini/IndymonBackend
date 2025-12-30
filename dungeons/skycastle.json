@@ -1,0 +1,308 @@
+{
+  "Name": "Sky Castle",
+  "GoesDownwards": false,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "On top of a pedestal, there's a $1.",
+      "PostEventString": "You pick it up and continue on your way."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "A $1 is protecting the area, it sees you as a threat to the Sky Castle.",
+      "PostEventString": "You defeated the guardian and took its $1 as a prize."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "A $1 is protecting the area, it sees you as a threat to the Sky Castle.",
+      "PostEventString": "You defeated the guardian and took its $1 as a prize."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "Floating in the air, a huge shining crystal talks to you: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on."
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "You reach an area where the temperature is warmer and the air is pure.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "BIG_HEAL",
+      "PreEventString": "You can't believe your eyes. You have found the famed fountain of life.",
+      "PostEventString": "Before you can react, $1 leaps and drinks from it. It is fully healed."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "You reach an area where the temperature is warmer and the air is pure.",
+      "PostEventString": "Your Pokemon have recovered from harmful conditions."
+    },
+	{
+      "EventType": "PP_HEAL",
+      "PreEventString": "Like bubbles in the air, you see unripe leppa berries floating. It is a bizarre sight.",
+      "PostEventString": "You and your Pokemon eat some of them. Their moves recover some PP."
+    },
+	{
+      "EventType": "SWARM",
+      "PreEventString": "A group of baby pokemon are looking at you. They've never seen a human before, and they're terrified. They decide to attack you, hopefully their last stand will protect their home.",
+      "PostEventString": "You have succesfully defeated the babies."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "You can't believe your eyes. You have found the famed fountain of life.",
+      "PostEventString": "You approach it, but it was a trap, your Pokemon fall into a pitfall trap, and sustain some damage."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "As you climb, the environment becomes more hostile. The low temperatures are extremely dangerous.",
+      "PostEventString": "You try your best, but the harsh temperature have affected $1, it is now frozem.",
+	  "SpecialParams": "frz"
+    },
+	{
+      "EventType": "RESEARCHER",
+      "PreEventString": "The walls of the castle contain a lot of ancient texts and tablets. No one truly knows the significance of these texts.",
+      "PostEventString": "You pick up a $1 that was embedded on a wall. Only a small fraction of the vast knowledge found in this place."
+    },
+	{
+      "EventType": "UNOWN",
+      "PreEventString": "You enter a set of ruins unlike all previous ones. This one contains weird glypths embedded in the walls. Suddenly, the glyphs come alive and start attacking!.",
+      "PostEventString": "Huh..."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Drowzee",
+		"Mr. Mime-Galar",
+		"Smoochum",
+		"Dratini",
+		"Togepi",
+		"Natu",
+		"Spoink",
+		"Swablu",
+		"Abra",
+		"Baltoy",
+		"Chingling",
+		"Drifloon",
+		"Munna",
+		"Gothita",
+		"Rufflet",
+		"Honedge",
+		"Minior",
+		"Bagon"
+	],
+	[
+		"Hypno",
+		"Lickitung",
+		"Jynx",
+		"Dragonair",
+		"Togetic",
+		"Xatu",
+		"Delibird",
+		"Grumpig",
+		"Lunatone",
+		"Solrock",
+		"Kadabra",
+		"Castform",
+		"Chimecho",
+		"Bronzor",
+		"Musharna",
+		"Sigilyph",
+		"Gothorita",
+		"Braviary",
+		"Doublade",
+		"Minior",
+		"Shelgon"
+	],
+	[
+		"Lickilicky",
+		"Mr. Rime",
+		"Gyarados",
+		"Aerodactyl",
+		"Dragonite",
+		"Togekiss",
+		"Altaria",
+		"Alakazam",
+		"Claydol",
+		"Drifblim",
+		"Bronzong",
+		"Gothitelle",
+		"Braviary-Hisui",
+		"Aegislash",
+		"Drampa",
+		"Salamence"
+	],
+	[
+		"Articuno",
+		"Articuno-Galar",
+		"Enamorus",
+		"Enamorus-Therian"
+	]
+  ],
+  "CommonItems": [
+		"Health Feather",
+		"Muscle Feather",
+		"Resist Feather",
+		"Genius Feather",
+		"Clever Feather",
+		"Swift Feather",
+		"Scout Feather",
+		"Wall Feather",
+		"Scholar Feather",
+		"Force-Field Feather",
+		"Athlete Feather",
+		"Bruiser Feather",
+		"Danger Feather",
+		"Zen Feather",
+		"Assassin Feather",
+		"Phantom Feather",
+		"Tank Feather",
+		"Guardian Feather",
+		"Amnesia Feather",
+		"Sniper Feather",
+		"Mystic Feather",
+		"Haban Berry",
+		"Colbur Berry",
+		"Yache Berry"
+  ],
+  "RareItems": [
+		"Rainbow Feather",
+		"Metronome",
+		"Dragon Fang",
+		"Twisted Spoon",
+		"Clear Amulet",
+		"Odd Incense",
+		"Sharp Beak",
+		"Assault Vest",
+		"Big Nugget",
+		"Sky Castle Ticket"
+  ],
+  "BossItem": "Ice Stone",
+  "Floors": [
+    {
+      "RoomColor": "White",
+      "NeWallTile": "▍",
+      "NwWallTile": "▍",
+      "SeWallTile": "≈",
+      "SwWallTile": "≈",
+      "EWallTile": "▞",
+      "WWallTile": "▚",
+      "NWallTile": "▍",
+      "SWallTile": "≈",
+	  "EWallPassageTile": "▫",
+      "WWallPassageTile": "▫",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": "~",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "DarkGray",
+      "VerticalPassageTile": "▮",
+      "ShortcutColor": "Gray",
+      "NeShortcutTile": "~",
+      "NwShortcutTile": "~",
+      "SeShortcutTile": "~",
+      "SwShortcutTile": "~",
+      "HorizontalShortcutTile": "~",
+      "VerticalShortcutTile": "~",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": ["Autotomize"]
+		},
+		{
+			"ConditionType": "ABILITY",
+			"Which": ["Light Metal", "Levitate"]
+		},
+		{
+			"ConditionType": "ITEM",
+			"Which": ["Float Stone"]
+		}
+	  ],
+	  "ShortcutClue": "You can walk through the clouds in this area, but they won't support much weight. Try to make sure you can lower your party's weight somehow.",
+	  "ShortcutResolution": "Your $1 allows the party to be light enough, you can take the shortcut through the clouds."
+    },
+	{
+      "RoomColor": "DarkCyan",
+      "NeWallTile": " ",
+      "NwWallTile": " ",
+      "SeWallTile": "≈",
+      "SwWallTile": "≈",
+      "EWallTile": "▎",
+      "WWallTile": "▐",
+      "NWallTile": " ",
+      "SWallTile": "≈",
+	  "EWallPassageTile": "≈",
+      "WWallPassageTile": "≈",
+      "NWallPassageTile": "≈",
+      "SWallPassageTile": "≈",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "Cyan",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "White",
+      "NeShortcutTile": "龍",
+      "NwShortcutTile": "龍",
+      "SeShortcutTile": "龍",
+      "SwShortcutTile": "龍",
+      "HorizontalShortcutTile": "龍",
+      "VerticalShortcutTile": "龍",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": ["Dragon Ascent", "Dragon Cheer", "Dragon Dance", "Dragon Energy", "Dragon Pulse", "Dragon Rush", "Dragon Tail"]
+		},
+		{
+			"ConditionType": "ABILITY",
+			"Which": ["Dragon's Maw"]
+		},
+		{
+			"ConditionType": "TYPE",
+			"Which": ["Dragon"]
+		}
+	  ],
+	  "ShortcutClue": "You see the end of the sky castle in the distance. You clearly can't make it across from here, but a dragon Pokemon flying nearby seems friendly, you may be able to get it's attention and ask it for help.",
+	  "ShortcutResolution": "Your $1 made the dragon happy. The dragon is now happy to give you a hand."
+    },
+	{
+      "RoomColor": "Cyan",
+      "NeWallTile": "▓",
+      "NwWallTile": "▓",
+      "SeWallTile": "▓",
+      "SwWallTile": "▓",
+      "EWallTile": "▓",
+      "WWallTile": "▓",
+      "NWallTile": "▓",
+      "SWallTile": "▓",
+	  "EWallPassageTile": "▒",
+      "WWallPassageTile": "▒",
+      "NWallPassageTile": "▒",
+      "SWallPassageTile": "▒",
+      "NWallShortcutTile": "▒",
+      "SWallShortcutTile": "▒",
+      "PassageColor": "Cyan",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "White",
+      "NeShortcutTile": "▒",
+      "NwShortcutTile": "▒",
+      "SeShortcutTile": "▒",
+      "SwShortcutTile": "▒",
+      "HorizontalShortcutTile": "▒",
+      "VerticalShortcutTile": "▒",
+	  "ShortcutConditions": [],
+	  "ShortcutClue": "This is the end of the line. No more shortcuts ahead.",
+	  "ShortcutResolution": ""
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "You face against $1, the guardian of the Sky Castle. It's clearly angry thet you're trespassing it's territory, but also curious that you made it so far.",
+    "PostEventString": "The guardian flies away. For a second, there's not a sound in the air. You're so high up that you can even see the curvature of the earth. But now it's time to return home."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "The air is cold and thin, you can hardly breathe. This is a hostile land, not meant for humans and Pokemon from the surface. You should use any opportunity you can to have a picnic.",
+    "PostEventString": "But for now it's time to move on..."
+  },
+  "CustomShowdownRules" : ["Continuous Hail Mod"],
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}
