@@ -12,7 +12,7 @@ namespace BotTest
             {
                 TypeNameHandling = TypeNameHandling.Auto,
             };
-            IndymonData dataCont = JsonConvert.DeserializeObject<IndymonData>(File.ReadAllText(indymonFile), settings);
+            SessionData dataCont = JsonConvert.DeserializeObject<SessionData>(File.ReadAllText(indymonFile), settings);
             BotBattle battle = new BotBattle(dataCont.DataContainer);
             battle.SimulateBotBattle(dataCont.DataContainer.TrainerData["tiago"], 3);
         }

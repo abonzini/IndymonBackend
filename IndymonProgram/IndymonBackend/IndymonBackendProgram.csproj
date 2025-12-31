@@ -8,12 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ExplorationManager.cs" />
+    <Compile Remove="TournamentManager.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ParsersAndData\ParsersAndData.csproj" />
-    <ProjectReference Include="..\ShowdownBot\ShowdownBot.csproj" />
+    <ProjectReference Include="..\MechanicsData\MechanicsData.csproj" />
+    <ProjectReference Include="..\Parsers\Parsers.csproj" />
   </ItemGroup>
 
 </Project>

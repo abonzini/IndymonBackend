@@ -1,9 +1,12 @@
-﻿namespace MechanicsData
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace MechanicsData
 {
-    public enum Type
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PokemonType
     {
         NONE,
-        STELLAR,
         NORMAL,
         FIGHTING,
         FLYING,
@@ -22,5 +25,19 @@
         DRAGON,
         DARK,
         FAIRY
+    }
+    public class TypeChart
+    {
+        public Dictionary<PokemonType, Dictionary<PokemonType, float>> DefensiveChart { get; set; } = new Dictionary<PokemonType, Dictionary<PokemonType, float>>();
+        public float GetReceivedDamage(HashSet<PokemonType> receiverTypes, PokemonType moveType)
+        {
+            float result = 1.0f;
+            foreach (PokemonType receiverType in receiverTypes)
+            {
+                result *= DefensiveChart[receiverType][moveType];
+            }
+            return result;
+        }
+
     }
 }

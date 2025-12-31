@@ -1,32 +1,24 @@
-﻿using Newtonsoft.Json;
-using ParsersAndData;
-using System.Security.Cryptography;
+﻿using MechanicsData;
+using Newtonsoft.Json;
+using Parsers;
 
 namespace IndymonBackendProgram
 {
-    public class IndymonData
+    public class SessionData
     {
-        public DataContainers DataContainer { get; set; }
-        public TournamentManager TournamentManager { get; set; }
-        public TournamentHistory TournamentHistory { get; set; }
-        public ExplorationManager ExplorationManager { get; set; }
+        public MechanicsDataContainer MechanicsContainer { get; set; }
         public string MasterDirectory { get; set; }
-        public string SheetId { get; set; }
-        public string TrainerDataTab { get; set; }
-        public string NpcDataTab { get; set; }
-        public string NamedNpcDataTab { get; set; }
-        public string TournamentDataTab { get; set; }
+    }
+    public static class SessionDataHelper
+    {
+        public static SessionData CurrentSessionData { get; set; }
     }
     public static class Program
     {
-        static IndymonData _allData = new IndymonData
-        {
-            DataContainer = new DataContainers(),
-            TournamentManager = null
-        };
         static void Main(string[] args)
         {
             string FILE_NAME = "indy.mon";
+            string MECHANICS_DATA_FILE = "mechanics_data.txt";
             string TOURN_CSV = "tournament_stats.csv";
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.ForegroundColor = ConsoleColor.White;
@@ -34,9 +26,43 @@ namespace IndymonBackendProgram
             Console.CursorVisible = false;
             if (args.Length == 0) // File not included, need to ask for it
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("WARNING: Starting indymon from scratch. If attempting to load an existing session, make sure to open this program with the file path as parameter.");
-                Console.ResetColor();
+                Console.WriteLine($"Folder where {FILE_NAME} located?");
+                string directoryPath = Console.ReadLine();
+                string filePath = Path.Combine(directoryPath, "indy.mon");
+                if (File.Exists(filePath))
+                {
+                    Console.WriteLine("Indymon file located, retrieving");
+                    JsonSerializerSettings settings = new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto,
+                    };
+                    SessionDataHelper.CurrentSessionData = JsonConvert.DeserializeObject<SessionData>(File.ReadAllText(filePath), settings);
+                }
+                else
+                {
+                    Console.WriteLine("No indymon file. Will just try to import backend data");
+                    SessionDataHelper.CurrentSessionData = new SessionData
+                    {
+                        MechanicsContainer = new MechanicsDataContainer()
+                    };
+                    // Begin with the mechanics back end
+                    string mechanicsDataPath = Path.Combine(directoryPath, MECHANICS_DATA_FILE);
+                    if (!File.Exists(mechanicsDataPath)) throw new Exception($"No {MECHANICS_DATA_FILE}");
+                    string[] lines = File.ReadAllLines(mechanicsDataPath);
+                    string sheetId = lines[0].Split(",")[0];
+                    string typechartTab = lines[2].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.TypeChart = IndymonParsers.GetTypeChart(sheetId, typechartTab);
+                    string moveTab = lines[3].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.Moves = IndymonParsers.GetMoveDictionary(sheetId, moveTab);
+                    string pokedexTab = lines[1].Split(",")[0];
+                    string learnsetsTab = lines[4].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.Dex = IndymonParsers.GetPokemonDictionary(sheetId, pokedexTab, learnsetsTab, SessionDataHelper.CurrentSessionData.MechanicsContainer.Moves);
+                    string modItemsTab = lines[5].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ModItems = IndymonParsers.GetModItemDictionary(sheetId, modItemsTab);
+                    string battleItemsTab = lines[6].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.BattleItems = IndymonParsers.GetBattleItemDictionary(sheetId, battleItemsTab);
+                }
+                SessionDataHelper.CurrentSessionData.MasterDirectory = directoryPath; // If this is null then everything got fucked up
             }
             else
             {
@@ -45,14 +71,13 @@ namespace IndymonBackendProgram
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                 };
-                _allData = JsonConvert.DeserializeObject<IndymonData>(File.ReadAllText(indymonFile), settings);
-                _allData.MasterDirectory = Path.GetDirectoryName(indymonFile);
+                SessionDataHelper.CurrentSessionData = JsonConvert.DeserializeObject<SessionData>(File.ReadAllText(indymonFile), settings);
+                SessionDataHelper.CurrentSessionData.MasterDirectory = Path.GetDirectoryName(indymonFile);
             }
             string InputString;
             do
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                PrintWarnings();
                 MainMenuInstructions();
                 InputString = Console.ReadLine();
                 switch (InputString)
@@ -60,135 +85,126 @@ namespace IndymonBackendProgram
                     case "0":
                         {
                             Console.WriteLine("Ordering Tournament history and exporting csv");
-                            string csvFile = Path.Combine(_allData.MasterDirectory, TOURN_CSV);
-                            File.WriteAllText(csvFile, FormatTournamentHistory());
+                            string csvFile = Path.Combine(SessionDataHelper.CurrentSessionData.MasterDirectory, TOURN_CSV);
+                            //File.WriteAllText(csvFile, FormatTournamentHistory());
                             Console.WriteLine("Serializing json");
-                            string indymonFile = Path.Combine(_allData.MasterDirectory, FILE_NAME);
+                            string indymonFile = Path.Combine(SessionDataHelper.CurrentSessionData.MasterDirectory, FILE_NAME);
                             JsonSerializerSettings settings = new JsonSerializerSettings
                             {
                                 TypeNameHandling = TypeNameHandling.Auto,
                                 Formatting = Formatting.Indented
                             };
-                            File.WriteAllText(indymonFile, JsonConvert.SerializeObject(_allData, settings));
+                            File.WriteAllText(indymonFile, JsonConvert.SerializeObject(SessionDataHelper.CurrentSessionData, settings));
                         }
                         break;
                     case "1":
-                        LoadEssentialData();
+                        //_allData.TournamentManager = new TournamentManager(_allData.DataContainer, _allData.TournamentHistory);
+                        //_allData.TournamentManager.GenerateNewTournament();
                         break;
                     case "2":
-                        LoadTrainerData();
-                        LoadNpcData();
-                        LoadNamedNpcData();
-                        LoadTournamentHistory();
+                        //_allData.TournamentManager.UpdateTournamentTeams();
                         break;
                     case "3":
-                        _allData.TournamentManager = new TournamentManager(_allData.DataContainer, _allData.TournamentHistory);
-                        _allData.TournamentManager.GenerateNewTournament();
+                        //_allData.TournamentManager.ExecuteTournament();
                         break;
                     case "4":
-                        _allData.TournamentManager.UpdateTournamentTeams();
+                        //_allData.TournamentManager.FinaliseTournament();
                         break;
                     case "5":
-                        _allData.TournamentManager.ExecuteTournament();
+                        //_allData.ExplorationManager = new ExplorationManager(_allData.DataContainer);
+                        //_allData.ExplorationManager.InitializeExploration();
                         break;
                     case "6":
-                        _allData.TournamentManager.FinaliseTournament();
+                        //_allData.ExplorationManager.ExecuteExploration();
                         break;
                     case "7":
-                        _allData.ExplorationManager = new ExplorationManager(_allData.DataContainer);
-                        _allData.ExplorationManager.InitializeExploration();
+                        //_allData.ExplorationManager.AnimateExploration();
                         break;
                     case "8":
-                        _allData.ExplorationManager.ExecuteExploration();
+                        //if (_allData.ExplorationManager.NextDungeon != "")
+                        //{
+                        //    _allData.ExplorationManager.InitializeNextDungeon();
+                        //}
+                        //else
+                        //{
+                        //    Console.ForegroundColor = ConsoleColor.Red;
+                        //    Console.WriteLine("ERROR. Can't do next dungeon because there isn't any!");
+                        //    Console.ForegroundColor = ConsoleColor.White;
+                        //}
                         break;
                     case "9":
-                        _allData.ExplorationManager.AnimateExploration();
+                        //{
+                        //    TrainerData chosenTrainer = Utilities.ChooseOneTrainerDialog(TeambuildSettings.NONE, _allData.DataContainer);
+                        //    string obtainedMon = chosenTrainer.Teamsheet[RandomNumberGenerator.GetInt32(chosenTrainer.Teamsheet.Count)].Species;
+                        //    Console.WriteLine($"Obtained child version of {obtainedMon}");
+                        //}
                         break;
                     case "10":
-                        if (_allData.ExplorationManager.NextDungeon != "")
-                        {
-                            _allData.ExplorationManager.InitializeNextDungeon();
-                        }
-                        else
-                        {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine("ERROR. Can't do next dungeon because there isn't any!");
-                            Console.ForegroundColor = ConsoleColor.White;
-                        }
-                        break;
-                    case "11":
-                        {
-                            TrainerData chosenTrainer = Utilities.ChooseOneTrainerDialog(TeambuildSettings.NONE, _allData.DataContainer);
-                            string obtainedMon = chosenTrainer.Teamsheet[RandomNumberGenerator.GetInt32(chosenTrainer.Teamsheet.Count)].Species;
-                            Console.WriteLine($"Obtained child version of {obtainedMon}");
-                        }
-                        break;
-                    case "12":
-                        {
-                            List<string> options = [.. _allData.DataContainer.Dungeons.Keys];
-                            Console.WriteLine("Which dungeon?");
-                            for (int i = 0; i < options.Count; i++)
-                            {
-                                Console.Write($"{i + 1}: {options[i]}, ");
-                            }
-                            Console.WriteLine("");
-                            string dungeon = options[int.Parse(Console.ReadLine()) - 1];
-                            Dungeon theDungeon = _allData.DataContainer.Dungeons[dungeon];
-                            Console.WriteLine("Which type of reward?\n" +
-                                "\t1 - Trainer: 2 commons, 1 disk/plate\n" +
-                                "\t2 - Gym Leader: 2 commons, 1 disk/plate, 1 rare\n" +
-                                "\t3 - Elite 4: 4 commons, 1 disk/plate, 1 rare\n" +
-                                "\t4 - Champion: 4 commons, 1 disk/plate, 2 rares");
-                            string choice = Console.ReadLine();
-                            int nCommons = 0, nRares = 0;
-                            bool isDisk = (RandomNumberGenerator.GetInt32(100000) % 2 == 0); // Random even/odd
-                            switch (choice)
-                            {
-                                case "1":
-                                    nCommons = 2;
-                                    nRares = 0;
-                                    break;
-                                case "2":
-                                    nCommons = 2;
-                                    nRares = 1;
-                                    break;
-                                case "3":
-                                    nCommons = 4;
-                                    nRares = 1;
-                                    break;
-                                case "4":
-                                    nCommons = 4;
-                                    nRares = 2;
-                                    break;
-                                default:
-                                    break;
-                            }
-                            List<string> commons = new List<string>();
-                            for (int i = 0; i < nCommons; i++)
-                            {
-                                string item = theDungeon.CommonItems[RandomNumberGenerator.GetInt32(theDungeon.CommonItems.Count)];
-                                commons.Add(item);
-                            }
-                            if (isDisk)
-                            {
-                                string obtainedDisk = _allData.DataContainer.MoveItemData.Keys.ToList()[RandomNumberGenerator.GetInt32(_allData.DataContainer.MoveItemData.Count)]; // Get random move disk
-                                commons.Add(obtainedDisk);
-                            }
-                            else
-                            {
-                                List<string> platesList = [.. _allData.DataContainer.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
-                                string chosenPlate = platesList[RandomNumberGenerator.GetInt32(platesList.Count)];
-                                commons.Add(chosenPlate);
-                            }
-                            List<string> rares = new List<string>();
-                            for (int i = 0; i < nRares; i++)
-                            {
-                                string item = theDungeon.RareItems[RandomNumberGenerator.GetInt32(theDungeon.RareItems.Count)];
-                                rares.Add(item);
-                            }
-                            Console.WriteLine($"Commmon items: {string.Join(",", commons)}");
-                            Console.WriteLine($"Rare items: {string.Join(",", rares)}");
-                        }
+                        //{
+                        //    List<string> options = [.. _allData.DataContainer.Dungeons.Keys];
+                        //    Console.WriteLine("Which dungeon?");
+                        //    for (int i = 0; i < options.Count; i++)
+                        //    {
+                        //        Console.Write($"{i + 1}: {options[i]}, ");
+                        //    }
+                        //    Console.WriteLine("");
+                        //    string dungeon = options[int.Parse(Console.ReadLine()) - 1];
+                        //    Dungeon theDungeon = _allData.DataContainer.Dungeons[dungeon];
+                        //    Console.WriteLine("Which type of reward?\n" +
+                        //        "\t1 - Trainer: 2 commons, 1 disk/plate\n" +
+                        //        "\t2 - Gym Leader: 2 commons, 1 disk/plate, 1 rare\n" +
+                        //        "\t3 - Elite 4: 4 commons, 1 disk/plate, 1 rare\n" +
+                        //        "\t4 - Champion: 4 commons, 1 disk/plate, 2 rares");
+                        //    string choice = Console.ReadLine();
+                        //    int nCommons = 0, nRares = 0;
+                        //    bool isDisk = (RandomNumberGenerator.GetInt32(100000) % 2 == 0); // Random even/odd
+                        //    switch (choice)
+                        //    {
+                        //        case "1":
+                        //            nCommons = 2;
+                        //            nRares = 0;
+                        //            break;
+                        //        case "2":
+                        //            nCommons = 2;
+                        //            nRares = 1;
+                        //            break;
+                        //        case "3":
+                        //            nCommons = 4;
+                        //            nRares = 1;
+                        //            break;
+                        //        case "4":
+                        //            nCommons = 4;
+                        //            nRares = 2;
+                        //            break;
+                        //        default:
+                        //            break;
+                        //    }
+                        //    List<string> commons = new List<string>();
+                        //    for (int i = 0; i < nCommons; i++)
+                        //    {
+                        //        string item = theDungeon.CommonItems[RandomNumberGenerator.GetInt32(theDungeon.CommonItems.Count)];
+                        //        commons.Add(item);
+                        //    }
+                        //    if (isDisk)
+                        //    {
+                        //        string obtainedDisk = _allData.DataContainer.MoveItemData.Keys.ToList()[RandomNumberGenerator.GetInt32(_allData.DataContainer.MoveItemData.Count)]; // Get random move disk
+                        //        commons.Add(obtainedDisk);
+                        //    }
+                        //    else
+                        //    {
+                        //        List<string> platesList = [.. _allData.DataContainer.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
+                        //        string chosenPlate = platesList[RandomNumberGenerator.GetInt32(platesList.Count)];
+                        //        commons.Add(chosenPlate);
+                        //    }
+                        //    List<string> rares = new List<string>();
+                        //    for (int i = 0; i < nRares; i++)
+                        //    {
+                        //        string item = theDungeon.RareItems[RandomNumberGenerator.GetInt32(theDungeon.RareItems.Count)];
+                        //        rares.Add(item);
+                        //    }
+                        //    Console.WriteLine($"Commmon items: {string.Join(",", commons)}");
+                        //    Console.WriteLine($"Rare items: {string.Join(",", rares)}");
+                        //}
                         break;
                     default:
                         break;
@@ -198,113 +214,25 @@ namespace IndymonBackendProgram
             Console.WriteLine("Session finished. Have a good day and don't forget to update spreadsheet!");
         }
         /// <summary>
-        /// Prints warnings if missing essential data needed
-        /// </summary>
-        static void PrintWarnings()
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            if (_allData.DataContainer.Dex == null) Console.WriteLine("WARNING: Pokemon data not initialized yet");
-            if (_allData.DataContainer.TrainerData.Count == 0) Console.WriteLine("WARNING: Trainer data not initialised yet");
-            Console.ResetColor();
-        }
-        /// <summary>
         /// Prints main menu instructions
         /// </summary>
         static void MainMenuInstructions()
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("0 - Save to indy.mon\n" +
-                "1 - Load mechanics data from folder\n" +
-                "2 - Fetch trainer data and tournament history from online sheet\n" +
-                "3 - Generate a new tournament\n" +
-                "4 - Update tournament participant's team sheets\n" +
-                "5 - Input tournament data\n" +
-                "6 - Finalize tournament. Animation + export new tournament data\n" +
-                "7 - Generate exploration, choose place, player, etc\n" +
-                "8 - Simulate current exploration\n" +
-                "9 - Animate resolved exploration\n" +
-                "10 - Resolve finished exploration (if needed, e.g. move to next dungeon)\n" +
-                "11 - Random Pokemon from trainer (Favor resolution)\n" +
-                "12 - Random exploration rewards (tiered favor resolutions)\n"
+                "1 - Generate a new tournament\n" +
+                "2 - Update tournament participant's team sheets\n" +
+                "3 - Input tournament data\n" +
+                "4 - Finalize tournament. Animation + export new tournament data\n" +
+                "5 - Generate exploration, choose place, player, etc\n" +
+                "6 - Simulate current exploration\n" +
+                "7 - Animate resolved exploration\n" +
+                "8 - Resolve finished exploration (if needed, e.g. move to next dungeon)\n" +
+                "9 - Random Pokemon from trainer (Favor resolution)\n" +
+                "10 - Random exploration rewards (tiered favor resolutions)\n"
                 );
         }
-        /// <summary>
-        /// Loads the essential data (dex, etc) for running indymon. Asks user for the location
-        /// </summary>
-        static void LoadEssentialData()
-        {
-            Console.WriteLine("Input the folder where indy.mon is located, or atleast the other files");
-            string directory = Console.ReadLine();
-            string masterPath = Path.Combine(directory, "indy.mon");
-            if (File.Exists(masterPath))
-            {
-                Console.WriteLine("Indymon file located, retrieving");
-                JsonSerializerSettings settings = new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                };
-                _allData = JsonConvert.DeserializeObject<IndymonData>(File.ReadAllText(masterPath), settings);
-                _allData.MasterDirectory = masterPath;
-                _allData.TournamentManager?.SetBackEndData(_allData.DataContainer, _allData.TournamentHistory);
-                _allData.ExplorationManager?.SetBackEndData(_allData.DataContainer);
-            }
-            else
-            {
-                Console.WriteLine("No indymon file. Will just try to import backend data");
-                string learnsetPath = Path.Combine(directory, "learnsets.ts");
-                string dexPath = Path.Combine(directory, "pokedex.ts");
-                string movesPath = Path.Combine(directory, "moves.ts");
-                string typeChartFile = Path.Combine(directory, "typechart.ts");
-                string defItemFile = Path.Combine(directory, "defensiveitems.csv");
-                string offItemFile = Path.Combine(directory, "offensiveitems.csv");
-                string teraItemFile = Path.Combine(directory, "teraitems.csv");
-                string evItemFile = Path.Combine(directory, "evitems.csv");
-                string natureItemFile = Path.Combine(directory, "natureitems.csv");
-                string moveItemFile = Path.Combine(directory, "moveitems.csv");
-                string googleSheetsFile = Path.Combine(directory, "google_sheets_data.txt");
-                string dungeonDirectory = Path.Combine(directory, "dungeons");
-                // First, retrieve all mons
-                Dictionary<string, Pokemon> monData = DexParser.ParseDexFile(dexPath);
-                // Then, get their movesets
-                MovesetParser.ParseMovests(learnsetPath, monData);
-                // Then, use the proper name lookup and make evos/forms inherit movesets
-                monData = Cleanups.NameAndMovesetCleanup(monData);
-                // Finally, parse move data
-                Dictionary<string, Move> moveData = MoveParser.ParseMoves(movesPath);
-                // And clean up names in mons, obtain STAB
-                Cleanups.MoveDataCleanup(monData, moveData);
-                // Finally clean moves themselves
-                moveData = Cleanups.MoveListCleanup(moveData);
-                Console.WriteLine("Loaded dex and moves correctly");
-                _allData.DataContainer.Dex = monData;
-                _allData.DataContainer.MoveData = moveData;
-                // Typechart
-                _allData.DataContainer.TypeChart = TypeChartParser.ParseTypechartFile(typeChartFile);
-                // Indymon custom items
-                _allData.DataContainer.DefensiveItemData = ItemParser.ParseItemAndEffects(defItemFile);
-                _allData.DataContainer.OffensiveItemData = ItemParser.ParseItemAndEffects(offItemFile);
-                _allData.DataContainer.TeraItemData = ItemParser.ParseItemAndEffects(teraItemFile);
-                _allData.DataContainer.EvItemData = ItemParser.ParseItemAndEffects(evItemFile);
-                _allData.DataContainer.NatureItemData = ItemParser.ParseItemAndEffects(natureItemFile);
-                _allData.DataContainer.MoveItemData = ItemParser.ParseItemAndEffects(moveItemFile);
-                // Google sheets
-                string[] lines = File.ReadAllLines(googleSheetsFile);
-                _allData.SheetId = lines[0];
-                _allData.TrainerDataTab = lines[1];
-                _allData.NpcDataTab = lines[2];
-                _allData.NamedNpcDataTab = lines[3];
-                _allData.TournamentDataTab = lines[4];
-                // Dungeons
-                Console.WriteLine("Loading dungeon data");
-                _allData.DataContainer.Dungeons = new Dictionary<string, Dungeon>();
-                foreach (string file in Directory.EnumerateFiles(dungeonDirectory))
-                {
-                    Dungeon nextDungeon = JsonConvert.DeserializeObject<Dungeon>(File.ReadAllText(file));
-                    _allData.DataContainer.Dungeons.Add(nextDungeon.Name, nextDungeon);
-                }
-            }
-            _allData.MasterDirectory = directory;
-        }
+        /*
         /// <summary>
         /// Loads playable trainer data from google doc
         /// </summary>
@@ -665,5 +593,6 @@ namespace IndymonBackendProgram
             // ok finally make the master string
             return string.Join("\n", lines);
         }
+        */
     }
 }

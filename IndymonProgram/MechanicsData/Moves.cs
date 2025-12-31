@@ -1,5 +1,9 @@
-﻿namespace MechanicsData
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace MechanicsData
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum MoveFlag
     {
         BANNED, // Forbidden moves
@@ -32,11 +36,31 @@
         SETUP_STATUS, // Setup status moves
         NO_MISS, // Moves that don't miss
         SELF_DEBUFF, // Debuff user (contrary, sure crit)
+        DAMAGE_PROP_WEIGTH, // Damage increases with weight
+        DAMAGE_PROP_SPEED, // Damage proportional with speed (e.g. electro ball)
+        DAMAGE_INV_SPEED, // Damage inverse with speed (e.g. gyro ball)
+        FIXED_DAMAGE, // Seismic toss, dragon rage
+        TRAPPING, // Trapping moves
+        HIGH_CRIT, // Like sure crit but not sure
     }
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum MoveCategory
     {
         PHYSICAL,
         SPECIAL,
         STATUS
+    }
+    public class Move
+    {
+        public string Name { get; set; } = "";
+        public PokemonType Type { get; set; }
+        public MoveCategory Category { get; set; }
+        public int Bp { get; set; }
+        public int Acc { get; set; }
+        public HashSet<MoveFlag> Flags { get; set; } = new HashSet<MoveFlag>();
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

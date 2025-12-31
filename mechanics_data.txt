@@ -1,0 +1,7 @@
+1PTnQXJsuOkJmnUi7bCxuH1JT9JwxrUxZj29gHXJn1vU, backend doc
+2042749132, pokedex
+1593134854, typechart
+2048986506, moves
+597315854, learnset
+2086622175, mod items
+105334850, battle items
