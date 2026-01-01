@@ -7,6 +7,7 @@ namespace MechanicsData
     public enum BattleItemFlag
     {
         NO_ITEM, // Item that is actualyl no item, helps acrobatics
+        ALL_ITEMS, // Any item has this tag (except NO_ITEM of course)
         BERRY, // Berry
         CONSUMABLE // Unburden, acro
     }
