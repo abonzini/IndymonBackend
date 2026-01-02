@@ -77,7 +77,7 @@
 		"Drilbur",
 		"Rolycoly",
 		"Nacli",
-        "Noibat",
+    "Noibat",
 		"Nosepass",
 		"Bunnelby"
 	],
@@ -283,5 +283,5 @@
   },
   "CustomShowdownRules" : [],
   "NextDungeon": "",
-  "NextDungeonShortcut": ""
+  "NextDungeonShortcut": "Molten Core"
 }

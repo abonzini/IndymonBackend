@@ -88,7 +88,8 @@
 		"Rufflet",
 		"Honedge",
 		"Minior",
-		"Bagon"
+		"Bagon",
+		"Castform"
 	],
 	[
 		"Hypno",
@@ -173,8 +174,7 @@
 		"Odd Incense",
 		"Sharp Beak",
 		"Assault Vest",
-		"Big Nugget",
-		"Sky Castle Ticket"
+		"Big Nugget"
   ],
   "BossItem": "Ice Stone",
   "Floors": [

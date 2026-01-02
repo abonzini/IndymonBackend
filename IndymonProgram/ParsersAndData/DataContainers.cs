@@ -574,7 +574,7 @@ namespace ParsersAndData
                                 {
                                     itemCandidate = BattleItems[itemIdx];
                                     // So if the item is ok, ill allow it
-                                    if (IstemUseful(itemCandidate.Name, pokemonSet, backEndData))
+                                    if (IsItemUseful(itemCandidate.Name, pokemonSet, backEndData))
                                     {
                                         break; // Otherwise I found it
                                     }
@@ -636,7 +636,7 @@ namespace ParsersAndData
         /// <param name="pokemonSet">Set of candidate mon</param>
         /// <param name="backEndData">Back end where extra data is obtained</param>
         /// <returns>If item would be useful</returns>
-        static bool IstemUseful(string itemName, PokemonSet pokemonSet, DataContainers backEndData)
+        static bool IsItemUseful(string itemName, PokemonSet pokemonSet, DataContainers backEndData)
         {
             // If offensive item, (i.e. item that boosts a type), then ensure mon is packing a move of that type...
             if (backEndData.OffensiveItemData.TryGetValue(itemName, out HashSet<string> offensiveTypes))
@@ -756,6 +756,9 @@ namespace ParsersAndData
                 case "smooth rock":
                     usefulMoves = ["sandstorm"];
                     usefulAbilities = ["sand stream", "sand spit"];
+                    break;
+                case "binding band":
+                    usefulMoves = ["bind", "clamp", "fire spin", "infestation", "magma storm", "sand tomb", "snap trap", "thunder cage", "whirlpool", "wrap"];
                     break;
                 default:
                     return true; // Item wasn't singled out so it means its always useful

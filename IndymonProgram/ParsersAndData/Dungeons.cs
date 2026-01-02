@@ -24,6 +24,7 @@ namespace ParsersAndData
         BIG_HEAL, // One specific mon heals a lot
         PP_HEAL, // 3PP heal
         UNOWN, // Unown event, 6 random unown with wacky moves
+        FIRELORD, // Fire legendary event, summon a legendary of lower lvl
     }
     public class RoomEvent
     {
@@ -44,7 +45,8 @@ namespace ParsersAndData
         ABILITY, // Need a specific ability
         POKEMON, // Need a specific pokemon
         TYPE, // Need a specific pokemon type
-        ITEM // Need a specific item
+        ITEM, // Need a specific item
+        MOVE_DISK, // Needs any move disk (item ending in move disk)
     }
     public class ShortcutCondition
     {

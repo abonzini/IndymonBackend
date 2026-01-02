@@ -639,6 +639,54 @@ namespace IndymonBackendProgram
                         }
                     }
                     break;
+                case RoomEventType.FIRELORD:
+                    // Weird one, weakened legendary with rare item
+                    {
+                        Console.WriteLine("Firelord battle");
+                        // Which mon will be chosen
+                        string item = _dungeonDetails.RareItems[RandomNumberGenerator.GetInt32(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
+                        List<string> validMons = ["moltres", "entei", "ho-oh", "groudon", "heatran", "chi-yu", "koraidon", "volcaion", "blacephalon"];
+                        string pokemonSpecies = validMons[RandomNumberGenerator.GetInt32(validMons.Count)];
+                        List<PokemonSet> encounterPokemon = new List<PokemonSet>();
+                        bool isShiny = (RandomNumberGenerator.GetInt32(SHINY_CHANCE) == 1);
+                        PokemonSet pokemon = new PokemonSet()
+                        {
+                            Species = pokemonSpecies,
+                            Shiny = isShiny,
+                            Level = RandomNumberGenerator.GetInt32(50, 66),
+                            Item = new Item() { Name = item, Uses = 1 }
+                        };
+                        Console.WriteLine($"Mon: {pokemonSpecies}");
+                        encounterPokemon.Add(pokemon); // Add mon to the set
+                        // Ok now begin event
+                        GenericMessageCommand(roomEvent.PreEventString);
+                        TrainerData wildMonTeam = new TrainerData() // Create the blank trainer
+                        {
+                            Avatar = "unknown",
+                            Name = "firelord",
+                            AutoItem = false,
+                            AutoTeam = true,
+                            Teamsheet = encounterPokemon,
+                        };
+                        wildMonTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        Console.Write("Encounter resolution: ");
+                        int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
+                        if (remainingMons == 0) // Means player lost
+                        {
+                            Console.WriteLine("Player lost");
+                            roomCleared = false; // Failure at clearing room
+                            GenericMessageCommand($"You blacked out...");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Player won");
+                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                            string postMessage = roomEvent.PostEventString.Replace("$1", item);
+                            GenericMessageCommand(postMessage);
+                            AddPokemonPrize(pokemonSpecies, 3, isShiny, prizes); // Add the mon (masterball tho)
+                        }
+                    }
+                    break;
                 case RoomEventType.JOINER:
                     // Mon that joins the team for adventures, always catchable
                     {
@@ -836,9 +884,20 @@ namespace IndymonBackendProgram
                         case ShortcutConditionType.ITEM:
                             foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has item, all good
                             {
-                                if (pokemon.Item != null && pokemon.Item.Name == valueToCheck) // type of pokemon found
+                                if (pokemon.Item != null && pokemon.Item.Name == valueToCheck) // item found
                                 {
                                     message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
+                                    canTakeShortcut = true;
+                                    break;
+                                }
+                            }
+                            break;
+                        case ShortcutConditionType.MOVE_DISK:
+                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has item, all good
+                            {
+                                if (pokemon.Item != null && pokemon.Item.Name.ToLower().Contains(" disk")) // disk found
+                                {
+                                    message = $"{pokemon.GetInformalName()}'s {pokemon.Item.Name}";
                                     canTakeShortcut = true;
                                     break;
                                 }
