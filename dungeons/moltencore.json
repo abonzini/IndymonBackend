@@ -74,7 +74,7 @@
       "Vulpix",
       "Growlithe-Hisui",
       "Magby",
-      "Cindaquil",
+      "Cyndaquil",
       "Slugma",
       "Houndour",
       "Onix",
@@ -185,7 +185,7 @@
 			"Which": [""]
 		}
 	  ],
-	  "ShortcutClue": "You find a group of Team Paradox members just hanging about and blocking the way. For some reason they're all wearing winter jackets. They're in a bad mood and say 'I've never seen you around before', you'll need to show them somethign to prove you're on their side.",
+	  "ShortcutClue": "You find a group of Team Paradox members just hanging about and blocking the way. For some reason they're all wearing winter jackets. They're in a bad mood and say 'I've never seen you around before', you'll need to show them something to prove you're on their side.",
 	  "ShortcutResolution": "They see your $1 and go crazy. They start cheering and headbanging and move out of the way."
     },
 	{
