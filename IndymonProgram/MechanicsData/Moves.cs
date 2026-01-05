@@ -14,7 +14,6 @@ namespace MechanicsData
         PIVOT, // Pivot moves (but not stuff like memento)
         SOUND, // Sound moves
         DEFENSE_DAMAGE, // Body press lol
-        MULTI_HIT, // Multihit moves
         PUNCH, // Punching moves
         SHARP, // Sharpness
         DANCE, // Dance moves
@@ -42,6 +41,13 @@ namespace MechanicsData
         FIXED_DAMAGE, // Seismic toss, dragon rage
         TRAPPING, // Trapping moves
         HIGH_CRIT, // Like sure crit but not sure
+        SUB_60, // Moves under 60 damage will be increased by technician
+        CHARGING, // Charging moves, like solar beam
+        MULTIHIT_2_MOVE, // 2-hit moves like bonemerang
+        MULTIHIT_3_MOVE, // 3-hit move like triple dive
+        MULTIHIT_2_TO_5_MOVE, // The common multi hit 2-5 hits
+        MULTIHIT_ACC_BASED_3_HIT, // Triple axel
+        MULTIHIT_ACC_BASED_10_HIT, // Good ol Pop Bomb
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MoveCategory
