@@ -9,7 +9,6 @@ namespace MechanicsData
     [JsonConverter(typeof(StringEnumConverter))]
     public enum WeightedElementType
     {
-        GAME_MECHANIC, /// Game mechanics, like the switch chance
         POKEMON, /// Affects/enables sets
         ARCHETYPE, /// Certain archetypes such as rain, terrains, etc. Not weighted but enabled, and can weight strategies
         BATTLE_ITEM, /// Affects a specific named item
