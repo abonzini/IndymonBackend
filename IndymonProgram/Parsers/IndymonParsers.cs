@@ -95,10 +95,43 @@ namespace Parsers
                 {
                     string nextFlag = fields[j].Replace("\"", "").Trim().ToUpper();
                     if (nextFlag == "") continue; // If flag is invalid, skip
-                    nextMove.Flags.Add(Enum.Parse<MoveFlag>(nextFlag));
+                    nextMove.Flags.Add(Enum.Parse<EffectFlag>(nextFlag));
                 }
                 // Move parsed, add
                 result.Add(nextMove.Name, nextMove);
+            }
+            return result;
+        }
+        /// <summary>
+        /// Parses a sheet (link+tab) into ability list
+        /// </summary>
+        /// <param name="sheetId">Google sheets link</param>
+        /// <param name="sheetTab">The tab where ability data is contained</param>
+        /// <returns>The ability list</returns>
+        public static Dictionary<string, Ability> GetAbilityDictionary(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Parsing Moves");
+            Dictionary<string, Ability> result = new Dictionary<string, Ability>();
+            // Parse csv
+            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            const int NAME_COL = 0;
+            const int FLAGS_COL = 2; // Contains all effect keys of this particular ability (more manual...)
+            string[] lines = csv.Split("\n");
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string[] fields = lines[i].Split(","); // Csv
+                Ability nextAbility = new Ability
+                {
+                    Name = fields[NAME_COL].Trim(),
+                };
+                for (int j = FLAGS_COL; j < fields.Length; j++)
+                {
+                    string nextFlag = fields[j].Replace("\"", "").Trim().ToUpper();
+                    if (nextFlag == "") continue; // If flag is invalid, skip
+                    nextAbility.Flags.Add(Enum.Parse<EffectFlag>(nextFlag));
+                }
+                // Ability parsed, add
+                result.Add(nextAbility.Name, nextAbility);
             }
             return result;
         }

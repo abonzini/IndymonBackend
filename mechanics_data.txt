@@ -5,3 +5,4 @@
 597315854, learnset
 2086622175, mod items
 105334850, battle items
+1710842129, abilities

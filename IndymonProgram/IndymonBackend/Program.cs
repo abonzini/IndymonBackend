@@ -61,6 +61,9 @@ namespace IndymonBackendProgram
                     SessionDataHelper.CurrentSessionData.MechanicsContainer.ModItems = IndymonParsers.GetModItemDictionary(sheetId, modItemsTab);
                     string battleItemsTab = lines[6].Split(",")[0];
                     SessionDataHelper.CurrentSessionData.MechanicsContainer.BattleItems = IndymonParsers.GetBattleItemDictionary(sheetId, battleItemsTab);
+                    string abilityTab = lines[7].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.Abilities = IndymonParsers.GetAbilityDictionary(sheetId, abilityTab);
+
                 }
                 SessionDataHelper.CurrentSessionData.MasterDirectory = directoryPath; // If this is null then everything got fucked up
             }

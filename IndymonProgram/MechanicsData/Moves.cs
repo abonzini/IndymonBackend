@@ -4,7 +4,7 @@ using Newtonsoft.Json.Converters;
 namespace MechanicsData
 {
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum MoveFlag
+    public enum EffectFlag
     {
         BANNED, // Forbidden moves
         DOUBLES_ONLY, // Moves that are good in doubles only, do not use in singles
@@ -64,7 +64,16 @@ namespace MechanicsData
         public MoveCategory Category { get; set; }
         public int Bp { get; set; }
         public int Acc { get; set; }
-        public HashSet<MoveFlag> Flags { get; set; } = new HashSet<MoveFlag>();
+        public HashSet<EffectFlag> Flags { get; set; } = new HashSet<EffectFlag>();
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+    public class Ability
+    {
+        public string Name { get; set; } = "";
+        public HashSet<EffectFlag> Flags { get; set; } = new HashSet<EffectFlag>();
         public override string ToString()
         {
             return Name;
