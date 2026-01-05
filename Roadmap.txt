@@ -37,5 +37,10 @@ This may be computationally more crazy but may be cool too so why not.
 It is the amin focus of S2, a great teambuilder
 
 // TODO
-- Move stats as array int[6]
-- Create category of move modifier, modify BP, Acc, Type, this is changed FOR A DAMAGING MOVE, and different to all assorted mods
+Load data in sheet, will take a while. Do in order:
+- Categories (check the move categories, will deal with the overwhelming quantity of mechanics) Currently: Sound
+- Archetypes (these also favor/discourage stuff, they should nerf/buff accordingly)
+- Items (load battle items, allow stuff). Mod items jsut mod the things and will be dealt differently in algo, I assume
+- Abilities (interact with moves and items)
+- Moves (interact with moves and items)
+Ask yourself, what can buff/nerf these? AND do they need to discourage elements of similar types?
