@@ -18,6 +18,7 @@ namespace MechanicsData
         MOVE, /// Affects a specific move by name
         MOVE_FLAGS, /// Affects moves carrying a specific flag
         MOVE_TYPE, /// Affects moves of specific types
+        MOVE_CATEGORY, /// Affects phy/spe/status (e.g. prankster, AV)
         // The base multiplier of stuff *X, caused by abilities, items etc
         ATTACK_MULTIPLIER, /// Things that multiply attack
         DEFENSE_MULTIPLIER, /// Things that multiply defense
