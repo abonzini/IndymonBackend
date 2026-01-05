@@ -149,12 +149,13 @@ namespace Parsers
                 thePokemon.Types.Add(theType);
                 theType = Enum.Parse<PokemonType>(fields[TYPE_2_FIELD].Trim().ToUpper());
                 if (theType != PokemonType.NONE) thePokemon.Types.Add(theType);
-                thePokemon.Hp = int.Parse(fields[HP_FIELD]);
-                thePokemon.Attack = int.Parse(fields[ATK_FIELD]);
-                thePokemon.Defense = int.Parse(fields[DEF_FIELD]);
-                thePokemon.SpecialAttack = int.Parse(fields[SPATK_FIELD]);
-                thePokemon.SpecialDefense = int.Parse(fields[SPDEF_FIELD]);
-                thePokemon.Speed = int.Parse(fields[SPEED_FIELD]);
+                int Hp = int.Parse(fields[HP_FIELD]);
+                int Attack = int.Parse(fields[ATK_FIELD]);
+                int Defense = int.Parse(fields[DEF_FIELD]);
+                int SpecialAttack = int.Parse(fields[SPATK_FIELD]);
+                int SpecialDefense = int.Parse(fields[SPDEF_FIELD]);
+                int Speed = int.Parse(fields[SPEED_FIELD]);
+                thePokemon.Stats = [Hp, Attack, Defense, SpecialAttack, SpecialDefense, Speed]; // Load stats
                 string theAbility = fields[ABILITY_1_FIELD].Trim();
                 if (theAbility != "") thePokemon.Abilities.Add(theAbility);
                 theAbility = fields[ABILITY_2_FIELD].Trim();

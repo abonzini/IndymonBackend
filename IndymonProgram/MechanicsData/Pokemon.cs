@@ -7,12 +7,7 @@
         public HashSet<string> Abilities { get; set; } = new HashSet<string>();
         public string Prevo { get; set; } = "";
         public HashSet<string> Evos { get; set; } = new HashSet<string>();
-        public int Hp { get; set; }
-        public int Attack { get; set; }
-        public int Defense { get; set; }
-        public int SpecialAttack { get; set; }
-        public int SpecialDefense { get; set; }
-        public int Speed { get; set; }
+        public int[] Stats { get; set; } = [0, 0, 0, 0, 0, 0]; // Hp, Attack, Defense, Special Attack, Special Defense, Speed
         public HashSet<string> Moves { get; set; } = new HashSet<string>();
         public override string ToString()
         {
