@@ -37,7 +37,5 @@ This may be computationally more crazy but may be cool too so why not.
 It is the amin focus of S2, a great teambuilder
 
 // TODO
-
-- Reparse all
-- Battle algorithm
-- Etc
+- Move stats as array int[6]
+- Create category of move modifier, modify BP, Acc, Type, this is changed FOR A DAMAGING MOVE, and different to all assorted mods
