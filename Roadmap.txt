@@ -38,9 +38,9 @@ It is the amin focus of S2, a great teambuilder
 
 // TODO
 Load data in sheet, will take a while. Do in order:
-- Team Archetype refactor. Need to split into setters and the effect. Archetype setters are nerfed consecutively and don't duplicate stuff, this includes alongside mons of course. Abilities also need to be setters for this to work.
-- Categories (check the move categories, will deal with the overwhelming quantity of mechanics) Currently: Sound
-- Items (load battle items, allow stuff). Mod items jsut mod the things and will be dealt differently in algo, I assume
-- Abilities (interact with moves and items)
+- Archetype/Ability refactor. Redo moves (and abilities) with the X_setter. They just discourage others in simpler terms. Moreover the item just really asks for setter. Setters will discourage themselves too. Start with weather/terrains. Eventually may add the rest.
+- Categories ( continue checking the move categories, will deal with the overwhelming quantity of mechanics) Currently: just finished sound, may want to start again while we have time
+- Check all Items, may want to add to list (load battle items, allow stuff). Mod items jsut mod the things and will be dealt differently in algo, I assume
+- Check all Abilities (interact with moves and items)
 - Moves (interact with moves and items)
 Ask yourself, what can buff/nerf these? AND do they need to discourage elements of similar types?
