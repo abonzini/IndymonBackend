@@ -11,6 +11,7 @@ namespace MechanicsData
         DRAIN, // Draining moves, benefit from root
         HEAL, // MOves that heal the user (triage)
         CHANCE, // Moves with a chance of something nice, for serene grace
+        SECONDARY_EFFECT, // Moves with a chance (can be 100%) of secondary effect, for sheer force
         PIVOT, // Pivot moves (but not stuff like memento)
         SOUND, // Sound moves
         DEFENSE_DAMAGE, // Body press lol
@@ -26,8 +27,12 @@ namespace MechanicsData
         PRIORITY, // Prio
         SELF_SLEEP, // Moves that need user to be sleeping
         SELF_STATUS, // Moves that benefit from user to be statused
+        SLEEP_INDUCING, // Moves that cause sleep
         OPP_SLEEP, // Moves that need opponent to be asleep
-        OPP_PARALYSIS, // Moves that require opponent to be paralyzed
+        PARALYSIS_INDUCING, // Moves that require opponent to be paralyzed
+        OPP_PARALYSIS, // Moves that cause paralysis
+        POISON_INDUCING, // Moves that cause poison
+        BURN_INDUCING, // Moves that cause burn
         GIVE_ITEM, // Moves that give item to enemy and/or discard item from owner,
         CRITICAL, // Sniper, self debuff
         NEED_OPP_ITEM, // Moves that need opp to have an item to be useful
@@ -49,6 +54,14 @@ namespace MechanicsData
         MULTIHIT_2_TO_5_MOVE, // The common multi hit 2-5 hits
         MULTIHIT_ACC_BASED_3_HIT, // Triple axel
         MULTIHIT_ACC_BASED_10_HIT, // Good ol Pop Bomb
+        SUN_SETTER, // Obvious
+        RAIN_SETTER, // Obvious
+        SNOW_SETTER, // Obvious
+        SAND_SETTER, // Obvious
+        ELE_TERRAIN_SETTER, // Obvious
+        GRASSY_TERRAIN_SETTER, // Obvious
+        PSYCHIC_TERRAIN_SETTER, // Obvious
+        MISTY_TERRAIN_SETTER, // Obvious
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MoveCategory

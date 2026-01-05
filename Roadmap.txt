@@ -38,10 +38,7 @@ It is the amin focus of S2, a great teambuilder
 
 // TODO
 Load data in sheet, will take a while. Do in order:
-- Rename move file to moves and abilities
-- Archetype/Ability refactor. Redo moves (and abilities) with the X_setter. They just discourage others in simpler terms. Moreover the item just really asks for setter. Setters will discourage themselves too. Start with weather/terrains. Eventually may add the rest.
-- Categories ( continue checking the move categories, will deal with the overwhelming quantity of mechanics) Currently: just finished sound, may want to start again while we have time
-- Check all Items, may want to add to list (load battle items, allow stuff). Mod items jsut mod the things and will be dealt differently in algo, I assume
+- Check all Items, may want to add to list (load battle items, allow stuff). Mod items jsut mod the things and will be dealt differently in algo, I assume. Add letter by letter, check items and interactions, add them and ensure. Current: A
 - Check all Abilities (interact with moves and items)
 - Moves (interact with moves and items)
 Ask yourself, what can buff/nerf these? AND do they need to discourage elements of similar types?
