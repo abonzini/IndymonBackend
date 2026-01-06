@@ -9,7 +9,8 @@ namespace MechanicsData
         NO_ITEM, // Item that is actualyl no item, helps acrobatics
         ALL_ITEMS, // Any item has this tag (except NO_ITEM of course)
         BERRY, // Berry
-        CONSUMABLE // Unburden, acro
+        CONSUMABLE, // Unburden, acro
+        BAD_ITEM, // Items that are normally useless or bad/negative
     }
     public class BattleItem
     {
