@@ -27,9 +27,7 @@ namespace MechanicsData
     {
         // The base multiplier of stuff *X, caused by abilities, items etc
         ATTACK_MULTIPLIER, /// Things that multiply attack
-        DEFENSE_MULTIPLIER, /// Things that multiply defense
         SPECIAL_ATTACK_MULTIPLIER, /// Things that multiply special attack
-        SPECIAL_DEFENSE_MULTIPLIER, /// Things that multiply special defense
         SPEED_MULTIPLIER, /// Things that multiply speed
         PHYSICAL_ACCURACY_MULTIPLIER, /// Things that multiply physical accuracy
         SPECIAL_ACCURACY_MULTIPLIER, /// Things that multiply special accuracy
