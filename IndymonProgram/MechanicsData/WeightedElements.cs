@@ -11,6 +11,7 @@ namespace MechanicsData
     {
         POKEMON, /// The pokemon. Can't be affected, but affects stuff
         POKEMON_TYPE, /// The pokemon type. Can't be affected, but affects stuff
+        POKEMON_HAS_EVO, /// The flag of whether the pokemon has an evo or not (only way to make eviolite happen)
         ARCHETYPE, /// Certain archetypes such as rain, terrains, etc. Not weighted but enabled, and can weight strategies
         BATTLE_ITEM, /// Affects a specific named item
         BATTLE_ITEM_FLAGS, /// Affects items with that flag
