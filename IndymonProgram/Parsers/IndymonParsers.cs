@@ -280,7 +280,7 @@ namespace Parsers
             const int NAME_COL = 0;
             const int OFF_TYPE_COL = 1;
             const int DEF_TYPE_COL = 2;
-            const int FLAGS_COL = 6; // Contains all effect keys of this particular item
+            const int FLAGS_COL = 7; // Contains all effect keys of this particular item
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
