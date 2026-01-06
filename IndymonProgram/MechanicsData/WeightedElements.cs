@@ -9,7 +9,8 @@ namespace MechanicsData
     [JsonConverter(typeof(StringEnumConverter))]
     public enum ElementType
     {
-        POKEMON, /// Affects/enables sets
+        POKEMON, /// The pokemon. Can't be affected, but affects stuff
+        POKEMON_TYPE, /// The pokemon type. Can't be affected, but affects stuff
         ARCHETYPE, /// Certain archetypes such as rain, terrains, etc. Not weighted but enabled, and can weight strategies
         BATTLE_ITEM, /// Affects a specific named item
         BATTLE_ITEM_FLAGS, /// Affects items with that flag
