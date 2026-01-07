@@ -38,6 +38,5 @@ It is the amin focus of S2, a great teambuilder
 
 // TODO
 Load data in sheet, will take a while. Do in order:
-- Check all Abilities (interact with moves and items)
 - Moves (interact with moves and items)
 Ask yourself, what can buff/nerf these? AND do they need to discourage elements of similar types?
