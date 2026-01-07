@@ -20,6 +20,7 @@ namespace MechanicsData
         MOVE_FLAGS, /// Affects moves carrying a specific flag
         MOVE_TYPE, /// Affects moves of specific types
         MOVE_CATEGORY, /// Affects phy/spe/status (e.g. prankster, AV)
+        ALL_MOVES, /// Affects every single move (e.g. normalize)
     }
     [JsonConverter(typeof(StringEnumConverter))]
     /// What stat is going to be modified and how
