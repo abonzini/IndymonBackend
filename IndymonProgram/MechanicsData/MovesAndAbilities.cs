@@ -62,6 +62,7 @@ namespace MechanicsData
         GRASSY_TERRAIN_SETTER, // Obvious
         PSYCHIC_TERRAIN_SETTER, // Obvious
         MISTY_TERRAIN_SETTER, // Obvious
+        ABILITY_MANIPULATING, // Deal with abilities, either giving or takign abilities
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MoveCategory
