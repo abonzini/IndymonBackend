@@ -65,13 +65,22 @@ namespace IndymonBackendProgram
             ExplorationSteps = new List<ExplorationStep>(); // Start from scratch!
             // First ask organizer to choose dungeon
             List<string> options = [.. _backEndData.Dungeons.Keys];
-            Console.WriteLine("Creating a brand new exploration, which dungeon?");
+            Console.WriteLine("Creating a brand new exploration, which dungeon? (0 for random)");
             for (int i = 0; i < options.Count; i++)
             {
                 Console.Write($"{i + 1}: {options[i]}, ");
             }
             Console.WriteLine("");
-            Dungeon = options[int.Parse(Console.ReadLine()) - 1];
+            int selection = int.Parse(Console.ReadLine()) - 1;
+            if (selection == 0)
+            {
+                selection = RandomNumberGenerator.GetInt32(options.Count);
+            }
+            else
+            {
+                selection--; // Make it array-indexable
+            }
+            Dungeon = options[selection];
             // Then which player
             TrainerData trainerData = Utilities.ChooseOneTrainerDialog(TeambuildSettings.EXPLORATION | TeambuildSettings.SMART, _backEndData);
             Trainer = trainerData.Name;

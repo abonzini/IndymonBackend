@@ -468,8 +468,10 @@ namespace ParsersAndData
                         {
                             // Check if mon contains ability, move or move disk, considering auto team tries to be "smart"
                             Pokemon monData = backEndData.Dex[mon.Species];
-                            monIsValid |= abilitiesToVerify.Overlaps(monData.GetSmartAbilities());
-                            monIsValid |= movesToVerify.Overlaps(monData.GetSmartMoves());
+                            HashSet<string> validAbilities = abilitiesToVerify.Intersect(monData.GetSmartAbilities()).ToHashSet();
+                            HashSet<string> validMoves = movesToVerify.Intersect(monData.GetSmartMoves()).ToHashSet();
+                            monIsValid |= validAbilities.Count > 0;
+                            monIsValid |= validMoves.Count > 0;
                             // In any case, even if not naturally learned, the mon may have a move disk equipped that will give it
                             if (mon.Item != null && !AutoItem && backEndData.MoveItemData.TryGetValue(mon.Item.Name, out HashSet<string> moveDiskMoves))
                             {
