@@ -39,7 +39,6 @@ namespace MechanicsData
         POSITIVE_STAT_BOOST, // Moves that appreciate many stat boosts
         SETUP_STATUS, // Setup status moves
         SETUP_DAMAGING, // Damaging moves that increase stat
-        NO_MISS, // Moves that don't miss
         SELF_DEBUFF, // Debuff user (contrary, sure crit)
         DAMAGE_PROP_WEIGTH, // Damage increases with weight
         DAMAGE_PROP_SPEED, // Damage proportional with speed (e.g. electro ball)
