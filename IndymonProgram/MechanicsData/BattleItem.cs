@@ -11,6 +11,7 @@ namespace MechanicsData
         BERRY, // Berry
         CONSUMABLE, // Unburden, acro
         BAD_ITEM, // Items that are normally useless or bad/negative
+        MOVE_BOOSTING_ITEM, // Items that boost are meant to boost the moves somehow, e.g. leftovers is good no matter what but choice scarf needs to boost to be useful, otherwise marked as useless
     }
     public class BattleItem
     {

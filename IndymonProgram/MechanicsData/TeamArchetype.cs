@@ -12,5 +12,6 @@
         MISTY_TERRAIN,
         GRASSY_TERRAIN,
         TRICK_ROOM,
+        GRAVITY,
     }
 }

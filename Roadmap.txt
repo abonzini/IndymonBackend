@@ -39,4 +39,5 @@ It is the amin focus of S2, a great teambuilder
 // TODO
 Load data in sheet, will take a while. Do in order:
 - Moves (interact with moves and items)
+- Revise items, MOVE_AFFECTING_ITEM has been included to filter out items meant to boost moves in order to discard them if useless. Do another round, examine which ones actually do boost stuff, and also transfer the "attacking boost" thing to the actual calculation, only defensive is needed otherwise
 Ask yourself, what can buff/nerf these? AND do they need to discourage elements of similar types?

@@ -39,6 +39,7 @@ namespace MechanicsData
         POSITIVE_STAT_BOOST, // Moves that appreciate many stat boosts
         SETUP_STATUS, // Setup status moves
         SETUP_DAMAGING, // Damaging moves that increase stat
+        SETUP_SPEED, // Moves that increase speed
         SELF_DEBUFF, // Debuff user (contrary, sure crit)
         DAMAGE_PROP_WEIGTH, // Damage increases with weight
         DAMAGE_PROP_SPEED, // Damage proportional with speed (e.g. electro ball)
@@ -48,6 +49,7 @@ namespace MechanicsData
         HIGH_CRIT, // Like sure crit but not sure
         SUB_60, // Moves under 60 damage will be increased by technician
         CHARGING, // Charging moves, like solar beam
+        RECHARGING, // Moves that recharge like hyper beam (not so good as they seem)
         MULTIHIT_2_MOVE, // 2-hit moves like bonemerang
         MULTIHIT_3_MOVE, // 3-hit move like triple dive
         MULTIHIT_2_TO_5_MOVE, // The common multi hit 2-5 hits
