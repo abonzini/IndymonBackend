@@ -110,7 +110,7 @@ namespace Parsers
         /// <returns>The ability list</returns>
         public static Dictionary<string, Ability> GetAbilityDictionary(string sheetId, string sheetTab)
         {
-            Console.WriteLine("Parsing Moves");
+            Console.WriteLine("Parsing Abilities");
             Dictionary<string, Ability> result = new Dictionary<string, Ability>();
             // Parse csv
             string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
@@ -288,7 +288,7 @@ namespace Parsers
                 {
                     Name = fields[NAME_COL]
                 };
-                typeField = fields[DEF_TYPE_COL].Trim().ToUpper();
+                string typeField = fields[DEF_TYPE_COL].Trim().ToUpper();
                 if (typeField != "")
                 {
                     nextItem.DefensiveBoostType = Enum.Parse<PokemonType>(typeField);
