@@ -278,9 +278,8 @@ namespace Parsers
             // Parse csv
             string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
-            const int OFF_TYPE_COL = 1;
-            const int DEF_TYPE_COL = 2;
-            const int FLAGS_COL = 8; // Contains all effect keys of this particular item
+            const int DEF_TYPE_COL = 1;
+            const int FLAGS_COL = 7; // Contains all effect keys of this particular item
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
@@ -289,11 +288,6 @@ namespace Parsers
                 {
                     Name = fields[NAME_COL]
                 };
-                string typeField = fields[OFF_TYPE_COL].Trim().ToUpper();
-                if (typeField != "")
-                {
-                    nextItem.OffensiveBoostType = Enum.Parse<PokemonType>(typeField);
-                }
                 typeField = fields[DEF_TYPE_COL].Trim().ToUpper();
                 if (typeField != "")
                 {

@@ -11,12 +11,11 @@ namespace MechanicsData
         BERRY, // Berry
         CONSUMABLE, // Unburden, acro
         BAD_ITEM, // Items that are normally useless or bad/negative
-        MOVE_BOOSTING_ITEM, // Items that boost are meant to boost the moves somehow, e.g. leftovers is good no matter what but choice scarf needs to boost to be useful, otherwise marked as useless
+        SET_AFFECTING_ITEM, // These items are meant to boost utility of a set, e.g. leftovers is good no matter what but choice item needs to boost to be useful, otherwise marked as useless
     }
     public class BattleItem
     {
         public string Name { get; set; } = "";
-        public PokemonType OffensiveBoostType { get; set; } = PokemonType.NONE;
         public PokemonType DefensiveBoostType { get; set; } = PokemonType.NONE;
         public HashSet<BattleItemFlag> Flags { get; set; } = new HashSet<BattleItemFlag>(); /// Flags that an item may have
         public override string ToString()

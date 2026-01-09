@@ -65,6 +65,8 @@ namespace MechanicsData
         MISTY_TERRAIN_SETTER, // Obvious
         ABILITY_MANIPULATING, // Deal with abilities, either giving or takign abilities
         BERRY_DEPENDANT, // Depends on mon having a berry on
+        HAZARD, // Sets hazard on the field
+        SWITCH_OPPONENT, // Switches opponent out
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MoveCategory
