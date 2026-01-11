@@ -472,7 +472,7 @@ namespace IndymonBackendProgram
                     }
                     break;
                 case RoomEventType.POKEMON_BATTLE:
-                    // Similar to aplha but there's 6 enemy mons
+                    // Similar to aplha but there's 3 enemy mons
                     {
                         const int NUMBER_OF_WILD_POKEMON = 3; // Time to balance-hardcode this
                         const int ITEMS_PER_WILD_POKEMON = 1;
@@ -693,6 +693,50 @@ namespace IndymonBackendProgram
                             string postMessage = roomEvent.PostEventString.Replace("$1", item);
                             GenericMessageCommand(postMessage);
                             AddPokemonPrize(pokemonSpecies, 3, isShiny, prizes); // Add the mon (masterball tho)
+                        }
+                    }
+                    break;
+                case RoomEventType.GIANT_POKEMON:
+                    // Single pokemon with a rare item but the mon is lvl 110-125
+                    {
+                        string item = _dungeonDetails.RareItems[RandomNumberGenerator.GetInt32(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
+                        List<string> potentialPokemon = _dungeonDetails.PokemonEachFloor[floor]; // Find the possible mons this floor
+                        string pokemonSpecies = potentialPokemon[RandomNumberGenerator.GetInt32(potentialPokemon.Count)].Trim().ToLower(); // Get a random one of these
+                        int level = RandomNumberGenerator.GetInt32(110, 126); // Get lvls 110-125
+                        string alphaString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
+                        GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
+                        bool isShiny = (RandomNumberGenerator.GetInt32(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
+                        PokemonSet giantPokemon = new PokemonSet()
+                        {
+                            Species = pokemonSpecies,
+                            Shiny = isShiny,
+                            Level = level,
+                            Item = new Item() { Name = item, Uses = 1 }
+                        };
+                        TrainerData giantTeam = new TrainerData() // Create the blank trainer
+                        {
+                            Avatar = "unknown",
+                            Name = "giant mon",
+                            AutoItem = false,
+                            AutoTeam = true,
+                            Teamsheet = [giantPokemon], // Only mon in the teamsheet
+                        };
+                        giantTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.SMART); // Randomize enemy team (movesets, etc), boss/alpha is a bit smarter than normal dungeon mon
+                        int remainingMons = ResolveEncounter(trainerData, giantTeam);
+                        if (remainingMons == 0) // Means player lost
+                        {
+                            Console.WriteLine("Player lost");
+                            roomCleared = false; // Failure at clearing room
+                            GenericMessageCommand($"You blacked out...");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Player won");
+                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                            alphaString = roomEvent.PostEventString.Replace("$1", item);
+                            GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
+                            AddRareItemPrize(item, prizes); // Add item to prizes
+                            AddPokemonPrize(pokemonSpecies, floor, isShiny, prizes); // Add giant mon too
                         }
                     }
                     break;

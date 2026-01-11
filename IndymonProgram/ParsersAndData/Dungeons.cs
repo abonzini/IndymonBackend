@@ -25,6 +25,7 @@ namespace ParsersAndData
         PP_HEAL, // 3PP heal
         UNOWN, // Unown event, 6 random unown with wacky moves
         FIRELORD, // Fire legendary event, summon a legendary of lower lvl
+        GIANT_POKEMON, // Underwater evet with a mon from same floor but lvl 110-125
     }
     public class RoomEvent
     {
