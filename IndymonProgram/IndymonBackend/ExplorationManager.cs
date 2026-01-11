@@ -1,5 +1,6 @@
 ﻿using ParsersAndData;
 using ShowdownBot;
+using System.Drawing;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -10,6 +11,7 @@ namespace IndymonBackendProgram
         NOP, // No operation, just a pause
         PRINT_STRING,
         PRINT_CLUE,
+        PRINT_PLOT,
         PRINT_EVOLUTION,
         CLEAR_CONSOLE,
         DRAW_ROOM,
@@ -17,7 +19,9 @@ namespace IndymonBackendProgram
         CONNECT_ROOMS_PASSAGE,
         CONNECT_ROOMS_SHORTCUT,
         ADD_INFO_COLUMN,
-        ADD_INFO_VALUE
+        ADD_INFO_VALUE,
+        CLEAR_ROOMS,
+        DRAW_REGI_EYE,
     }
     public enum CardinalDirections
     {
@@ -71,7 +75,7 @@ namespace IndymonBackendProgram
                 Console.Write($"{i + 1}: {options[i]}, ");
             }
             Console.WriteLine("");
-            int selection = int.Parse(Console.ReadLine()) - 1;
+            int selection = int.Parse(Console.ReadLine());
             if (selection == 0)
             {
                 selection = RandomNumberGenerator.GetInt32(options.Count);
@@ -191,9 +195,11 @@ namespace IndymonBackendProgram
                     }
                     else if ((room == DUNGEON_ROOMS_PER_FLOOR - 1) && (floor == DUNGEON_NUMBER_OF_FLOORS - 1)) // Last room is always boss event
                     {
+                        ExecuteEvent(_dungeonDetails.PreBossEvent, floor, prizes, trainerData); // Pre boss event
                         roomSuccess = ExecuteEvent(_dungeonDetails.BossEvent, floor, prizes, trainerData); // BOSS
                         if (roomSuccess) // If has been beaten, then dungeon is also over
                         {
+                            ExecuteEvent(_dungeonDetails.PostBossEvent, floor, prizes, trainerData); // Post boss event
                             DrawConnectRoomCommand(floor, room, floor + 1, room, false); // Connects to invisible next dungeon, no shortcut
                             DrawMoveCharacterCommand(floor, room, floor + 1, room); // Character dissapears
                             auxString = $"You move onward...";
@@ -369,6 +375,16 @@ namespace IndymonBackendProgram
                         GenericMessageCommand(messageString);
                         AddCommonItemPrize(obtainedDisk, prizes);
                         messageString = roomEvent.PostEventString.Replace("$1", obtainedDisk);
+                        GenericMessageCommand(messageString);
+                    }
+                    break;
+                case RoomEventType.IMP_GAIN:
+                    {
+                        int impGain = RandomNumberGenerator.GetInt32(2,5); // 2-4 IMP
+                        string messageString = roomEvent.PreEventString.Replace("$1", $"{impGain} IMP");
+                        GenericMessageCommand(messageString);
+                        AddCommonItemPrize($"{impGain} IMP", prizes);
+                        messageString = roomEvent.PostEventString.Replace("$1", $"{impGain} IMP");
                         GenericMessageCommand(messageString);
                     }
                     break;
@@ -740,6 +756,52 @@ namespace IndymonBackendProgram
                         }
                     }
                     break;
+                case RoomEventType.MIRROR_MATCH:
+                    // Fight against yourself but a couple levels lower
+                    {
+                        TrainerData copiedTeam = new TrainerData() // Create the blank trainer
+                        {
+                            Avatar = trainerData.Avatar,
+                            Name = "illusion",
+                            AutoItem = false,
+                            AutoTeam = false,
+                            Teamsheet = [], // Will add mons after
+                        };
+                        foreach (PokemonSet set in trainerData.Teamsheet)
+                        {
+                            int level = RandomNumberGenerator.GetInt32(75-91); // Get lvls 75-90
+                            PokemonSet copiedMon = new PokemonSet()
+                            {
+                                Species = set.Species,
+                                Shiny = set.Shiny,
+                                Level = level,
+                                Item = set.Item,
+                            };
+                            copiedTeam.Teamsheet.Add(copiedMon);
+                        }
+                        GenericMessageCommand(roomEvent.PreEventString);
+                        copiedTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.SMART); // Randomize enemy team (movesets, etc), boss/alpha is a bit smarter than normal dungeon mon
+                        int remainingMons = ResolveEncounter(trainerData, copiedTeam);
+                        if (remainingMons == 0) // Means player lost
+                        {
+                            Console.WriteLine("Player lost");
+                            roomCleared = false; // Failure at clearing room
+                            GenericMessageCommand($"You blacked out...");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Player won");
+                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                            GenericMessageCommand(roomEvent.PostEventString); // Prints the message but we know it could have a $1
+                        }
+                    }
+                    break;
+                case RoomEventType.PLOT_CLUE:
+                    {
+                        PlotMessageCommand(roomEvent.PreEventString);
+                        PlotMessageCommand(roomEvent.PostEventString);
+                    }
+                    break;
                 case RoomEventType.JOINER:
                     // Mon that joins the team for adventures, always catchable
                     {
@@ -800,6 +862,15 @@ namespace IndymonBackendProgram
                             GenericMessageCommand(npcString);
                         }
                     }
+                    break;
+                case RoomEventType.REGISTEEL: // Dramatic drawing of registeel eyes
+                    ClearRoomsCommand();
+                    DrawRegiEye(-1,-1,1000);
+                    DrawRegiEye(1,-1,1000);
+                    DrawRegiEye(2,0,500);
+                    DrawRegiEye(1,1,333);
+                    DrawRegiEye(-1,1,333);
+                    DrawRegiEye(-2,0,333);
                     break;
                 default:
                     break;
@@ -993,6 +1064,20 @@ namespace IndymonBackendProgram
             });
         }
         /// <summary>
+        /// Adds to event queue, a plot message string. Will be plot-based (i.e. gives clue to a player)
+        /// </summary>
+        /// <param name="message">String to add</param>
+        void PlotMessageCommand(string message)
+        {
+            Console.WriteLine($"> {message}"); // Important for debug too
+            ExplorationSteps.Add(new ExplorationStep()
+            {
+                Type = ExplorationStepType.PRINT_PLOT,
+                StringParam = message,
+                MillisecondsWait = STANDARD_MESSAGE_PAUSE
+            });
+        }
+        /// <summary>
         /// Adds to event queue, a generic message regarding pokemon evolution
         /// </summary>
         /// <param name="message">String to add</param>
@@ -1029,6 +1114,17 @@ namespace IndymonBackendProgram
             });
         }
         /// <summary>
+        /// Clears all rooms and table (UNRECOVERABLE!)
+        /// </summary>
+        void ClearRoomsCommand()
+        {
+            ExplorationSteps.Add(new ExplorationStep() // Clean the rooms
+            {
+                Type = ExplorationStepType.CLEAR_ROOMS,
+                MillisecondsWait = DRAW_ROOM_PAUSE
+            });
+        }
+        /// <summary>
         /// Commands the system to draw a room box
         /// </summary>
         /// <param name="floor">Floor of room</param>
@@ -1039,6 +1135,20 @@ namespace IndymonBackendProgram
             {
                 Type = ExplorationStepType.DRAW_ROOM,
                 DestCoord = (floor, room)
+            });
+        }
+        /// <summary>
+        /// Draws a regi eye in the relative coords x,y
+        /// </summary>
+        /// <param name="x">x</param>
+        /// <param name="y">y</param>
+        void DrawRegiEye(int x, int y, int milliSecondWait)
+        {
+            ExplorationSteps.Add(new ExplorationStep()
+            {
+                Type = ExplorationStepType.DRAW_REGI_EYE,
+                DestCoord = (x, y),
+                MillisecondsWait = milliSecondWait
             });
         }
         /// <summary>
@@ -1184,6 +1294,12 @@ namespace IndymonBackendProgram
                         Console.WriteLine($"> {nextStep.StringParam}"); // Write message
                         consoleOffset = Console.CursorTop; // New console location
                         break;
+                    case ExplorationStepType.PRINT_PLOT:
+                        Console.ForegroundColor = ConsoleColor.Cyan; // Sets plot color
+                        Console.SetCursorPosition(0, consoleOffset);
+                        Console.WriteLine($"> {nextStep.StringParam}"); // Write message
+                        consoleOffset = Console.CursorTop; // New console location
+                        break;
                     case ExplorationStepType.PRINT_EVOLUTION:
                         Console.ForegroundColor = ConsoleColor.Magenta; // Sets info color
                         Console.SetCursorPosition(0, consoleOffset);
@@ -1235,6 +1351,20 @@ namespace IndymonBackendProgram
                         UpdateInfoTableField(nextStep.StringParam, actualTableCoord, infoRows, infoColOffset);
                         // Redraw table
                         RedrawInfoTable(infoRows);
+                        break;
+                    case ExplorationStepType.CLEAR_ROOMS:
+                        for (int line = 0; line < consoleLineStart; line++) // Clear all until text
+                        {
+                            Console.SetCursorPosition(0, line);
+                            Console.Write(emptyLine);
+                        }
+                        break;
+                    case ExplorationStepType.DRAW_REGI_EYE:
+                        Console.ForegroundColor = ConsoleColor.Red; // Regi eyes are red
+                        int midpointX = Console.WindowWidth / 2; // Midpoint pixel
+                        int midpointY = consoleLineStart / 2;
+                        Console.SetCursorPosition(nextStep.DestCoord.Item1 + midpointX, nextStep.DestCoord.Item2 + midpointY);
+                        Console.Write($"●"); // Draw regi eye
                         break;
                     default:
                         break;

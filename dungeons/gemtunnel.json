@@ -281,6 +281,8 @@
     "PreEventString": "Even though it's dark, rest is important. You should find some time for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": "Molten Core"

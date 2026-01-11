@@ -282,6 +282,8 @@
     "PreEventString": "The sun is shining and there's a gentle breeze. A perfect place for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": ""

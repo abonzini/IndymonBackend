@@ -298,6 +298,8 @@
     "PreEventString": "Proper recovery and rest are just as important as training itself. It's time to take a small break.",
     "PostEventString": "But now it's time to move on..."
   },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": "Sky Castle"

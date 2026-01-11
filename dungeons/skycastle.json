@@ -55,7 +55,7 @@
 	{
       "EventType": "STATUS_TRAP",
       "PreEventString": "As you climb, the environment becomes more hostile. The low temperatures are extremely dangerous.",
-      "PostEventString": "You try your best, but the harsh temperature have affected $1, it is now frozem.",
+      "PostEventString": "You try your best, but the harsh temperature have affected $1, it is now frozen.",
 	  "SpecialParams": "frz"
     },
 	{
@@ -302,6 +302,8 @@
     "PreEventString": "The air is cold and thin, you can hardly breathe. This is a hostile land, not meant for humans and Pokemon from the surface. You should use any opportunity you can to have a picnic.",
     "PostEventString": "But for now it's time to move on..."
   },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Hail Mod"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""

@@ -285,6 +285,8 @@
     "PreEventString": "The cold, darkness and pressure are unbearable. However you find an air pocket and thermal vents which keep you warm. It's the only chance you have for a picnic.",
     "PostEventString": "But for now it's time to move on..."
   },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Primordial Sea Mod"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""

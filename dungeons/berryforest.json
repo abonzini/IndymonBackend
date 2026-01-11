@@ -291,7 +291,9 @@
     "PreEventString": "You find a clearing in the forest. The air is pure, it's a perfect place for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : [],
-  "NextDungeon": "",
-  "NextDungeonShortcut": ""
+  "NextDungeon": "Rub-a-Dub Pond",
+  "NextDungeonShortcut": "Cursed Mansion"
 }

@@ -1,15 +1,15 @@
 Mini Meadows -> Raikou/Entei/Thundurus(both)-> Sun Stone
 	Power Plant -> Zapdos/Zeraora -> Thunder Stone
 	Desert -> Regieleki
+Gem Cave -> Lake Spirits -> Moon Stone
+	Magma -> Moltres/Heatran -> Fire Stone
+	Apricorn Forest -> Regirock (Apricorns)
 Berry Forest -> Shaymin/Celebi -> Leaf Stone
 	Haunted Mansion -> Marshadow/Spectrier -> Shiny Stone
 	Pond -> Registeel
-Gem Cave -> Lake Spirits -> Moon Stone
-	Magma -> Moltres/Heatran -> Fire Stone
-	Apricorn Forest -> Regirock
 Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone 
 	Underwater -> Tapu Fini/Volcanion -> Water Stone
-	Faraway Island -> Regidrago 
+	Faraway Island -> Regidrago (Food Ingredients)
 White Monastery -> Justice -> Dawn Stone
 	Sky Tower -> Enamorus(both)/Articuno/ArticunoGalar -> Ice Stone
 	Glacier -> Regice

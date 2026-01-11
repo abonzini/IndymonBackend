@@ -1,0 +1,298 @@
+{
+  "Name": "Cursed Mansion",
+  "GoesDownwards": false,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "You find an old wooden chest. You find $1 inside.",
+      "PostEventString": "You pick it up and continue on your way."
+    },
+	{
+      "EventType": "MIRROR_MATCH",
+      "PreEventString": "A mysterious figure starts materializing in front of you. The figure is a perfect clone of you, as if looking into a mirror. Suddenly, it attacks!.",
+      "PostEventString": "The figure vanishes without a trace. Better keep going before it appears again."
+    },
+	{
+      "EventType": "PLOT_CLUE",
+      "PreEventString": "An old man is standing in front of you with a blank stare. He smells like coffee. He says 'You don't know how to catch a Pokémon? I suppose I had better show you then!'.",
+      "PostEventString": "He throws a Pokeball at the middle of the room, but there wasn't anything in there. Then, the old man stays in place, not doing anything. YOU FEEL A SENSE OF UNEASINESS, AS SOMETHING IN THE WORLD HAD TEMPORARILY BROKEN."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "You feel an evil prescence behind you. You're suddenly attacked by a $1!",
+      "PostEventString": "The Pokemon vanishes. For now..."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "This room has a lot of abandoned machinery and weird looking equipment. Conencted to it is a piece of evolution crystal. It weakly whispers: yE who s..k AWakneAN ; L3T us Be.begin.",
+      "PostEventString": "The crystal stops glowing, completely drained out of energy. It's time to move on."
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "Even though you're in a mansion, it is still an extension of the berry forest, with many healthy berries to eat.",
+      "PostEventString": "Your team eats some berries and have recovered some health."
+    },
+	{
+      "EventType": "BIG_HEAL",
+      "PreEventString": "Even though you're in a mansion, it is still an extension of the berry forest, with many healthy berries to eat.",
+      "PostEventString": "$1 eats some berries. It is fully healed."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "Even though you're in a mansion, it is still an extension of the berry forest, with many healthy berries to eat.",
+      "PostEventString": "Your team eats some berries and have recovered from harmful conditions."
+    },
+	{
+      "EventType": "PP_HEAL",
+      "PreEventString": "Even though you're in a mansion, it is still an extension of the berry forest, with many healthy berries to eat.",
+      "PostEventString": "Your team eats some berries and their moves recover some PP."
+    },
+	{
+      "EventType": "SWARM",
+      "PreEventString": "A group of young trickster pokemon challenges you to a fight. You don't feel any malice from them, seems they just want to play.",
+      "PostEventString": "The pokemon are satisfied and happy, they move along gleefuly."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "A Banette appears out of nowhere and gives you a gift-wrapped box.",
+      "PostEventString": "You open the box, which immediately explodes! Your Pokemon sustain some damage."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "A Banette appears out of nowhere and gives you a gift-wrapped box.",
+      "PostEventString": "You open the box, which releases a large amount of sleeping gas. $1 is now asleep.",
+	  "SpecialParams": "slp"
+    },
+	{
+      "EventType": "IMP_GAIN",
+      "PreEventString": "You find a very old wallet in the floor.",
+      "PostEventString": "You open it. Contains no ID, but you grab $1 that was inside."
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "You see $1, but something doesn't seem right. They seem possessed! 'H..help me', they say. You quickly grab some medicines from their bag and start a fight.",
+      "PostEventString": "$1 regains their senses. They owe you big time."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Murkrow",
+		"Meowth-Alola",
+		"Gastly",
+		"Shuppet",
+		"Duskull",
+		"Drifloon",
+		"Zorua",
+		"Zorua-Hisui",
+		"Purrloin",
+		"Litwick",
+		"Phantump",
+		"Pumpkaboo",
+		"Rowlet",
+		"Nickit",
+		"Sinistea",
+		"Bramblin",
+		"Greavard",
+		"Gimmighoul"
+	],
+	[
+		"Persian-Alola",
+		"Haunter",
+		"Misdreavus",
+		"Sableye",
+		"Banette",
+		"Dusclops",
+		"Spiritomb",
+		"Liepard",
+		"Lampent",
+		"Gourgeist",
+		"Dartix",
+		"Thievul",
+		"Polteageist",
+		"Houndstone"
+	],
+	[
+		"Honchkrow",
+		"Gengar",
+		"Mismagius",
+		"Dusknoir",
+		"Drifblim",
+		"Zoroark",
+		"Zoroark-Hisui",
+		"Chandelure",
+		"Trevenant",
+		"Decidueye",
+		"Mimikyu",
+		"Brambleghast",
+		"Gholdengo"
+	],
+	[
+		"Marshadow",
+		"Spectrier"
+	]
+  ],
+  "CommonItems": [
+		"Aguav Berry",
+		"Apicot Berry",
+		"Aspear Berry",
+		"Cheri Berry",
+		"Chesto Berry",
+		"Chilan Berry",
+		"Custap Berry",
+		"Enigma Berry",
+		"Figy Berry",
+		"Ganlon Berry",
+		"Iapapa Berry",
+		"Jaboca Berry",
+		"Kee Berry",
+		"Lansat Berry",
+		"Leppa Berry",
+		"Liechi Berry",
+		"Lum Berry",
+		"Mago Berry",
+		"Maranga Berry",
+		"Micle Berry",
+		"Oran Berry",
+		"Pecha Berry",
+		"Persim Berry",
+		"Petaya Berry",
+		"Rawst Berry",
+		"Rowap Berry",
+		"Salac Berry",
+		"Sitrus Berry",
+		"Starf Berry",
+		"Wiki Berry",
+		"Colbur Berry",
+		"Kasib Berry"
+  ],
+  "RareItems": [
+		"Ability Shield",
+		"Adrenaline Orb",
+		"Blunder Policy",
+		"Black Glasses",
+		"Weakness Policy",
+		"Clear Amulet",
+		"Covert Cloak",
+		"Destiny Knot",
+		"Spell Tag"
+  ],
+  "BossItem": "Shiny Stone",
+  "Floors": [
+    {
+      "RoomColor": "White",
+      "NeWallTile": "┐",
+      "NwWallTile": "┌",
+      "SeWallTile": "┘",
+      "SwWallTile": "└",
+      "EWallTile": "│",
+      "WWallTile": "│",
+      "NWallTile": "─",
+      "SWallTile": "─",
+	  "EWallPassageTile": "┆",
+      "WWallPassageTile": "┆",
+      "NWallPassageTile": "┄",
+      "SWallPassageTile": "┄",
+      "NWallShortcutTile": "┆",
+      "SWallShortcutTile": "┆",
+      "PassageColor": "DarkGray",
+      "VerticalPassageTile": "┆",
+      "ShortcutColor": "DarkMagenta",
+      "NeShortcutTile": "Ҩ",
+      "NwShortcutTile": "Ҩ",
+      "SeShortcutTile": "Ҩ",
+      "SwShortcutTile": "Ҩ",
+      "HorizontalShortcutTile": "Ҩ",
+      "VerticalShortcutTile": "Ҩ",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": ["Accelerock","Aqua Jet","Bullet Punch","Extreme Speed","Fake Out","Feint","First Impression","Grassy Glide","Ice Shard","Jet Punch","Mach Punch","Quick Attack","Shadow Sneak","Sucker Punch","Thunderclap","Upper Hand","Vacuum Wave","Water Shuriken","Zippy Zap"]
+		}
+	  ],
+	  "ShortcutClue": "A weird wormhole has appeared, linking this room with another room further ahead. But it's closing quick! Think fast!",
+	  "ShortcutResolution": "Your $1 is fast enough to help you keep the portal open. You pass through."
+    },
+	{
+      "RoomColor": "White",
+      "NeWallTile": "╕",
+      "NwWallTile": "╔",
+      "SeWallTile": " ",
+      "SwWallTile": " ",
+      "EWallTile": " ",
+      "WWallTile": "║",
+      "NWallTile": "═",
+      "SWallTile": "╙",
+	  "EWallPassageTile": " ",
+      "WWallPassageTile": "╢",
+      "NWallPassageTile": "╧",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "White",
+      "VerticalPassageTile": "│",
+      "ShortcutColor": "DarkMagenta",
+      "NeShortcutTile": "✤",
+      "NwShortcutTile": "✤",
+      "SeShortcutTile": "✤",
+      "SwShortcutTile": "✤",
+      "HorizontalShortcutTile": "✤",
+      "VerticalShortcutTile": "✤",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": ["Natural Gift", "Present", "Trick-or-Treat", "No Retreat", "Trick", "Trick Room", "Flower Trick", "Power Trick"]
+		},
+		{
+			"ConditionType": "ABILITY",
+			"Which": ["Flower Gift"]
+		}
+	  ],
+	  "ShortcutClue": "A lot of ghost Pokemon are fooling around having fun. 'TrIcK or TrEaT¿', they vocalize! They seem to want a present or something...",
+	  "ShortcutResolution": "Your $1 seems to have done the trick. They laught about and lead you deeper through the mansion."
+    },
+	{
+      "RoomColor": "DarkMagenta",
+      "NeWallTile": "░",
+      "NwWallTile": "░",
+      "SeWallTile": "░",
+      "SwWallTile": "░",
+      "EWallTile": "░",
+      "WWallTile": "░",
+      "NWallTile": "░",
+      "SWallTile": "░",
+	  "EWallPassageTile": "░",
+      "WWallPassageTile": "░",
+      "NWallPassageTile": "░",
+      "SWallPassageTile": "░",
+      "NWallShortcutTile": "░",
+      "SWallShortcutTile": "░",
+      "PassageColor": "Magenta",
+      "VerticalPassageTile": "░",
+      "ShortcutColor": "White",
+      "NeShortcutTile": " ",
+      "NwShortcutTile": " ",
+      "SeShortcutTile": " ",
+      "SwShortcutTile": " ",
+      "HorizontalShortcutTile": " ",
+      "VerticalShortcutTile": " ",
+	  "ShortcutConditions": [],
+	  "ShortcutClue": "No way through the fog but forward. Nowhere else to go.",
+	  "ShortcutResolution": ""
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "The fog is too thick to be able to see or advance every further. You feel the prescence of an entity, a mix of playful and threatening.",
+    "PostEventString": "Creature dissapears in the fog. The fog dissipates just for a moment, and you find the path back to safety. What could have happened in this place?."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "You find a dining room in the mansion. You still feel uneasy, as if something was watching you, but it's probably still the best place for a picnic.",
+    "PostEventString": "But for now it's time to move on..."
+  },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
+  "CustomShowdownRules" : ["Continuous Trick Room Mod"],
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

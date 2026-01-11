@@ -191,7 +191,11 @@
 		{
 				"ConditionType": "MOVE",
 				"Which": ["Surf"]
-		}
+		},
+    {
+				"ConditionType": "ABILITY",
+				"Which": ["Swift Swim"]
+		},
 	  ],
 	  "ShortcutClue": "You could probably swim across to reach ahead faster.",
 	  "ShortcutResolution": "Your $1 allows you to reach the distant sandbanks."
@@ -275,6 +279,8 @@
     "PreEventString": "Nothing like the relaxing sunset to forget all of your troubles. It's a perfect place for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": "Deepest Trench"

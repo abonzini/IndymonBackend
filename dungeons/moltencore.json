@@ -270,6 +270,8 @@
     "PreEventString": "The air is burning. You can barely continue on, your eyes and dry and can barely breathe. This is a hostile land, and you can't even know where it ends, the air filled with thick smoke. You find a small grotto, where you could establish a camping location.",
     "PostEventString": "But for now it's time to move on..."
   },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Desolate Land Mod"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
