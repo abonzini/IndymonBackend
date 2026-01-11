@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using ParsersAndData;
-using System.Security.Cryptography;
 
 namespace IndymonBackendProgram
 {
@@ -119,7 +118,7 @@ namespace IndymonBackendProgram
                     case "11":
                         {
                             TrainerData chosenTrainer = Utilities.ChooseOneTrainerDialog(TeambuildSettings.NONE, _allData.DataContainer);
-                            string obtainedMon = chosenTrainer.Teamsheet[RandomNumberGenerator.GetInt32(chosenTrainer.Teamsheet.Count)].Species;
+                            string obtainedMon = chosenTrainer.Teamsheet[Utilities.GetRandomNumber(chosenTrainer.Teamsheet.Count)].Species;
                             Console.WriteLine($"Obtained child version of {obtainedMon}");
                         }
                         break;
@@ -141,7 +140,7 @@ namespace IndymonBackendProgram
                                 "\t4 - Champion: 4 commons, 1 disk/plate, 2 rares");
                             string choice = Console.ReadLine();
                             int nCommons = 0, nRares = 0;
-                            bool isDisk = (RandomNumberGenerator.GetInt32(100000) % 2 == 0); // Random even/odd
+                            bool isDisk = (Utilities.GetRandomNumber(100000) % 2 == 0); // Random even/odd
                             switch (choice)
                             {
                                 case "1":
@@ -166,24 +165,24 @@ namespace IndymonBackendProgram
                             List<string> commons = new List<string>();
                             for (int i = 0; i < nCommons; i++)
                             {
-                                string item = theDungeon.CommonItems[RandomNumberGenerator.GetInt32(theDungeon.CommonItems.Count)];
+                                string item = theDungeon.CommonItems[Utilities.GetRandomNumber(theDungeon.CommonItems.Count)];
                                 commons.Add(item);
                             }
                             if (isDisk)
                             {
-                                string obtainedDisk = _allData.DataContainer.MoveItemData.Keys.ToList()[RandomNumberGenerator.GetInt32(_allData.DataContainer.MoveItemData.Count)]; // Get random move disk
+                                string obtainedDisk = _allData.DataContainer.MoveItemData.Keys.ToList()[Utilities.GetRandomNumber(_allData.DataContainer.MoveItemData.Count)]; // Get random move disk
                                 commons.Add(obtainedDisk);
                             }
                             else
                             {
                                 List<string> platesList = [.. _allData.DataContainer.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
-                                string chosenPlate = platesList[RandomNumberGenerator.GetInt32(platesList.Count)];
+                                string chosenPlate = platesList[Utilities.GetRandomNumber(platesList.Count)];
                                 commons.Add(chosenPlate);
                             }
                             List<string> rares = new List<string>();
                             for (int i = 0; i < nRares; i++)
                             {
-                                string item = theDungeon.RareItems[RandomNumberGenerator.GetInt32(theDungeon.RareItems.Count)];
+                                string item = theDungeon.RareItems[Utilities.GetRandomNumber(theDungeon.RareItems.Count)];
                                 rares.Add(item);
                             }
                             Console.WriteLine($"Commmon items: {string.Join(",", commons)}");
@@ -294,8 +293,8 @@ namespace IndymonBackendProgram
                             _allData.DataContainer.MoveData = moveData;
                             // There's one last weird detail, Unowns in this game actually have all moves with their corresponding letter, so need to add all moves and then filter
                             // Same as mons with sketch so...
-                            List<Pokemon> allMoveMons = monData.Values.Where(p => p.Name.ToLower().Contains("unown") || p.Moves.Contains("sketch")).ToList();
-                            HashSet<string> allMoves = moveData.Keys.ToHashSet(); // Get a nice hash with all moves
+                            List<Pokemon> allMoveMons = [.. monData.Values.Where(p => p.Name.ToLower().Contains("unown") || p.Moves.Contains("sketch"))];
+                            HashSet<string> allMoves = [.. moveData.Keys]; // Get a nice hash with all moves
                             foreach (Pokemon mon in allMoveMons)
                             {
                                 mon.Moves = allMoves; // This mon now learns all moves

@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using ParsersAndData;
 using System.Net.WebSockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -216,8 +215,8 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
-                        string monSpecies = m.Groups[2].Value.Trim().ToLower(); // Species of the mon
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question (FUCK YOU FARFETCHD)
+                        string monSpecies = m.Groups[2].Value.Trim().ToLower().Replace("’", "'"); // Species of the mon (FUCK YOU FARFETCHD)
                         string status = m.Groups[3].Value.Trim().ToLower(); // Hp status
                         //Console.WriteLine($"Switch debug: {monId}->{monSpecies}->{status}");
                         if (!_monsById.TryGetValue(monId, out PokemonSet pokemonInTeam)) // Id not known yet
@@ -371,7 +370,7 @@ namespace ShowdownBot
                 bool invalidChoice;
                 do
                 {
-                    int moveChoice = RandomNumberGenerator.GetInt32(0, 4); // 0 -> 3 can be the choice
+                    int moveChoice = Utilities.GetRandomNumber(0, 4); // 0 -> 3 can be the choice
                     ActiveOptions playOptions = _currentGameState.Active.FirstOrDefault();
                     // Move is valid as long its in a valid slot and usable (not disabled, pp)
                     invalidChoice = moveChoice >= playOptions.Moves.Count || playOptions.Moves[moveChoice].Disabled || (playOptions.Moves[moveChoice].Pp == 0);
@@ -382,7 +381,7 @@ namespace ShowdownBot
                             List<int> switchIns = _currentGameState.Side.GetValidSwitchIns();
                             if (switchIns.Count > 0) // Can switch then, so theres a valid move
                             {
-                                int switchChoice = RandomNumberGenerator.GetInt32(0, switchIns.Count);
+                                int switchChoice = Utilities.GetRandomNumber(0, switchIns.Count);
                                 int switchedInMon = switchIns[switchChoice];
                                 command = $"{battle}|/choose switch {switchedInMon}"; // Switch to random mon
                                 invalidChoice = false; // Move valid after all

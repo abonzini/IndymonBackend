@@ -16,7 +16,7 @@ namespace ParsersAndData
             while (n > 1) // Fischer yates
             {
                 n--;
-                int k = RandomNumberGenerator.GetInt32(n + 1);
+                int k = GetRandomNumber(n + 1);
                 (list[offset + k], list[offset + n]) = (list[offset + n], list[offset + k]); // Swap
             }
         }
@@ -58,6 +58,44 @@ namespace ParsersAndData
             }
             // Finally, try to define teamsheet
             return trainers[int.Parse(Console.ReadLine()) - 1];
+        }
+        static List<int> _rngNumbers = [];
+        static int _currentRngIndex = 0;
+        static SemaphoreSlim _rngSemaphore = new SemaphoreSlim(1, 1);
+        const int RNG_LIST_SIZE = 100;
+        const int MAX_INT = 1000000; // Idk
+        /// <summary>
+        /// Gets random [min-max)
+        /// </summary>
+        /// <param name="minInclusive">[min</param>
+        /// <param name="maxExclusive">max)</param>
+        /// <returns></returns>
+        public static int GetRandomNumber(int minInclusive, int maxExclusive)
+        {
+            _rngSemaphore.Wait();
+            if (_currentRngIndex >= _rngNumbers.Count)
+            {
+                _currentRngIndex = 0;
+                _rngNumbers.Clear();
+                for (int i = 0; i < RNG_LIST_SIZE; i++)
+                {
+                    _rngNumbers.Add(RandomNumberGenerator.GetInt32(MAX_INT));
+                }
+            }
+            int result = _rngNumbers[_currentRngIndex] % (maxExclusive - minInclusive); // Trim to range
+            _currentRngIndex++; // Will check next index later
+            result += minInclusive;
+            _rngSemaphore.Release();
+            return result;
+        }
+        /// <summary>
+        /// Same but [0,max)
+        /// </summary>
+        /// <param name="maxExclusive">max)</param>
+        /// <returns></returns>
+        public static int GetRandomNumber(int maxExclusive)
+        {
+            return GetRandomNumber(0, maxExclusive);
         }
     }
 }

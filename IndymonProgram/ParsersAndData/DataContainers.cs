@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace ParsersAndData
@@ -86,7 +85,15 @@ namespace ParsersAndData
         public void RandomizeAndVerify(DataContainers backEndData, TeambuildSettings settings)
         {
             bool acceptedMon = false;
-            Pokemon pokemonBackendData = backEndData.Dex[Species];
+            Pokemon pokemonBackendData;
+            if (Species.ToLower().Contains("unown")) // Weird case because the species is always unown even if many aesthetic formes that are not in the dex
+            {
+                pokemonBackendData = backEndData.Dex["unown"];
+            }
+            else
+            {
+                pokemonBackendData = backEndData.Dex[Species];
+            }
             while (!acceptedMon)
             {
                 // Randomize mon, with a 10% chance of each move being empty (for 7% was 1->18%, 2->1.3%, 3->0.003% but we changed the method to generate movesets since then)
@@ -151,15 +158,15 @@ namespace ParsersAndData
                 legalMoves.IntersectWith(legalMoves.Where(m => m.StartsWith(letter))); // Reduce  
             }
             // First, get the mon an ability
-            Ability = legalAbilities.ElementAt(RandomNumberGenerator.GetInt32(legalAbilities.Count)); // Get a random one
+            Ability = legalAbilities.ElementAt(Utilities.GetRandomNumber(legalAbilities.Count)); // Get a random one
             // Moves 1-4, just get random shit with a chance to switch
             for (int i = 0; i < 4; i++)
             {
                 Moves[i] = ""; // Clean move first
                 if (legalMoves.Count == 0) continue; // If no more moves, continue so I can clear the rest of the moveset but im done
-                if (RandomNumberGenerator.GetInt32(0, 100) > switchChance) // Means the next move is not a switch, add something
+                if (Utilities.GetRandomNumber(0, 100) > switchChance) // Means the next move is not a switch, add something
                 {
-                    Moves[i] = legalMoves.ElementAt(RandomNumberGenerator.GetInt32(legalMoves.Count));
+                    Moves[i] = legalMoves.ElementAt(Utilities.GetRandomNumber(legalMoves.Count));
                     legalMoves.Remove(Moves[i]);
                 }
             }
@@ -187,7 +194,7 @@ namespace ParsersAndData
                 {
                     // Replace a move with a stab then
                     legalMoves.Add(Moves[safeMoveIndex]); // Re-add the move to the pool
-                    Moves[safeMoveIndex] = legalStabs.ElementAt(RandomNumberGenerator.GetInt32(legalStabs.Count)); // Add a random stab then
+                    Moves[safeMoveIndex] = legalStabs.ElementAt(Utilities.GetRandomNumber(legalStabs.Count)); // Add a random stab then
                     legalMoves.Remove(Moves[safeMoveIndex]);
                     safeMoveIndex++; // Make the STAB move safe
                 }
@@ -227,12 +234,12 @@ namespace ParsersAndData
                     // I'll try ability first since dancer is good
                     if (abilitiesICanUse.Count > 0)
                     {
-                        Ability = abilitiesICanUse.ElementAt(RandomNumberGenerator.GetInt32(abilitiesICanUse.Count));
+                        Ability = abilitiesICanUse.ElementAt(Utilities.GetRandomNumber(abilitiesICanUse.Count));
                     }
                     else // Just replace a move then, replace whatever's in the safe move index (everything below is protected)
                     {
                         legalMoves.Add(Moves[safeMoveIndex]);
-                        Moves[safeMoveIndex] = movesICanUse.ElementAt(RandomNumberGenerator.GetInt32(movesICanUse.Count));
+                        Moves[safeMoveIndex] = movesICanUse.ElementAt(Utilities.GetRandomNumber(movesICanUse.Count));
                         legalMoves.Remove(Moves[safeMoveIndex]);
                         safeMoveIndex++;
                     }
@@ -530,7 +537,7 @@ namespace ParsersAndData
                 {
                     // First, get all the possible team comps that are legal for this format, choose a random one, and then shuffle the mons
                     List<List<PokemonSet>> legalComps = GetValidTeamComps(backEndData, minNMons, maxNMons, settings);
-                    List<PokemonSet> chosenSet = legalComps[RandomNumberGenerator.GetInt32(legalComps.Count)];
+                    List<PokemonSet> chosenSet = legalComps[Utilities.GetRandomNumber(legalComps.Count)];
                     Utilities.ShuffleList(chosenSet, 0, chosenSet.Count);
                     // Now make sure the sets have the mons in order
                     for (int i = 0; i < chosenSet.Count; i++)
@@ -568,7 +575,7 @@ namespace ParsersAndData
                         Console.WriteLine($"\tItem for {pokemonSet.Species}");
                         if (BattleItems.Count > 0)
                         {
-                            int roll = RandomNumberGenerator.GetInt32(0, 100);
+                            int roll = Utilities.GetRandomNumber(0, 100);
                             if (roll < itemAcceptanceChance) // Randomly, try to assign one of the items to the pokemon
                             {
                                 Item itemCandidate = null;

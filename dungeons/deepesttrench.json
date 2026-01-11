@@ -87,7 +87,8 @@
 		"Finneon",
 		"Frillish",
 		"Popplio",
-		"Marenie"
+		"Marenie",
+		"Castform"
 	],
 	[
 		"Seadra",
@@ -172,7 +173,7 @@
       "SwWallTile": "◌",
       "EWallTile": "◌",
       "WWallTile": "◌",
-      "NWallTile": "◌",
+      "NWallTile": " ",
       "SWallTile": "◌",
 	  "EWallPassageTile": " ",
       "WWallPassageTile": " ",
