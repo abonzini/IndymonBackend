@@ -31,6 +31,7 @@ namespace ParsersAndData
         PLOT_CLUE, // New text color, say cyan, for storyline clue that may lead you to special event
         IMP_GAIN, // Gives IMP instead of items
         REGISTEEL, // Draws registeel face
+        REGICE, // Draws regice face
     }
     public class RoomEvent
     {

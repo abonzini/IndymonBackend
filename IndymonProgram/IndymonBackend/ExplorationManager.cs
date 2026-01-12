@@ -870,6 +870,15 @@ namespace IndymonBackendProgram
                     DrawRegiEye(-1, 1, 333);
                     DrawRegiEye(-2, 0, 333);
                     break;
+                case RoomEventType.REGICE: // Dramatic drawing of regice eyes
+                    DrawRegiEye(0, 0, 1000);
+                    DrawRegiEye(0, -1, 0);
+                    DrawRegiEye(0, 1, 1000);
+                    DrawRegiEye(1, 0, 0);
+                    DrawRegiEye(-1, 0, 500);
+                    DrawRegiEye(2, 0, 0);
+                    DrawRegiEye(-2, 0, 500);
+                    break;
                 default:
                     break;
             }

@@ -5,7 +5,7 @@
     {
       "EventType": "TREASURE",
       "PreEventString": "There's a golden chest on a nearby peak.",
-      "PostEventString": "Whith a lot of effort, you manage to climb and retrieve the treasure."
+      "PostEventString": "Whith a lot of effort, you manage to climb and retrieve the treasure ($1)."
     },
 	{
       "EventType": "ALPHA",
@@ -301,6 +301,6 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : [],
-  "NextDungeon": "Chillwind Glaciar",
+  "NextDungeon": "Northface Glacier",
   "NextDungeonShortcut": "Sky Castle"
 }

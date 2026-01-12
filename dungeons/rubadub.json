@@ -14,7 +14,7 @@
     },
 	{
       "EventType": "EVO",
-      "PreEventString": "All the Pokemon in the lake are singing around a pruple shining crystal. It talks to you: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PreEventString": "All the Pokemon in the lake are singing around a purple shining crystal. It talks to you: YE WHO SEEK AWAKENING, LET US BEGIN.",
       "PostEventString": "It's time to move on."
     },
 	{
@@ -82,7 +82,8 @@
 		"Chewtle",
 		"Quaxly",
     "Farfetch'd",
-		"Castform"
+		"Castform",
+    "Corphish"
 	],
 	[
 		"Wartortle",
@@ -117,7 +118,8 @@
 		"Inteleon",
 		"Quaquaval",
 		"Dondozo",
-		"Tatsugiri"
+		"Tatsugiri",
+    "Crawdaunt"
 	],
 	[
 		"Registeel"
@@ -167,7 +169,8 @@
 		"Leftovers",
 		"Luminous Moss",
 		"Miracle Seed",
-		"Silver Powder"
+		"Silver Powder",
+    "Water Stone"
   ],
   "BossItem": "Titan Plate 3",
   "Floors": [
@@ -292,7 +295,7 @@
   {
       "EventType": "PLOT_CLUE",
       "PreEventString": "... After their hard work was done, the titans began their well deserved slumber.",
-      "PostEventString": "They were never seen ever since. Despite the efforts of their most devout followers, they were never found."
+      "PostEventString": "They were never seen since. Despite the efforts of their most devout followers, they were never found. ..."
   },
   "CustomShowdownRules" : ["Continuous Rain Mod"],
   "NextDungeon": "",
