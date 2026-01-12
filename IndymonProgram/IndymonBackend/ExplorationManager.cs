@@ -378,7 +378,7 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.IMP_GAIN:
                     {
-                        int impGain = Utilities.GetRandomNumber(2, 5); // 2-4 IMP
+                        int impGain = Utilities.GetRandomNumber(2, 4); // 2-3 IMP
                         string messageString = roomEvent.PreEventString.Replace("$1", $"{impGain} IMP");
                         GenericMessageCommand(messageString);
                         AddCommonItemPrize($"{impGain} IMP", Prizes);
@@ -767,13 +767,16 @@ namespace IndymonBackendProgram
                         };
                         foreach (PokemonSet set in trainerData.Teamsheet)
                         {
-                            int level = Utilities.GetRandomNumber(75 - 91); // Get lvls 75-90
+                            int level = Utilities.GetRandomNumber(75, 91); // Get lvls 75-90
                             PokemonSet copiedMon = new PokemonSet()
                             {
                                 Species = set.Species,
                                 Shiny = set.Shiny,
                                 Level = level,
                                 Item = set.Item,
+                                Ability = set.Ability,
+                                Moves = set.Moves,
+                                ExplorationStatus = set.ExplorationStatus
                             };
                             copiedTeam.Teamsheet.Add(copiedMon);
                         }

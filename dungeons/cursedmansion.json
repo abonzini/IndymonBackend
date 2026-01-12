@@ -217,11 +217,11 @@
       "NeWallTile": "╕",
       "NwWallTile": "╔",
       "SeWallTile": " ",
-      "SwWallTile": " ",
+      "SwWallTile": "╙",
       "EWallTile": " ",
       "WWallTile": "║",
       "NWallTile": "═",
-      "SWallTile": "╙",
+      "SWallTile": " ",
 	  "EWallPassageTile": " ",
       "WWallPassageTile": "╢",
       "NWallPassageTile": "╧",
@@ -248,7 +248,7 @@
 		}
 	  ],
 	  "ShortcutClue": "A lot of ghost Pokemon are fooling around having fun. 'TrIcK or TrEaT¿', they vocalize! They seem to want a present or something...",
-	  "ShortcutResolution": "Your $1 seems to have done the trick. They laught about and lead you deeper through the mansion."
+	  "ShortcutResolution": "Your $1 seems to have done the trick. They laugh about it and and lead you deeper through the mansion."
     },
 	{
       "RoomColor": "DarkMagenta",
