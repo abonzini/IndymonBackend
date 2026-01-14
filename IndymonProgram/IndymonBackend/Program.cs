@@ -1,12 +1,11 @@
-﻿using MechanicsData;
+﻿using MechanicsDataContainer;
 using Newtonsoft.Json;
-using Parsers;
 
 namespace IndymonBackendProgram
 {
     public class SessionData
     {
-        public MechanicsDataContainer MechanicsContainer { get; set; }
+        public MechanicsDataContainers MechanicsContainer { get; set; }
         public string MasterDirectory { get; set; }
     }
     public static class SessionDataHelper
@@ -43,7 +42,7 @@ namespace IndymonBackendProgram
                     Console.WriteLine("No indymon file. Will just try to import backend data");
                     SessionDataHelper.CurrentSessionData = new SessionData
                     {
-                        MechanicsContainer = new MechanicsDataContainer()
+                        MechanicsContainer = new MechanicsDataContainers()
                     };
                     // Begin with the mechanics back end
                     string mechanicsDataPath = Path.Combine(directoryPath, MECHANICS_DATA_FILE);
@@ -51,19 +50,26 @@ namespace IndymonBackendProgram
                     string[] lines = File.ReadAllLines(mechanicsDataPath);
                     string sheetId = lines[0].Split(",")[0];
                     string typechartTab = lines[2].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.TypeChart = IndymonParsers.GetTypeChart(sheetId, typechartTab);
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseTypeChart(sheetId, typechartTab);
                     string moveTab = lines[3].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.Moves = IndymonParsers.GetMoveDictionary(sheetId, moveTab);
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseMoves(sheetId, moveTab);
                     string pokedexTab = lines[1].Split(",")[0];
                     string learnsetsTab = lines[4].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.Dex = IndymonParsers.GetPokemonDictionary(sheetId, pokedexTab, learnsetsTab, SessionDataHelper.CurrentSessionData.MechanicsContainer.Moves);
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParsePokemonData(sheetId, pokedexTab, learnsetsTab);
                     string modItemsTab = lines[5].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ModItems = IndymonParsers.GetModItemDictionary(sheetId, modItemsTab);
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseModItems(sheetId, modItemsTab);
                     string battleItemsTab = lines[6].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.BattleItems = IndymonParsers.GetBattleItemDictionary(sheetId, battleItemsTab);
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseBattleItems(sheetId, battleItemsTab);
                     string abilityTab = lines[7].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.Abilities = IndymonParsers.GetAbilityDictionary(sheetId, abilityTab);
-
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseAbilities(sheetId, abilityTab);
+                    string initialWeightsTab = lines[8].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseInitialWeights(sheetId, initialWeightsTab);
+                    string enablementTab = lines[9].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseEnabledOptions(sheetId, enablementTab);
+                    string forcedBuildsTab = lines[10].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseForcedBuilds(sheetId, forcedBuildsTab);
+                    string statModsTab = lines[11].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseStatModifiers(sheetId, statModsTab);
                 }
                 SessionDataHelper.CurrentSessionData.MasterDirectory = directoryPath; // If this is null then everything got fucked up
             }

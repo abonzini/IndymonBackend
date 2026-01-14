@@ -17,7 +17,7 @@ namespace MechanicsData
         BATTLE_ITEM_FLAGS, /// Affects items with that flag
         ABILITY, /// Affects an ability
         MOVE, /// Affects a specific move by name
-        MOVE_FLAGS, /// Affects moves carrying a specific flag
+        EFFECT_FLAGS, /// Affects moves or abilities carrying a specific flag
         MOVE_TYPE, /// Affects moves of specific types
         MOVE_CATEGORY, /// Affects phy/spe/status (e.g. prankster, AV)
         ALL_MOVES, /// Affects every single move (e.g. normalize)

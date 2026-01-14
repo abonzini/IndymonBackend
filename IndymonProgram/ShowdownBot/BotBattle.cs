@@ -1,6 +1,4 @@
-﻿using ParsersAndData;
-
-namespace ShowdownBot
+﻿namespace ShowdownBot
 {
     public class BotBattle
     {

@@ -6,3 +6,7 @@
 2086622175, mod items
 105334850, battle items
 1710842129, abilities
+928341334, initial weights
+451590364, Enabler strats
+1228549123, Forced Builds
+608096215, Stat Mods

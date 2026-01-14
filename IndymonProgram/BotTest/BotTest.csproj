@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IndymonBackend\IndymonBackendProgram.csproj" />
-    <ProjectReference Include="..\ParsersAndData\ParsersAndData.csproj" />
     <ProjectReference Include="..\ShowdownBot\ShowdownBot.csproj" />
   </ItemGroup>
 

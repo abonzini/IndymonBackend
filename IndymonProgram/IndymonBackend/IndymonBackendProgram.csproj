@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MechanicsDataContainer\MechanicsDataContainer.csproj" />
     <ProjectReference Include="..\MechanicsData\MechanicsData.csproj" />
-    <ProjectReference Include="..\Parsers\Parsers.csproj" />
   </ItemGroup>
 
 </Project>
