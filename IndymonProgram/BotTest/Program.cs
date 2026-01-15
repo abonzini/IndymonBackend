@@ -1,5 +1,4 @@
-﻿using IndymonBackendProgram;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using ShowdownBot;
 namespace BotTest
 {

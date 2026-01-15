@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechanicsData", "MechanicsD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechanicsDataContainer", "MechanicsDataContainer\MechanicsDataContainer.csproj", "{FB7A20ED-4F71-578E-CD96-028B53632E0A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameData", "GameData\GameData.csproj", "{D6592491-AE09-4AE8-A32B-8061DDBCDB29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDataContainer", "GameDataContainer\GameDataContainer.csproj", "{780CB291-BE6F-421A-AAB2-1CEE16651BD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +48,14 @@ Global
 		{FB7A20ED-4F71-578E-CD96-028B53632E0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB7A20ED-4F71-578E-CD96-028B53632E0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB7A20ED-4F71-578E-CD96-028B53632E0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6592491-AE09-4AE8-A32B-8061DDBCDB29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6592491-AE09-4AE8-A32B-8061DDBCDB29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6592491-AE09-4AE8-A32B-8061DDBCDB29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6592491-AE09-4AE8-A32B-8061DDBCDB29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{780CB291-BE6F-421A-AAB2-1CEE16651BD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{780CB291-BE6F-421A-AAB2-1CEE16651BD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{780CB291-BE6F-421A-AAB2-1CEE16651BD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{780CB291-BE6F-421A-AAB2-1CEE16651BD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

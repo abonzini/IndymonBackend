@@ -1,94 +1,21 @@
 ﻿using MechanicsDataContainer;
-using Newtonsoft.Json;
 
 namespace IndymonBackendProgram
 {
-    public class SessionData
-    {
-        public MechanicsDataContainers MechanicsContainer { get; set; }
-        public string MasterDirectory { get; set; }
-    }
-    public static class SessionDataHelper
-    {
-        public static SessionData CurrentSessionData { get; set; }
-    }
     public static class Program
     {
         static void Main(string[] args)
         {
-            string FILE_NAME = "indy.mon";
-            string MECHANICS_DATA_FILE = "mechanics_data.txt";
-            string TOURN_CSV = "tournament_stats.csv";
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Indymon manager program ☺");
             Console.CursorVisible = false;
-            if (args.Length == 0) // File not included, need to ask for it
-            {
-                Console.WriteLine($"Folder where {FILE_NAME} located?");
-                string directoryPath = Console.ReadLine();
-                string filePath = Path.Combine(directoryPath, "indy.mon");
-                if (File.Exists(filePath))
-                {
-                    Console.WriteLine("Indymon file located, retrieving");
-                    JsonSerializerSettings settings = new JsonSerializerSettings
-                    {
-                        TypeNameHandling = TypeNameHandling.Auto,
-                    };
-                    SessionDataHelper.CurrentSessionData = JsonConvert.DeserializeObject<SessionData>(File.ReadAllText(filePath), settings);
-                }
-                else
-                {
-                    Console.WriteLine("No indymon file. Will just try to import backend data");
-                    SessionDataHelper.CurrentSessionData = new SessionData
-                    {
-                        MechanicsContainer = new MechanicsDataContainers()
-                    };
-                    // Begin with the mechanics back end
-                    string mechanicsDataPath = Path.Combine(directoryPath, MECHANICS_DATA_FILE);
-                    if (!File.Exists(mechanicsDataPath)) throw new Exception($"No {MECHANICS_DATA_FILE}");
-                    string[] lines = File.ReadAllLines(mechanicsDataPath);
-                    string sheetId = lines[0].Split(",")[0];
-                    string typechartTab = lines[2].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseTypeChart(sheetId, typechartTab);
-                    string moveTab = lines[3].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseMoves(sheetId, moveTab);
-                    string pokedexTab = lines[1].Split(",")[0];
-                    string learnsetsTab = lines[4].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParsePokemonData(sheetId, pokedexTab, learnsetsTab);
-                    string modItemsTab = lines[5].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseModItems(sheetId, modItemsTab);
-                    string battleItemsTab = lines[6].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseBattleItems(sheetId, battleItemsTab);
-                    string abilityTab = lines[7].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseAbilities(sheetId, abilityTab);
-                    string initialWeightsTab = lines[8].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseInitialWeights(sheetId, initialWeightsTab);
-                    string enablementTab = lines[9].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseEnabledOptions(sheetId, enablementTab);
-                    string forcedBuildsTab = lines[10].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseForcedBuilds(sheetId, forcedBuildsTab);
-                    string statModsTab = lines[11].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseStatModifiers(sheetId, statModsTab);
-                    string moveModsTab = lines[12].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseMoveModifiers(sheetId, moveModsTab);
-                    string weightModsTab = lines[13].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseWeightModifiers(sheetId, weightModsTab);
-                    string fixedModsTab = lines[14].Split(",")[0];
-                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseFixedModifiers(sheetId, fixedModsTab);
-                }
-                SessionDataHelper.CurrentSessionData.MasterDirectory = directoryPath; // If this is null then everything got fucked up
-            }
-            else
-            {
-                string indymonFile = args[0];
-                JsonSerializerSettings settings = new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                };
-                SessionDataHelper.CurrentSessionData = JsonConvert.DeserializeObject<SessionData>(File.ReadAllText(indymonFile), settings);
-                SessionDataHelper.CurrentSessionData.MasterDirectory = Path.GetDirectoryName(indymonFile);
-            }
+            Console.WriteLine($"Folder where data is located?");
+            string directoryPath = Console.ReadLine();
+            // Begin with the mechanics back end
+            string MECHANICS_DATA_FILE = "mechanics_data.txt";
+            MechanicsDataContainers.GlobalMechanicsData.InitializeData(Path.Combine(directoryPath, MECHANICS_DATA_FILE));
+            // Ok beginning of code proper
             string InputString;
             do
             {
@@ -100,16 +27,16 @@ namespace IndymonBackendProgram
                     case "0":
                         {
                             Console.WriteLine("Ordering Tournament history and exporting csv");
-                            string csvFile = Path.Combine(SessionDataHelper.CurrentSessionData.MasterDirectory, TOURN_CSV);
+                            //string csvFile = Path.Combine(SessionDataHelper.CurrentSessionData.MasterDirectory, TOURN_CSV);
                             //File.WriteAllText(csvFile, FormatTournamentHistory());
-                            Console.WriteLine("Serializing json");
-                            string indymonFile = Path.Combine(SessionDataHelper.CurrentSessionData.MasterDirectory, FILE_NAME);
-                            JsonSerializerSettings settings = new JsonSerializerSettings
-                            {
-                                TypeNameHandling = TypeNameHandling.Auto,
-                                Formatting = Formatting.Indented
-                            };
-                            File.WriteAllText(indymonFile, JsonConvert.SerializeObject(SessionDataHelper.CurrentSessionData, settings));
+                            //Console.WriteLine("Serializing json");
+                            //string indymonFile = Path.Combine(SessionDataHelper.CurrentSessionData.MasterDirectory, FILE_NAME);
+                            //JsonSerializerSettings settings = new JsonSerializerSettings
+                            //{
+                            //    TypeNameHandling = TypeNameHandling.Auto,
+                            //    Formatting = Formatting.Indented
+                            //};
+                            //File.WriteAllText(indymonFile, JsonConvert.SerializeObject(SessionDataHelper.CurrentSessionData, settings));
                         }
                         break;
                     case "1":

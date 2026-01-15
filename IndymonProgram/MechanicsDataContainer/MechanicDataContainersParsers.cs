@@ -10,7 +10,7 @@ namespace MechanicsDataContainer
         /// <param name="sheetId">Id</param>
         /// <param name="sheetTab">Tab</param>
         /// <returns>The csv</returns>
-        static string GetCsvFromGoogleSheets(string sheetId, string sheetTab)
+        string GetCsvFromGoogleSheets(string sheetId, string sheetTab)
         {
             string url = $"https://docs.google.com/spreadsheets/d/{sheetId}/export?format=csv&gid={sheetTab}";
             using HttpClient client = new HttpClient();
@@ -21,7 +21,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseTypeChart(string sheetId, string sheetTab)
+        void ParseTypeChart(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Typechart");
             TypeChart = new TypeChart();
@@ -64,7 +64,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseMoves(string sheetId, string sheetTab)
+        void ParseMoves(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Moves");
             Moves = new Dictionary<string, Move>();
@@ -103,7 +103,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseAbilities(string sheetId, string sheetTab)
+        void ParseAbilities(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Abilities");
             Abilities = new Dictionary<string, Ability>();
@@ -135,7 +135,7 @@ namespace MechanicsDataContainer
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="dexSheetTab">Which tab has the data</param>
         /// <param name="learnsetSheetTab">Which tab has learnsets</param>
-        public void ParsePokemonData(string sheetId, string dexSheetTab, string learnsetSheetTab)
+        void ParsePokemonData(string sheetId, string dexSheetTab, string learnsetSheetTab)
         {
             Console.WriteLine("Parsing Pokedex");
             Dex = new Dictionary<string, Pokemon>();
@@ -225,7 +225,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseModItems(string sheetId, string sheetTab)
+        void ParseModItems(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Mod Item List");
             ModItems = new Dictionary<string, ModItem>();
@@ -247,7 +247,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseBattleItems(string sheetId, string sheetTab)
+        void ParseBattleItems(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Battle Items");
             BattleItems = new Dictionary<string, BattleItem>();
@@ -285,7 +285,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseInitialWeights(string sheetId, string sheetTab)
+        void ParseInitialWeights(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Initial Weights");
             InitialWeights = new Dictionary<(ElementType, string), float>();
@@ -311,7 +311,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseEnabledOptions(string sheetId, string sheetTab)
+        void ParseEnabledOptions(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Enablement List");
             Enablers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
@@ -351,7 +351,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseForcedBuilds(string sheetId, string sheetTab)
+        void ParseForcedBuilds(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Forced Build List");
             ForcedBuilds = new Dictionary<(ElementType, string), HashSet<(ElementType, string)>>();
@@ -386,7 +386,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseStatModifiers(string sheetId, string sheetTab)
+        void ParseStatModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Stat Mods List");
             StatModifiers = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
@@ -421,7 +421,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseMoveModifiers(string sheetId, string sheetTab)
+        void ParseMoveModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Move Mods List");
             MoveModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
@@ -466,7 +466,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseWeightModifiers(string sheetId, string sheetTab)
+        void ParseWeightModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Weight Mods List");
             WeightModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
@@ -503,7 +503,7 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        public void ParseFixedModifiers(string sheetId, string sheetTab)
+        void ParseFixedModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Fixed Mods List");
             FixedModifiers = new Dictionary<(ElementType, string), float>();
