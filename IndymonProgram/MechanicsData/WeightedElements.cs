@@ -57,7 +57,7 @@ namespace MechanicsData
     }
     [JsonConverter(typeof(StringEnumConverter))]
     /// How specific moves are affected
-    public enum MoveModifiers
+    public enum MoveModifier
     {
         // Things that affect moves for damage calculation
         MOVE_BP_MOD, /// A specific's move BP is affected

@@ -416,5 +416,50 @@ namespace MechanicsDataContainer
                 statMods.Add((statModType, statModValue));
             }
         }
+        /// <summary>
+        /// Parses the move modifiers list. This requires all data (moves,dex,etc) to be pre-parsed
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
+        public void ParseMoveModifiers(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Parsing Move Mods List");
+            MoveModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
+            // Parse csv
+            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            const int MODIFIER_TYPE_COL = 0;
+            const int MODIFIER_NAME_COL = 1;
+            const int MODIFIED_TYPE_COL = 2;
+            const int MODIFIED_NAME_COL = 3;
+            const int MOD_TYPE_COL = 4;
+            const int MOD_NAME_COL = 5;
+            string[] lines = csv.Split("\n");
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string[] fields = lines[i].Split(","); // Csv
+                ElementType modifierType = Enum.Parse<ElementType>(fields[MODIFIER_TYPE_COL].Trim());
+                string modifierName = fields[MODIFIER_NAME_COL].Trim();
+                ElementType modifiedType = Enum.Parse<ElementType>(fields[MODIFIED_TYPE_COL].Trim());
+                string modifiedName = fields[MODIFIED_NAME_COL].Trim();
+                MoveModifier modType = Enum.Parse<MoveModifier>(fields[MOD_TYPE_COL].Trim());
+                string modName = fields[MOD_NAME_COL].Trim();
+                // Validate if all's good
+                if (!ValidateElementExistance(modifierType, modifierName)) throw new Exception($"{modifierName} is not a valid {modifierType}");
+                if (!ValidateElementExistance(modifiedType, modifiedName)) throw new Exception($"{modifiedName} is not a valid {modifiedType}");
+                if (!ValidateMoveModExistance(modType, modName)) throw new Exception($"{modName} is not a valid {modType}");
+                // Add to the corresponding matrices
+                if (!MoveModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), Dictionary<MoveModifier, string>> modifieds))
+                {
+                    modifieds = new Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>();
+                    MoveModifiers.Add((modifierType, modifierName), modifieds);
+                }
+                if (!modifieds.TryGetValue((modifiedType, modifiedName), out Dictionary<MoveModifier, string> moveMods))
+                {
+                    moveMods = new Dictionary<MoveModifier, string>();
+                    modifieds.Add((modifiedType, modifiedName), moveMods);
+                }
+                moveMods.Add(modType, modName);
+            }
+        }
     }
 }

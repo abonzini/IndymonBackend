@@ -70,6 +70,8 @@ namespace IndymonBackendProgram
                     SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseForcedBuilds(sheetId, forcedBuildsTab);
                     string statModsTab = lines[11].Split(",")[0];
                     SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseStatModifiers(sheetId, statModsTab);
+                    string moveModsTab = lines[12].Split(",")[0];
+                    SessionDataHelper.CurrentSessionData.MechanicsContainer.ParseMoveModifiers(sheetId, moveModsTab);
                 }
                 SessionDataHelper.CurrentSessionData.MasterDirectory = directoryPath; // If this is null then everything got fucked up
             }

@@ -48,5 +48,20 @@ namespace MechanicsDataContainer
                 _ => false,
             };
         }
+        /// <summary>
+        /// Validates whether this move mod exists in data
+        /// </summary>
+        /// <param name="mod">Type of mod</param>
+        /// <param name="name">Name of the element to verify</param>
+        /// <returns>True if element exists in this data</returns>
+        public static bool ValidateMoveModExistance(MoveModifier mod, string name)
+        {
+            return mod switch
+            {
+                MoveModifier.MOVE_BP_MOD or MoveModifier.MOVE_ACC_MOD => float.TryParse(name, out _),
+                MoveModifier.MOVE_TYPE_MOD => Enum.TryParse<PokemonType>(name, true, out _),
+                _ => false,
+            };
+        }
     }
 }
