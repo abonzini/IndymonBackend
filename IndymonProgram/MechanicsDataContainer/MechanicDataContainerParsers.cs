@@ -461,5 +461,69 @@ namespace MechanicsDataContainer
                 moveMods.Add(modType, modName);
             }
         }
+        /// <summary>
+        /// Parses the weight modifiers list. This requires all data (moves,dex,etc) to be pre-parsed
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
+        public void ParseWeightModifiers(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Parsing Weight Mods List");
+            WeightModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
+            // Parse csv
+            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            const int MODIFIER_TYPE_COL = 0;
+            const int MODIFIER_NAME_COL = 1;
+            const int MODIFIED_TYPE_COL = 2;
+            const int MODIFIED_NAME_COL = 3;
+            const int WEIGHT_COL = 4;
+            string[] lines = csv.Split("\n");
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string[] fields = lines[i].Split(","); // Csv
+                ElementType modifierType = Enum.Parse<ElementType>(fields[MODIFIER_TYPE_COL].Trim());
+                string modifierName = fields[MODIFIER_NAME_COL].Trim();
+                ElementType modifiedType = Enum.Parse<ElementType>(fields[MODIFIED_TYPE_COL].Trim());
+                string modifiedName = fields[MODIFIED_NAME_COL].Trim();
+                float weight = float.Parse(fields[WEIGHT_COL]);
+                // Validate if all's good
+                if (!ValidateElementExistance(modifierType, modifierName)) throw new Exception($"{modifierName} is not a valid {modifierType}");
+                if (!ValidateElementExistance(modifiedType, modifiedName)) throw new Exception($"{modifiedName} is not a valid {modifiedType}");
+                // Add to the corresponding matrices
+                if (!WeightModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), float> modifieds))
+                {
+                    modifieds = new Dictionary<(ElementType, string), float>();
+                    WeightModifiers.Add((modifierType, modifierName), modifieds);
+                }
+                modifieds.Add((modifiedType, modifiedName), weight); // This should be unique
+            }
+        }
+        /// <summary>
+        /// Parses the fixed modifiers list. This requires all data (moves,dex,etc) to be pre-parsed
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
+        public void ParseFixedModifiers(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Parsing Fixed Mods List");
+            FixedModifiers = new Dictionary<(ElementType, string), float>();
+            // Parse csv
+            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            const int MODIFIER_TYPE_COL = 0;
+            const int MODIFIER_NAME_COL = 1;
+            const int WEIGHT_COL = 2;
+            string[] lines = csv.Split("\n");
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string[] fields = lines[i].Split(","); // Csv
+                ElementType modifierType = Enum.Parse<ElementType>(fields[MODIFIER_TYPE_COL].Trim());
+                string modifierName = fields[MODIFIER_NAME_COL].Trim();
+                float weight = float.Parse(fields[WEIGHT_COL]);
+                // Validate if all's good
+                if (!ValidateElementExistance(modifierType, modifierName)) throw new Exception($"{modifierName} is not a valid {modifierType}");
+                // Add to the corresponding matrices
+                FixedModifiers.Add((modifierType, modifierName), weight); // This should be unique
+            }
+        }
     }
 }
