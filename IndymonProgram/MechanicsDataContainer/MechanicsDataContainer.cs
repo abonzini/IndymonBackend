@@ -14,6 +14,6 @@ namespace MechanicsDataContainer
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>> Enablers { get; set; }
         public HashSet<(ElementType, string)> DisabledOptions { get; set; }
         public Dictionary<(ElementType, string), HashSet<(ElementType, string)>> ForcedBuilds { get; set; }
-        public Dictionary<(ElementType, string), HashSet<(StatModifiers, string)>> StatModifiers { get; set; }
+        public Dictionary<(ElementType, string), HashSet<(StatModifier, string)>> StatModifiers { get; set; }
     }
 }

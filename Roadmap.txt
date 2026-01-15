@@ -13,8 +13,3 @@ Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone
 White Monastery -> Justice -> Dawn Stone
 	Sky Tower -> Enamorus(both)/Articuno/ArticunoGalar -> Ice Stone
 	Glacier -> Regice
-    
-TODO:
-Add EV, Tera, Mon Type 1, Mon Type 2, nature to move mods, add all mod items
-Add correct silvally, ogerpon ?
-Continue mod lists

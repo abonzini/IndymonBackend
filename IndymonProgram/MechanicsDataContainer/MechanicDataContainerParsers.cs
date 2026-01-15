@@ -231,25 +231,13 @@ namespace MechanicsDataContainer
             ModItems = new Dictionary<string, ModItem>();
             // Parse csv
             string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int NAME_COL = 0;
-            const int EFFECTS_COL = 1; // Contains all effect keys of this particular item (starting)
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
-                string[] fields = lines[i].Split(","); // Csv
                 ModItem nextModItem = new ModItem
                 {
-                    Name = fields[NAME_COL]
+                    Name = lines[i].Trim()
                 };
-                for (int j = EFFECTS_COL; j < fields.Length; j++)
-                {
-                    string modEffect = fields[j].Trim();
-                    if (modEffect == "") break; // No more effects
-                    string[] modParts = modEffect.Split(":");
-                    ModItemExtraFlag action = Enum.Parse<ModItemExtraFlag>(modParts[0].Trim());
-                    string value = modParts[1].Trim();
-                    nextModItem.Mods.Add((action, value));
-                }
                 // Move parsed, add
                 ModItems.Add(nextModItem.Name, nextModItem);
             }
@@ -401,7 +389,7 @@ namespace MechanicsDataContainer
         public void ParseStatModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Stat Mods List");
-            StatModifiers = new Dictionary<(ElementType, string), HashSet<(StatModifiers, string)>>();
+            StatModifiers = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
             // Parse csv
             string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int ELEMENT_TYPE_COL = 0;
@@ -414,14 +402,15 @@ namespace MechanicsDataContainer
                 string[] fields = lines[i].Split(","); // Csv
                 ElementType elementType = Enum.Parse<ElementType>(fields[ELEMENT_TYPE_COL].Trim());
                 string elementName = fields[ELEMENT_NAME_COL].Trim();
-                StatModifiers statModType = Enum.Parse<StatModifiers>(fields[STAT_MOD_TYPE_COL].Trim());
+                StatModifier statModType = Enum.Parse<StatModifier>(fields[STAT_MOD_TYPE_COL].Trim());
                 string statModValue = fields[STAT_MOD_VALUE_NAME].Trim();
                 // Validate if all's good
                 if (!ValidateElementExistance(elementType, elementName)) throw new Exception($"{elementName} is not a valid {elementType}");
+                if (!ValidateStatModExistance(statModType, statModValue)) throw new Exception($"{statModValue} is not a valid {statModType}");
                 // Add to the corresponding matrices
-                if (!StatModifiers.TryGetValue((elementType, elementName), out HashSet<(StatModifiers, string)> statMods))
+                if (!StatModifiers.TryGetValue((elementType, elementName), out HashSet<(StatModifier, string)> statMods))
                 {
-                    statMods = new HashSet<(StatModifiers, string)>();
+                    statMods = new HashSet<(StatModifier, string)>();
                     StatModifiers.Add((elementType, elementName), statMods);
                 }
                 statMods.Add((statModType, statModValue));
