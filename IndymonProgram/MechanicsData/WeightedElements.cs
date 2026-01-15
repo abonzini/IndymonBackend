@@ -18,9 +18,9 @@ namespace MechanicsData
         ABILITY, /// Affects an ability
         MOVE, /// Affects a specific move by name
         EFFECT_FLAGS, /// Affects moves or abilities carrying a specific flag
-        MOVE_TYPE, /// Affects moves of specific types
+        DAMAGING_MOVE_OF_TYPE, /// Affects damaging moves of specific types (most damage related stuff!)
         MOVE_CATEGORY, /// Affects phy/spe/status (e.g. prankster, AV)
-        ALL_MOVES, /// Affects every single move (e.g. normalize)
+        ANY_DAMAGING_MOVE, /// Affects every single damaging move (e.g. normalize)
     }
     [JsonConverter(typeof(StringEnumConverter))]
     /// What stat is going to be modified and how

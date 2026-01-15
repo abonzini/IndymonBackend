@@ -18,4 +18,3 @@ TODO:
 Add EV, Tera, Mon Type 1, Mon Type 2, nature to move mods, add all mod items
 Add correct silvally, ogerpon ?
 Continue mod lists
-Non-throwable items? Like the mask n shit

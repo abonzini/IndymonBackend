@@ -3,7 +3,7 @@
     public class Pokemon
     {
         public string Name { get; set; } = "";
-        public HashSet<PokemonType> Types { get; set; } = new HashSet<PokemonType>();
+        public PokemonType[] Types { get; set; } = [PokemonType.NONE, PokemonType.NONE];
         public HashSet<string> Abilities { get; set; } = new HashSet<string>();
         public string Prevo { get; set; } = "";
         public HashSet<string> Evos { get; set; } = new HashSet<string>();

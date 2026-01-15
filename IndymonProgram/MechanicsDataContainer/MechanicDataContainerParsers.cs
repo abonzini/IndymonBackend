@@ -171,9 +171,9 @@ namespace MechanicsDataContainer
                 Pokemon thePokemon = Dex[nextPokemonName];
                 thePokemon.Name = nextPokemonName;
                 PokemonType theType = Enum.Parse<PokemonType>(fields[TYPE_1_FIELD].Trim().ToUpper());
-                thePokemon.Types.Add(theType);
+                thePokemon.Types[0] = theType;
                 theType = Enum.Parse<PokemonType>(fields[TYPE_2_FIELD].Trim().ToUpper());
-                if (theType != PokemonType.NONE) thePokemon.Types.Add(theType);
+                thePokemon.Types[1] = theType;
                 int Hp = int.Parse(fields[HP_FIELD]);
                 int Attack = int.Parse(fields[ATK_FIELD]);
                 int Defense = int.Parse(fields[DEF_FIELD]);
@@ -267,7 +267,7 @@ namespace MechanicsDataContainer
             string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
             const int DEF_TYPE_COL = 1;
-            const int FLAGS_COL = 7; // Contains all effect keys of this particular item
+            const int FLAGS_COL = 8; // Contains all effect keys of this particular item
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
