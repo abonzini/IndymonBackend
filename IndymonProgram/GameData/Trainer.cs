@@ -8,6 +8,7 @@ namespace GameData
         public string DungeonIdentifier { get; set; } = "?";
         public string Avatar { get; set; } = "";
         public bool AutoTeam { get; set; } = true;
+        public bool AutoFavour { get; set; } = true;
         public bool AutoSetItem { get; set; } = true;
         public bool AutoModItem { get; set; } = true;
         public bool AutoBattleItem { get; set; } = true;
