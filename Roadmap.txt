@@ -1,6 +1,6 @@
-Mini Meadows -> Raikou/Entei/Thundurus(both)-> Sun Stone
-	Power Plant -> Zapdos/Zeraora -> Thunder Stone
-	Desert -> Regieleki
+Mini Meadows -> Raikou/Entei/Thundurus(both)-> Thunder Stone
+	Desert -> Idk -> Sun Stone
+	Power Plant -> Regieleki
 Berry Forest -> Shaymin/Celebi -> Leaf Stone
 	Haunted Mansion -> Marshadow/Spectrier -> Shiny Stone
 	Pond -> Registeel
