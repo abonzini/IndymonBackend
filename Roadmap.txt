@@ -1,6 +1,6 @@
-Mini Meadows -> Raikou/Entei/Thundurus(both)-> Sun Stone
-	Power Plant -> Zapdos/Zeraora -> Thunder Stone
-	Desert -> Regieleki
+Mini Meadows -> Raikou/Entei/Thundurus(both)-> Thunder Stone
+	Desert -> Idk -> Sun Stone
+	Power Plant -> Regieleki
 Gem Cave -> Lake Spirits -> Moon Stone
 	Magma -> Moltres/Heatran -> Fire Stone
 	Apricorn Forest -> Regirock (Apricorns)
@@ -13,25 +13,3 @@ Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone
 White Monastery -> Justice -> Dawn Stone
 	Sky Tower -> Enamorus(both)/Articuno/ArticunoGalar -> Ice Stone
 	Glacier -> Regice
-
-// REWoRK
-Ability + Moves are now weighted, e.g. Tackle 100, Surf 100. Weight is modified for damage (more damage BP*Stat = more chance), and beneficial effects by particular cases
-
-Mon can take items (of any type, seen separately) before or after set, considering same P of taking item before, so that
-P1 (pre set) = P/2
-P2 (post set) = (P/2)/(1-P1)
-
-Pre and post item acceptance is different, a pre item implies set may be biased towards item, e.g. favoring consume abilities, recycle if berry, etc, rest if chesto and so on, same as favored abilities
-So, take item and thsi will modify weights
-
-Later on, ability + move selection starts to take place, moves are initially pushed to fulfill conditions such as
-1 - Move Disks
-2 - Legal stab
-3 - Format rules
-With the corresponding weights, it'll be a system of intersection and unions to determine what is possible and then score wise.
-Rest of slots are filled, while random pick influences future weights (e.g. rest gives snore a high chance, etc), Normalize gives all moves stab, etc
-
-Finally, taking item post set involves only adding items that are useful, this would include plate only if multipliers, MOD only if helps, etc
-This results in a "smart" but random set with decent coverage, etc. Eventually more item sets can be added and modified and so on.
-This may be computationally more crazy but may be cool too so why not.
-It is the amin focus of S2, a great teambuilder
