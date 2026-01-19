@@ -565,9 +565,10 @@ namespace ParsersAndData
                     const int DESIRED_FINAL_NUMBER_OF_ITEMS = 4;
                     const int BASE_ACCEPTANCE_CHANCE = 20;
                     int itemAcceptanceChance;
+
                     if (BattleItems.Count <= DESIRED_FINAL_NUMBER_OF_ITEMS) itemAcceptanceChance = BASE_ACCEPTANCE_CHANCE; // Minimum chance to always use something, sometimes
                     else if ((BattleItems.Count - DESIRED_FINAL_NUMBER_OF_ITEMS) > maxNMons) itemAcceptanceChance = 100; // Since even if all mons equipped it won't reach the desired, just guarantee use
-                    else itemAcceptanceChance = 100 * (1 - (DESIRED_FINAL_NUMBER_OF_ITEMS / BattleItems.Count)); // Otherwise the chance is given so around DESIRED_FINAL_NUMBER_OF_ITEMS remains
+                    else itemAcceptanceChance = 100 - (100 * DESIRED_FINAL_NUMBER_OF_ITEMS / BattleItems.Count); // Otherwise the chance is given so around DESIRED_FINAL_NUMBER_OF_ITEMS remains
                     // Now go mon by mon, each mon has the same chance of having an item, will go item by item after
                     for (int i = 0; i < maxNMons; i++)
                     {
@@ -578,6 +579,7 @@ namespace ParsersAndData
                             int roll = Utilities.GetRandomNumber(0, 100);
                             if (roll < itemAcceptanceChance) // Randomly, try to assign one of the items to the pokemon
                             {
+                                Console.WriteLine($"\t\t{pokemonSet.Species} will take an item (roll {roll}<{itemAcceptanceChance})");
                                 Item itemCandidate = null;
                                 for (int itemIdx = 0; itemIdx < BattleItems.Count; itemIdx++) // Will try an item, one by one
                                 {
@@ -612,7 +614,7 @@ namespace ParsersAndData
                             }
                             else
                             {
-                                Console.WriteLine($"\t\t{pokemonSet.Species} wont take an item (roll {roll}<{itemAcceptanceChance})");
+                                Console.WriteLine($"\t\t{pokemonSet.Species} won't take an item (roll {roll}<{itemAcceptanceChance})");
                             }
                         }
                         else

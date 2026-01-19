@@ -41,7 +41,7 @@
       "EventType": "STATUS_TRAP",
       "PreEventString": "You arrive to an area that is partly flooded.",
       "PostEventString": "Unfortunately, a live wire is touching the water! $1 is electrocuted!",
-	  "SpecialParams": "frz"
+	  "SpecialParams": "par"
     },
 	{
       "EventType": "NPC_BATTLE",
@@ -189,7 +189,7 @@
 		}
 	  ],
 	  "ShortcutClue": "This is a high voltage area. Electric arcs all over. You'll need help from a Pokemon that is not affected by this electricity.",
-	  "ShortcutResolution": "Your $1 overwhelms the security system. The hatch opens..."
+	  "ShortcutResolution": "Your $1 neutralizes the electricity. The team can now pass safely."
     },
 	{
       "RoomColor": "Yellow",

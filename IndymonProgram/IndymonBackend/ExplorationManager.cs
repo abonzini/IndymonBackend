@@ -265,17 +265,20 @@ namespace IndymonBackendProgram
                 case RoomEventType.BOSS: // Boss fight, identical to alpha, will fetch next floor anyway, which if floor 3, it's boss
                 case RoomEventType.ALPHA: // Find a frenzied mon from a floor above, boss will have a rare item if defeated
                     {
-                        string item;
+                        Item item = null;
                         if (roomEvent.EventType == RoomEventType.BOSS && _dungeonDetails.BossItem != "") // If boss, you also get the boss special prize (if any)
                         {
-                            item = _dungeonDetails.BossItem;
+                            if (!_dungeonDetails.BossItem.ToLower().Contains("titan plate")) // Regi items are bs
+                            {
+                                item = new Item() { Name = _dungeonDetails.BossItem, Uses = 1 };
+                            }
                         }
                         else
                         {
-                            item = _dungeonDetails.RareItems[Utilities.GetRandomNumber(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
+                            item = new Item() { Name = _dungeonDetails.RareItems[Utilities.GetRandomNumber(_dungeonDetails.RareItems.Count)].Trim().ToLower(), Uses = 1 }; // Get a random rare item
                         }
                         int enemyFloor = floor + 1;
-                        if (enemyFloor >= DUNGEON_NUMBER_OF_FLOORS) enemyFloor = DUNGEON_NUMBER_OF_FLOORS - 1; // Cant pull a boss
+                        if (roomEvent.EventType == RoomEventType.ALPHA && enemyFloor >= DUNGEON_NUMBER_OF_FLOORS) enemyFloor = DUNGEON_NUMBER_OF_FLOORS - 1; // Cant pull a boss
                         List<string> pokemonNextFloor = _dungeonDetails.PokemonEachFloor[enemyFloor]; // Find the possible mons next floor
                         string pokemonSpecies = pokemonNextFloor[Utilities.GetRandomNumber(pokemonNextFloor.Count)].Trim().ToLower(); // Get a random one of these
                         Console.WriteLine($"Strong {pokemonSpecies} holding {item}");
@@ -286,7 +289,7 @@ namespace IndymonBackendProgram
                         {
                             Species = pokemonSpecies,
                             Shiny = isShiny,
-                            Item = new Item() { Name = item, Uses = 1 }
+                            Item = item
                         };
                         TrainerData alphaTeam = new TrainerData() // Create the blank trainer
                         {
@@ -309,10 +312,10 @@ namespace IndymonBackendProgram
                         {
                             Console.WriteLine("Player won");
                             UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            alphaString = roomEvent.PostEventString.Replace("$1", item);
+                            alphaString = roomEvent.PostEventString.Replace("$1", item.Name);
                             GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                            AddRareItemPrize(item, Prizes); // Add item to Prizes
-                            AddPokemonPrize(pokemonSpecies, floor + 1, isShiny, Prizes); // Add alpha mon too
+                            AddRareItemPrize(item.Name, Prizes); // Add item to Prizes
+                            AddPokemonPrize(pokemonSpecies, enemyFloor, isShiny, Prizes); // Add alpha mon too
                         }
                     }
                     break;

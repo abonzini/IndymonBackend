@@ -186,6 +186,10 @@ namespace ShowdownBot
             {
                 Console.WriteLine($"NAME BOT REGISTRATION ERROR! {message}");
             }
+            else if (message.Contains("Your team was rejected")) // Name registration error
+            {
+                Console.WriteLine($"TEAM FORMAT ERROR! {message}");
+            }
             else if (message.Contains("|request|")) // Battle request, bot needs to do a decision
             {
                 if (CurrentState == BotState.IN_FIGHT)
@@ -337,7 +341,7 @@ namespace ShowdownBot
                             // Means the active field also has data of the moves current PP, load here
                             foreach (AvailableMove move in _currentGameState.Active[0].Moves)
                             {
-                                int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Trim().ToLower());
+                                int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Replace("102", "").Trim().ToLower()); // For some reason return is called return102
                                 currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
                             }
                         }
