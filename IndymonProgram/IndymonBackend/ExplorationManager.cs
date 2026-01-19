@@ -274,7 +274,9 @@ namespace IndymonBackendProgram
                         {
                             item = _dungeonDetails.RareItems[Utilities.GetRandomNumber(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
                         }
-                        List<string> pokemonNextFloor = _dungeonDetails.PokemonEachFloor[floor + 1]; // Find the possible mons next floor
+                        int enemyFloor = floor + 1;
+                        if (enemyFloor >= DUNGEON_NUMBER_OF_FLOORS) enemyFloor = DUNGEON_NUMBER_OF_FLOORS - 1; // Cant pull a boss
+                        List<string> pokemonNextFloor = _dungeonDetails.PokemonEachFloor[enemyFloor]; // Find the possible mons next floor
                         string pokemonSpecies = pokemonNextFloor[Utilities.GetRandomNumber(pokemonNextFloor.Count)].Trim().ToLower(); // Get a random one of these
                         Console.WriteLine($"Strong {pokemonSpecies} holding {item}");
                         string alphaString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
@@ -881,6 +883,17 @@ namespace IndymonBackendProgram
                     DrawRegiEye(-1, 0, 500);
                     DrawRegiEye(2, 0, 0);
                     DrawRegiEye(-2, 0, 500);
+                    break;
+                case RoomEventType.REGIELEKI: // Dramatic drawing of regigas eyes
+                    DrawRegiEye(0, 0, 250);
+                    DrawRegiEye(1, 0, 250);
+                    DrawRegiEye(-1, 0, 250);
+                    DrawRegiEye(2, 0, 250);
+                    DrawRegiEye(-2, 0, 250);
+                    DrawRegiEye(3, 1, 250);
+                    DrawRegiEye(3, -1, 250);
+                    DrawRegiEye(-3, -1, 250);
+                    DrawRegiEye(-3, 1, 250);
                     break;
                 default:
                     break;

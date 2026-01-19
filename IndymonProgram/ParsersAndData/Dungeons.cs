@@ -32,6 +32,7 @@ namespace ParsersAndData
         IMP_GAIN, // Gives IMP instead of items
         REGISTEEL, // Draws registeel face
         REGICE, // Draws regice face
+        REGIELEKI, // Draws regieleki face
     }
     public class RoomEvent
     {
