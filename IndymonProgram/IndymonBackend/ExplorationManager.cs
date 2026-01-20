@@ -262,34 +262,65 @@ namespace IndymonBackendProgram
                         AddRareItemPrize(itemFound, Prizes);
                     }
                     break;
-                case RoomEventType.BOSS: // Boss fight, identical to alpha, will fetch next floor anyway, which if floor 3, it's boss
-                case RoomEventType.ALPHA: // Find a frenzied mon from a floor above, boss will have a rare item if defeated
+                case RoomEventType.BOSS: // Boss fight
                     {
-                        Item item = null;
-                        if (roomEvent.EventType == RoomEventType.BOSS && _dungeonDetails.BossItem != "") // If boss, you also get the boss special prize (if any)
+                        string item = (_dungeonDetails.BossItem != "") ? _dungeonDetails.BossItem : "";
+                        int enemyFloor = 3; // Last floor is where bosses are
+                        List<string> possiblePokemon = _dungeonDetails.PokemonEachFloor[enemyFloor]; // Find the possible mons next floor
+                        string enemySpecies = possiblePokemon[Utilities.GetRandomNumber(possiblePokemon.Count)].Trim().ToLower(); // Get a random one of these
+                        Console.WriteLine($"Boss {enemySpecies} holding {item}");
+                        string bossString = roomEvent.PreEventString.Replace("$1", enemySpecies);
+                        GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
+                        bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
+                        PokemonSet bossPokemon = new PokemonSet()
                         {
-                            if (!_dungeonDetails.BossItem.ToLower().Contains("titan plate")) // Regi items are bs
-                            {
-                                item = new Item() { Name = _dungeonDetails.BossItem, Uses = 1 };
-                            }
+                            Species = enemySpecies,
+                            Shiny = isShiny,
+                            Item = (item.ToLower().Contains("titan plate")) ? null : new Item() { Name = item, Uses = 1 } // Ensure battle item is really there
+                        };
+                        TrainerData bossTeam = new TrainerData() // Create the blank trainer
+                        {
+                            Avatar = "unknown",
+                            Name = "boss",
+                            AutoItem = false,
+                            AutoTeam = true,
+                            Teamsheet = [bossPokemon], // Only mon in the teamsheet
+                        };
+                        bossTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.SMART); // Randomize enemy team (movesets, etc), boss/alpha is a bit smarter than normal dungeon mon
+                        Console.Write("Encounter resolution: ");
+                        int remainingMons = ResolveEncounter(trainerData, bossTeam);
+                        if (remainingMons == 0) // Means player lost
+                        {
+                            Console.WriteLine("Player lost");
+                            roomCleared = false; // Failure at clearing room
+                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
-                            item = new Item() { Name = _dungeonDetails.RareItems[Utilities.GetRandomNumber(_dungeonDetails.RareItems.Count)].Trim().ToLower(), Uses = 1 }; // Get a random rare item
+                            Console.WriteLine("Player won");
+                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                            bossString = roomEvent.PostEventString.Replace("$1", item);
+                            GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
+                            AddRareItemPrize(item, Prizes); // Add item to Prizes
+                            AddPokemonPrize(enemySpecies, enemyFloor, isShiny, Prizes); // Add boss mon too
                         }
-                        int enemyFloor = floor + 1;
-                        if (roomEvent.EventType == RoomEventType.ALPHA && enemyFloor >= DUNGEON_NUMBER_OF_FLOORS) enemyFloor = DUNGEON_NUMBER_OF_FLOORS - 1; // Cant pull a boss
-                        List<string> pokemonNextFloor = _dungeonDetails.PokemonEachFloor[enemyFloor]; // Find the possible mons next floor
-                        string pokemonSpecies = pokemonNextFloor[Utilities.GetRandomNumber(pokemonNextFloor.Count)].Trim().ToLower(); // Get a random one of these
-                        Console.WriteLine($"Strong {pokemonSpecies} holding {item}");
-                        string alphaString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
+                    }
+                    break;
+                case RoomEventType.ALPHA: // Find a frenzied mon from a floor above, boss will have a rare item if defeated
+                    {
+                        string item = _dungeonDetails.RareItems[Utilities.GetRandomNumber(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
+                        int enemyFloor = (floor + 1 >= DUNGEON_NUMBER_OF_FLOORS) ? floor : floor + 1; // Find enemy of next floor if possible
+                        List<string> possiblePokemon = _dungeonDetails.PokemonEachFloor[enemyFloor]; // Find the possible mons next floor
+                        string enemySpecies = possiblePokemon[Utilities.GetRandomNumber(possiblePokemon.Count)].Trim().ToLower(); // Get a random one of these
+                        Console.WriteLine($"Strong {enemySpecies} holding {item}");
+                        string alphaString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
                         bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
                         PokemonSet alphaPokemon = new PokemonSet()
                         {
-                            Species = pokemonSpecies,
+                            Species = enemySpecies,
                             Shiny = isShiny,
-                            Item = item
+                            Item = new Item() { Name = item, Uses = 1 }
                         };
                         TrainerData alphaTeam = new TrainerData() // Create the blank trainer
                         {
@@ -312,10 +343,10 @@ namespace IndymonBackendProgram
                         {
                             Console.WriteLine("Player won");
                             UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            alphaString = roomEvent.PostEventString.Replace("$1", item.Name);
+                            alphaString = roomEvent.PostEventString.Replace("$1", item);
                             GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                            AddRareItemPrize(item.Name, Prizes); // Add item to Prizes
-                            AddPokemonPrize(pokemonSpecies, enemyFloor, isShiny, Prizes); // Add alpha mon too
+                            AddRareItemPrize(item, Prizes); // Add item to Prizes
+                            AddPokemonPrize(enemySpecies, enemyFloor, isShiny, Prizes); // Add alpha mon too
                         }
                     }
                     break;
