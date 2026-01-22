@@ -56,5 +56,10 @@ namespace MechanicsDataContainer
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers { get; set; }
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>> WeightModifiers { get; set; }
         public Dictionary<(ElementType, string), float> FixedModifiers { get; set; }
+        float[] AverageStats { get; set; } = new float[6];
+        public float GetAverageStat(Stat stat)
+        {
+            return AverageStats[(int)stat];
+        }
     }
 }

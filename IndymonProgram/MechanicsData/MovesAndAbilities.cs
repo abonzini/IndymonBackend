@@ -14,7 +14,9 @@ namespace MechanicsData
         SECONDARY_EFFECT, // Moves with a chance (can be 100%) of secondary effect, for sheer force
         PIVOT, // Pivot moves (but not stuff like memento)
         SOUND, // Sound moves
+        OPP_ATTACK_DAMAGE, // Foul play lol
         DEFENSE_DAMAGE, // Body press lol
+        OTHER_DEFENSE_STAT, // Uses the other defensive stat (e.g. psyshock)
         PUNCH, // Punching moves
         SHARP, // Sharpness
         DANCE, // Dance moves

@@ -175,11 +175,17 @@ namespace MechanicsDataContainer
                 theType = Enum.Parse<PokemonType>(fields[TYPE_2_FIELD].Trim().ToUpper());
                 thePokemon.Types[1] = theType;
                 int Hp = int.Parse(fields[HP_FIELD]);
+                AverageStats[(int)Stat.HP] += Hp;
                 int Attack = int.Parse(fields[ATK_FIELD]);
+                AverageStats[(int)Stat.ATTACK] += Attack;
                 int Defense = int.Parse(fields[DEF_FIELD]);
+                AverageStats[(int)Stat.DEFENSE] += Defense;
                 int SpecialAttack = int.Parse(fields[SPATK_FIELD]);
+                AverageStats[(int)Stat.SPECIAL_ATTACK] += SpecialAttack;
                 int SpecialDefense = int.Parse(fields[SPDEF_FIELD]);
+                AverageStats[(int)Stat.SPECIAL_DEFENSE] += SpecialDefense;
                 int Speed = int.Parse(fields[SPEED_FIELD]);
+                AverageStats[(int)Stat.SPEED] += Speed;
                 thePokemon.Stats = [Hp, Attack, Defense, SpecialAttack, SpecialDefense, Speed]; // Load stats
                 string theAbility = fields[ABILITY_1_FIELD].Trim();
                 if (theAbility != "") thePokemon.Abilities.Add(theAbility);
@@ -214,11 +220,18 @@ namespace MechanicsDataContainer
                     }
                 }
             }
-            // Final step, ensure each mon has a learnset (validation)
+            // Then, ensure each mon has a learnset (validation)
             foreach (Pokemon mon in Dex.Values)
             {
                 if (mon.Moves.Count == 0) throw new Exception("This mon has no moveset");
             }
+            // Final step, calculate average stats
+            AverageStats[(int)Stat.HP] /= Dex.Count;
+            AverageStats[(int)Stat.ATTACK] /= Dex.Count;
+            AverageStats[(int)Stat.DEFENSE] /= Dex.Count;
+            AverageStats[(int)Stat.SPECIAL_ATTACK] /= Dex.Count;
+            AverageStats[(int)Stat.SPECIAL_DEFENSE] /= Dex.Count;
+            AverageStats[(int)Stat.SPEED] /= Dex.Count;
         }
         /// <summary>
         /// Parses all mod items
