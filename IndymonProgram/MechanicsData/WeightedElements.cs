@@ -63,5 +63,7 @@ namespace MechanicsData
         MOVE_BP_MOD, /// A specific's move BP is affected
         MOVE_ACC_MOD, /// A specific's move accuracy is affected
         MOVE_TYPE_MOD, /// A specific's move type is affected
+        ADD_FLAG, /// Move gains a flag (e.g. poison touch makes contact moves poison inducing)
+        REMOVE_FLAG, /// Move loses a flag (e.g. long reach removes contact)
     }
 }

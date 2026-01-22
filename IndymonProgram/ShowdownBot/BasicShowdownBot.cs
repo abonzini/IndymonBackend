@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;

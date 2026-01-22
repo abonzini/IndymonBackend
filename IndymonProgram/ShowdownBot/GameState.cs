@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace ShowdownBot
+﻿namespace ShowdownBot
 {
     public class AvailableMove
     {

@@ -60,6 +60,7 @@ namespace MechanicsDataContainer
             {
                 MoveModifier.MOVE_BP_MOD or MoveModifier.MOVE_ACC_MOD => float.TryParse(name, out _),
                 MoveModifier.MOVE_TYPE_MOD => Enum.TryParse<PokemonType>(name, true, out _),
+                MoveModifier.ADD_FLAG or MoveModifier.REMOVE_FLAG => Enum.TryParse<EffectFlag>(name, true, out _),
                 _ => false,
             };
         }

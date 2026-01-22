@@ -9,7 +9,7 @@ namespace MechanicsData
         BANNED, // Forbidden moves
         DOUBLES_ONLY, // Moves that are good in doubles only, do not use in singles
         DRAIN, // Draining moves, benefit from root
-        HEAL, // MOves that heal the user (triage)
+        HEAL, // Moves that heal the user (triage)
         CHANCE, // Moves with a chance of something nice, for serene grace
         SECONDARY_EFFECT, // Moves with a chance (can be 100%) of secondary effect, for sheer force
         PIVOT, // Pivot moves (but not stuff like memento)
@@ -63,10 +63,11 @@ namespace MechanicsData
         GRASSY_TERRAIN_SETTER, // Obvious
         PSYCHIC_TERRAIN_SETTER, // Obvious
         MISTY_TERRAIN_SETTER, // Obvious
-        ABILITY_MANIPULATING, // Deal with abilities, either giving or takign abilities
+        ABILITY_MANIPULATING, // Deal with abilities, either giving or taking abilities
         BERRY_DEPENDANT, // Depends on mon having a berry on
         HAZARD, // Sets hazard on the field
         SWITCH_OPPONENT, // Switches opponent out
+        USES_STRONGEST_STAT, // Uses strongest stat for damage calculation
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MoveCategory
