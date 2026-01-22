@@ -42,24 +42,20 @@ namespace MechanicsDataContainer
             string fixedModsTab = lines[14].Split(",")[0];
             ParseFixedModifiers(sheetId, fixedModsTab);
         }
-        public TypeChart TypeChart { get; set; }
-        public Dictionary<string, Move> Moves { get; set; }
-        public Dictionary<string, Ability> Abilities { get; set; }
-        public Dictionary<string, Pokemon> Dex { get; set; }
-        public Dictionary<string, ModItem> ModItems { get; set; }
-        public Dictionary<string, BattleItem> BattleItems { get; set; }
-        public Dictionary<(ElementType, string), float> InitialWeights { get; set; }
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>> Enablers { get; set; }
-        public HashSet<(ElementType, string)> DisabledOptions { get; set; }
-        public Dictionary<(ElementType, string), HashSet<(ElementType, string)>> ForcedBuilds { get; set; }
-        public Dictionary<(ElementType, string), HashSet<(StatModifier, string)>> StatModifiers { get; set; }
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers { get; set; }
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>> WeightModifiers { get; set; }
-        public Dictionary<(ElementType, string), float> FixedModifiers { get; set; }
-        float[] AverageStats { get; set; } = new float[6];
-        public float GetAverageStat(Stat stat)
-        {
-            return AverageStats[(int)stat];
-        }
+        public TypeChart TypeChart { get; set; } = new TypeChart();
+        public Dictionary<string, Move> Moves { get; set; } = new Dictionary<string, Move>();
+        public Dictionary<string, Ability> Abilities { get; set; } = new Dictionary<string, Ability>();
+        public Dictionary<string, Pokemon> Dex { get; set; } = new Dictionary<string, Pokemon>();
+        public Dictionary<string, ModItem> ModItems { get; set; } = new Dictionary<string, ModItem>();
+        public Dictionary<string, BattleItem> BattleItems { get; set; } = new Dictionary<string, BattleItem>();
+        public Dictionary<(ElementType, string), float> InitialWeights { get; set; } = new Dictionary<(ElementType, string), float>();
+        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>> Enablers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
+        public HashSet<(ElementType, string)> DisabledOptions { get; set; } = new HashSet<(ElementType, string)>();
+        public Dictionary<(ElementType, string), HashSet<(ElementType, string)>> ForcedBuilds { get; set; } = new Dictionary<(ElementType, string), HashSet<(ElementType, string)>>();
+        public Dictionary<(ElementType, string), HashSet<(StatModifier, string)>> StatModifiers { get; set; } = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
+        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
+        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>> WeightModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
+        public Dictionary<(ElementType, string), float> FixedModifiers { get; set; } = new Dictionary<(ElementType, string), float>();
+        public float[] AverageStats { get; set; } = new float[6];
     }
 }

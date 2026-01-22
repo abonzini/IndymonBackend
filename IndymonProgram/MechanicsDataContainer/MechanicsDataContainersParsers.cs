@@ -1,21 +1,10 @@
 ﻿using MechanicsData;
+using Utilities;
 
 namespace MechanicsDataContainer
 {
     public partial class MechanicsDataContainers
     {
-        /// <summary>
-        /// Gets a csv from a google sheets id+tab combo
-        /// </summary>
-        /// <param name="sheetId">Id</param>
-        /// <param name="sheetTab">Tab</param>
-        /// <returns>The csv</returns>
-        string GetCsvFromGoogleSheets(string sheetId, string sheetTab)
-        {
-            string url = $"https://docs.google.com/spreadsheets/d/{sheetId}/export?format=csv&gid={sheetTab}";
-            using HttpClient client = new HttpClient();
-            return client.GetStringAsync(url).GetAwaiter().GetResult();
-        }
         /// <summary>
         /// Parses the type chart
         /// </summary>
@@ -24,9 +13,9 @@ namespace MechanicsDataContainer
         void ParseTypeChart(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Typechart");
-            TypeChart = new TypeChart();
+            TypeChart.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] lines = csv.Split("\n");
             List<PokemonType> columnTags = new List<PokemonType>();
             for (int i = 0; i < lines.Length; i++)
@@ -67,9 +56,9 @@ namespace MechanicsDataContainer
         void ParseMoves(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Moves");
-            Moves = new Dictionary<string, Move>();
+            Moves.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
             const int TYPE_COL = 1;
             const int CATEGORY_COL = 2;
@@ -106,9 +95,9 @@ namespace MechanicsDataContainer
         void ParseAbilities(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Abilities");
-            Abilities = new Dictionary<string, Ability>();
+            Abilities.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
             const int FLAGS_COL = 2; // Contains all effect keys of this particular ability (more manual...)
             string[] lines = csv.Split("\n");
@@ -138,10 +127,10 @@ namespace MechanicsDataContainer
         void ParsePokemonData(string sheetId, string dexSheetTab, string learnsetSheetTab)
         {
             Console.WriteLine("Parsing Pokedex");
-            Dex = new Dictionary<string, Pokemon>();
+            Dex.Clear();
             // Parse csv
-            string pokemonCsv = GetCsvFromGoogleSheets(sheetId, dexSheetTab);
-            string learnsetCsv = GetCsvFromGoogleSheets(sheetId, learnsetSheetTab);
+            string pokemonCsv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, dexSheetTab);
+            string learnsetCsv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, learnsetSheetTab);
             string[] pokemonLines = pokemonCsv.Split('\n');
             // First pass, add all pokemon into the dictionary with an empty Pokemon, this is to first know the existance of all mons
             for (int i = 1; i < pokemonLines.Length; i++)
@@ -241,9 +230,9 @@ namespace MechanicsDataContainer
         void ParseModItems(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Mod Item List");
-            ModItems = new Dictionary<string, ModItem>();
+            ModItems.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
@@ -263,9 +252,9 @@ namespace MechanicsDataContainer
         void ParseBattleItems(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Battle Items");
-            BattleItems = new Dictionary<string, BattleItem>();
+            BattleItems.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
             const int DEF_TYPE_COL = 1;
             const int FLAGS_COL = 8; // Contains all effect keys of this particular item
@@ -301,9 +290,9 @@ namespace MechanicsDataContainer
         void ParseInitialWeights(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Initial Weights");
-            InitialWeights = new Dictionary<(ElementType, string), float>();
+            InitialWeights.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int ELEMENT_TYPE_COL = 0;
             const int NAME_COL = 1;
             const int WEIGHT_COL = 2;
@@ -315,7 +304,7 @@ namespace MechanicsDataContainer
                 string name = fields[NAME_COL].Trim();
                 float weight = float.Parse(fields[WEIGHT_COL]);
                 // Validate if all's good
-                if (!ValidateElementExistance(type, name)) throw new Exception($"{name} is not a valid {type}");
+                AssertElementExistance(type, name);
                 InitialWeights.Add((type, name), weight);
             }
         }
@@ -328,9 +317,9 @@ namespace MechanicsDataContainer
         {
             Console.WriteLine("Parsing Enablement List");
             Enablers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
-            DisabledOptions = new HashSet<(ElementType, string)>();
+            DisabledOptions.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int ENABLER_TYPE_COL = 0;
             const int ENABLER_NAME_COL = 1;
             const int ENABLED_TYPE_COL = 2;
@@ -346,8 +335,8 @@ namespace MechanicsDataContainer
                 string enabledName = fields[ENABLED_NAME_COL].Trim();
                 float weight = (fields[WEIGHT_COL].Trim() != "-") ? float.Parse(fields[WEIGHT_COL]) : 1;
                 // Validate if all's good
-                if (!ValidateElementExistance(enablerType, enablerName)) throw new Exception($"{enablerName} is not a valid {enablerType}");
-                if (!ValidateElementExistance(enabledType, enabledName)) throw new Exception($"{enabledName} is not a valid {enabledType}");
+                AssertElementExistance(enablerType, enablerName);
+                AssertElementExistance(enabledType, enabledName);
                 // Add to the corresponding matrices
                 if (!Enablers.TryGetValue((enablerType, enablerName), out Dictionary<(ElementType, string), float> enableds))
                 {
@@ -367,9 +356,9 @@ namespace MechanicsDataContainer
         void ParseForcedBuilds(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Forced Build List");
-            ForcedBuilds = new Dictionary<(ElementType, string), HashSet<(ElementType, string)>>();
+            ForcedBuilds.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int FORCER_TYPE_COL = 0;
             const int FORCER_NAME_COL = 1;
             const int FORCED_TYPE_COL = 2;
@@ -383,8 +372,8 @@ namespace MechanicsDataContainer
                 ElementType forcedType = Enum.Parse<ElementType>(fields[FORCED_TYPE_COL].Trim());
                 string forcedName = fields[FORCED_NAME_COL].Trim();
                 // Validate if all's good
-                if (!ValidateElementExistance(forcerType, forcerName)) throw new Exception($"{forcerName} is not a valid {forcerType}");
-                if (!ValidateElementExistance(forcedType, forcedName)) throw new Exception($"{forcedName} is not a valid {forcedType}");
+                AssertElementExistance(forcerType, forcerName);
+                AssertElementExistance(forcedType, forcedName);
                 // Add to the corresponding matrices
                 if (!ForcedBuilds.TryGetValue((forcerType, forcerName), out HashSet<(ElementType, string)> forceds))
                 {
@@ -402,9 +391,9 @@ namespace MechanicsDataContainer
         void ParseStatModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Stat Mods List");
-            StatModifiers = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
+            StatModifiers.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int ELEMENT_TYPE_COL = 0;
             const int ELEMENT_NAME_COL = 1;
             const int STAT_MOD_TYPE_COL = 2;
@@ -418,8 +407,8 @@ namespace MechanicsDataContainer
                 StatModifier statModType = Enum.Parse<StatModifier>(fields[STAT_MOD_TYPE_COL].Trim());
                 string statModValue = fields[STAT_MOD_VALUE_NAME].Trim();
                 // Validate if all's good
-                if (!ValidateElementExistance(elementType, elementName)) throw new Exception($"{elementName} is not a valid {elementType}");
-                if (!ValidateStatModExistance(statModType, statModValue)) throw new Exception($"{statModValue} is not a valid {statModType}");
+                AssertElementExistance(elementType, elementName);
+                AssertStatModExistance(statModType, statModValue);
                 // Add to the corresponding matrices
                 if (!StatModifiers.TryGetValue((elementType, elementName), out HashSet<(StatModifier, string)> statMods))
                 {
@@ -437,9 +426,9 @@ namespace MechanicsDataContainer
         void ParseMoveModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Move Mods List");
-            MoveModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
+            MoveModifiers.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int MODIFIER_TYPE_COL = 0;
             const int MODIFIER_NAME_COL = 1;
             const int MODIFIED_TYPE_COL = 2;
@@ -457,9 +446,9 @@ namespace MechanicsDataContainer
                 MoveModifier modType = Enum.Parse<MoveModifier>(fields[MOD_TYPE_COL].Trim());
                 string modName = fields[MOD_NAME_COL].Trim();
                 // Validate if all's good
-                if (!ValidateElementExistance(modifierType, modifierName)) throw new Exception($"{modifierName} is not a valid {modifierType}");
-                if (!ValidateElementExistance(modifiedType, modifiedName)) throw new Exception($"{modifiedName} is not a valid {modifiedType}");
-                if (!ValidateMoveModExistance(modType, modName)) throw new Exception($"{modName} is not a valid {modType}");
+                AssertElementExistance(modifierType, modifierName);
+                AssertElementExistance(modifiedType, modifiedName);
+                AssertMoveModExistance(modType, modName);
                 // Add to the corresponding matrices
                 if (!MoveModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), Dictionary<MoveModifier, string>> modifieds))
                 {
@@ -482,9 +471,9 @@ namespace MechanicsDataContainer
         void ParseWeightModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Weight Mods List");
-            WeightModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
+            WeightModifiers.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int MODIFIER_TYPE_COL = 0;
             const int MODIFIER_NAME_COL = 1;
             const int MODIFIED_TYPE_COL = 2;
@@ -500,8 +489,8 @@ namespace MechanicsDataContainer
                 string modifiedName = fields[MODIFIED_NAME_COL].Trim();
                 float weight = float.Parse(fields[WEIGHT_COL]);
                 // Validate if all's good
-                if (!ValidateElementExistance(modifierType, modifierName)) throw new Exception($"{modifierName} is not a valid {modifierType}");
-                if (!ValidateElementExistance(modifiedType, modifiedName)) throw new Exception($"{modifiedName} is not a valid {modifiedType}");
+                AssertElementExistance(modifierType, modifierName);
+                AssertElementExistance(modifiedType, modifiedName);
                 // Add to the corresponding matrices
                 if (!WeightModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), float> modifieds))
                 {
@@ -519,9 +508,9 @@ namespace MechanicsDataContainer
         void ParseFixedModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Fixed Mods List");
-            FixedModifiers = new Dictionary<(ElementType, string), float>();
+            FixedModifiers.Clear();
             // Parse csv
-            string csv = GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int MODIFIER_TYPE_COL = 0;
             const int MODIFIER_NAME_COL = 1;
             const int WEIGHT_COL = 2;
@@ -533,7 +522,7 @@ namespace MechanicsDataContainer
                 string modifierName = fields[MODIFIER_NAME_COL].Trim();
                 float weight = float.Parse(fields[WEIGHT_COL]);
                 // Validate if all's good
-                if (!ValidateElementExistance(modifierType, modifierName)) throw new Exception($"{modifierName} is not a valid {modifierType}");
+                AssertElementExistance(modifierType, modifierName);
                 // Add to the corresponding matrices
                 FixedModifiers.Add((modifierType, modifierName), weight); // This should be unique
             }

@@ -6,6 +6,7 @@ namespace ParsersAndData
     [JsonConverter(typeof(StringEnumConverter))]
     public enum RoomEventType
     {
+        NONE, // No event
         POKEMON_BATTLE, // Normal found in pokemon room lol
         CAMPING, // Break room/camping
         TREASURE, // Player gets a treasure from rare item pool
@@ -24,6 +25,14 @@ namespace ParsersAndData
         BIG_HEAL, // One specific mon heals a lot
         PP_HEAL, // 3PP heal
         UNOWN, // Unown event, 6 random unown with wacky moves
+        FIRELORD, // Fire legendary event, summon a legendary of lower lvl
+        GIANT_POKEMON, // Underwater event with a mon from same floor but lvl 110-125
+        MIRROR_MATCH, // Mirror match vs your own party but lvl 80-90
+        PLOT_CLUE, // New text color, say cyan, for storyline clue that may lead you to special event
+        IMP_GAIN, // Gives IMP instead of items
+        REGISTEEL, // Draws registeel face
+        REGICE, // Draws regice face
+        REGIELEKI, // Draws regieleki face
     }
     public class RoomEvent
     {
@@ -44,7 +53,8 @@ namespace ParsersAndData
         ABILITY, // Need a specific ability
         POKEMON, // Need a specific pokemon
         TYPE, // Need a specific pokemon type
-        ITEM // Need a specific item
+        ITEM, // Need a specific item
+        MOVE_DISK, // Needs any move disk (item ending in move disk)
     }
     public class ShortcutCondition
     {
@@ -101,6 +111,8 @@ namespace ParsersAndData
         public List<DungeonFloor> Floors { get; set; }
         public RoomEvent BossEvent { get; set; }
         public RoomEvent CampingEvent { get; set; }
+        public RoomEvent PreBossEvent { get; set; }
+        public RoomEvent PostBossEvent { get; set; }
         public string NextDungeon { get; set; }
         public string NextDungeonShortcut { get; set; }
         public List<string> CustomShowdownRules { get; set; }

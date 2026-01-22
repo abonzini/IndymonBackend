@@ -1,5 +1,9 @@
-﻿namespace MechanicsData
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace MechanicsData
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum Stat
     {
         HP = 0,

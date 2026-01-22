@@ -1,10 +1,11 @@
-﻿using MechanicsDataContainer;
+﻿using GameDataContainer;
+using MechanicsDataContainer;
 
 namespace IndymonBackendProgram
 {
     public static class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.ForegroundColor = ConsoleColor.White;
@@ -15,6 +16,12 @@ namespace IndymonBackendProgram
             // Begin with the mechanics back end
             string MECHANICS_DATA_FILE = "mechanics_data.txt";
             MechanicsDataContainers.GlobalMechanicsData.InitializeData(Path.Combine(directoryPath, MECHANICS_DATA_FILE));
+            // Then the trainer data back end
+            string DUNGEON_DATA_DIR = "dungeons";
+            GameDataContainers.GlobalGameData.InitializeDungeonData(Path.Combine(directoryPath, DUNGEON_DATA_DIR));
+            // Then the trainer data back end
+            string GAME_DATA_FILE = "game_data.txt";
+            GameDataContainers.GlobalGameData.InitializeTrainerData(Path.Combine(directoryPath, GAME_DATA_FILE));
             // Ok beginning of code proper
             string InputString;
             do

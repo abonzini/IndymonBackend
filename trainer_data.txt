@@ -1,5 +1,0 @@
-1IO0kvM6HFG8IFIOYJRlOqpq3-YM3mDJ1yuPy2eUGkQw, doc link
-1015902951, trainer data
-364323808, npc data
-43578104, named npc data
-710115071, tournament data

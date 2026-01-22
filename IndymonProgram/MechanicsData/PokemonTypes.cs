@@ -38,6 +38,9 @@ namespace MechanicsData
             }
             return result;
         }
-
+        public void Clear()
+        {
+            DefensiveChart.Clear();
+        }
     }
 }
