@@ -17,11 +17,12 @@ namespace MechanicsData
     {
         public string Name { get; set; } = "";
         public PokemonType[] Types { get; set; } = [PokemonType.NONE, PokemonType.NONE];
-        public HashSet<string> Abilities { get; set; } = new HashSet<string>();
-        public string Prevo { get; set; } = "";
-        public HashSet<string> Evos { get; set; } = new HashSet<string>();
+        public List<Ability> Abilities { get; set; } = new List<Ability>();
+        public Pokemon Prevo { get; set; } = null;
+        public List<Pokemon> Evos { get; set; } = new List<Pokemon>();
         public int[] Stats { get; set; } = new int[6]; // All stats, hopefully init to 0
-        public HashSet<string> Moves { get; set; } = new HashSet<string>();
+        public List<Move> Moveset { get; set; } = new List<Move>();
+        public float Weight { get; set; } = 0.0f;
         public override string ToString()
         {
             return Name;

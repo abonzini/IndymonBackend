@@ -31,8 +31,7 @@ namespace MechanicsData
         SELF_STATUS, // Moves that benefit from user to be statused
         SLEEP_INDUCING, // Moves that cause sleep
         OPP_SLEEP, // Moves that need opponent to be asleep
-        PARALYSIS_INDUCING, // Moves that require opponent to be paralyzed
-        OPP_PARALYSIS, // Moves that cause paralysis
+        PARALYSIS_INDUCING, // Moves that cause paralysis
         POISON_INDUCING, // Moves that cause poison
         BURN_INDUCING, // Moves that cause burn
         GIVE_ITEM, // Moves that give item to enemy and/or discard item from owner,
@@ -43,9 +42,10 @@ namespace MechanicsData
         SETUP_DAMAGING, // Damaging moves that increase stat
         SETUP_SPEED, // Moves that increase speed
         SELF_DEBUFF, // Debuff user (contrary, sure crit)
-        DAMAGE_PROP_WEIGTH, // Damage increases with weight
-        DAMAGE_PROP_SPEED, // Damage proportional with speed (e.g. electro ball)
-        DAMAGE_INV_SPEED, // Damage inverse with speed (e.g. gyro ball)
+        DAMAGE_PROP_WEIGTH_DIFFERENCE, // Damage increases with weight difference
+        DAMAGE_PROP_OPP_WEIGTH, // Damage increases solely w opp weight
+        DAMAGE_PROP_SPEED_DIFFERENCE, // Damage proportional with speed (e.g. electro ball)
+        DAMAGE_INV_SPEED_DIFFERENCE, // Damage inverse with speed (e.g. gyro ball)
         FIXED_DAMAGE, // Seismic toss, dragon rage
         TRAPPING, // Trapping moves
         HIGH_CRIT, // Like sure crit but not sure
@@ -67,9 +67,9 @@ namespace MechanicsData
         MISTY_TERRAIN_SETTER, // Obvious
         ABILITY_MANIPULATING, // Deal with abilities, either giving or taking abilities
         BERRY_DEPENDANT, // Depends on mon having a berry on
-        HAZARD, // Sets hazard on the field
         SWITCH_OPPONENT, // Switches opponent out
         USES_STRONGEST_STAT, // Uses strongest stat for damage calculation
+        BYPASSES_IMMUNITY, // Move bypasses immunities thay would've made it do 0 damage
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MoveCategory

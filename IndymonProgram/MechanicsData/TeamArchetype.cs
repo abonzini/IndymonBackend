@@ -13,7 +13,9 @@
         GRASSY_TERRAIN,
         TRICK_ROOM,
         GRAVITY,
-        HAZARD,
+        ROCKS,
+        SPIKES,
         TSPIKES,
+        WEBS,
     }
 }

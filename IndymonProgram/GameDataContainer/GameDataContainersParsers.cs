@@ -13,21 +13,20 @@ namespace GameDataContainer
         /// <param name="sheetId"></param>
         /// <param name="sheetTab"></param>
         /// <param name="trainerContainer"></param>
-        static void ParseTrainerCards(string sheetId, string sheetTab, Dictionary<string, Trainer> trainerContainer)
+        void ParseTrainerCards(string sheetId, string sheetTab, Dictionary<string, Trainer> trainerContainer)
         {
-            Console.WriteLine("Parsing Trainer Cards");
             trainerContainer.Clear();
             // Parse csv
             const int TRAINER_CARD_ROWS = 22; // Number of lines per trainer card
             const int TRAINER_CARD_COLS = 21; // Number of columns per trainer card
             string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] rows = csv.Split("\n");
-            string[] cols = rows[0].Split(',');
+            string[] cols = rows[0].Trim().Split(',');
             for (int i = 0; i < rows.Length; i += TRAINER_CARD_ROWS) // Parse all trainer rows, one by one, each i will be a row of trainers
             {
                 for (int j = 0; j < cols.Length; j += TRAINER_CARD_COLS)
                 {
-                    string[] nextLine = rows[i].Split(',');
+                    string[] nextLine = rows[i].Trim().Split(','); // Trim to avoid weird carriage return shenanigans
                     // Can parse trainer i,j no problem!
                     Trainer nextTrainer = new Trainer();
                     // Row 0, main data
@@ -45,12 +44,12 @@ namespace GameDataContainer
                     // Then, relative rows 2->21 have all the data always in order
                     for (int remainingRows = 2; (remainingRows < TRAINER_CARD_ROWS && remainingRows + i < rows.Length); remainingRows++)
                     {
-                        nextLine = rows[remainingRows + i].Split(",");
+                        nextLine = rows[remainingRows + i].Trim().Split(",");
                         string pokemonName = nextLine[j + 0];
                         if (pokemonName != "") // Valid pokemon, parse
                         {
                             MechanicsDataContainers.GlobalMechanicsData.AssertElementExistance(ElementType.POKEMON, pokemonName); // Make sure pokemon exists, no typo
-                            PokemonSet newPokemon = new PokemonSet()
+                            TrainerPokemon newPokemon = new TrainerPokemon()
                             {
                                 Species = pokemonName,
                                 Nickname = nextLine[j + 1],
@@ -92,10 +91,14 @@ namespace GameDataContainer
                                 }
                             }
                             // Finally, add Pokemon to team (or nowhere if team full)
-                            if (nextTrainer.Pokemons.Count < Trainer.MAX_MONS_IN_TEAM) // Add to team
+                            if (nextTrainer.PartyPokemon.Count < Trainer.MAX_MONS_IN_TEAM) // Add to team
                             {
-                                nextTrainer.Pokemons.Add(newPokemon);
-                            } // Otherwise box if/when implemented
+                                nextTrainer.PartyPokemon.Add(newPokemon);
+                            }
+                            else
+                            {
+                                nextTrainer.BoxedPokemon.Add(newPokemon);
+                            }
                         }
                         // Next is Set items in bag so
                         string itemName = nextLine[j + 6];
@@ -122,13 +125,27 @@ namespace GameDataContainer
                         }
                         // Finally for now, favours
                         itemName = nextLine[j + 15];
-                        if (itemName != "" && itemName.Contains("Favour")) // A key item here, is it favour?
+                        if (itemName != "")
                         {
-                            string trainerFavour = itemName.Split("'")[0].Trim(); // Got trainer who owns the favour
                             int itemCount = int.Parse(nextLine[j + 16]);
-                            IndymonUtilities.AddtemToDictionary(nextTrainer.TrainerFavours, trainerFavour, itemCount);
+                            if (itemName.Contains("Favour")) // A key item here, is it favour?
+                            {
+                                string trainerFavour = itemName.Split("'")[0].Trim(); // Got trainer who owns the favour
+                                GetTrainer(trainerFavour);
+                                IndymonUtilities.AddtemToDictionary(nextTrainer.TrainerFavours, trainerFavour, itemCount);
+                            }
+                            else // Regular key item
+                            {
+                                IndymonUtilities.AddtemToDictionary(nextTrainer.KeyItems, itemName, itemCount);
+                            }
                         }
-                        // If other key items or balls, do here ish, keep in mind balls may not exist and may cut the column count short so need to check size
+                        // Finally, Ballz
+                        itemName = nextLine[j + 18];
+                        if (itemName != "")
+                        {
+                            int itemCount = int.Parse(nextLine[j + 19]);
+                            IndymonUtilities.AddtemToDictionary(nextTrainer.PokeBalls, itemName, itemCount);
+                        }
                     }
                     trainerContainer.Add(nextTrainer.Name, nextTrainer);
                 }

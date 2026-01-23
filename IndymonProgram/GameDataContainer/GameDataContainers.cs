@@ -30,12 +30,23 @@ namespace GameDataContainer
             if (!File.Exists(filePath)) throw new Exception($"Path {filePath} does not exist");
             string[] lines = File.ReadAllLines(filePath);
             string sheetId = lines[0].Split(",")[0];
-            string trainerDataTab = lines[1].Split(",")[0];
-            ParseTrainerCards(sheetId, trainerDataTab, TrainerData);
-            string npcDataTab = lines[2].Split(",")[0];
-            ParseTrainerCards(sheetId, npcDataTab, NpcData);
+            // In inverse order so that trainers can find favors
+            Console.WriteLine("Parsing Famous Trainer Cards");
             string famousNpcDataTab = lines[3].Split(",")[0];
             ParseTrainerCards(sheetId, famousNpcDataTab, FamousNpcData);
+            Console.WriteLine("Parsing NPC Cards");
+            string npcDataTab = lines[2].Split(",")[0];
+            ParseTrainerCards(sheetId, npcDataTab, NpcData);
+            Console.WriteLine("Parsing Trainer Cards");
+            string trainerDataTab = lines[1].Split(",")[0];
+            ParseTrainerCards(sheetId, trainerDataTab, TrainerData);
+        }
+        public Trainer GetTrainer(string Name)
+        {
+            if (FamousNpcData.TryGetValue(Name, out Trainer foundTrainer)) return foundTrainer;
+            else if (NpcData.TryGetValue(Name, out foundTrainer)) return foundTrainer;
+            else if (TrainerData.TryGetValue(Name, out foundTrainer)) return foundTrainer;
+            else throw new Exception($"Trainer {Name} does not exist!");
         }
         public Dictionary<string, Dungeon> Dungeons { get; set; } = new Dictionary<string, Dungeon>();
         public Dictionary<string, Trainer> TrainerData { get; set; } = new Dictionary<string, Trainer>();

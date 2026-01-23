@@ -152,10 +152,11 @@ namespace MechanicsDataContainer
                 const int SPATK_FIELD = 6;
                 const int SPDEF_FIELD = 7;
                 const int SPEED_FIELD = 8;
-                const int ABILITY_1_FIELD = 10;
-                const int ABILITY_2_FIELD = 11;
-                const int ABILITY_3_FIELD = 12;
-                const int FIRST_EVO_FIELD = 13;
+                const int WEIGHT_FIELD = 10;
+                const int ABILITY_1_FIELD = 11;
+                const int ABILITY_2_FIELD = 12;
+                const int ABILITY_3_FIELD = 13;
+                const int FIRST_EVO_FIELD = 14;
                 string nextPokemonName = fields[NAME_FIELD];
                 Pokemon thePokemon = Dex[nextPokemonName];
                 thePokemon.Name = nextPokemonName;
@@ -163,31 +164,30 @@ namespace MechanicsDataContainer
                 thePokemon.Types[0] = theType;
                 theType = Enum.Parse<PokemonType>(fields[TYPE_2_FIELD].Trim().ToUpper());
                 thePokemon.Types[1] = theType;
+                // Stats
                 int Hp = int.Parse(fields[HP_FIELD]);
-                AverageStats[(int)Stat.HP] += Hp;
                 int Attack = int.Parse(fields[ATK_FIELD]);
-                AverageStats[(int)Stat.ATTACK] += Attack;
                 int Defense = int.Parse(fields[DEF_FIELD]);
-                AverageStats[(int)Stat.DEFENSE] += Defense;
                 int SpecialAttack = int.Parse(fields[SPATK_FIELD]);
-                AverageStats[(int)Stat.SPECIAL_ATTACK] += SpecialAttack;
                 int SpecialDefense = int.Parse(fields[SPDEF_FIELD]);
-                AverageStats[(int)Stat.SPECIAL_DEFENSE] += SpecialDefense;
                 int Speed = int.Parse(fields[SPEED_FIELD]);
-                AverageStats[(int)Stat.SPEED] += Speed;
-                thePokemon.Stats = [Hp, Attack, Defense, SpecialAttack, SpecialDefense, Speed]; // Load stats
+                thePokemon.Stats = [Hp, Attack, Defense, SpecialAttack, SpecialDefense, Speed];
+                thePokemon.Weight = float.Parse(fields[WEIGHT_FIELD]);
+                // Ability
                 string theAbility = fields[ABILITY_1_FIELD].Trim();
-                if (theAbility != "") thePokemon.Abilities.Add(theAbility);
+                if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
                 theAbility = fields[ABILITY_2_FIELD].Trim();
-                if (theAbility != "") thePokemon.Abilities.Add(theAbility);
+                if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
                 theAbility = fields[ABILITY_3_FIELD].Trim();
-                if (theAbility != "") thePokemon.Abilities.Add(theAbility);
+                if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
+                // Evo and prevos
                 for (int j = FIRST_EVO_FIELD; j < fields.Length; j++)
                 {
                     string nextEvo = fields[j].Trim();
                     if (nextEvo == "") break; // No more evos
-                    Dex[nextEvo].Prevo = nextPokemonName; // Also register it in the evolution
-                    thePokemon.Evos.Add(nextEvo);
+                    Pokemon evo = Dex[nextEvo];
+                    evo.Prevo = thePokemon; // Also register myself in the evolution
+                    thePokemon.Evos.Add(evo);
                 }
             }
             // Next step, process the learnset
@@ -201,26 +201,22 @@ namespace MechanicsDataContainer
                 {
                     string theMove = fields[i].Trim();
                     if (theMove == "") break; // Finished this mon's moveset
-                    if (!Moves.ContainsKey(theMove)) throw new Exception("Move in learnset not found"); // Move doesn't exist, need to revise
-                    thePokemon.Moves.Add(theMove);
+                    Move move = Moves[theMove];
+                    thePokemon.Moveset.Add(move);
                     if (theMove == "Sketch")
                     {
-                        thePokemon.Moves.UnionWith(Moves.Keys.ToHashSet()); // If sketch, add all existing moves too
+                        thePokemon.Moveset.Clear(); // Remove whatever was there before, i can learn all anyway
+                        thePokemon.Moveset.AddRange(Moves.Values.ToList()); // Just add all
+                        break; // Stop the rest
                     }
                 }
             }
             // Then, ensure each mon has a learnset (validation)
             foreach (Pokemon mon in Dex.Values)
             {
-                if (mon.Moves.Count == 0) throw new Exception("This mon has no moveset");
+                if (mon.Moveset.Count == 0) throw new Exception("This mon has no moveset");
             }
             // Final step, calculate average stats
-            AverageStats[(int)Stat.HP] /= Dex.Count;
-            AverageStats[(int)Stat.ATTACK] /= Dex.Count;
-            AverageStats[(int)Stat.DEFENSE] /= Dex.Count;
-            AverageStats[(int)Stat.SPECIAL_ATTACK] /= Dex.Count;
-            AverageStats[(int)Stat.SPECIAL_DEFENSE] /= Dex.Count;
-            AverageStats[(int)Stat.SPEED] /= Dex.Count;
         }
         /// <summary>
         /// Parses all mod items

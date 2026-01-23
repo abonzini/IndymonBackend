@@ -18,6 +18,8 @@ namespace MechanicsDataContainer
             ParseTypeChart(sheetId, typechartTab);
             string moveTab = lines[3].Split(",")[0];
             ParseMoves(sheetId, moveTab);
+            string abilityTab = lines[7].Split(",")[0];
+            ParseAbilities(sheetId, abilityTab);
             string pokedexTab = lines[1].Split(",")[0];
             string learnsetsTab = lines[4].Split(",")[0];
             ParsePokemonData(sheetId, pokedexTab, learnsetsTab);
@@ -25,8 +27,6 @@ namespace MechanicsDataContainer
             ParseModItems(sheetId, modItemsTab);
             string battleItemsTab = lines[6].Split(",")[0];
             ParseBattleItems(sheetId, battleItemsTab);
-            string abilityTab = lines[7].Split(",")[0];
-            ParseAbilities(sheetId, abilityTab);
             string initialWeightsTab = lines[8].Split(",")[0];
             ParseInitialWeights(sheetId, initialWeightsTab);
             string enablementTab = lines[9].Split(",")[0];
@@ -56,6 +56,5 @@ namespace MechanicsDataContainer
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>> WeightModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
         public Dictionary<(ElementType, string), float> FixedModifiers { get; set; } = new Dictionary<(ElementType, string), float>();
-        public float[] AverageStats { get; set; } = new float[6];
     }
 }

@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDataContainer", "GameDa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "Utilities\Utilities.csproj", "{E6C45427-C620-4710-B7F2-BC31FC636262}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomatedTeamBuilder", "AutomatedTeamBuilder\AutomatedTeamBuilder.csproj", "{FE5C5FB3-7B73-4BE3-AF2F-16DEECAFBBEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{E6C45427-C620-4710-B7F2-BC31FC636262}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6C45427-C620-4710-B7F2-BC31FC636262}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6C45427-C620-4710-B7F2-BC31FC636262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE5C5FB3-7B73-4BE3-AF2F-16DEECAFBBEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE5C5FB3-7B73-4BE3-AF2F-16DEECAFBBEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE5C5FB3-7B73-4BE3-AF2F-16DEECAFBBEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE5C5FB3-7B73-4BE3-AF2F-16DEECAFBBEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

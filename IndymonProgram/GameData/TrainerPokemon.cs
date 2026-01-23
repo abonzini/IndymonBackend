@@ -2,7 +2,7 @@
 
 namespace GameData
 {
-    public class PokemonSet
+    public class TrainerPokemon
     {
         public string Species { get; set; } = "";
         public string Nickname { get; set; } = "";

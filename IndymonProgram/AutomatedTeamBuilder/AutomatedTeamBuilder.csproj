@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GameDataContainer\GameDataContainer.csproj" />
+    <ProjectReference Include="..\GameData\GameData.csproj" />
+    <ProjectReference Include="..\MechanicsDataContainer\MechanicsDataContainer.csproj" />
+    <ProjectReference Include="..\MechanicsData\MechanicsData.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
+  </ItemGroup>
+
+</Project>

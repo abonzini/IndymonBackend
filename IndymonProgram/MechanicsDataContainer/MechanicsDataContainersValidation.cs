@@ -13,6 +13,7 @@ namespace MechanicsDataContainer
         {
             bool elementExists = type switch
             {
+                ElementType.NONE => true,
                 ElementType.POKEMON => Dex.ContainsKey(name),
                 ElementType.POKEMON_TYPE => Enum.TryParse<PokemonType>(name, true, out _),
                 ElementType.POKEMON_HAS_EVO => bool.TryParse(name, out _),
@@ -39,8 +40,8 @@ namespace MechanicsDataContainer
         {
             bool modExists = mod switch
             {
-                StatModifier.ATTACK_MULTIPLIER or StatModifier.DEFENSE_MULTIPLIER or StatModifier.SPECIAL_ATTACK_MULTIPLIER or StatModifier.SPEED_MULTIPLIER or StatModifier.SPECIAL_ACCURACY_MULTIPLIER or StatModifier.PHYSICAL_ACCURACY_MULTIPLIER => float.TryParse(name, out _),
-                StatModifier.ATTACK_BOOST or StatModifier.DEFENSE_BOOST or StatModifier.SPECIAL_ATTACK_BOOST or StatModifier.SPECIAL_DEFENSE_BOOST or StatModifier.SPEED_BOOST or StatModifier.HIGHEST_STAT_BOOST or StatModifier.ALL_BOOSTS or StatModifier.HP_EV or StatModifier.ATK_EV or StatModifier.DEF_EV or StatModifier.SPATK_EV or StatModifier.SPDEF_EV or StatModifier.SPEED_EV => int.TryParse(name, out _),
+                StatModifier.WEIGHT_MULTIPLIER or StatModifier.ATTACK_MULTIPLIER or StatModifier.DEFENSE_MULTIPLIER or StatModifier.SPECIAL_ATTACK_MULTIPLIER or StatModifier.SPECIAL_DEFENSE_MULTIPLIER or StatModifier.SPEED_MULTIPLIER or StatModifier.SPECIAL_ACCURACY_MULTIPLIER or StatModifier.PHYSICAL_ACCURACY_MULTIPLIER or StatModifier.OPP_HP_MULTIPLIER or StatModifier.OPP_ATTACK_MULTIPLIER or StatModifier.OPP_DEFENSE_MULTIPLIER or StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER or StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER or StatModifier.OPP_SPEED_MULTIPLIER => float.TryParse(name, out _),
+                StatModifier.ATTACK_BOOST or StatModifier.DEFENSE_BOOST or StatModifier.SPECIAL_ATTACK_BOOST or StatModifier.SPECIAL_DEFENSE_BOOST or StatModifier.SPEED_BOOST or StatModifier.HIGHEST_STAT_BOOST or StatModifier.ALL_BOOSTS or StatModifier.HP_EV or StatModifier.ATK_EV or StatModifier.DEF_EV or StatModifier.SPATK_EV or StatModifier.SPDEF_EV or StatModifier.SPEED_EV or StatModifier.OPP_ATTACK_BOOST or StatModifier.OPP_DEFENSE_BOOST or StatModifier.OPP_SPECIAL_ATTACK_BOOST or StatModifier.OPP_SPECIAL_DEFENSE_BOOST or StatModifier.OPP_SPEED_BOOST or StatModifier.ALL_OPP_BOOSTS => int.TryParse(name, out _),
                 StatModifier.NATURE => Enum.TryParse<Nature>(name, true, out _),
                 StatModifier.TERA or StatModifier.TYPE_1 or StatModifier.TYPE_2 => Enum.TryParse<PokemonType>(name, true, out _),
                 _ => false,

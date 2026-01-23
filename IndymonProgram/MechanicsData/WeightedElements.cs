@@ -9,6 +9,7 @@ namespace MechanicsData
     [JsonConverter(typeof(StringEnumConverter))]
     public enum ElementType
     {
+        NONE, /// No element
         POKEMON, /// The pokemon. Can't be affected, but affects stuff
         POKEMON_TYPE, /// The pokemon type. Can't be affected, but affects stuff
         POKEMON_HAS_EVO, /// The flag of whether the pokemon has an evo or not (only way to make eviolite happen)
@@ -27,22 +28,36 @@ namespace MechanicsData
     /// What stat is going to be modified and how
     public enum StatModifier
     {
+        WEIGHT_MULTIPLIER, /// Things that modify weight
         // The base multiplier of stuff *X, caused by abilities, items etc
         ATTACK_MULTIPLIER, /// Things that multiply attack
         DEFENSE_MULTIPLIER, /// Things that multiply defense (body press calc i.g.)
         SPECIAL_ATTACK_MULTIPLIER, /// Things that multiply special attack
+        SPECIAL_DEFENSE_MULTIPLIER, /// Things that multiply special defense
         SPEED_MULTIPLIER, /// Things that multiply speed
         PHYSICAL_ACCURACY_MULTIPLIER, /// Things that multiply physical accuracy
         SPECIAL_ACCURACY_MULTIPLIER, /// Things that multiply special accuracy
+        OPP_HP_MULTIPLIER, /// This is weird but it's basically effects that diminish opp max health (i.e hazards)
+        OPP_ATTACK_MULTIPLIER,
+        OPP_DEFENSE_MULTIPLIER,
+        OPP_SPECIAL_ATTACK_MULTIPLIER,
+        OPP_SPECIAL_DEFENSE_MULTIPLIER,
+        OPP_SPEED_MULTIPLIER,
         // Stat changes of stats caused usually by moves or abilities
         ATTACK_BOOST, /// Attack stat changes
         DEFENSE_BOOST, /// Defense stat changes
         SPECIAL_ATTACK_BOOST, /// Special attack stat changes
         SPECIAL_DEFENSE_BOOST, /// Special defense stat changes
         SPEED_BOOST, /// Speed stat changes
-        HIGHEST_STAT_BOOST, /// Stat change of the highest stat
+        OPP_ATTACK_BOOST,
+        OPP_DEFENSE_BOOST,
+        OPP_SPECIAL_ATTACK_BOOST,
+        OPP_SPECIAL_DEFENSE_BOOST,
+        OPP_SPEED_BOOST,
         // Thigs that affect the boosts in weird ways
+        HIGHEST_STAT_BOOST, /// Stat change of the highest stat
         ALL_BOOSTS, /// All boosts are affected a specific amount
+        ALL_OPP_BOOSTS, /// Same but for opponent
         // Things that affect the mon (damage calc wise)
         HP_EV, /// EVs
         ATK_EV, /// EVs
