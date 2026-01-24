@@ -17,7 +17,6 @@ namespace MechanicsData
     public class BattleItem
     {
         public string Name { get; set; } = "";
-        public PokemonType DefensiveBoostType { get; set; } = PokemonType.NONE;
         public HashSet<BattleItemFlag> Flags { get; set; } = new HashSet<BattleItemFlag>(); /// Flags that an item may have
         public override string ToString()
         {

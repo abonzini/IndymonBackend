@@ -83,8 +83,8 @@ namespace MechanicsData
         public string Name { get; set; } = "";
         public PokemonType Type { get; set; }
         public MoveCategory Category { get; set; }
-        public int Bp { get; set; }
-        public int Acc { get; set; }
+        public double Bp { get; set; }
+        public double Acc { get; set; }
         public HashSet<EffectFlag> Flags { get; set; } = new HashSet<EffectFlag>();
         public override string ToString()
         {

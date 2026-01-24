@@ -22,7 +22,7 @@ namespace MechanicsData
         public List<Pokemon> Evos { get; set; } = new List<Pokemon>();
         public int[] Stats { get; set; } = new int[6]; // All stats, hopefully init to 0
         public List<Move> Moveset { get; set; } = new List<Move>();
-        public float Weight { get; set; } = 0.0f;
+        public double Weight { get; set; } = 0.0f;
         public override string ToString()
         {
             return Name;

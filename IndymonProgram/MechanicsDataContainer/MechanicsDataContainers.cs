@@ -48,13 +48,13 @@ namespace MechanicsDataContainer
         public Dictionary<string, Pokemon> Dex { get; set; } = new Dictionary<string, Pokemon>();
         public Dictionary<string, ModItem> ModItems { get; set; } = new Dictionary<string, ModItem>();
         public Dictionary<string, BattleItem> BattleItems { get; set; } = new Dictionary<string, BattleItem>();
-        public Dictionary<(ElementType, string), float> InitialWeights { get; set; } = new Dictionary<(ElementType, string), float>();
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>> Enablers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
+        public Dictionary<(ElementType, string), double> InitialWeights { get; set; } = new Dictionary<(ElementType, string), double>();
+        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> Enablers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
         public HashSet<(ElementType, string)> DisabledOptions { get; set; } = new HashSet<(ElementType, string)>();
         public Dictionary<(ElementType, string), HashSet<(ElementType, string)>> ForcedBuilds { get; set; } = new Dictionary<(ElementType, string), HashSet<(ElementType, string)>>();
         public Dictionary<(ElementType, string), HashSet<(StatModifier, string)>> StatModifiers { get; set; } = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>> WeightModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
-        public Dictionary<(ElementType, string), float> FixedModifiers { get; set; } = new Dictionary<(ElementType, string), float>();
+        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> WeightModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
+        public Dictionary<(ElementType, string), double> FixedModifiers { get; set; } = new Dictionary<(ElementType, string), double>();
     }
 }

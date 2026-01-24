@@ -38,11 +38,11 @@ namespace MechanicsDataContainer
                 else
                 {
                     PokemonType nextType = Enum.Parse<PokemonType>(fields[0].Trim().ToUpper()); // First one is the type (try)
-                    TypeChart.DefensiveChart.Add(nextType, new Dictionary<PokemonType, float>()); // Add this type
+                    TypeChart.DefensiveChart.Add(nextType, new Dictionary<PokemonType, double>()); // Add this type
                     for (int j = 1; j < fields.Length; j++)
                     {
                         PokemonType whatType = columnTags[j];
-                        float multiplier = float.Parse(fields[j].Trim());
+                        double multiplier = double.Parse(fields[j].Trim());
                         TypeChart.DefensiveChart[nextType].Add(whatType, multiplier); // Add the multiplier
                     }
                 }
@@ -74,8 +74,8 @@ namespace MechanicsDataContainer
                     Name = fields[NAME_COL].Trim(),
                     Type = Enum.Parse<PokemonType>(fields[TYPE_COL].Trim().ToUpper()),
                     Category = Enum.Parse<MoveCategory>(fields[CATEGORY_COL].Trim().ToUpper()),
-                    Bp = int.Parse(fields[BP_COL].Trim()),
-                    Acc = int.Parse(fields[ACC_COL].Trim())
+                    Bp = double.Parse(fields[BP_COL].Trim()),
+                    Acc = double.Parse(fields[ACC_COL].Trim())
                 };
                 for (int j = FLAGS_COL; j < fields.Length; j++)
                 {
@@ -172,7 +172,7 @@ namespace MechanicsDataContainer
                 int SpecialDefense = int.Parse(fields[SPDEF_FIELD]);
                 int Speed = int.Parse(fields[SPEED_FIELD]);
                 thePokemon.Stats = [Hp, Attack, Defense, SpecialAttack, SpecialDefense, Speed];
-                thePokemon.Weight = float.Parse(fields[WEIGHT_FIELD]);
+                thePokemon.Weight = double.Parse(fields[WEIGHT_FIELD]);
                 // Ability
                 string theAbility = fields[ABILITY_1_FIELD].Trim();
                 if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
@@ -206,7 +206,7 @@ namespace MechanicsDataContainer
                     if (theMove == "Sketch")
                     {
                         thePokemon.Moveset.Clear(); // Remove whatever was there before, i can learn all anyway
-                        thePokemon.Moveset.AddRange(Moves.Values.ToList()); // Just add all
+                        thePokemon.Moveset.AddRange([.. Moves.Values]); // Just add all
                         break; // Stop the rest
                     }
                 }
@@ -252,8 +252,7 @@ namespace MechanicsDataContainer
             // Parse csv
             string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
-            const int DEF_TYPE_COL = 1;
-            const int FLAGS_COL = 8; // Contains all effect keys of this particular item
+            const int FLAGS_COL = 7; // Contains all effect keys of this particular item
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
@@ -262,11 +261,6 @@ namespace MechanicsDataContainer
                 {
                     Name = fields[NAME_COL]
                 };
-                string typeField = fields[DEF_TYPE_COL].Trim().ToUpper();
-                if (typeField != "")
-                {
-                    nextItem.DefensiveBoostType = Enum.Parse<PokemonType>(typeField);
-                }
                 for (int j = FLAGS_COL; j < fields.Length; j++)
                 {
                     string nextFlag = fields[j].Replace("\"", "").Trim().ToUpper();
@@ -298,7 +292,7 @@ namespace MechanicsDataContainer
                 string[] fields = lines[i].Split(","); // Csv
                 ElementType type = Enum.Parse<ElementType>(fields[ELEMENT_TYPE_COL].Trim());
                 string name = fields[NAME_COL].Trim();
-                float weight = float.Parse(fields[WEIGHT_COL]);
+                double weight = double.Parse(fields[WEIGHT_COL]);
                 // Validate if all's good
                 AssertElementExistance(type, name);
                 InitialWeights.Add((type, name), weight);
@@ -312,7 +306,7 @@ namespace MechanicsDataContainer
         void ParseEnabledOptions(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Enablement List");
-            Enablers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), float>>();
+            Enablers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
             DisabledOptions.Clear();
             // Parse csv
             string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
@@ -329,14 +323,14 @@ namespace MechanicsDataContainer
                 string enablerName = fields[ENABLER_NAME_COL].Trim();
                 ElementType enabledType = Enum.Parse<ElementType>(fields[ENABLED_TYPE_COL].Trim());
                 string enabledName = fields[ENABLED_NAME_COL].Trim();
-                float weight = (fields[WEIGHT_COL].Trim() != "-") ? float.Parse(fields[WEIGHT_COL]) : 1;
+                double weight = (fields[WEIGHT_COL].Trim() != "-") ? double.Parse(fields[WEIGHT_COL]) : 1;
                 // Validate if all's good
                 AssertElementExistance(enablerType, enablerName);
                 AssertElementExistance(enabledType, enabledName);
                 // Add to the corresponding matrices
-                if (!Enablers.TryGetValue((enablerType, enablerName), out Dictionary<(ElementType, string), float> enableds))
+                if (!Enablers.TryGetValue((enablerType, enablerName), out Dictionary<(ElementType, string), double> enableds))
                 {
-                    enableds = new Dictionary<(ElementType, string), float>();
+                    enableds = new Dictionary<(ElementType, string), double>();
                     Enablers.Add((enablerType, enablerName), enableds);
                 }
                 enableds.Add((enabledType, enabledName), weight);
@@ -483,14 +477,14 @@ namespace MechanicsDataContainer
                 string modifierName = fields[MODIFIER_NAME_COL].Trim();
                 ElementType modifiedType = Enum.Parse<ElementType>(fields[MODIFIED_TYPE_COL].Trim());
                 string modifiedName = fields[MODIFIED_NAME_COL].Trim();
-                float weight = float.Parse(fields[WEIGHT_COL]);
+                double weight = double.Parse(fields[WEIGHT_COL]);
                 // Validate if all's good
                 AssertElementExistance(modifierType, modifierName);
                 AssertElementExistance(modifiedType, modifiedName);
                 // Add to the corresponding matrices
-                if (!WeightModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), float> modifieds))
+                if (!WeightModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), double> modifieds))
                 {
-                    modifieds = new Dictionary<(ElementType, string), float>();
+                    modifieds = new Dictionary<(ElementType, string), double>();
                     WeightModifiers.Add((modifierType, modifierName), modifieds);
                 }
                 modifieds.Add((modifiedType, modifiedName), weight); // This should be unique
@@ -516,7 +510,7 @@ namespace MechanicsDataContainer
                 string[] fields = lines[i].Split(","); // Csv
                 ElementType modifierType = Enum.Parse<ElementType>(fields[MODIFIER_TYPE_COL].Trim());
                 string modifierName = fields[MODIFIER_NAME_COL].Trim();
-                float weight = float.Parse(fields[WEIGHT_COL]);
+                double weight = double.Parse(fields[WEIGHT_COL]);
                 // Validate if all's good
                 AssertElementExistance(modifierType, modifierName);
                 // Add to the corresponding matrices

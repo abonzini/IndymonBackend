@@ -28,10 +28,16 @@ namespace MechanicsData
     }
     public class TypeChart
     {
-        public Dictionary<PokemonType, Dictionary<PokemonType, float>> DefensiveChart { get; set; } = new Dictionary<PokemonType, Dictionary<PokemonType, float>>();
-        public float GetReceivedDamage(HashSet<PokemonType> receiverTypes, PokemonType moveType)
+        public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveChart { get; set; } = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
+        /// <summary>
+        /// Returns how much damage a mon with multiple types would get from an attack of specific type
+        /// </summary>
+        /// <param name="receiverTypes">Types of receiver mon</param>
+        /// <param name="moveType">Type of move</param>
+        /// <returns>Damage multiplier (usually between 0-4)</returns>
+        public double GetReceivedDamage(IEnumerable<PokemonType> receiverTypes, PokemonType moveType)
         {
-            float result = 1.0f;
+            double result = 1.0f;
             foreach (PokemonType receiverType in receiverTypes)
             {
                 result *= DefensiveChart[receiverType][moveType];

@@ -1,7 +1,6 @@
 ﻿using GameData;
 using GameDataContainer;
 using MechanicsData;
-using MechanicsDataContainer;
 using Utilities;
 
 namespace AutomatedTeamBuilder
@@ -24,7 +23,7 @@ namespace AutomatedTeamBuilder
     /// <summary>
     /// When attempting to check a valid team build, this structure contains all possible options that fulfill the desired constraints
     /// </summary>
-    public class ValidTeamBuild
+    public class PossibleTeamBuild
     {
         /// <summary>
         /// The Trainer's mons that can be used for this
@@ -39,7 +38,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         public Dictionary<string, List<TrainerPokemon>> FavourPokemon = new Dictionary<string, List<TrainerPokemon>>();
     }
-    public static class TeamBuilder
+    public static partial class TeamBuilder
     {
         /// <summary>
         /// For a given trainer, gives me all the possible teams they could build with the corresponding constraint sets
@@ -48,13 +47,13 @@ namespace AutomatedTeamBuilder
         /// <param name="nMons">How many mons need to satisfy the constraints (min)</param>
         /// <param name="constraints">The constraints for teambuild</param>
         /// <returns></returns>
-        public static List<ValidTeamBuild> GetTrainersBuildOptions(Trainer trainer, int nMons, TeamBuildConstraints constraints)
+        public static List<PossibleTeamBuild> GetTrainersBuildOptions(Trainer trainer, int nMons, TeamBuildConstraints constraints)
         {
-            List<ValidTeamBuild> resultingBuilds = new List<ValidTeamBuild>();
+            List<PossibleTeamBuild> resultingBuilds = new List<PossibleTeamBuild>();
             int mostOwnMonsUsed = 0; // Will try to only use the options that use the most own mons to not overuse set items or favors if don't need
             foreach (List<(ElementType, string)> options in constraints.DifferentOptions) // Check each satisfied constraint
             {
-                ValidTeamBuild buildOption = new ValidTeamBuild(); // The corresponding team options for this case
+                PossibleTeamBuild buildOption = new PossibleTeamBuild(); // The corresponding team options for this case
                 // First, check all own mons that satisfy
                 foreach (TrainerPokemon mon in trainer.PartyPokemon)
                 {
@@ -141,121 +140,13 @@ namespace AutomatedTeamBuilder
             return resultingBuilds;
         }
         /// <summary>
-        /// Returns the ability as granted by a set item that potentially alters ability
-        /// </summary>
-        /// <returns>Ability added by this set item, if any</returns>
-        public static Ability GetSetItemAbility(string setItem)
-        {
-            Ability resultingAbility = null;
-            if (setItem.Contains(" Ability Capsule")) // Abilities granted by capsule
-            {
-                string abilityName = setItem.Split(" Ability Capsule")[0].Trim();
-                resultingAbility = MechanicsDataContainers.GlobalMechanicsData.Abilities[abilityName];
-            }
-            return resultingAbility;
-        }
-        /// <summary>
-        /// Returns the move as granted by a set item that potentially alters move
-        /// </summary>
-        /// <returns>Move added added by this set item, if any</returns>
-        public static Move GetSetItemMove(string setItem)
-        {
-            Move resultingMove = null;
-            if (setItem.Contains(" Move Disk")) // Moves granted by Move disk
-            {
-                string moveName = setItem.Split(" Move Disk")[0].Trim();
-                resultingMove = MechanicsDataContainers.GlobalMechanicsData.Moves[moveName];
-            }
-            return resultingMove;
-        }
-        /// <summary>
-        /// Checks whether a mon fills property or not
-        /// </summary>
-        /// <param name="mon">Which mon</param>
-        /// <param name="elementToCheck">What property to check for</param>
-        /// <param name="elementToCheckName">Name of property to look for</param>
-        /// <returns></returns>
-        static bool ValidateMonProperty(TrainerPokemon mon, ElementType elementToCheck, string elementToCheckName)
-        {
-            Pokemon pokemonData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species]; // Obtain mon data
-            // Elements that may be of use when checking stuff
-            Enum.TryParse(elementToCheckName, true, out PokemonType typeToCheck);
-            Enum.TryParse(elementToCheckName, true, out BattleItemFlag battleItemFlagToCheck);
-            Enum.TryParse(elementToCheckName, true, out EffectFlag effectFlagToCheck);
-            Enum.TryParse(elementToCheckName, true, out MoveCategory moveCategoryToCheck);
-            return elementToCheck switch // Some won't apply
-            {
-                ElementType.NONE => true,
-                ElementType.POKEMON => pokemonData.Name == elementToCheckName,
-                ElementType.POKEMON_TYPE => pokemonData.Types.Contains(typeToCheck),
-                ElementType.POKEMON_HAS_EVO => pokemonData.Evos.Count > 0,
-                ElementType.BATTLE_ITEM => mon.BattleItem?.Name == elementToCheckName,
-                ElementType.BATTLE_ITEM_FLAGS => mon.BattleItem?.Flags.Contains(battleItemFlagToCheck) == true,
-                ElementType.MOD_ITEM => mon.ModItem?.Name == elementToCheckName,
-                ElementType.ABILITY => pokemonData.Abilities.Append(GetSetItemAbility(mon.SetItem)).Any(a => a?.Name == elementToCheckName), // If has ability or set item adds it
-                ElementType.MOVE => pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Name == elementToCheckName), // If has move or set item adds it
-                // Complex one because both moves and abilities may have it!
-                ElementType.EFFECT_FLAGS => pokemonData.Abilities.Append(GetSetItemAbility(mon.SetItem)).Any(a => a?.Flags.Contains(effectFlagToCheck) == true) ||
-                    pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Flags.Contains(effectFlagToCheck) == true),
-                ElementType.DAMAGING_MOVE_OF_TYPE => pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Category != MoveCategory.STATUS && m?.Type == typeToCheck),
-                ElementType.MOVE_CATEGORY => pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Category == moveCategoryToCheck),
-                ElementType.ANY_DAMAGING_MOVE => pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Category != MoveCategory.STATUS),
-                _ => false,
-            };
-        }
-        /// <summary>
-        /// Checks whether ability fulfills property or not
-        /// </summary>
-        /// <param name="ability">Ability to check</param>
-        /// <param name="elementToCheck">Element to check</param>
-        /// <param name="elementToCheckName">Name of element to check</param>
-        /// <returns>True if the ability satisfies property</returns>
-        static bool ValidateAbilityProperty(Ability ability, ElementType elementToCheck, string elementToCheckName)
-        {
-            if (ability == null) return false;
-            // Elements that may be of use when checking stuff
-            Enum.TryParse(elementToCheckName, true, out EffectFlag effectFlagToCheck);
-            return elementToCheck switch
-            {
-                ElementType.NONE => true,
-                ElementType.ABILITY => ability.Name == elementToCheckName,
-                ElementType.EFFECT_FLAGS => ability.Flags.Contains(effectFlagToCheck) == true,
-                _ => false,
-            };
-        }
-        /// <summary>
-        /// Checks whether move fulfills property or not
-        /// </summary>
-        /// <param name="move">Move to check</param>
-        /// <param name="elementToCheck">Element to check</param>
-        /// <param name="elementToCheckName">Name of element to check</param>
-        /// <returns>True if the ability satisfies property</returns>
-        static bool ValidateMoveProperty(Move move, ElementType elementToCheck, string elementToCheckName)
-        {
-            if (move == null) return false;
-            // Elements that may be of use when checking stuff
-            Enum.TryParse(elementToCheckName, true, out PokemonType typeToCheck);
-            Enum.TryParse(elementToCheckName, true, out EffectFlag effectFlagToCheck);
-            Enum.TryParse(elementToCheckName, true, out MoveCategory moveCategoryToCheck);
-            return elementToCheck switch // Some won't apply
-            {
-                ElementType.NONE => true,
-                ElementType.MOVE => move.Name == elementToCheckName,
-                ElementType.EFFECT_FLAGS => move.Flags.Contains(effectFlagToCheck),
-                ElementType.DAMAGING_MOVE_OF_TYPE => move.Category != MoveCategory.STATUS && move.Type == typeToCheck,
-                ElementType.MOVE_CATEGORY => move.Category == moveCategoryToCheck,
-                ElementType.ANY_DAMAGING_MOVE => move.Category != MoveCategory.STATUS,
-                _ => false,
-            };
-        }
-        /// <summary>
         /// Assembles a trainer's team given all possible builds, randomized if there's any preference
         /// </summary>
         /// <param name="trainer">The trainer whose battle team to define</param>
         /// <param name="teamBuild">All the possible builds for the trainers</param>
-        public static void AssembleTrainersBattleTeam(Trainer trainer, int nMons, List<ValidTeamBuild> teamBuild)
+        public static void AssembleTrainersBattleTeam(Trainer trainer, int nMons, List<PossibleTeamBuild> teamBuild)
         {
-            ValidTeamBuild usedBuild = IndymonUtilities.GetRandomPick(teamBuild); // TODO: May need to be chosen in some crazy monotypes instead of random
+            PossibleTeamBuild usedBuild = IndymonUtilities.GetRandomPick(teamBuild); // TODO: May need to be chosen in some crazy monotypes instead of random
             List<TrainerPokemon> finalBattleTeam = []; // This is the result
             List<TrainerPokemon> allTrainerMons = [.. trainer.PartyPokemon]; // May take from here in order if needed
             if (trainer.AutoTeam) // If shuffling is allowed, all is shuffled then lol
@@ -304,6 +195,47 @@ namespace AutomatedTeamBuilder
             }
             // Should be al good here I guess
             trainer.BattleTeam = finalBattleTeam; // Set this team for battle
+        }
+        /// <summary>
+        /// A contaxt of things going on, to be able to build mons sets. Includes opp average profile, typechart, and ongoing archetypes if present
+        /// </summary>
+        class TeamBuildContext
+        {
+            public List<TeamArchetype> CurrentTeamArchetypes = new List<TeamArchetype>(); // Contains an ongoing archetype that applies for all team
+            public List<List<PokemonType>> OpponentsTypes = new List<List<PokemonType>>(); // Contains a list of all types found in opp teams
+            public double[] OpponentsStats = new double[6]; // All opp stats in average
+            public double OppSpeedVariance = 0; // Speed is special as I need the variance to calculate speed creep
+            public double AverageOpponentWeight = 0; // Average weight of opponents
+        }
+        /// <summary>
+        /// The context of a currently building mon. Also used to store data about current mods and stuff
+        /// </summary>
+        class PokemonBuildInfo
+        {
+            // Things that are added on the transcourse of building a set, makes some other stuff more or less desirable
+            public TeamBuildConstraints AdditionalConstraints = new TeamBuildConstraints(); /// Teambuild constraint that are added due to required builds (unless unable to complete obviously)
+            public Dictionary<(ElementType, string), float> EnabledOptions = new Dictionary<(ElementType, string), float>(); /// Things that normally are disabled but are now enabled, and the weight by where they were just enabled
+            public HashSet<(StatModifier, string)> ModifiedTypeEffectiveness = new HashSet<(StatModifier, string)>();
+            public Dictionary<(ElementType, string), Dictionary<MoveModifier, string>> MoveMods = new Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>();
+            public Dictionary<(ElementType, string), double> WeightMods = new Dictionary<(ElementType, string), double>();
+            public List<List<PokemonType>> StillResistedTypes = new List<List<PokemonType>>(); // Types that this mon can't hit very well, to give a bit of a "coverage boost"
+            // Then stuff that alters current mon
+            public Nature Nature = Nature.SERIOUS;
+            public PokemonType TeraType = PokemonType.NONE;
+            public PokemonType[] PokemonTypes = [PokemonType.NONE, PokemonType.NONE];
+            public int[] Evs = new int[6];
+            public int[] StatBoosts = new int[6];
+            public double[] StatMultipliers = [1, 1, 1, 1, 1, 1];
+            public double PhysicalAccuracyMultiplier = 1;
+            public double SpecialAccuracyMultiplier = 1;
+            public double WeightMultiplier = 1;
+            // Things that alter opp mon
+            public int[] OppStatBoosts = new int[6];
+            public double[] OppStatMultipliers = [1, 1, 1, 1, 1, 1];
+            // Battle sim (how much damage my attacks do, how much damage mon takes from stuff, speed creep)
+            public double DamageScore = 0;
+            public double DefenseScore = 0;
+            public double SpeedScore = 0;
         }
     }
 }

@@ -10,10 +10,16 @@ namespace GameData
         public string SetItem { get; set; } = "";
         public ModItem ModItem { get; set; } = null;
         public BattleItem BattleItem { get; set; } = null;
-        // Etc (set-related i.g.)
         public override string ToString()
         {
             return (Nickname != "") ? $"{Nickname} ({Species})" : Species;
         }
+        // Etc (set-related for exporting, filled by team builder unless you really know what you're doing)
+        public Ability ChosenAbility { get; set; } = null;
+        public List<Move> ChosenMoveset { get; set; } = [];
+        public int[] Evs { get; set; } = new int[6];
+        public Nature Nature { get; set; } = Nature.SERIOUS;
+        public PokemonType TeraType { get; set; } = PokemonType.NONE;
+
     }
 }

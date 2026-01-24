@@ -69,6 +69,12 @@ namespace MechanicsData
         TYPE_1, /// Changes first type
         TYPE_2, /// Changes second type
         TERA, /// Changes tera
+        NULLIFIES_RECV_DAMAGE_OF_TYPE, // For nullify/absorb abilities
+        DOUBLES_RECV_DAMAGE_OF_TYPE, // For abilities that fuck me up
+        HALVES_RECV_DAMAGE_OF_TYPE, // For chilan berry
+        HALVES_RECV_SE_DAMAGE_OF_TYPE, // For resist berries
+        ALTER_RECV_SE_DAMAGE, // Halves all SE damage
+        ALTER_RECV_NON_SE_DAMAGE, // For wonder guard!
     }
     [JsonConverter(typeof(StringEnumConverter))]
     /// How specific moves are affected
