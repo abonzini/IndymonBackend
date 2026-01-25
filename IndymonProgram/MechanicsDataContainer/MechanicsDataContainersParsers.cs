@@ -99,7 +99,7 @@ namespace MechanicsDataContainer
             // Parse csv
             string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
-            const int FLAGS_COL = 2; // Contains all effect keys of this particular ability (more manual...)
+            const int FLAGS_COL = 1; // Contains all effect keys of this particular ability (more manual...)
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
@@ -440,17 +440,17 @@ namespace MechanicsDataContainer
                 AssertElementExistance(modifiedType, modifiedName);
                 AssertMoveModExistance(modType, modName);
                 // Add to the corresponding matrices
-                if (!MoveModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), Dictionary<MoveModifier, string>> modifieds))
+                if (!MoveModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), List<(MoveModifier, string)>> modifieds))
                 {
-                    modifieds = new Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>();
+                    modifieds = new Dictionary<(ElementType, string), List<(MoveModifier, string)>>();
                     MoveModifiers.Add((modifierType, modifierName), modifieds);
                 }
-                if (!modifieds.TryGetValue((modifiedType, modifiedName), out Dictionary<MoveModifier, string> moveMods))
+                if (!modifieds.TryGetValue((modifiedType, modifiedName), out List<(MoveModifier, string)> moveMods))
                 {
-                    moveMods = new Dictionary<MoveModifier, string>();
+                    moveMods = new List<(MoveModifier, string)>();
                     modifieds.Add((modifiedType, modifiedName), moveMods);
                 }
-                moveMods.Add(modType, modName);
+                moveMods.Add((modType, modName));
             }
         }
         /// <summary>

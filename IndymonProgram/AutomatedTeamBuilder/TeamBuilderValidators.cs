@@ -23,7 +23,6 @@ namespace AutomatedTeamBuilder
             Enum.TryParse(elementToCheckName, true, out MoveCategory moveCategoryToCheck);
             return elementToCheck switch // Some won't apply
             {
-                ElementType.NONE => true,
                 ElementType.POKEMON => pokemonData.Name == elementToCheckName,
                 ElementType.POKEMON_TYPE => pokemonData.Types.Contains(typeToCheck),
                 ElementType.POKEMON_HAS_EVO => pokemonData.Evos.Count > 0,
@@ -55,7 +54,6 @@ namespace AutomatedTeamBuilder
             Enum.TryParse(elementToCheckName, true, out EffectFlag effectFlagToCheck);
             return elementToCheck switch
             {
-                ElementType.NONE => true,
                 ElementType.ABILITY => ability.Name == elementToCheckName,
                 ElementType.EFFECT_FLAGS => ability.Flags.Contains(effectFlagToCheck) == true,
                 _ => false,
@@ -77,7 +75,6 @@ namespace AutomatedTeamBuilder
             Enum.TryParse(elementToCheckName, true, out MoveCategory moveCategoryToCheck);
             return elementToCheck switch // Some won't apply
             {
-                ElementType.NONE => true,
                 ElementType.MOVE => move.Name == elementToCheckName,
                 ElementType.EFFECT_FLAGS => move.Flags.Contains(effectFlagToCheck),
                 ElementType.DAMAGING_MOVE_OF_TYPE => move.Category != MoveCategory.STATUS && move.Type == typeToCheck,

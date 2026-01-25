@@ -9,7 +9,6 @@ namespace MechanicsData
     [JsonConverter(typeof(StringEnumConverter))]
     public enum ElementType
     {
-        NONE, /// No element
         POKEMON, /// The pokemon. Can't be affected, but affects stuff
         POKEMON_TYPE, /// The pokemon type. Can't be affected, but affects stuff
         POKEMON_HAS_EVO, /// The flag of whether the pokemon has an evo or not (only way to make eviolite happen)

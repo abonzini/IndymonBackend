@@ -13,7 +13,6 @@ namespace MechanicsDataContainer
         {
             bool elementExists = type switch
             {
-                ElementType.NONE => true,
                 ElementType.POKEMON => Dex.ContainsKey(name),
                 ElementType.POKEMON_TYPE => Enum.TryParse<PokemonType>(name, true, out _),
                 ElementType.POKEMON_HAS_EVO => bool.TryParse(name, out _),
