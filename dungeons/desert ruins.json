@@ -1,0 +1,295 @@
+{
+  "Name": "Desert Ruins",
+  "GoesDownwards": true,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "Covered by the sand, you find a $1 that may have been lost centuries ago.",
+      "PostEventString": "You pick it up and continue on your way."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "In the distance, you see a black silhouette. As it gets closer, you see an angry $1 trashing about.",
+      "PostEventString": "The enemy flees, scared. You took its $1 as a prize."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "In the distance, you see a black silhouette. As it gets closer, you see an angry $1 trashing about.",
+      "PostEventString": "The enemy flees, scared. You took its $1 as a prize."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "In the center of a stone circle, a huge shining crystal talks to you: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on."
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "You reach an oasis where you can rest and regain energy.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "BIG_HEAL",
+      "PreEventString": "You find a very tall Sitrus tree.",
+      "PostEventString": "$1 manages to catch a couple of Sitrus Berries. It is fully healed."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "You reach an oasis where you can rest and regain energy.",
+      "PostEventString": "Your Pokemon have recovered from harmful conditions."
+    },
+	{
+      "EventType": "PP_HEAL",
+      "PreEventString": "Time to eat some of the Leppa Rations you bought before coming.",
+      "PostEventString": "You and your Pokemon eat some of them. Their moves recover some PP."
+    },
+	{
+      "EventType": "SWARM",
+      "PreEventString": "You accidentally step on a pressure plate trap! Suddenly, tons of Pokemon fall from a hole in the roof..",
+      "PostEventString": "Perhaps this wasn't a trap and just a misunderstanding."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "You accidentally step on a pressure plate trap! A lot of Skorupi start crawling from a hole in the wall!",
+      "PostEventString": "They sting you, and your Pokemon sustain some damage."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "You accidentally step on a pressure plate trap! A lot of Skorupi start crawling from a hole in the wall!",
+      "PostEventString": "They sting you, and some of your Pokemon get badly poisoned.",
+	  "SpecialParams": "tox"
+    },
+	{
+      "EventType": "RESEARCHER",
+      "PreEventString": "The ruins contain multiple tablets written in ancient texts. The members of the Archaeological society would probably go crazy about this.",
+      "PostEventString": "You pick up a $1 that was on the floor."
+    },
+	{
+      "EventType": "UNOWN",
+      "PreEventString": "You enter a set of ruins unlike all previous ones. This one contains weird glypths embedded in the walls. Suddenly, the glyphs come alive and start attacking!.",
+      "PostEventString": "Huh..."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+    "Sandshrew",
+    "Meowth-Galar",
+    "Phanpy",
+    "Larvitar",
+    "Nincada",
+    "Trapinch",
+    "Cacnea",
+    "Baltoy",
+    "Gible",
+    "Hippopotas",
+    "Skorupi",
+    "Drilbur",
+    "Sandile",
+    "Dwebble",
+    "Yamask",
+    "Yamask-Galar",
+    "Golett",
+    "Rockruff",
+    "Salandit",
+    "Silicobra",
+    "Bramblin",
+    "Rellor"
+	],
+	[
+    "Sandslash",
+    "Gligar",
+    "Pupitar",
+    "Ninjask",
+    "Vibrava",
+    "Cacturne",
+    "Claydol",
+    "Gabite",
+    "Drapion",
+    "Krokorok",
+    "Maractus",
+    "Crustle",
+    "Cofagrigus",
+    "Runerigus",
+    "Lycanroc",
+    "Lycanroc-Midnight",
+    "Sandaconda",
+    "Perrserker",
+    "Stonjourner",
+    "Klawf",
+    "Rabsca"
+	],
+	[
+    "Gliscor",
+    "Skarmory",
+    "Donphan",
+    "Tyranitar",
+    "Shedinja",
+    "Flygon",
+    "Garchomp",
+    "Hippowdon",
+    "Excadrill",
+    "Krookodile",
+    "Golurk",
+    "Durant",
+    "Lycanroc-Dusk",
+    "Salazzle",
+    "Brambleghast",
+    "Orthworm"
+	],
+	[
+		"Chi-Yu",
+    "Ting-Lu",
+    "Wo-Chien",
+    "Chien-Pao"
+	]
+  ],
+  "CommonItems": [
+		"Lonely Mint",
+    "Adamant Mint",
+    "Naughty Mint",
+    "Brave Mint",
+    "Bold Mint",
+    "Impish Mint",
+    "Lax Mint",
+    "Relaxed Mint",
+    "Modest Mint",
+    "Mild Mint",
+    "Rash Mint",
+    "Quiet Mint",
+    "Calm Mint",
+    "Gentle Mint",
+    "Careful Mint",
+    "Sassy Mint",
+    "Timid Mint",
+    "Hasty Mint",
+    "Jolly Mint",
+    "Naive Mint",
+		"Yache Berry",
+    "Rindo Berry",
+    "Sitrus Berry"
+  ],
+  "RareItems": [
+    "Clear Amulet",
+    "Focus Band",
+    "Focus Sash",
+    "Grip Claw",
+    "Loaded Dice",
+    "Safety Goggles",
+    "Soft Sand",
+    "Utility Umbrella"
+  ],
+  "BossItem": "Sun Stone",
+  "Floors": [
+    {
+      "RoomColor": "DarkYellow",
+      "NeWallTile": "︵",
+      "NwWallTile": "︵",
+      "SeWallTile": "︵",
+      "SwWallTile": "︵",
+      "EWallTile": "︵",
+      "WWallTile": "︵",
+      "NWallTile": "︵",
+      "SWallTile": "︵",
+	  "EWallPassageTile": "▒",
+      "WWallPassageTile": "▒",
+      "NWallPassageTile": "▒",
+      "SWallPassageTile": "▒",
+      "NWallShortcutTile": "▓",
+      "SWallShortcutTile": "▓",
+      "PassageColor": "DarkYellow",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "Yellow",
+      "NeShortcutTile": "▓",
+      "NwShortcutTile": "▓",
+      "SeShortcutTile": "▓",
+      "SwShortcutTile": "▓",
+      "HorizontalShortcutTile": "▓",
+      "VerticalShortcutTile": "▓",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "ITEM",
+			"Which": ["Zoom Lens", "Wide Lens", "Safety Goggles", "Wise Glasses", "Black Glasses", "Choice Specs"]
+		}
+	  ],
+	  "ShortcutClue": "The sandstorm is a bit more intense in this area. You'll need eye protection to make it through.",
+	  "ShortcutResolution": "Your $1 protects your party's vision while you go through the sandstorm."
+    },
+	{
+      "RoomColor": "DarkGray",
+      "NeWallTile": "▲",
+      "NwWallTile": "︵",
+      "SeWallTile": "︵",
+      "SwWallTile": "︵",
+      "EWallTile": "︵",
+      "WWallTile": "︵",
+      "NWallTile": "︵",
+      "SWallTile": "︵",
+	    "EWallPassageTile": "_",
+      "WWallPassageTile": "_",
+      "NWallPassageTile": "│",
+      "SWallPassageTile": "│",
+      "NWallShortcutTile": "⌸",
+      "SWallShortcutTile": "⌸",
+      "PassageColor": "Yellow",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "White",
+      "NeShortcutTile": "⌸",
+      "NwShortcutTile": "⌸",
+      "SeShortcutTile": "⌸",
+      "SwShortcutTile": "⌸",
+      "HorizontalShortcutTile": "⌸",
+      "VerticalShortcutTile": "⌸",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "ITEM",
+			"Which": ["Blank Plate", "Fist Plate", "Sky Plate", "Toxic Plate", "Earth Plate", "Stone Plate", "Insect Plate", "Spooky Plate", "Iron Plate", "Flame Plate", "Splash Plate", "Meadow Plate", "Zap Plate", "Mind Plate", "Icicle Plate", "Draco Plate", "Dread Plate", "Pixie Plate"]
+		}
+	  ],
+	  "ShortcutClue": "You see an opening on the ruin's walls, but the instruction is in another language. It resembles the one found in Plates.",
+	  "ShortcutResolution": "Your $1 has a very similar text to the one in the wall. With a bit of time, you manage to decypher how to open the secret passage."
+    },
+	{
+      "RoomColor": "Yellow",
+      "NeWallTile": "︵",
+      "NwWallTile": "▙",
+      "SeWallTile": "▞",
+      "SwWallTile": "︵",
+      "EWallTile": "︵",
+      "WWallTile": "█",
+      "NWallTile": "︵",
+      "SWallTile": "︵",
+	    "EWallPassageTile": "▒",
+      "WWallPassageTile": "▒",
+      "NWallPassageTile": "▒",
+      "SWallPassageTile": "▒",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "DarkYellow",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "White",
+      "NeShortcutTile": " ",
+      "NwShortcutTile": " ",
+      "SeShortcutTile": " ",
+      "SwShortcutTile": " ",
+      "HorizontalShortcutTile": " ",
+      "VerticalShortcutTile": " ",
+	  "ShortcutConditions": [],
+	  "ShortcutClue": "This is the end of the line. No more shortcuts ahead.",
+	  "ShortcutResolution": ""
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "In the center of the ruins, you find a bizarre creature. It is the mythical $1, symbol of ruination.",
+    "PostEventString": "The boss leaves behind the $1, a precious treasure that was revered by ancient civilisations."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "The desert is harsh, but with enough preparation you should be able to cross it. You should stop for camping whenever possible.",
+    "PostEventString": "But for now it's time to move on..."
+  },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
+  "CustomShowdownRules" : ["Continuous Sand Mod"],
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

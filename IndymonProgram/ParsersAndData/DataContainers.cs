@@ -33,7 +33,7 @@ namespace ParsersAndData
     {
         public int HealthPercentage { get; set; } = 100;
         public string NonVolatileStatus { get; set; } = "";
-        public int[] MovePp { get; set; } = [1000, 1000, 1000, 1000]; // Starts with a big value idc
+        public int[] MovePp { get; set; } = [99, 99, 99, 99]; // Starts with a big value idc
         public void SetStatus(string status)
         {
             if (status.ToLower() == "0 fnt")

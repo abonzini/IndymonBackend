@@ -138,6 +138,10 @@ namespace IndymonBackendProgram
             AddInfoColumnCommand("Pokemon", 18);
             AddInfoColumnCommand("Health", 6);
             AddInfoColumnCommand("Status", 6);
+            AddInfoColumnCommand("M1", 2);
+            AddInfoColumnCommand("M2", 2);
+            AddInfoColumnCommand("M3", 2);
+            AddInfoColumnCommand("M4", 2);
             UpdateTrainerDataInfo(trainerData);
             for (int floor = 0; floor < DUNGEON_NUMBER_OF_FLOORS; floor++) // Begin the iteration of all floors
             {
@@ -998,6 +1002,10 @@ namespace IndymonBackendProgram
                 ModifyInfoValueCommand(mon.Species, (0, i));
                 ModifyInfoValueCommand($"{mon.ExplorationStatus.HealthPercentage}%", (1, i));
                 ModifyInfoValueCommand(mon.ExplorationStatus.NonVolatileStatus, (2, i));
+                ModifyInfoValueCommand(mon.ExplorationStatus.MovePp[0].ToString(), (3, i));
+                ModifyInfoValueCommand(mon.ExplorationStatus.MovePp[1].ToString(), (4, i));
+                ModifyInfoValueCommand(mon.ExplorationStatus.MovePp[2].ToString(), (5, i));
+                ModifyInfoValueCommand(mon.ExplorationStatus.MovePp[3].ToString(), (6, i));
             }
         }
         /// <summary>

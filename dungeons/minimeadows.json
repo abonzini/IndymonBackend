@@ -286,5 +286,5 @@
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : [],
   "NextDungeon": "Abandoned Power Plant",
-  "NextDungeonShortcut": ""
+  "NextDungeonShortcut": "Desert Ruins"
 }
