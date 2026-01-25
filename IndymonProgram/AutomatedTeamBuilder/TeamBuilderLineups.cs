@@ -30,9 +30,9 @@ namespace AutomatedTeamBuilder
         /// </summary>
         public List<TrainerPokemon> TrainerOwnPokemon = new List<TrainerPokemon>();
         /// <summary>
-        /// The set items that can be used to satisfy strict move/ability requirements
+        /// The set items that can be used to satisfy strict move/ability requirements and which mons to apply to
         /// </summary>
-        public List<string> SetItems = new List<string>();
+        public Dictionary<string, List<TrainerPokemon>> TrainerOwnPokemonUsingSetItem = new Dictionary<string, List<TrainerPokemon>>();
         /// <summary>
         /// Pokemon that a trainer could lend you as a favor that satisfy req
         /// </summary>
@@ -54,6 +54,7 @@ namespace AutomatedTeamBuilder
             foreach (List<(ElementType, string)> options in constraints.DifferentOptions) // Check each satisfied constraint
             {
                 PossibleTeamBuild buildOption = new PossibleTeamBuild(); // The corresponding team options for this case
+                List<TrainerPokemon> invalidPokemon = new List<TrainerPokemon>(); // Will contain pokemon that can't fill the case naturally
                 // First, check all own mons that satisfy
                 foreach (TrainerPokemon mon in trainer.PartyPokemon)
                 {
@@ -67,29 +68,52 @@ namespace AutomatedTeamBuilder
                             break;
                         }
                     }
+                    if (!monValid) // If a mon didn't make it, add to list
+                    {
+                        invalidPokemon.Add(mon);
+                    }
                 }
-                // Then, need to check if the set items in inventory also satisfy, there may be lots (but only if trainer can use them
+                // Then, need to check if the set items in inventory also satisfy, there may be lots (but only if trainer/mon can use them)
                 if (trainer.AutoSetItem)
                 {
-                    foreach (KeyValuePair<string, int> setItem in trainer.SetItems)
+                    foreach (string setItem in trainer.SetItems.Keys)
                     {
+                        bool setItemIsValid = false;
                         foreach ((ElementType, string) check in options)
                         {
-                            Ability setItemAbility = GetSetItemAbility(setItem.Key);
+                            Ability setItemAbility = GetSetItemAbility(setItem);
                             if (setItemAbility != null) // Set items that grant ability may grant a satisfying ability
                             {
                                 if (ValidateAbilityProperty(setItemAbility, check.Item1, check.Item2))
                                 {
-                                    buildOption.SetItems.AddRange(Enumerable.Repeat(setItem.Key, setItem.Value));
+                                    setItemIsValid = true;
+                                    break;
                                 }
                             }
-                            Move setItemMove = GetSetItemMove(setItem.Key);
+                            Move setItemMove = GetSetItemMove(setItem);
                             if (setItemMove != null) // Set items that grant move may grant a satisfying move 
                             {
                                 if (ValidateMoveProperty(setItemMove, check.Item1, check.Item2))
                                 {
-                                    buildOption.SetItems.AddRange(Enumerable.Repeat(setItem.Key, setItem.Value));
+                                    setItemIsValid = true;
+                                    break;
                                 }
+                            }
+                        }
+                        // If set item satisfies, then check which mons can use it and add them to result
+                        if (setItemIsValid)
+                        {
+                            List<TrainerPokemon> validMons = new List<TrainerPokemon>();
+                            foreach (TrainerPokemon mon in invalidPokemon)
+                            {
+                                if (CanEquipSetItem(mon, setItem))
+                                {
+                                    validMons.Add(mon);
+                                }
+                            }
+                            if (validMons.Count > 0)
+                            {
+                                buildOption.TrainerOwnPokemonUsingSetItem.Add(setItem, validMons);
                             }
                         }
                     }
@@ -122,8 +146,12 @@ namespace AutomatedTeamBuilder
                 }
                 // Now that all the options are set in place, need to verify if all of these allow to complete a team
                 int usableMons = buildOption.TrainerOwnPokemon.Count; // Mons that can be used
-                int trainerInvalidMons = trainer.PartyPokemon.Count - usableMons; // These mons want to play but can't!
-                usableMons += Math.Min(trainerInvalidMons, buildOption.SetItems.Count); // Can use these to add more mons, but only if i have enough items/mons
+                foreach (KeyValuePair<string, List<TrainerPokemon>> setItemOptions in buildOption.TrainerOwnPokemonUsingSetItem) // Then check how many equippable items options
+                {
+                    int setItemCount = trainer.SetItems[setItemOptions.Key]; // How many of these items I have?
+                    int potentialMonCount = setItemOptions.Value.Count;
+                    usableMons += Math.Min(setItemCount, potentialMonCount); // Can use these to add more mons, but only if i have enough items/mons
+                }
                 foreach (KeyValuePair<string, List<TrainerPokemon>> favorOption in buildOption.FavourPokemon) // Then, see how much I can borrow from each trainer
                 {
                     int numberOfFavors = trainer.TrainerFavours[favorOption.Key];
@@ -148,40 +176,83 @@ namespace AutomatedTeamBuilder
         {
             PossibleTeamBuild usedBuild = IndymonUtilities.GetRandomPick(teamBuild); // TODO: May need to be chosen in some crazy monotypes instead of random
             List<TrainerPokemon> finalBattleTeam = []; // This is the result
-            List<TrainerPokemon> allTrainerMons = [.. trainer.PartyPokemon]; // May take from here in order if needed
-            if (trainer.AutoTeam) // If shuffling is allowed, all is shuffled then lol
+            // Now, begin the sequence of try to add trainer mons
+            // If trainer defined a strict order, will add them in the order of team as stated, otherwise do mon>set item>favor
+            if (trainer.AutoTeam) // If shuffling is allowed, all is shuffled then and picks prioritising item efficiency
             {
-                IndymonUtilities.ShuffleList(allTrainerMons);
                 IndymonUtilities.ShuffleList(usedBuild.TrainerOwnPokemon);
-            }
-            // Now, begin the sequence of try to add trainer mons, in order: Party -> Set Items -> Favours
-            for (int i = 0; i < usedBuild.TrainerOwnPokemon.Count && finalBattleTeam.Count < nMons; i++) // Fill as much as possible from here until done or ran out of mons
-            {
-                finalBattleTeam.Add(usedBuild.TrainerOwnPokemon[i]); // Add to final team
-            }
-            // Then, if still need to fill, let's go items
-            if (finalBattleTeam.Count < nMons)
-            {
-                allTrainerMons.RemoveAll(p => finalBattleTeam.Contains(p)); // Removes the mons already in the team
-                // Add mons + battle item as long as i still have mons (and items!)
-                for (int i = 0; usedBuild.SetItems.Count > 0 && i < allTrainerMons.Count && finalBattleTeam.Count < nMons; i++)
+                for (int i = 0; i < usedBuild.TrainerOwnPokemon.Count && finalBattleTeam.Count < nMons; i++) // Fill as much as possible from here until done or ran out of mons
                 {
-                    // Pick the next mon, equip a random (!) set item, cram into party
-                    TrainerPokemon chosenMon = allTrainerMons[i];
-                    string chosenSetItem = IndymonUtilities.GetRandomPick(usedBuild.SetItems);
-                    usedBuild.SetItems.Remove(chosenSetItem); // Need to remove so it's not picked again, mon is ok as it is iterating
-                    IndymonUtilities.AddtemToDictionary(trainer.SetItems, chosenSetItem, -1, true); // Also need to remove from the inventory!
-                    chosenMon.SetItem = chosenSetItem; // This should be empty as auto-set-item should made sure to take this thing away from mon during parsing
-                    finalBattleTeam.Add(chosenMon);
+                    finalBattleTeam.Add(usedBuild.TrainerOwnPokemon[i]); // Add to final team
+                }
+                // Then, if still need to fill, let's go items
+                if (finalBattleTeam.Count < nMons)
+                {
+                    // Add mons + battle item as long as i still have mons (and items!) and need to get more
+                    while (usedBuild.TrainerOwnPokemonUsingSetItem.Count > 0 && finalBattleTeam.Count < nMons)
+                    {
+                        // Pick a random set item, a random mon from the list, decrement uses of set item
+                        string chosenSetItem = IndymonUtilities.GetRandomPick(usedBuild.TrainerOwnPokemonUsingSetItem.Keys.ToList()); // Choose an item
+                        List<TrainerPokemon> potentialMons = usedBuild.TrainerOwnPokemonUsingSetItem[chosenSetItem].Where(p => !finalBattleTeam.Contains(p)).ToList();
+                        if (potentialMons.Count > 0) // ok theres something to work with
+                        {
+                            TrainerPokemon chosenMon = IndymonUtilities.GetRandomPick(potentialMons);
+                            chosenMon.SetItem = chosenSetItem; // Equip the thing
+                            int finalSetItemAmount = IndymonUtilities.AddtemToCountDictionary(trainer.SetItems, chosenSetItem, -1, true);
+                            if (finalSetItemAmount <= 0) // If this was the last use of this item, then remove it from options from now on
+                            {
+                                usedBuild.TrainerOwnPokemonUsingSetItem.Remove(chosenSetItem); // This set item no longer valid
+                            }
+                            finalBattleTeam.Add(chosenMon);
+                        }
+                        else
+                        {
+                            usedBuild.TrainerOwnPokemonUsingSetItem.Remove(chosenSetItem); // This set item no longer valid
+                        }
+                    }
                 }
             }
-            // Finally finally, same with favor dudes
+            else // Respect the strict order, mons are retrieved from their corresponding places
+            {
+                // Choose mons until i ran out of need or ran out of mon, but do so in the desired order
+                for (int i = 0; i < trainer.PartyPokemon.Count && finalBattleTeam.Count < nMons; i++)
+                {
+                    TrainerPokemon mon = trainer.PartyPokemon[i];
+                    if (usedBuild.TrainerOwnPokemon.Contains(mon)) // This was a valid mon, just add as is!
+                    {
+                        finalBattleTeam.Add(mon);
+                    }
+                    else // Then, may still be able to add it with a set item
+                    {
+                        List<string> potentialSetItems = new List<string>();
+                        foreach (KeyValuePair<string, List<TrainerPokemon>> monsWSetItems in usedBuild.TrainerOwnPokemonUsingSetItem)
+                        {
+                            if (monsWSetItems.Value.Contains(mon)) // Mon can use this
+                            {
+                                potentialSetItems.Add(monsWSetItems.Key);
+                            }
+                        }
+                        if (potentialSetItems.Count > 0) // Ok this mon can have the set item...
+                        {
+                            string chosenSetItem = IndymonUtilities.GetRandomPick(potentialSetItems); // Choose one at random
+                            mon.SetItem = chosenSetItem; // Equip the thing
+                            int finalSetItemAmount = IndymonUtilities.AddtemToCountDictionary(trainer.SetItems, chosenSetItem, -1, true);
+                            if (finalSetItemAmount <= 0) // If this was the last use of this item, then remove it from options from now on
+                            {
+                                usedBuild.TrainerOwnPokemonUsingSetItem.Remove(chosenSetItem); // This set item no longer valid
+                            }
+                            finalBattleTeam.Add(mon);
+                        }
+                    }
+                }
+            }
+            // Finally finally, same with favor dudes, this will be random either way
             while (finalBattleTeam.Count < nMons)
             {
                 // First, find which random favor I will cash in
                 KeyValuePair<string, List<TrainerPokemon>> nextFavour = IndymonUtilities.GetRandomKvp(usedBuild.FavourPokemon);
                 int remainingFavours = trainer.TrainerFavours[nextFavour.Key] - 1;
-                IndymonUtilities.AddtemToDictionary(trainer.TrainerFavours, nextFavour.Key, -1, true); // Remove 1 from the remaining favors of trainer
+                IndymonUtilities.AddtemToCountDictionary(trainer.TrainerFavours, nextFavour.Key, -1, true); // Remove 1 from the remaining favors of trainer
                 TrainerPokemon borrowedMon = IndymonUtilities.GetRandomPick(nextFavour.Value);
                 if (trainer.TrainerFavours[nextFavour.Key] <= 0)// If i used the last trainer's favour
                 {
@@ -195,47 +266,6 @@ namespace AutomatedTeamBuilder
             }
             // Should be al good here I guess
             trainer.BattleTeam = finalBattleTeam; // Set this team for battle
-        }
-        /// <summary>
-        /// A contaxt of things going on, to be able to build mons sets. Includes opp average profile, typechart, and ongoing archetypes if present
-        /// </summary>
-        class TeamBuildContext
-        {
-            public List<TeamArchetype> CurrentTeamArchetypes = new List<TeamArchetype>(); // Contains an ongoing archetype that applies for all team
-            public List<List<PokemonType>> OpponentsTypes = new List<List<PokemonType>>(); // Contains a list of all types found in opp teams
-            public double[] OpponentsStats = new double[6]; // All opp stats in average
-            public double OppSpeedVariance = 0; // Speed is special as I need the variance to calculate speed creep
-            public double AverageOpponentWeight = 0; // Average weight of opponents
-        }
-        /// <summary>
-        /// The context of a currently building mon. Also used to store data about current mods and stuff
-        /// </summary>
-        class PokemonBuildInfo
-        {
-            // Things that are added on the transcourse of building a set, makes some other stuff more or less desirable
-            public TeamBuildConstraints AdditionalConstraints = new TeamBuildConstraints(); /// Teambuild constraint that are added due to required builds (unless unable to complete obviously)
-            public Dictionary<(ElementType, string), float> EnabledOptions = new Dictionary<(ElementType, string), float>(); /// Things that normally are disabled but are now enabled, and the weight by where they were just enabled
-            public HashSet<(StatModifier, string)> ModifiedTypeEffectiveness = new HashSet<(StatModifier, string)>();
-            public Dictionary<(ElementType, string), Dictionary<MoveModifier, string>> MoveMods = new Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>();
-            public Dictionary<(ElementType, string), double> WeightMods = new Dictionary<(ElementType, string), double>();
-            public List<List<PokemonType>> StillResistedTypes = new List<List<PokemonType>>(); // Types that this mon can't hit very well, to give a bit of a "coverage boost"
-            // Then stuff that alters current mon
-            public Nature Nature = Nature.SERIOUS;
-            public PokemonType TeraType = PokemonType.NONE;
-            public PokemonType[] PokemonTypes = [PokemonType.NONE, PokemonType.NONE];
-            public int[] Evs = new int[6];
-            public int[] StatBoosts = new int[6];
-            public double[] StatMultipliers = [1, 1, 1, 1, 1, 1];
-            public double PhysicalAccuracyMultiplier = 1;
-            public double SpecialAccuracyMultiplier = 1;
-            public double WeightMultiplier = 1;
-            // Things that alter opp mon
-            public int[] OppStatBoosts = new int[6];
-            public double[] OppStatMultipliers = [1, 1, 1, 1, 1, 1];
-            // Battle sim (how much damage my attacks do, how much damage mon takes from stuff, speed creep)
-            public double DamageScore = 0;
-            public double DefenseScore = 0;
-            public double SpeedScore = 0;
         }
     }
 }

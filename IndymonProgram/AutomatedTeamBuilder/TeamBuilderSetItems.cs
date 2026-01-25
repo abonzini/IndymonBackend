@@ -1,10 +1,13 @@
-﻿using MechanicsData;
+﻿using GameData;
+using MechanicsData;
 using MechanicsDataContainer;
 
 namespace AutomatedTeamBuilder
 {
     public static partial class TeamBuilder
     {
+        const string BASIC_DISK_STRING = "Basic Disk";
+        const string ADVANCED_DISK_STRING = "Advanced Disk";
         /// <summary>
         /// Returns the ability as granted by a set item that potentially alters ability
         /// </summary>
@@ -12,26 +15,56 @@ namespace AutomatedTeamBuilder
         public static Ability GetSetItemAbility(string setItem)
         {
             Ability resultingAbility = null;
-            if (setItem.Contains(" Ability Capsule")) // Abilities granted by capsule
-            {
-                string abilityName = setItem.Split(" Ability Capsule")[0].Trim();
-                resultingAbility = MechanicsDataContainers.GlobalMechanicsData.Abilities[abilityName];
-            }
+            if (setItem == "this is 100% a placeholder to avoid warning text, ignore") resultingAbility = new Ability();
             return resultingAbility;
         }
         /// <summary>
         /// Returns the move as granted by a set item that potentially alters move
         /// </summary>
-        /// <returns>Move added added by this set item, if any</returns>
+        /// <param name="setItem"></param>
+        /// <returns>Move added added by this set item, null if none</returns>
         public static Move GetSetItemMove(string setItem)
         {
             Move resultingMove = null;
-            if (setItem.Contains(" Move Disk")) // Moves granted by Move disk
+            // Checks granted by Move disk
+            if (setItem.Contains(BASIC_DISK_STRING))
             {
-                string moveName = setItem.Split(" Move Disk")[0].Trim();
+                string moveName = setItem.Split(BASIC_DISK_STRING)[0].Trim();
                 resultingMove = MechanicsDataContainers.GlobalMechanicsData.Moves[moveName];
             }
+            else if (setItem.Contains(ADVANCED_DISK_STRING))
+            {
+                string moveName = setItem.Split(ADVANCED_DISK_STRING)[0].Trim();
+                resultingMove = MechanicsDataContainers.GlobalMechanicsData.Moves[moveName];
+            }
+            else
+            {
+                // Not a move item
+            }
             return resultingMove;
+        }
+        /// <summary>
+        /// Determines whether a specific mon is able to equip a specific set item
+        /// </summary>
+        /// <param name="mon">The mon to check</param>
+        /// <param name="setItem">The set item to check</param>
+        /// <returns>True if this mon can equip it</returns>
+        public static bool CanEquipSetItem(TrainerPokemon mon, string setItem)
+        {
+            Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
+            if (setItem.Contains(BASIC_DISK_STRING)) // Basic disk, only equippable if mon has move in learnsheet
+            {
+                return monData.Moveset.Contains(GetSetItemMove(setItem));
+            }
+            else if (setItem.Contains(ADVANCED_DISK_STRING))
+            {
+                return true; // Set item that can always be equipped, known or not
+            }
+            else
+            {
+                // Not a valid item idk what it is
+                return false;
+            }
         }
     }
 }

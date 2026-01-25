@@ -59,7 +59,7 @@ namespace GameDataContainer
                             string setItemName = nextLine[j + 3];
                             if (setItemName != "")
                             {
-                                if (nextTrainer.AutoSetItem) IndymonUtilities.AddtemToDictionary(nextTrainer.SetItems, setItemName);
+                                if (nextTrainer.AutoSetItem) IndymonUtilities.AddtemToCountDictionary(nextTrainer.SetItems, setItemName);
                                 else newPokemon.SetItem = setItemName;
                             }
                             // Mod item, and verify if goes to trainer or mon
@@ -69,7 +69,7 @@ namespace GameDataContainer
                                 ModItem modItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[modItemName];
                                 if (nextTrainer.AutoModItem)
                                 {
-                                    IndymonUtilities.AddtemToDictionary(nextTrainer.ModItems, modItem);
+                                    IndymonUtilities.AddtemToCountDictionary(nextTrainer.ModItems, modItem);
                                 }
                                 else
                                 {
@@ -83,7 +83,7 @@ namespace GameDataContainer
                                 BattleItem battleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[battleItemName];
                                 if (nextTrainer.AutoBattleItem)
                                 {
-                                    IndymonUtilities.AddtemToDictionary(nextTrainer.BattleItems, battleItem);
+                                    IndymonUtilities.AddtemToCountDictionary(nextTrainer.BattleItems, battleItem);
                                 }
                                 else
                                 {
@@ -105,7 +105,7 @@ namespace GameDataContainer
                         if (itemName != "") // A set item here
                         {
                             int itemCount = int.Parse(nextLine[j + 7]);
-                            IndymonUtilities.AddtemToDictionary(nextTrainer.SetItems, itemName, itemCount);
+                            IndymonUtilities.AddtemToCountDictionary(nextTrainer.SetItems, itemName, itemCount);
                         }
                         // Next, mod items
                         itemName = nextLine[j + 9];
@@ -113,7 +113,7 @@ namespace GameDataContainer
                         {
                             ModItem modItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[itemName];
                             int itemCount = int.Parse(nextLine[j + 10]);
-                            IndymonUtilities.AddtemToDictionary(nextTrainer.ModItems, modItem, itemCount);
+                            IndymonUtilities.AddtemToCountDictionary(nextTrainer.ModItems, modItem, itemCount);
                         }
                         // Next, battle items
                         itemName = nextLine[j + 12];
@@ -121,7 +121,7 @@ namespace GameDataContainer
                         {
                             BattleItem battleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[itemName];
                             int itemCount = int.Parse(nextLine[j + 13]);
-                            IndymonUtilities.AddtemToDictionary(nextTrainer.BattleItems, battleItem, itemCount);
+                            IndymonUtilities.AddtemToCountDictionary(nextTrainer.BattleItems, battleItem, itemCount);
                         }
                         // Finally for now, favours
                         itemName = nextLine[j + 15];
@@ -132,11 +132,11 @@ namespace GameDataContainer
                             {
                                 string trainerFavour = itemName.Split("'")[0].Trim(); // Got trainer who owns the favour
                                 GetTrainer(trainerFavour);
-                                IndymonUtilities.AddtemToDictionary(nextTrainer.TrainerFavours, trainerFavour, itemCount);
+                                IndymonUtilities.AddtemToCountDictionary(nextTrainer.TrainerFavours, trainerFavour, itemCount);
                             }
                             else // Regular key item
                             {
-                                IndymonUtilities.AddtemToDictionary(nextTrainer.KeyItems, itemName, itemCount);
+                                IndymonUtilities.AddtemToCountDictionary(nextTrainer.KeyItems, itemName, itemCount);
                             }
                         }
                         // Finally, Ballz
@@ -144,7 +144,7 @@ namespace GameDataContainer
                         if (itemName != "")
                         {
                             int itemCount = int.Parse(nextLine[j + 19]);
-                            IndymonUtilities.AddtemToDictionary(nextTrainer.PokeBalls, itemName, itemCount);
+                            IndymonUtilities.AddtemToCountDictionary(nextTrainer.PokeBalls, itemName, itemCount);
                         }
                     }
                     trainerContainer.Add(nextTrainer.Name, nextTrainer);

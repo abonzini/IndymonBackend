@@ -24,13 +24,18 @@ namespace Utilities
         /// <param name="item">Item to add</param>
         /// <param name="count">How many to add</param>
         /// <param name="eliminateIf0">If subtracting, and the result is less than 0, remove the thing</param>
-        public static void AddtemToDictionary<T>(Dictionary<T, int> dict, T item, int count = 1, bool eliminateIf0 = false)
+        /// <returns>The final count of the item</returns>
+        public static int AddtemToCountDictionary<T>(Dictionary<T, int> dict, T item, int count = 1, bool eliminateIf0 = false)
         {
+            int itemCount = count;
             if (!dict.TryAdd(item, count)) // Try to add if not exists already
             {
-                dict[item] += count;
-                if (eliminateIf0 && dict[item] <= 0) dict.Remove(item);
+                itemCount = dict[item];
+                itemCount += count;
+                dict[item] = itemCount;
+                if (eliminateIf0 && count <= 0) dict.Remove(item);
             }
+            return itemCount;
         }
         /// <summary>
         /// Performs a Fischer Yates shuffling of an array
