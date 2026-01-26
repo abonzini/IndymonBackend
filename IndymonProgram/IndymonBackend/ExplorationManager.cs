@@ -659,14 +659,20 @@ namespace IndymonBackendProgram
                         Console.WriteLine("Unown battle");
                         // Items obtained during the fight (commons)
                         List<PokemonSet> encounterPokemon = new List<PokemonSet>();
+                        HashSet<char> usedLetters = [];
                         for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
                         {
-                            char letter = (char)Utilities.GetRandomNumber('A', 'Z' + 1); // Shoudl give me a random letter lol
+                            char letter;
+                            do
+                            {
+                                letter = (char)Utilities.GetRandomNumber('A', 'Z' + 1); // Shoudl give me a random letter lol
+                            } while (usedLetters.Contains(letter)); // Get unique letters please
                             string pokemonSpecies = (letter == 'A') ? $"Unown" : $"Unown-{letter}"; // Unown or Unown-*
                             bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1);
                             PokemonSet pokemon = new PokemonSet()
                             {
                                 Species = pokemonSpecies,
+                                NickName = letter.ToString().ToUpper(),
                                 Shiny = isShiny,
                             };
                             Console.WriteLine($"Mon: {pokemonSpecies}");
@@ -677,7 +683,7 @@ namespace IndymonBackendProgram
                         TrainerData wildMonTeam = new TrainerData() // Create the blank trainer
                         {
                             Avatar = "unknown",
-                            Name = "sybols",
+                            Name = "symbols",
                             AutoItem = false,
                             AutoTeam = true,
                             Teamsheet = encounterPokemon,
