@@ -48,6 +48,7 @@ namespace MechanicsData
         SPECIAL_ATTACK_BOOST, /// Special attack stat changes
         SPECIAL_DEFENSE_BOOST, /// Special defense stat changes
         SPEED_BOOST, /// Speed stat changes
+        CRIT_BOOST, /// Boost to critical stage
         OPP_ATTACK_BOOST,
         OPP_DEFENSE_BOOST,
         OPP_SPECIAL_ATTACK_BOOST,
@@ -83,7 +84,7 @@ namespace MechanicsData
         MOVE_BP_MOD, /// A specific's move BP is affected
         MOVE_ACC_MOD, /// A specific's move accuracy is affected
         MOVE_TYPE_MOD, /// A specific's move type is affected
-        ADD_FLAG, /// Move gains a flag (e.g. poison touch makes contact moves poison inducing)
-        REMOVE_FLAG, /// Move loses a flag (e.g. long reach removes contact)
+        ADD_FLAG, /// Move gains a flag (e.g. poison touch makes contact moves poison inducing). Flags can't add flags, only everything else to avoid weird loops
+        REMOVE_FLAG, /// Move loses a flag (e.g. long reach removes contact). Flags can't remove flags, only everything else to avoid weird loops
     }
 }

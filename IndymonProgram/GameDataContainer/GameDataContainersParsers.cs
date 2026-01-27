@@ -59,36 +59,19 @@ namespace GameDataContainer
                             string setItemName = nextLine[j + 3];
                             if (setItemName != "")
                             {
-                                if (nextTrainer.AutoSetItem) IndymonUtilities.AddtemToCountDictionary(nextTrainer.SetItems, setItemName);
-                                else newPokemon.SetItem = setItemName;
+                                newPokemon.SetItem = setItemName;
                             }
                             // Mod item, and verify if goes to trainer or mon
                             string modItemName = nextLine[j + 4];
                             if (modItemName != "")
                             {
-                                ModItem modItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[modItemName];
-                                if (nextTrainer.AutoModItem)
-                                {
-                                    IndymonUtilities.AddtemToCountDictionary(nextTrainer.ModItems, modItem);
-                                }
-                                else
-                                {
-                                    newPokemon.ModItem = modItem;
-                                }
+                                newPokemon.ModItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[modItemName];
                             }
                             // Battle item, and verify if goes to trainer or mon
                             string battleItemName = nextLine[j + 5];
                             if (battleItemName != "")
                             {
-                                BattleItem battleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[battleItemName];
-                                if (nextTrainer.AutoBattleItem)
-                                {
-                                    IndymonUtilities.AddtemToCountDictionary(nextTrainer.BattleItems, battleItem);
-                                }
-                                else
-                                {
-                                    newPokemon.BattleItem = battleItem;
-                                }
+                                newPokemon.BattleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[battleItemName];
                             }
                             // Finally, add Pokemon to team (or nowhere if team full)
                             if (nextTrainer.PartyPokemon.Count < Trainer.MAX_MONS_IN_TEAM) // Add to team

@@ -12,7 +12,9 @@ namespace MechanicsData
         BERRY, // Berry
         CONSUMABLE, // Unburden, acro
         BAD_ITEM, // Items that are normally useless or bad/negative
-        SET_AFFECTING_ITEM, // These items are meant to boost utility of a set, e.g. leftovers is good no matter what but choice item needs to boost to be useful, otherwise marked as useless
+        REQUIRES_OFF_INCREASE, // Item requires offensive increase to be selected (to avoid giving specs to physicals and stuff like that)
+        REQUIRES_DEF_INCREASE, // Item requires defensive increase to be selected (tera shard e.g.)
+        REQUIRES_SPEED_INCREASE, // Item requires meaningful speed increase to be selected (to avoid giving scarf to fast (or too slow) mons)
     }
     public class BattleItem
     {

@@ -440,17 +440,17 @@ namespace MechanicsDataContainer
                 AssertElementExistance(modifiedType, modifiedName);
                 AssertMoveModExistance(modType, modName);
                 // Add to the corresponding matrices
-                if (!MoveModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), List<(MoveModifier, string)>> modifieds))
+                if (!MoveModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), Dictionary<MoveModifier, string>> modifieds))
                 {
-                    modifieds = new Dictionary<(ElementType, string), List<(MoveModifier, string)>>();
+                    modifieds = new Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>();
                     MoveModifiers.Add((modifierType, modifierName), modifieds);
                 }
-                if (!modifieds.TryGetValue((modifiedType, modifiedName), out List<(MoveModifier, string)> moveMods))
+                if (!modifieds.TryGetValue((modifiedType, modifiedName), out Dictionary<MoveModifier, string> moveMods))
                 {
-                    moveMods = new List<(MoveModifier, string)>();
+                    moveMods = new Dictionary<MoveModifier, string>();
                     modifieds.Add((modifiedType, modifiedName), moveMods);
                 }
-                moveMods.Add((modType, modName));
+                moveMods.Add(modType, modName);
             }
         }
         /// <summary>

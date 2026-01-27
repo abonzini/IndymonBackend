@@ -51,6 +51,7 @@ namespace AutomatedTeamBuilder
         /// <returns>True if this mon can equip it</returns>
         public static bool CanEquipSetItem(TrainerPokemon mon, string setItem)
         {
+            if (mon.SetItem != "") return false; // Mon already has set item so it can't equip more!
             Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
             if (setItem.Contains(BASIC_DISK_STRING)) // Basic disk, only equippable if mon has move in learnsheet
             {

@@ -28,8 +28,12 @@ namespace AutomatedTeamBuilder
             public HashSet<TeamArchetype> AdditionalArchetypes = new HashSet<TeamArchetype>(); /// Contains archetypes created by this mon
             public TeamBuildConstraints AdditionalConstraints = new TeamBuildConstraints(); /// Teambuild constraint that are added due to required builds (unless unable to complete obviously)
             public Dictionary<(ElementType, string), double> EnabledOptions = new Dictionary<(ElementType, string), double>(); /// Things that normally are disabled but are now enabled, and the weight by where they were just enabled
-            public HashSet<(StatModifier, string)> ModifiedTypeEffectiveness = new HashSet<(StatModifier, string)>();
-            public Dictionary<(ElementType, string), List<(MoveModifier, string)>> MoveMods = new Dictionary<(ElementType, string), List<(MoveModifier, string)>>();
+            public HashSet<(StatModifier, string)> ModifiedTypeEffectiveness = new HashSet<(StatModifier, string)>(); /// Some modified type effectiveness for receiving damage
+            public Dictionary<(ElementType, string), double> MoveBpMods = new Dictionary<(ElementType, string), double>(); /// All the stat mods that modified a moves BP
+            public Dictionary<(ElementType, string), PokemonType> MoveTypeMods = new Dictionary<(ElementType, string), PokemonType>(); /// All the move types mods
+            public Dictionary<(ElementType, string), double> MoveAccMods = new Dictionary<(ElementType, string), double>(); /// All the move accuracy mods
+            public Dictionary<(ElementType, string), HashSet<EffectFlag>> AllAddedFlags = new Dictionary<(ElementType, string), HashSet<EffectFlag>>(); /// All the extra flags added to moves/abilities
+            public Dictionary<(ElementType, string), HashSet<EffectFlag>> AllRemovedFlags = new Dictionary<(ElementType, string), HashSet<EffectFlag>>(); /// All the extra flags removed from moves/abilities
             public Dictionary<(ElementType, string), double> WeightMods = new Dictionary<(ElementType, string), double>();
             // Then stuff that alters current mon
             public Nature Nature = Nature.SERIOUS;
@@ -41,6 +45,7 @@ namespace AutomatedTeamBuilder
             public double PhysicalAccuracyMultiplier = 1;
             public double SpecialAccuracyMultiplier = 1;
             public double WeightMultiplier = 1;
+            public int CriticalStages = 0;
             // Things that alter opp mon
             public int[] OppStatBoosts = new int[6];
             public double[] OppStatMultipliers = [1, 1, 1, 1, 1, 1];
@@ -93,6 +98,23 @@ namespace AutomatedTeamBuilder
                 }
             }
             ExtractMonMods(pokemon, result);
+            // Finally, gather all flags and apply flag mods but onyl once (e.g. 2 instances of same flag don't stack)
+            HashSet<EffectFlag> allFlags = [];
+            if (pokemon.ChosenAbility != null)
+            {
+                allFlags = [.. pokemon.ChosenAbility.Flags]; // Ability flags are already 100% known as abilities aren't modded
+            }
+            foreach (Move move in pokemon.ChosenMoveset)
+            {
+                if (move != null)
+                {
+                    allFlags.UnionWith(ExtractMoveFlags(move, result));
+                }
+            }
+            foreach (EffectFlag flag in allFlags) // Finally, apply all flag mods once per flag
+            {
+                ExtractMods((ElementType.EFFECT_FLAGS, flag.ToString()), result);
+            }
             // Finally, need to obtain offensive/defensive/speed scores
             if (teamCtx != null) // This can only occur if I know the context of battle
             {
@@ -143,13 +165,9 @@ namespace AutomatedTeamBuilder
         {
             // This one is trickier, need to add both the ability and the flag
             ExtractMods((ElementType.ABILITY, ability.Name), monCtx);
-            foreach (EffectFlag flag in ability.Flags)
-            {
-                ExtractMods((ElementType.EFFECT_FLAGS, flag.ToString()), monCtx);
-            }
         }
         /// <summary>
-        /// Obtains all mods associated to this, updates Ctx
+        /// Obtains all mods associated to this, updates Ctx. Flags will be done afterwards after all elements have added ALL_FLAGS or REMOVE_FLAGS
         /// </summary>
         /// <param name="move">Move</param>
         /// <param name="monCtx">Context where to add the mods</param>
@@ -157,16 +175,38 @@ namespace AutomatedTeamBuilder
         {
             // Moves are the most complex ones
             ExtractMods((ElementType.MOVE, move.Name), monCtx);
-            foreach (EffectFlag flag in move.Flags)
-            {
-                ExtractMods((ElementType.EFFECT_FLAGS, flag.ToString()), monCtx);
-            }
             ExtractMods((ElementType.MOVE_CATEGORY, move.Category.ToString()), monCtx);
             if (move.Category != MoveCategory.STATUS) // Damaging moves
             {
                 ExtractMods((ElementType.ANY_DAMAGING_MOVE, "-"), monCtx); // Damaging move detected
                 ExtractMods((ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString()), monCtx);
             }
+        }
+        /// <summary>
+        /// Obtains all flags applied to this move. To be called last to ensure everything has had time to modify flags
+        /// </summary>
+        /// <param name="move">Move</param>
+        /// <param name="monCtx">Context to see which flags are added/removed from move</param>
+        /// <returns>All flags in this move</returns>
+        static HashSet<EffectFlag> ExtractMoveFlags(Move move, PokemonBuildInfo monCtx)
+        {
+            HashSet<EffectFlag> moveFlags = [.. move.Flags]; // Copies moves base flags
+            HashSet<EffectFlag> removedFlags = [];
+            HashSet<EffectFlag> addedFlags = [];
+            // Check what has been added
+            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.MOVE, move.Name)]);
+            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.MOVE_CATEGORY, move.Category.ToString())]);
+            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.ANY_DAMAGING_MOVE, "-")]);
+            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString())]);
+            // Check what has been removed
+            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.MOVE, move.Name)]);
+            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.MOVE_CATEGORY, move.Category.ToString())]);
+            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.ANY_DAMAGING_MOVE, "-")]);
+            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString())]);
+            // Add then remove, better to forget some flag than have a wrong one
+            moveFlags.UnionWith(addedFlags);
+            moveFlags.ExceptWith(removedFlags);
+            return moveFlags;
         }
         /// <summary>
         /// Obtains all mods associated to this, updates Ctx
@@ -284,6 +324,9 @@ namespace AutomatedTeamBuilder
                         };
                         monCtx.StatBoosts[(int)affectedStat] += int.Parse(statMod.Item2);
                         break;
+                    case StatModifier.CRIT_BOOST:
+                        monCtx.CriticalStages += int.Parse(statMod.Item2);
+                        break;
                     case StatModifier.OPP_ATTACK_BOOST:
                     case StatModifier.OPP_DEFENSE_BOOST:
                     case StatModifier.OPP_SPECIAL_ATTACK_BOOST:
@@ -360,16 +403,51 @@ namespace AutomatedTeamBuilder
                 }
             }
             // Then, move mods, add all move mods to queue
-            foreach (KeyValuePair<(ElementType, string), List<(MoveModifier, string)>> nextMoveMod in MechanicsDataContainers.GlobalMechanicsData.MoveModifiers[element]) // Modifies moves accordingly
+            foreach (KeyValuePair<(ElementType, string), Dictionary<MoveModifier, string>> nextMoveMod in MechanicsDataContainers.GlobalMechanicsData.MoveModifiers[element]) // Modifies moves accordingly
             {
-                // Some move mods will start stacking with each other, make sure we got them in the right way
-                if (!monCtx.MoveMods.TryGetValue(nextMoveMod.Key, out List<(MoveModifier, string)> modList)) // If not there, need to create brand new
+                string auxValue;
+                // Move mods are very complex so I'd rather split them into 5 parts (all the mods currently)
+                if (nextMoveMod.Value.TryGetValue(MoveModifier.MOVE_BP_MOD, out auxValue)) // There's a BP mod
                 {
-                    modList = new List<(MoveModifier, string)>();
-                    monCtx.MoveMods.Add(nextMoveMod.Key, modList);
+                    double modValue = double.Parse(auxValue);
+                    if (!monCtx.MoveBpMods.ContainsKey(nextMoveMod.Key))
+                    {
+                        monCtx.MoveBpMods.Add(nextMoveMod.Key, 1);
+                    }
+                    monCtx.MoveBpMods[nextMoveMod.Key] *= modValue;
                 }
-                // Then just add to the list
-                modList.AddRange(modList);
+                if (nextMoveMod.Value.TryGetValue(MoveModifier.MOVE_ACC_MOD, out auxValue)) // There's an acc mod
+                {
+                    double modValue = double.Parse(auxValue);
+                    if (!monCtx.MoveAccMods.ContainsKey(nextMoveMod.Key))
+                    {
+                        monCtx.MoveAccMods.Add(nextMoveMod.Key, 1);
+                    }
+                    monCtx.MoveAccMods[nextMoveMod.Key] *= modValue;
+                }
+                if (nextMoveMod.Value.TryGetValue(MoveModifier.MOVE_TYPE_MOD, out auxValue))
+                {
+                    PokemonType modType = Enum.Parse<PokemonType>(auxValue);
+                    monCtx.MoveTypeMods[nextMoveMod.Key] = modType; // This one is weird because if exists, ill just need to replace, shouldn't happen tho
+                }
+                if (nextMoveMod.Value.TryGetValue(MoveModifier.ADD_FLAG, out auxValue))
+                {
+                    EffectFlag flag = Enum.Parse<EffectFlag>(auxValue);
+                    if (!monCtx.AllAddedFlags.ContainsKey(nextMoveMod.Key))
+                    {
+                        monCtx.AllAddedFlags.Add(nextMoveMod.Key, []);
+                    }
+                    monCtx.AllAddedFlags[nextMoveMod.Key].Add(flag);
+                }
+                if (nextMoveMod.Value.TryGetValue(MoveModifier.REMOVE_FLAG, out auxValue))
+                {
+                    EffectFlag flag = Enum.Parse<EffectFlag>(auxValue);
+                    if (!monCtx.AllRemovedFlags.ContainsKey(nextMoveMod.Key))
+                    {
+                        monCtx.AllRemovedFlags.Add(nextMoveMod.Key, []);
+                    }
+                    monCtx.AllRemovedFlags[nextMoveMod.Key].Add(flag);
+                }
             }
             // Then, weight mods, these ones are funny because they need to re-multiply if already existing
             foreach (KeyValuePair<(ElementType, string), double> weightMod in MechanicsDataContainers.GlobalMechanicsData.WeightModifiers[element])
