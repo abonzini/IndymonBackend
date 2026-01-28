@@ -17,22 +17,10 @@ White Monastery -> Justice -> Dawn Stone
 ---
 
 Need to manually ensure in team calc:
-- Status move penalty depending on mon slot (to avoid status spam in the last slot or setting shit status)
-- Calculate weight/speed diff BPs properly
-- Calculate multistrike properly
-- Calculate fixed damage properly
-- Sub 60 removal in some variable effects
-- Swap of stats, body press, foul play
 - Archetype based type changes, e.g. castform, mimicry (or whatever stunfisk does), possibly conversion and those things
-- Stab
-- Adaptability
 - Tinted lens i think it is
-- Tera based Stab
-- Status setup requires improvement, same as set defined items
 - Damage formula considering typecharts, immunity bypass
 - Specific behaviour for freeze dry
-- Revelation dance
-- Sky drop
 - Trick room inverting speeds
 - Diminish stabs of same cat to ensure more variety
 - Status discard

@@ -165,12 +165,12 @@ namespace MechanicsDataContainer
                 theType = Enum.Parse<PokemonType>(fields[TYPE_2_FIELD].Trim().ToUpper());
                 thePokemon.Types[1] = theType;
                 // Stats
-                int Hp = int.Parse(fields[HP_FIELD]);
-                int Attack = int.Parse(fields[ATK_FIELD]);
-                int Defense = int.Parse(fields[DEF_FIELD]);
-                int SpecialAttack = int.Parse(fields[SPATK_FIELD]);
-                int SpecialDefense = int.Parse(fields[SPDEF_FIELD]);
-                int Speed = int.Parse(fields[SPEED_FIELD]);
+                double Hp = int.Parse(fields[HP_FIELD]);
+                double Attack = int.Parse(fields[ATK_FIELD]);
+                double Defense = int.Parse(fields[DEF_FIELD]);
+                double SpecialAttack = int.Parse(fields[SPATK_FIELD]);
+                double SpecialDefense = int.Parse(fields[SPDEF_FIELD]);
+                double Speed = int.Parse(fields[SPEED_FIELD]);
                 thePokemon.Stats = [Hp, Attack, Defense, SpecialAttack, SpecialDefense, Speed];
                 thePokemon.Weight = double.Parse(fields[WEIGHT_FIELD]);
                 // Ability

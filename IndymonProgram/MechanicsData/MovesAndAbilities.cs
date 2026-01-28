@@ -70,6 +70,7 @@ namespace MechanicsData
         SWITCH_OPPONENT, // Switches opponent out
         USES_STRONGEST_STAT, // Uses strongest stat for damage calculation
         BYPASSES_IMMUNITY, // Move bypasses immunities thay would've made it do 0 damage
+        GOOD_FIRST_MON, // Moves that are only really interesting on the first mon of the team (i.e. hazard setting)
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MoveCategory
