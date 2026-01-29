@@ -13,7 +13,7 @@ namespace MechanicsDataContainer
         void ParseTypeChart(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Typechart");
-            TypeChart.Clear();
+            DefensiveTypeChart.Clear();
             // Parse csv
             string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] lines = csv.Split("\n");
@@ -38,12 +38,12 @@ namespace MechanicsDataContainer
                 else
                 {
                     PokemonType nextType = Enum.Parse<PokemonType>(fields[0].Trim().ToUpper()); // First one is the type (try)
-                    TypeChart.DefensiveChart.Add(nextType, new Dictionary<PokemonType, double>()); // Add this type
+                    DefensiveTypeChart.Add(nextType, new Dictionary<PokemonType, double>()); // Add this type
                     for (int j = 1; j < fields.Length; j++)
                     {
                         PokemonType whatType = columnTags[j];
                         double multiplier = double.Parse(fields[j].Trim());
-                        TypeChart.DefensiveChart[nextType].Add(whatType, multiplier); // Add the multiplier
+                        DefensiveTypeChart[nextType].Add(whatType, multiplier); // Add the multiplier
                     }
                 }
             }
@@ -161,9 +161,9 @@ namespace MechanicsDataContainer
                 Pokemon thePokemon = Dex[nextPokemonName];
                 thePokemon.Name = nextPokemonName;
                 PokemonType theType = Enum.Parse<PokemonType>(fields[TYPE_1_FIELD].Trim().ToUpper());
-                thePokemon.Types[0] = theType;
+                thePokemon.Types = (theType, thePokemon.Types.Item2);
                 theType = Enum.Parse<PokemonType>(fields[TYPE_2_FIELD].Trim().ToUpper());
-                thePokemon.Types[1] = theType;
+                thePokemon.Types = (thePokemon.Types.Item1, theType);
                 // Stats
                 double Hp = int.Parse(fields[HP_FIELD]);
                 double Attack = int.Parse(fields[ATK_FIELD]);

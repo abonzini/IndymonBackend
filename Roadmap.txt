@@ -17,11 +17,8 @@ White Monastery -> Justice -> Dawn Stone
 ---
 
 Need to manually ensure in team calc:
-- Archetype based type changes, e.g. castform, mimicry (or whatever stunfisk does), possibly conversion and those things
-- Tinted lens i think it is
-- Damage formula considering typecharts, immunity bypass
-- Specific behaviour for freeze dry
-- Trick room inverting speeds
-- Diminish stabs of same cat to ensure more variety
-- Status discard
-- Coverage small bonus
+- Setup (and speed setup) increasing their respective utility. Add defensive setup? Same idea? >1.1 or sth
+
+Distant future (ideas):
+-	Make nat power, camouflage use the correct stuff both in calcs (archetype, no prob) and custom showdown. Showdown: Custom format like force monotype, string as value. Field has camouflage type string as value. On constructor, check if value of rule retreived and replaced in field. Camouflage takes stirng instead of normal. Every dungeon has a camuflage type.
+	As to how modify the mods, maybe can hardcode them in the mod table (ugly) or add additional mods on launch (less ugly and already implemented in archetypes and such)

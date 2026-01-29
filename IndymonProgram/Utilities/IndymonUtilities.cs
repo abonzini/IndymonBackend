@@ -171,5 +171,38 @@ namespace Utilities
             }
             throw new Exception("Impossible chance reached");
         }
+        /// <summary>
+        /// Returns an array where every element is the max of all elements of array. Assumes all sub-arrays to be same size
+        /// </summary>
+        /// <param name="arrays">Array of arrays that contain numbers</param>
+        /// <returns>A single array with the max value for each index</returns>
+        public static List<double> ArrayMax(List<List<double>> arrays)
+        {
+            double[] result = new double[arrays[0].Count]; // Prepares an array with the size pre-determined and all arrays need to be this size
+            for (int i = 0; i < result.Length; i++)
+            {
+                double maxValue = double.NegativeInfinity;
+                foreach (List<double> array in arrays)
+                {
+                    maxValue = Math.Max(maxValue, array[i]);
+                }
+                result[i] = maxValue;
+            }
+            return [.. result];
+        }
+        /// <summary>
+        /// Returns the average of elements of array
+        /// </summary>
+        /// <param name="array">Array that contains numbers</param>
+        /// <returns>The average value of elements in array</returns>
+        public static double ArrayAverage(List<double> array)
+        {
+            double result = 0;
+            foreach (double element in array)
+            {
+                result += element;
+            }
+            return result / array.Count;
+        }
     }
 }

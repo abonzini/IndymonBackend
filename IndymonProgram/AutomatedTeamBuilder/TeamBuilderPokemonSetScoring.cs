@@ -1,6 +1,8 @@
 ﻿using GameData;
+using MathNet.Numerics.Distributions;
 using MechanicsData;
 using MechanicsDataContainer;
+using Utilities;
 
 namespace AutomatedTeamBuilder
 {
@@ -12,9 +14,9 @@ namespace AutomatedTeamBuilder
         public int currentMon = 0;
         public HashSet<TeamArchetype> CurrentTeamArchetypes = new HashSet<TeamArchetype>(); // Contains an ongoing archetype that applies for all team
         public TeamBuildConstraints TeamBuildConstraints = new TeamBuildConstraints(); // Constraints applied to this team building. Different meaning to team build, as this is a list of all necessary stuff (A+B)*(C+D)
-        public List<List<PokemonType>> OpponentsTypes = new List<List<PokemonType>>(); // Contains a list of all types found in opp teams
+        public List<(PokemonType, PokemonType)> OpponentsTypes = new List<(PokemonType, PokemonType)>(); // Contains a list of all types found in opp teams
         public double[] OpponentsStats = new double[6]; // All opp stats in average
-        public double OppSpeedVariance = 0; // Speed is special as I need the variance to calculate speed creep
+        public double[] OppStatVariance = new double[6]; // The variance of opp stat
         public double AverageOpponentWeight = 0; // Average weight of opponents
         public bool smartTeamBuild = true; // If NPC mons, the moves are just selected randomly withouth smart weights
     }
@@ -39,9 +41,12 @@ namespace AutomatedTeamBuilder
             // Then stuff that alters current mon
             public Nature Nature = Nature.SERIOUS;
             public PokemonType TeraType = PokemonType.NONE;
-            public PokemonType[] PokemonTypes = [PokemonType.NONE, PokemonType.NONE];
+            public (PokemonType, PokemonType) PokemonTypes = (PokemonType.NONE, PokemonType.NONE);
+            public string MonSuffix = "";
+            public double[] MonStats = new double[6];
             public int[] Evs = new int[6];
             public int[] StatBoosts = new int[7]; // Where the 7th is not a stat per se, it's the "hightest" stat, applied last in stat calc
+            public int StatBoostsMultiplier = 1;
             public double[] StatMultipliers = [1, 1, 1, 1, 1, 1];
             public double PhysicalAccuracyMultiplier = 1;
             public double SpecialAccuracyMultiplier = 1;
@@ -49,6 +54,7 @@ namespace AutomatedTeamBuilder
             public int CriticalStages = 0;
             // Things that alter opp mon
             public int[] OppStatBoosts = new int[6];
+            public int OppStatBoostsMultiplier = 1;
             public double[] OppStatMultipliers = [1, 1, 1, 1, 1, 1];
             // Battle sim (how much damage my attacks do, how much damage mon takes from stuff, speed creep)
             public double DamageScore = 1;
@@ -60,20 +66,61 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="pokemon">The Pokemon with its current set</param>
         /// <param name="teamCtx">Extra context of the fight, null if skips the context checks</param>
+        /// <param name="ignoreMostRecientMove">Ignores most recient move for off score, just to verify off score retroactive improvements without move dmaage affecting</param>
         /// <returns>The Pokemon build details</returns>
-        static PokemonBuildInfo ObtainPokemonSetContext(TrainerPokemon pokemon, TeamBuildContext teamCtx = null)
+        static PokemonBuildInfo ObtainPokemonSetContext(TrainerPokemon pokemon, TeamBuildContext teamCtx = null, bool ignoreMostRecientMove = false)
         {
             PokemonBuildInfo result = new PokemonBuildInfo();
-            // First, need to load mon base types
+            // First, need to load mon base stuff
             Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[pokemon.Species];
-            result.PokemonTypes[0] = monData.Types[0];
-            result.PokemonTypes[1] = monData.Types[1];
+            // And other stuff
+            result.MonStats = monData.Stats;
             result.MonWeight = monData.Weight;
             // Dump all the team-based data into here
             if (teamCtx != null)
             {
                 result.AdditionalArchetypes.UnionWith(teamCtx.CurrentTeamArchetypes); // Add all archetypes present overall in the team
                 result.AdditionalConstraints = teamCtx.TeamBuildConstraints.Clone();
+            }
+            // Then, a calculation of mon's current type that may involve some hardcoded shenanigans
+            result.PokemonTypes = monData.Types;// Set base type
+            if (pokemon.ChosenAbility?.Name == "Forecast") // Change type on weather
+            {
+                if (result.AdditionalArchetypes.Contains(TeamArchetype.SUN))
+                {
+                    result.PokemonTypes = (PokemonType.FIRE, PokemonType.NONE);
+                }
+                if (result.AdditionalArchetypes.Contains(TeamArchetype.RAIN))
+                {
+                    result.PokemonTypes = (PokemonType.WATER, PokemonType.NONE);
+                }
+                if (result.AdditionalArchetypes.Contains(TeamArchetype.SNOW))
+                {
+                    result.PokemonTypes = (PokemonType.ICE, PokemonType.NONE);
+                }
+            }
+            else if (pokemon.ChosenAbility?.Name == "Mimicry" || pokemon.ChosenMoveset.Any(m => m.Name == "Camouflage")) // Change type on terrain
+            {
+                if (result.AdditionalArchetypes.Contains(TeamArchetype.GRASSY_TERRAIN))
+                {
+                    result.PokemonTypes = (PokemonType.GRASS, PokemonType.NONE);
+                }
+                if (result.AdditionalArchetypes.Contains(TeamArchetype.PSY_TERRAIN))
+                {
+                    result.PokemonTypes = (PokemonType.PSYCHIC, PokemonType.NONE);
+                }
+                if (result.AdditionalArchetypes.Contains(TeamArchetype.ELE_TERRAIN))
+                {
+                    result.PokemonTypes = (PokemonType.ELECTRIC, PokemonType.NONE);
+                }
+                if (result.AdditionalArchetypes.Contains(TeamArchetype.MISTY_TERRAIN))
+                {
+                    result.PokemonTypes = (PokemonType.FAIRY, PokemonType.NONE);
+                }
+            }
+            else
+            {
+                // No mon type changes
             }
             // Then obtain, step by step, all mods applied by all the (currently known) elements of the mon's build
             foreach (TeamArchetype archetype in result.AdditionalArchetypes)
@@ -120,7 +167,79 @@ namespace AutomatedTeamBuilder
             // Finally, need to obtain offensive/defensive/speed scores
             if (teamCtx != null) // This can only occur if I know the context of battle
             {
-                // TODO: Actually calculate the 3 scores
+                (double[] monStats, double[] monStatVariance) = MonStatCalculation(result); // Get mon stats (variance is 0 anyway)
+                (double[] oppStats, double[] oppVariance) = MonStatCalculation(result, teamCtx, true); // Get opp stats and variance
+                // Offensive value calculation (this can be only done with 1 or more moves naturally otherwise set to 1
+                {
+                    List<double> movesDamage = [];
+                    List<List<double>> movesTypeCoverage = [];
+                    // Check all moves but ignore the last one if calculating improvement
+                    for (int i = 0; i < (ignoreMostRecientMove ? pokemon.ChosenMoveset.Count - 1 : pokemon.ChosenMoveset.Count); i++)
+                    {
+                        Move move = pokemon.ChosenMoveset[i];
+                        if (move.Category == MoveCategory.STATUS) continue; // We don't check for status moves
+                        // Get move damage without variance
+                        movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, monStatVariance, teamCtx,
+                            (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
+                            pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways
+                            pokemon.BattleItem?.Name == "Loaded Dice").Item1);
+                        PokemonType moveType = GetModifiedMoveType(move, result); // Get the final move type for type effectiveness
+                        // Get the move coverage, making sure some specific crazy effects that modify moves
+                        movesTypeCoverage.Add(CalculateOffensiveTypeCoverage(moveType, teamCtx.OpponentsTypes,
+                            ExtractMoveFlags(move, result).Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
+                            pokemon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
+                            move.Name == "Freeze Dry")); // Freeze dry is SE against water
+                    }
+                    if (movesDamage.Count > 0) // There will be a offensive score then
+                    {
+                        // Do some magic to calculate average move damage with average type coverage
+                        List<double> bestCaseMoveCoverage = IndymonUtilities.ArrayMax(movesTypeCoverage);
+                        double averageMoveDamage = IndymonUtilities.ArrayAverage(movesDamage) * IndymonUtilities.ArrayAverage(bestCaseMoveCoverage);
+                        // Finally the offensive score will be a function of the damage I do as a fucntion of the normal distro of opp HP
+                        // This makes underkills have values of <0.5, and overkills values that ->1
+                        // Improvements will then involve moves that make the move approach overkill, but increasing overkill will have diminishing returns
+                        Normal enemyHpDistro = new Normal(oppStats[0], Math.Sqrt(oppVariance[0])); // Get the std dev ofc
+                        result.DamageScore = enemyHpDistro.CumulativeDistribution(averageMoveDamage);
+                    }
+                }
+                // Defensive value calculation
+                {
+                    // Gets hit by a ton of moves, both physical and special, equivalent to every single move stab in the game, average both
+                    // This gives me the average punch in the face I get, my HP is evaluated inside this
+                    // This makes underkills make my hp be close to 1 and overkills make it tend to 0
+                    // Improvements will then involve moves move me in this curve but if I gain defense for nothing, or is not enough anyway, then it's ok
+                    Move sampleMove = new Move()
+                    {
+                        Name = "Sample Move",
+                        Type = PokemonType.NONE, // Irrelevant for base damage calc
+                        Category = MoveCategory.PHYSICAL,
+                        Bp = 80, // The Bp doesn't matter too much I do 80/100 as an average OK move
+                        Acc = 100,
+                    };
+                    (double physicalDamage, double physicalVariance) = CalcMoveDamage(sampleMove, result, oppStats, monStats, oppVariance, teamCtx);
+                    sampleMove.Category = MoveCategory.SPECIAL; // Also calc special move
+                    (double specialDamage, double specialVariance) = CalcMoveDamage(sampleMove, result, oppStats, monStats, oppVariance, teamCtx);
+                    double averageDamage = (physicalDamage + specialDamage) / 2;
+                    double averageDamageVariance = (physicalVariance + specialVariance) / 4;
+                    // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly
+                    List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(result.PokemonTypes, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
+                    double averageStabReceived = IndymonUtilities.ArrayAverage(moveStabsReceived);
+                    averageDamage *= averageStabReceived;
+                    averageDamageVariance *= averageStabReceived * averageStabReceived;
+                    // Do the normal thing now
+                    Normal damageReceivedDistro = new Normal(averageDamage, Math.Sqrt(averageDamageVariance)); // Get the std dev ofc
+                    result.DefenseScore = damageReceivedDistro.CumulativeDistribution(monStats[0]); // Compare my HP with this damage
+                }
+                // Speed value calculation
+                {
+                    // Just compare my speed with opps speed, nothing crazy
+                    Normal oppSpeedDistro = new Normal(oppStats[5], Math.Sqrt(oppVariance[5])); // Get the std dev ofc
+                    result.SpeedScore = oppSpeedDistro.CumulativeDistribution(monStats[5]); // Compare my speed w opp speed
+                    if (result.AdditionalArchetypes.Contains(TeamArchetype.TRICK_ROOM)) // Trick room inverts this
+                    {
+                        result.SpeedScore = 1 - result.SpeedScore; // Inverts percentile since it will be symmetric around opp speed
+                    }
+                }
             }
             return result;
         }
@@ -232,11 +351,18 @@ namespace AutomatedTeamBuilder
         static PokemonType GetModifiedMoveType(Move move, PokemonBuildInfo monCtx)
         {
             PokemonType moveType = move.Type;
-            // Checks the move type mod everywhere (including own flagsbut not the added flags)
-            moveType = monCtx.MoveTypeMods.GetValueOrDefault((ElementType.MOVE, move.Name), moveType);
-            moveType = monCtx.MoveTypeMods.GetValueOrDefault((ElementType.MOVE_CATEGORY, move.Category.ToString()), moveType);
-            moveType = monCtx.MoveTypeMods.GetValueOrDefault((ElementType.ANY_DAMAGING_MOVE, "-"), moveType);
-            moveType = monCtx.MoveTypeMods.GetValueOrDefault((ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString()), moveType);
+            if (move.Name == "Revelation Dance") // Revelation dance overrides everything so I don't get cool mods
+            {
+                moveType = (monCtx.TeraType != PokemonType.NONE) ? monCtx.TeraType : monCtx.PokemonTypes.Item1;
+            }
+            else
+            {
+                // Checks the move type mod everywhere (including own flagsbut not the added flags)
+                moveType = monCtx.MoveTypeMods.GetValueOrDefault((ElementType.MOVE, move.Name), moveType);
+                moveType = monCtx.MoveTypeMods.GetValueOrDefault((ElementType.MOVE_CATEGORY, move.Category.ToString()), moveType);
+                moveType = monCtx.MoveTypeMods.GetValueOrDefault((ElementType.ANY_DAMAGING_MOVE, "-"), moveType);
+                moveType = monCtx.MoveTypeMods.GetValueOrDefault((ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString()), moveType);
+            }
             return moveType;
         }
         /// <summary>
@@ -255,8 +381,8 @@ namespace AutomatedTeamBuilder
             }
             else
             {
-                ExtractMods((ElementType.POKEMON_TYPE, monCtx.PokemonTypes[0].ToString()), monCtx);
-                ExtractMods((ElementType.POKEMON_TYPE, monCtx.PokemonTypes[1].ToString()), monCtx);
+                ExtractMods((ElementType.POKEMON_TYPE, monCtx.PokemonTypes.Item1.ToString()), monCtx);
+                ExtractMods((ElementType.POKEMON_TYPE, monCtx.PokemonTypes.Item2.ToString()), monCtx);
             }
             // Finally the eviolite thing, advertise whether has evo or not
             ExtractMods((ElementType.POKEMON_HAS_EVO, (monData.Evos.Count > 0).ToString().ToUpper()), monCtx);
@@ -297,9 +423,13 @@ namespace AutomatedTeamBuilder
                 int[] auxStatBoostArray;
                 switch (statMod.Item1)
                 {
+                    case StatModifier.SUFFIX_CHANGE:
+                        monCtx.MonSuffix = statMod.Item2; // Adds suffix
+                        break;
                     case StatModifier.WEIGHT_MULTIPLIER:
                         monCtx.MonWeight *= double.Parse(statMod.Item2);
                         break;
+                    case StatModifier.HP_MULTIPLIER:
                     case StatModifier.ATTACK_MULTIPLIER:
                     case StatModifier.DEFENSE_MULTIPLIER:
                     case StatModifier.SPECIAL_ATTACK_MULTIPLIER:
@@ -307,6 +437,7 @@ namespace AutomatedTeamBuilder
                     case StatModifier.SPEED_MULTIPLIER:
                         auxIndex = statMod.Item1 switch
                         {
+                            StatModifier.HP_MULTIPLIER => 0,
                             StatModifier.ATTACK_MULTIPLIER => 1,
                             StatModifier.DEFENSE_MULTIPLIER => 2,
                             StatModifier.SPECIAL_ATTACK_MULTIPLIER => 3,
@@ -406,20 +537,10 @@ namespace AutomatedTeamBuilder
                         monCtx.OppStatBoosts[6] += int.Parse(statMod.Item2); // Will be stored here and calculated later
                         break;
                     case StatModifier.ALL_BOOSTS:
+                        monCtx.StatBoostsMultiplier *= int.Parse(statMod.Item2);
+                        break;
                     case StatModifier.ALL_OPP_BOOSTS:
-                        auxStatBoostArray = statMod.Item1 switch
-                        {
-                            StatModifier.ALL_BOOSTS => monCtx.StatBoosts,
-                            StatModifier.ALL_OPP_BOOSTS => monCtx.OppStatBoosts,
-                            _ => throw new Exception("???"),
-                        };
-                        auxInt = int.Parse(statMod.Item2); // Will multiply all stat boosts
-                        for (int i = 0; i < auxStatBoostArray.Length; i++)
-                        {
-                            int resultingBoost = auxStatBoostArray[i] * auxInt;
-                            resultingBoost = Math.Clamp(resultingBoost, -6, 6); // Clamp to +-6
-                            auxStatBoostArray[i] *= auxInt;
-                        }
+                        monCtx.OppStatBoostsMultiplier *= int.Parse(statMod.Item2);
                         break;
                     case StatModifier.HP_EV:
                     case StatModifier.ATK_EV:
@@ -443,10 +564,10 @@ namespace AutomatedTeamBuilder
                         monCtx.Nature = Enum.Parse<Nature>(statMod.Item2);
                         break;
                     case StatModifier.TYPE_1:
-                        monCtx.PokemonTypes[0] = Enum.Parse<PokemonType>(statMod.Item2);
+                        monCtx.PokemonTypes = (Enum.Parse<PokemonType>(statMod.Item2), monCtx.PokemonTypes.Item2);
                         break;
                     case StatModifier.TYPE_2:
-                        monCtx.PokemonTypes[1] = Enum.Parse<PokemonType>(statMod.Item2);
+                        monCtx.PokemonTypes = (monCtx.PokemonTypes.Item1, Enum.Parse<PokemonType>(statMod.Item2));
                         break;
                     case StatModifier.TERA:
                         monCtx.TeraType = Enum.Parse<PokemonType>(statMod.Item2);

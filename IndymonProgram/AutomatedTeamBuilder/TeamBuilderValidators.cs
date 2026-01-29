@@ -24,7 +24,7 @@ namespace AutomatedTeamBuilder
             return elementToCheck switch // Some won't apply
             {
                 ElementType.POKEMON => pokemonData.Name == elementToCheckName,
-                ElementType.POKEMON_TYPE => pokemonData.Types.Contains(typeToCheck),
+                ElementType.POKEMON_TYPE => (pokemonData.Types.Item1 == typeToCheck || pokemonData.Types.Item2 == typeToCheck),
                 ElementType.POKEMON_HAS_EVO => pokemonData.Evos.Count > 0,
                 ElementType.BATTLE_ITEM => mon.BattleItem?.Name == elementToCheckName,
                 ElementType.BATTLE_ITEM_FLAGS => mon.BattleItem?.Flags.Contains(battleItemFlagToCheck) == true,

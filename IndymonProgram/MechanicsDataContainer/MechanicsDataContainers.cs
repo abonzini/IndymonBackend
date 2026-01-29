@@ -42,7 +42,7 @@ namespace MechanicsDataContainer
             string fixedModsTab = lines[14].Split(",")[0];
             ParseFixedModifiers(sheetId, fixedModsTab);
         }
-        public TypeChart TypeChart { get; set; } = new TypeChart();
+        public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart { get; set; } = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
         public Dictionary<string, Move> Moves { get; set; } = new Dictionary<string, Move>();
         public Dictionary<string, Ability> Abilities { get; set; } = new Dictionary<string, Ability>();
         public Dictionary<string, Pokemon> Dex { get; set; } = new Dictionary<string, Pokemon>();
