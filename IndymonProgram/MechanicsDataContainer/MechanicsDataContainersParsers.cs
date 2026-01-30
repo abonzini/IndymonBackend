@@ -77,11 +77,12 @@ namespace MechanicsDataContainer
                     Bp = double.Parse(fields[BP_COL].Trim()),
                     Acc = double.Parse(fields[ACC_COL].Trim())
                 };
-                for (int j = FLAGS_COL; j < fields.Length; j++)
+                string[] flagsFields = fields[FLAGS_COL].Split(";");
+                foreach (string flag in flagsFields)
                 {
-                    string nextFlag = fields[j].Replace("\"", "").Trim().ToUpper();
+                    string nextFlag = flag.Trim();
                     if (nextFlag == "") continue; // If flag is invalid, skip
-                    nextMove.Flags.Add(Enum.Parse<EffectFlag>(nextFlag));
+                    nextMove.Flags.Add(Enum.Parse<EffectFlag>(nextFlag.Trim()));
                 }
                 // Move parsed, add
                 Moves.Add(nextMove.Name, nextMove);
@@ -108,11 +109,12 @@ namespace MechanicsDataContainer
                 {
                     Name = fields[NAME_COL].Trim(),
                 };
-                for (int j = FLAGS_COL; j < fields.Length; j++)
+                string[] flagsFields = fields[FLAGS_COL].Split(";");
+                foreach (string flag in flagsFields)
                 {
-                    string nextFlag = fields[j].Replace("\"", "").Trim().ToUpper();
+                    string nextFlag = flag.Trim();
                     if (nextFlag == "") continue; // If flag is invalid, skip
-                    nextAbility.Flags.Add(Enum.Parse<EffectFlag>(nextFlag));
+                    nextAbility.Flags.Add(Enum.Parse<EffectFlag>(nextFlag.Trim()));
                 }
                 // Ability parsed, add
                 Abilities.Add(nextAbility.Name, nextAbility);
@@ -239,11 +241,12 @@ namespace MechanicsDataContainer
                 {
                     Name = fields[NAME_COL]
                 };
-                for (int j = FLAGS_COL; j < fields.Length; j++)
+                string[] flagsFields = fields[FLAGS_COL].Split(";");
+                foreach (string flag in flagsFields)
                 {
-                    string nextFlag = fields[j].Replace("\"", "").Trim().ToUpper();
-                    if (nextFlag == "") continue; // If not valid flag, skip
-                    nextItem.Flags.Add(Enum.Parse<ItemFlag>(nextFlag));
+                    string nextFlag = flag.Trim();
+                    if (nextFlag == "") continue; // If flag is invalid, skip
+                    nextItem.Flags.Add(Enum.Parse<ItemFlag>(nextFlag.Trim()));
                 }
                 // Move parsed, add
                 ModItems.Add(nextItem.Name, nextItem);
@@ -270,11 +273,12 @@ namespace MechanicsDataContainer
                 {
                     Name = fields[NAME_COL]
                 };
-                for (int j = FLAGS_COL; j < fields.Length; j++)
+                string[] flagsFields = fields[FLAGS_COL].Split(";");
+                foreach (string flag in flagsFields)
                 {
-                    string nextFlag = fields[j].Replace("\"", "").Trim().ToUpper();
-                    if (nextFlag == "") continue; // If not valid flag, skip
-                    nextItem.Flags.Add(Enum.Parse<ItemFlag>(nextFlag));
+                    string nextFlag = flag.Trim();
+                    if (nextFlag == "") continue; // If flag is invalid, skip
+                    nextItem.Flags.Add(Enum.Parse<ItemFlag>(nextFlag.Trim()));
                 }
                 if (!nextItem.Flags.Contains(ItemFlag.ALL_ITEMS)) throw new Exception($"{nextItem} does not have the ALL_ITEMS flag, corruption supsected.");
                 // Move parsed, add
