@@ -46,8 +46,8 @@ namespace MechanicsDataContainer
         public Dictionary<string, Move> Moves { get; set; } = new Dictionary<string, Move>();
         public Dictionary<string, Ability> Abilities { get; set; } = new Dictionary<string, Ability>();
         public Dictionary<string, Pokemon> Dex { get; set; } = new Dictionary<string, Pokemon>();
-        public Dictionary<string, ModItem> ModItems { get; set; } = new Dictionary<string, ModItem>();
-        public Dictionary<string, BattleItem> BattleItems { get; set; } = new Dictionary<string, BattleItem>();
+        public Dictionary<string, Item> ModItems { get; set; } = new Dictionary<string, Item>();
+        public Dictionary<string, Item> BattleItems { get; set; } = new Dictionary<string, Item>();
         public Dictionary<(ElementType, string), double> InitialWeights { get; set; } = new Dictionary<(ElementType, string), double>();
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> Enablers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
         public HashSet<(ElementType, string)> DisabledOptions { get; set; } = new HashSet<(ElementType, string)>();

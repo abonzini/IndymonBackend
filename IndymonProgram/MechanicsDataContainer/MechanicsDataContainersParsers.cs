@@ -229,15 +229,24 @@ namespace MechanicsDataContainer
             ModItems.Clear();
             // Parse csv
             string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            const int NAME_COL = 0;
+            const int FLAGS_COL = 4; // Contains all effect keys of this particular item
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
-                ModItem nextModItem = new ModItem
+                string[] fields = lines[i].Split(","); // Csv
+                Item nextItem = new Item
                 {
-                    Name = lines[i].Trim()
+                    Name = fields[NAME_COL]
                 };
+                for (int j = FLAGS_COL; j < fields.Length; j++)
+                {
+                    string nextFlag = fields[j].Replace("\"", "").Trim().ToUpper();
+                    if (nextFlag == "") continue; // If not valid flag, skip
+                    nextItem.Flags.Add(Enum.Parse<ItemFlag>(nextFlag));
+                }
                 // Move parsed, add
-                ModItems.Add(nextModItem.Name, nextModItem);
+                ModItems.Add(nextItem.Name, nextItem);
             }
         }
         /// <summary>
@@ -252,12 +261,12 @@ namespace MechanicsDataContainer
             // Parse csv
             string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
-            const int FLAGS_COL = 7; // Contains all effect keys of this particular item
+            const int FLAGS_COL = 9; // Contains all effect keys of this particular item
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
                 string[] fields = lines[i].Split(","); // Csv
-                BattleItem nextItem = new BattleItem
+                Item nextItem = new Item
                 {
                     Name = fields[NAME_COL]
                 };
@@ -265,9 +274,9 @@ namespace MechanicsDataContainer
                 {
                     string nextFlag = fields[j].Replace("\"", "").Trim().ToUpper();
                     if (nextFlag == "") continue; // If not valid flag, skip
-                    nextItem.Flags.Add(Enum.Parse<BattleItemFlag>(nextFlag));
+                    nextItem.Flags.Add(Enum.Parse<ItemFlag>(nextFlag));
                 }
-                if (!nextItem.Flags.Contains(BattleItemFlag.ALL_ITEMS)) throw new Exception($"{nextItem} does not have the ALL_ITEMS flag, corruption supsected.");
+                if (!nextItem.Flags.Contains(ItemFlag.ALL_ITEMS)) throw new Exception($"{nextItem} does not have the ALL_ITEMS flag, corruption supsected.");
                 // Move parsed, add
                 BattleItems.Add(nextItem.Name, nextItem);
             }

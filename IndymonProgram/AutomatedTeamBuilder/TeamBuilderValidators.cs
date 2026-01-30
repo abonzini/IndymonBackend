@@ -18,7 +18,7 @@ namespace AutomatedTeamBuilder
             Pokemon pokemonData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species]; // Obtain mon data
             // Elements that may be of use when checking stuff
             Enum.TryParse(elementToCheckName, true, out PokemonType typeToCheck);
-            Enum.TryParse(elementToCheckName, true, out BattleItemFlag battleItemFlagToCheck);
+            Enum.TryParse(elementToCheckName, true, out ItemFlag battleItemFlagToCheck);
             Enum.TryParse(elementToCheckName, true, out EffectFlag effectFlagToCheck);
             Enum.TryParse(elementToCheckName, true, out MoveCategory moveCategoryToCheck);
             return elementToCheck switch // Some won't apply
@@ -27,7 +27,7 @@ namespace AutomatedTeamBuilder
                 ElementType.POKEMON_TYPE => (pokemonData.Types.Item1 == typeToCheck || pokemonData.Types.Item2 == typeToCheck),
                 ElementType.POKEMON_HAS_EVO => pokemonData.Evos.Count > 0,
                 ElementType.BATTLE_ITEM => mon.BattleItem?.Name == elementToCheckName,
-                ElementType.BATTLE_ITEM_FLAGS => mon.BattleItem?.Flags.Contains(battleItemFlagToCheck) == true,
+                ElementType.ITEM_FLAGS => mon.BattleItem?.Flags.Contains(battleItemFlagToCheck) == true,
                 ElementType.MOD_ITEM => mon.ModItem?.Name == elementToCheckName,
                 ElementType.ABILITY => pokemonData.Abilities.Append(GetSetItemAbility(mon.SetItem)).Any(a => a?.Name == elementToCheckName), // If has ability or set item adds it
                 ElementType.MOVE => pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Name == elementToCheckName), // If has move or set item adds it

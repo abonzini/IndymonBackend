@@ -19,7 +19,7 @@ namespace MechanicsDataContainer
                 ElementType.POKEMON_HAS_EVO => bool.TryParse(name, out _),
                 ElementType.ARCHETYPE => Enum.TryParse<TeamArchetype>(name, true, out _),
                 ElementType.BATTLE_ITEM => BattleItems.ContainsKey(name),
-                ElementType.BATTLE_ITEM_FLAGS => Enum.TryParse<BattleItemFlag>(name, true, out _),
+                ElementType.ITEM_FLAGS => Enum.TryParse<ItemFlag>(name, true, out _),
                 ElementType.MOD_ITEM => ModItems.ContainsKey(name),
                 ElementType.ABILITY => Abilities.ContainsKey(name),
                 ElementType.MOVE => Moves.ContainsKey(name),

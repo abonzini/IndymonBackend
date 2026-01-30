@@ -94,7 +94,7 @@ namespace GameDataContainer
                         itemName = nextLine[j + 9];
                         if (itemName != "") // A set item here
                         {
-                            ModItem modItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[itemName];
+                            Item modItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[itemName];
                             int itemCount = int.Parse(nextLine[j + 10]);
                             IndymonUtilities.AddtemToCountDictionary(nextTrainer.ModItems, modItem, itemCount);
                         }
@@ -102,7 +102,7 @@ namespace GameDataContainer
                         itemName = nextLine[j + 12];
                         if (itemName != "") // A set item here
                         {
-                            BattleItem battleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[itemName];
+                            Item battleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[itemName];
                             int itemCount = int.Parse(nextLine[j + 13]);
                             IndymonUtilities.AddtemToCountDictionary(nextTrainer.BattleItems, battleItem, itemCount);
                         }

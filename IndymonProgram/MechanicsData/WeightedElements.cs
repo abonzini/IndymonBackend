@@ -14,7 +14,7 @@ namespace MechanicsData
         POKEMON_HAS_EVO, /// The flag of whether the pokemon has an evo or not (only way to make eviolite happen)
         ARCHETYPE, /// Certain archetypes such as rain, terrains, etc. Not weighted but enabled, and can weight strategies
         BATTLE_ITEM, /// Affects a specific named item
-        BATTLE_ITEM_FLAGS, /// Affects items with that flag
+        ITEM_FLAGS, /// Affects items with that flag
         MOD_ITEM, /// A mod item is affecting stuf, normally the change stats or sth
         ABILITY, /// Affects an ability
         MOVE, /// Affects a specific move by name

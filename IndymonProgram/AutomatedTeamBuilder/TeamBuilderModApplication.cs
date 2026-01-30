@@ -21,23 +21,13 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="item">Mod item</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractModItemMods(ModItem item, PokemonBuildInfo monCtx)
-        {
-            // For active mod items, it's also very simple
-            ExtractMods((ElementType.MOD_ITEM, item.Name), monCtx);
-        }
-        /// <summary>
-        /// Obtains all mods associated to this, updates Ctx
-        /// </summary>
-        /// <param name="item">Mod item</param>
-        /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractBattleItemMods(BattleItem item, PokemonBuildInfo monCtx)
+        static void ExtractItemMods(Item item, PokemonBuildInfo monCtx)
         {
             // This one is trickier, need to add both the items and the flags
             ExtractMods((ElementType.BATTLE_ITEM, item.Name), monCtx);
-            foreach (BattleItemFlag flag in item.Flags)
+            foreach (ItemFlag flag in item.Flags)
             {
-                ExtractMods((ElementType.BATTLE_ITEM_FLAGS, flag.ToString()), monCtx);
+                ExtractMods((ElementType.ITEM_FLAGS, flag.ToString()), monCtx);
             }
         }
         /// <summary>
@@ -123,9 +113,9 @@ namespace AutomatedTeamBuilder
                 bool typeChanged = false;
                 do
                 {
-                    PokemonType newType = moveType, typeMod;
+                    PokemonType newType = moveType;
                     // Checks the move type mod everywhere (including own flagsbut not the added flags)
-                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.MOVE, move.Name), out typeMod)) newType = typeMod;
+                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.MOVE, move.Name), out PokemonType typeMod)) newType = typeMod;
                     if (monCtx.MoveTypeMods.TryGetValue((ElementType.MOVE_CATEGORY, move.Category.ToString()), out typeMod)) newType = typeMod;
                     if (monCtx.MoveTypeMods.TryGetValue((ElementType.ANY_DAMAGING_MOVE, "-"), out typeMod)) newType = typeMod;
                     if (monCtx.MoveTypeMods.TryGetValue((ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString()), out typeMod)) newType = typeMod;

@@ -16,8 +16,8 @@ namespace GameData
         public List<TrainerPokemon> PartyPokemon { get; set; } = new List<TrainerPokemon>();
         public List<TrainerPokemon> BoxedPokemon { get; set; } = new List<TrainerPokemon>();
         public Dictionary<string, int> SetItems { get; set; } = new Dictionary<string, int>();
-        public Dictionary<ModItem, int> ModItems { get; set; } = new Dictionary<ModItem, int>();
-        public Dictionary<BattleItem, int> BattleItems { get; set; } = new Dictionary<BattleItem, int>();
+        public Dictionary<Item, int> ModItems { get; set; } = new Dictionary<Item, int>();
+        public Dictionary<Item, int> BattleItems { get; set; } = new Dictionary<Item, int>();
         public Dictionary<string, int> TrainerFavours { get; set; } = new Dictionary<string, int>();
         public Dictionary<string, int> KeyItems { get; set; } = new Dictionary<string, int>();
         public Dictionary<string, int> PokeBalls { get; set; } = new Dictionary<string, int>();

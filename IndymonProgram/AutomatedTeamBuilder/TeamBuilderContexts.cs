@@ -129,11 +129,11 @@ namespace AutomatedTeamBuilder
             }
             if (pokemon.ModItem != null)
             {
-                ExtractModItemMods(pokemon.ModItem, result);
+                ExtractItemMods(pokemon.ModItem, result);
             }
             if (pokemon.BattleItem != null)
             {
-                ExtractBattleItemMods(pokemon.BattleItem, result);
+                ExtractItemMods(pokemon.BattleItem, result);
             }
             if (pokemon.ChosenAbility != null)
             {
