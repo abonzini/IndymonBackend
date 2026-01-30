@@ -24,7 +24,7 @@ namespace MechanicsDataContainer
                 ElementType.ABILITY => Abilities.ContainsKey(name),
                 ElementType.MOVE => Moves.ContainsKey(name),
                 ElementType.EFFECT_FLAGS => Enum.TryParse<EffectFlag>(name, true, out _),
-                ElementType.DAMAGING_MOVE_OF_TYPE => Enum.TryParse<PokemonType>(name, true, out _),
+                ElementType.DAMAGING_MOVE_OF_TYPE or ElementType.ORIGINAL_TYPE_OF_MOVE => Enum.TryParse<PokemonType>(name, true, out _),
                 ElementType.MOVE_CATEGORY => Enum.TryParse<MoveCategory>(name, true, out _),
                 ElementType.ANY_DAMAGING_MOVE => true,
                 _ => false,

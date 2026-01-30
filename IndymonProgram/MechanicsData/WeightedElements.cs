@@ -19,6 +19,7 @@ namespace MechanicsData
         ABILITY, /// Affects an ability
         MOVE, /// Affects a specific move by name
         EFFECT_FLAGS, /// Affects moves or abilities carrying a specific flag
+        ORIGINAL_TYPE_OF_MOVE, /// Afftects moves before their type is modified
         DAMAGING_MOVE_OF_TYPE, /// Affects damaging moves of specific types (most damage related stuff!)
         MOVE_CATEGORY, /// Affects phy/spe/status (e.g. prankster, AV)
         ANY_DAMAGING_MOVE, /// Affects every single damaging move (e.g. normalize)
