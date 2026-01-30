@@ -41,9 +41,9 @@ namespace MechanicsData
         SETUP_DAMAGING, // Damaging moves that increase stat
         SELF_DEBUFF, // Debuff user (contrary, sure crit)
         SETUP_STATUS, // Collection of all the status setup moves
-        SETUP_OFF, // Setup status moves that increase offensive stat
-        SETUP_DEF, // Setup status moves that increase defensive stat
-        SETUP_SPEED, // Setup status moves that increase speed
+        OFF_UTILTIY, // Moves with an off utility only
+        DEF_UTILITY, // Moves with a def utility only
+        SPEED_UTILITY, // Moves with a speed utility only
         DAMAGE_PROP_WEIGTH_DIFFERENCE, // Damage increases with weight difference
         DAMAGE_PROP_OPP_WEIGTH, // Damage increases solely w opp weight
         DAMAGE_PROP_SPEED_DIFFERENCE, // Damage proportional with speed (e.g. electro ball)
