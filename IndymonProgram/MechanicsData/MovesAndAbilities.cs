@@ -38,10 +38,12 @@ namespace MechanicsData
         CRITICAL, // Sniper, self debuff
         NEED_OPP_ITEM, // Moves that need opp to have an item to be useful
         POSITIVE_STAT_BOOST, // Moves that appreciate many stat boosts
-        SETUP_STATUS, // Setup status moves
         SETUP_DAMAGING, // Damaging moves that increase stat
-        SETUP_SPEED, // Moves that increase speed
         SELF_DEBUFF, // Debuff user (contrary, sure crit)
+        SETUP_STATUS, // Collection of all the status setup moves
+        SETUP_OFF, // Setup status moves that increase offensive stat
+        SETUP_DEF, // Setup status moves that increase defensive stat
+        SETUP_SPEED, // Setup status moves that increase speed
         DAMAGE_PROP_WEIGTH_DIFFERENCE, // Damage increases with weight difference
         DAMAGE_PROP_OPP_WEIGTH, // Damage increases solely w opp weight
         DAMAGE_PROP_SPEED_DIFFERENCE, // Damage proportional with speed (e.g. electro ball)
