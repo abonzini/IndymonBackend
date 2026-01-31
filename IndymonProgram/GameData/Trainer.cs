@@ -26,6 +26,6 @@ namespace GameData
             return Name;
         }
         // Things related to an assembled team ready for battle
-        public List<TrainerPokemon> BattleTeam = new List<TrainerPokemon>(); // A subset of team but can also have borrowed mons ready to battle
+        public List<TrainerPokemon> BattleTeam { get; set; } = new List<TrainerPokemon>(); // A subset of team but can also have borrowed mons ready to battle
     }
 }

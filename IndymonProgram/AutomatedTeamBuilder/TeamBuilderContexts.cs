@@ -11,7 +11,6 @@ namespace AutomatedTeamBuilder
     /// </summary>
     public class TeamBuildContext
     {
-        public int currentMon = 0;
         public HashSet<TeamArchetype> CurrentTeamArchetypes = new HashSet<TeamArchetype>(); // Contains an ongoing archetype that applies for all team
         public TeamBuildConstraints TeamBuildConstraints = new TeamBuildConstraints(); // Constraints applied to this team building. Different meaning to team build, as this is a list of all necessary stuff (A+B)*(C+D)
         public List<(PokemonType, PokemonType)> OpponentsTypes = new List<(PokemonType, PokemonType)>(); // Contains a list of all types found in opp teams
@@ -68,7 +67,7 @@ namespace AutomatedTeamBuilder
         /// <param name="teamCtx">Extra context of the fight, null if skips the context checks</param>
         /// <param name="ignoreMostRecientMove">Ignores most recient move for off score, just to verify off score retroactive improvements without move dmaage affecting</param>
         /// <returns>The Pokemon build details</returns>
-        static PokemonBuildInfo ObtainPokemonSetContext(TrainerPokemon pokemon, TeamBuildContext teamCtx = null, bool ignoreMostRecientMove = false)
+        static PokemonBuildInfo ObtainPokemonSetContext(TrainerPokemon pokemon, TeamBuildContext teamCtx, bool ignoreMostRecientMove = false)
         {
             PokemonBuildInfo result = new PokemonBuildInfo();
             // First, need to load mon base stuff
