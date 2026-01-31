@@ -222,7 +222,8 @@ namespace AutomatedTeamBuilder
                     double averageDamage = (physicalDamage + specialDamage) / 2;
                     double averageDamageVariance = (physicalVariance + specialVariance) / 4;
                     // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly
-                    List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(result.PokemonTypes, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
+                    (PokemonType, PokemonType) defendingPokemonType = (result.TeraType != PokemonType.NONE) ? (result.TeraType, PokemonType.NONE) : result.PokemonTypes;
+                    List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(defendingPokemonType, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
                     double averageStabReceived = IndymonUtilities.ArrayAverage(moveStabsReceived);
                     averageDamage *= averageStabReceived;
                     averageDamageVariance *= averageStabReceived * averageStabReceived;
