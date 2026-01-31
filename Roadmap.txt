@@ -15,10 +15,16 @@ White Monastery -> Justice -> Dawn Stone
 	Glacier -> Regice
 
 ---
-
 Need to manually ensure in team calc:
 - Setup (and speed setup) increasing their respective utility. Add defensive setup? Same idea? >1.1 or sth
 
 Distant future (ideas):
--	Make nat power, camouflage use the correct stuff both in calcs (archetype, no prob) and custom showdown. Showdown: Custom format like force monotype, string as value. Field has camouflage type string as value. On constructor, check if value of rule retreived and replaced in field. Camouflage takes stirng instead of normal. Every dungeon has a camuflage type.
-	As to how modify the mods, maybe can hardcode them in the mod table (ugly) or add additional mods on launch (less ugly and already implemented in archetypes and such)
+-	To do next time a player selects nature power/secret power or camouflage (or random person explore)
+	Exploration/Arena terrain info. Have an extra flag in ps.field which is something like arena-tag. Load arena tag from custom rule.
+	Custom ruleset, identical to "Force Monotype". Field loads it like "this.ruleTable.valueRules.get('arenatagmod')"
+	Modifies:
+		- Camouflage type
+		- Nature Power move
+		- Secret power effect
+		- Let default be, as before, tri-attack/paralysis/normal (??), and then else if chain
+		- Add mod to all dungeons
