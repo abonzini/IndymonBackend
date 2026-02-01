@@ -4,6 +4,7 @@ namespace AutomatedTeamBuilder
 {
     public static partial class TeamBuilder
     {
+        // Calc area
         /// <summary>
         /// Calculates the damage of a (damaging!) move
         /// </summary>
@@ -277,5 +278,68 @@ namespace AutomatedTeamBuilder
             result *= monCtx.MoveAccMods.GetValueOrDefault((ElementType.DAMAGING_MOVE_OF_TYPE, moveType.ToString()), 1); // With type mod
             return result;
         }
+        /// <summary>
+        /// Obtains all flags applied to this move. To be called last to ensure everything has had time to modify flags
+        /// </summary>
+        /// <param name="move">Move</param>
+        /// <param name="monCtx">Context to see which flags are added/removed from move</param>
+        /// <returns>All flags in this move</returns>
+        static HashSet<EffectFlag> ExtractMoveFlags(Move move, PokemonBuildInfo monCtx)
+        {
+            HashSet<EffectFlag> moveFlags = [.. move.Flags]; // Copies moves base flags
+            HashSet<EffectFlag> removedFlags = [];
+            HashSet<EffectFlag> addedFlags = [];
+            // Check what has been added
+            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.MOVE, move.Name)]);
+            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.MOVE_CATEGORY, move.Category.ToString())]);
+            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.ANY_DAMAGING_MOVE, "-")]);
+            // Check what has been removed
+            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.MOVE, move.Name)]);
+            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.MOVE_CATEGORY, move.Category.ToString())]);
+            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.ANY_DAMAGING_MOVE, "-")]);
+            // For type mods, need to apply many times if the move's type has changed
+            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.ORIGINAL_TYPE_OF_MOVE, move.Type.ToString())]);
+            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.ORIGINAL_TYPE_OF_MOVE, move.Type.ToString())]);
+            PokemonType moveType = GetModifiedMoveType(move, monCtx);
+            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.DAMAGING_MOVE_OF_TYPE, moveType.ToString())]);
+            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.DAMAGING_MOVE_OF_TYPE, moveType.ToString())]);
+            // Add then remove, better to forget some flag than have a wrong one
+            moveFlags.UnionWith(addedFlags);
+            moveFlags.ExceptWith(removedFlags);
+            return moveFlags;
+        }
+        /// <summary>
+        /// Gets a move's type by frantically checking every move type mod
+        /// </summary>
+        /// <param name="move">Move to check</param>
+        /// <param name="monCtx">Mon ctx to get mods</param>
+        /// <returns></returns>
+        static PokemonType GetModifiedMoveType(Move move, PokemonBuildInfo monCtx)
+        {
+            PokemonType moveType = move.Type;
+            if (move.Name == "Revelation Dance") // Revelation dance overrides everything so I don't get cool mods
+            {
+                moveType = (monCtx.TeraType != PokemonType.NONE) ? monCtx.TeraType : monCtx.PokemonTypes.Item1;
+            }
+            else
+            {
+                bool typeChanged = false;
+                do
+                {
+                    PokemonType newType = moveType;
+                    // Checks the move type mod everywhere (including own flagsbut not the added flags)
+                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.MOVE, move.Name), out PokemonType typeMod)) newType = typeMod;
+                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.MOVE_CATEGORY, move.Category.ToString()), out typeMod)) newType = typeMod;
+                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.ANY_DAMAGING_MOVE, "-"), out typeMod)) newType = typeMod;
+                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString()), out typeMod)) newType = typeMod;
+                    if (newType != moveType)
+                    {
+                        typeChanged = true;
+                    }
+                } while (typeChanged);
+            }
+            return moveType;
+        }
+        // Scoring area
     }
 }

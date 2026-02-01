@@ -39,7 +39,6 @@ namespace AutomatedTeamBuilder
         public Nature Nature = Nature.SERIOUS;
         public PokemonType TeraType = PokemonType.NONE;
         public (PokemonType, PokemonType) PokemonTypes = (PokemonType.NONE, PokemonType.NONE);
-        public string MonSuffix = "";
         public double[] MonStats = new double[6];
         public int[] Evs = new int[6];
         public int[] StatBoosts = new int[7]; // Where the 7th is not a stat per se, it's the "hightest" stat, applied last in stat calc
@@ -76,11 +75,8 @@ namespace AutomatedTeamBuilder
             result.MonStats = monData.Stats;
             result.MonWeight = monData.Weight;
             // Dump all the team-based data into here
-            if (teamCtx != null)
-            {
-                result.AdditionalArchetypes.UnionWith(teamCtx.CurrentTeamArchetypes); // Add all archetypes present overall in the team
-                result.AdditionalConstraints = teamCtx.TeamBuildConstraints.Clone();
-            }
+            result.AdditionalArchetypes.UnionWith(teamCtx.CurrentTeamArchetypes); // Add all archetypes present overall in the team
+            result.AdditionalConstraints = teamCtx.TeamBuildConstraints.Clone();
             // Then, a calculation of mon's current type that may involve some hardcoded shenanigans
             result.PokemonTypes = monData.Types;// Set base type
             if (pokemon.ChosenAbility?.Name == "Forecast") // Change type on weather
@@ -164,81 +160,78 @@ namespace AutomatedTeamBuilder
                 ExtractMods((ElementType.EFFECT_FLAGS, flag.ToString()), result);
             }
             // Finally, need to obtain offensive/defensive/speed scores
-            if (teamCtx != null) // This can only occur if I know the context of battle
+            (double[] monStats, double[] monStatVariance) = MonStatCalculation(result); // Get mon stats (variance is 0 anyway)
+            (double[] oppStats, double[] oppVariance) = MonStatCalculation(result, teamCtx, true); // Get opp stats and variance
+            // Offensive value calculation (this can be only done with 1 or more moves naturally otherwise set to 1
             {
-                (double[] monStats, double[] monStatVariance) = MonStatCalculation(result); // Get mon stats (variance is 0 anyway)
-                (double[] oppStats, double[] oppVariance) = MonStatCalculation(result, teamCtx, true); // Get opp stats and variance
-                // Offensive value calculation (this can be only done with 1 or more moves naturally otherwise set to 1
+                List<double> movesDamage = [];
+                List<List<double>> movesTypeCoverage = [];
+                // Check all moves but ignore the last one if calculating improvement
+                for (int i = 0; i < (ignoreMostRecientMove ? pokemon.ChosenMoveset.Count - 1 : pokemon.ChosenMoveset.Count); i++)
                 {
-                    List<double> movesDamage = [];
-                    List<List<double>> movesTypeCoverage = [];
-                    // Check all moves but ignore the last one if calculating improvement
-                    for (int i = 0; i < (ignoreMostRecientMove ? pokemon.ChosenMoveset.Count - 1 : pokemon.ChosenMoveset.Count); i++)
-                    {
-                        Move move = pokemon.ChosenMoveset[i];
-                        if (move.Category == MoveCategory.STATUS) continue; // We don't check for status moves
-                        // Get move damage without variance
-                        movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, monStatVariance, teamCtx,
-                            (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
-                            pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways
-                            pokemon.BattleItem?.Name == "Loaded Dice").Item1);
-                        PokemonType moveType = GetModifiedMoveType(move, result); // Get the final move type for type effectiveness
-                        // Get the move coverage, making sure some specific crazy effects that modify moves
-                        movesTypeCoverage.Add(CalculateOffensiveTypeCoverage(moveType, teamCtx.OpponentsTypes,
-                            ExtractMoveFlags(move, result).Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
-                            pokemon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
-                            move.Name == "Freeze Dry")); // Freeze dry is SE against water
-                    }
-                    if (movesDamage.Count > 0) // There will be a offensive score then
-                    {
-                        // Do some magic to calculate average move damage with average type coverage
-                        List<double> bestCaseMoveCoverage = IndymonUtilities.ArrayMax(movesTypeCoverage);
-                        double averageMoveDamage = IndymonUtilities.ArrayAverage(movesDamage) * IndymonUtilities.ArrayAverage(bestCaseMoveCoverage);
-                        // Finally the offensive score will be a function of the damage I do as a fucntion of the normal distro of opp HP
-                        // This makes underkills have values of <0.5, and overkills values that ->1
-                        // Improvements will then involve moves that make the move approach overkill, but increasing overkill will have diminishing returns
-                        Normal enemyHpDistro = new Normal(oppStats[0], Math.Sqrt(oppVariance[0])); // Get the std dev ofc
-                        result.DamageScore = enemyHpDistro.CumulativeDistribution(averageMoveDamage);
-                    }
+                    Move move = pokemon.ChosenMoveset[i];
+                    if (move.Category == MoveCategory.STATUS) continue; // We don't check for status moves
+                    // Get move damage without variance
+                    movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, monStatVariance, teamCtx,
+                        (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
+                        pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways
+                        pokemon.BattleItem?.Name == "Loaded Dice").Item1);
+                    PokemonType moveType = GetModifiedMoveType(move, result); // Get the final move type for type effectiveness
+                    // Get the move coverage, making sure some specific crazy effects that modify moves
+                    movesTypeCoverage.Add(CalculateOffensiveTypeCoverage(moveType, teamCtx.OpponentsTypes,
+                        ExtractMoveFlags(move, result).Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
+                        pokemon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
+                        move.Name == "Freeze Dry")); // Freeze dry is SE against water
                 }
-                // Defensive value calculation
+                if (movesDamage.Count > 0) // There will be a offensive score then
                 {
-                    // Gets hit by a ton of moves, both physical and special, equivalent to every single move stab in the game, average both
-                    // This gives me the average punch in the face I get, my HP is evaluated inside this
-                    // This makes underkills make my hp be close to 1 and overkills make it tend to 0
-                    // Improvements will then involve moves move me in this curve but if I gain defense for nothing, or is not enough anyway, then it's ok
-                    Move sampleMove = new Move()
-                    {
-                        Name = "Sample Move",
-                        Type = PokemonType.NONE, // Irrelevant for base damage calc
-                        Category = MoveCategory.PHYSICAL,
-                        Bp = 80, // The Bp doesn't matter too much I do 80/100 as an average OK move
-                        Acc = 100,
-                    };
-                    (double physicalDamage, double physicalVariance) = CalcMoveDamage(sampleMove, result, oppStats, monStats, oppVariance, teamCtx);
-                    sampleMove.Category = MoveCategory.SPECIAL; // Also calc special move
-                    (double specialDamage, double specialVariance) = CalcMoveDamage(sampleMove, result, oppStats, monStats, oppVariance, teamCtx);
-                    double averageDamage = (physicalDamage + specialDamage) / 2;
-                    double averageDamageVariance = (physicalVariance + specialVariance) / 4;
-                    // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly
-                    (PokemonType, PokemonType) defendingPokemonType = (result.TeraType != PokemonType.NONE) ? (result.TeraType, PokemonType.NONE) : result.PokemonTypes;
-                    List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(defendingPokemonType, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
-                    double averageStabReceived = IndymonUtilities.ArrayAverage(moveStabsReceived);
-                    averageDamage *= averageStabReceived;
-                    averageDamageVariance *= averageStabReceived * averageStabReceived;
-                    // Do the normal thing now
-                    Normal damageReceivedDistro = new Normal(averageDamage, Math.Sqrt(averageDamageVariance)); // Get the std dev ofc
-                    result.DefenseScore = damageReceivedDistro.CumulativeDistribution(monStats[0]); // Compare my HP with this damage
+                    // Do some magic to calculate average move damage with average type coverage
+                    List<double> bestCaseMoveCoverage = IndymonUtilities.ArrayMax(movesTypeCoverage);
+                    double averageMoveDamage = IndymonUtilities.ArrayAverage(movesDamage) * IndymonUtilities.ArrayAverage(bestCaseMoveCoverage);
+                    // Finally the offensive score will be a function of the damage I do as a fucntion of the normal distro of opp HP
+                    // This makes underkills have values of <0.5, and overkills values that ->1
+                    // Improvements will then involve moves that make the move approach overkill, but increasing overkill will have diminishing returns
+                    Normal enemyHpDistro = new Normal(oppStats[0], Math.Sqrt(oppVariance[0])); // Get the std dev ofc
+                    result.DamageScore = enemyHpDistro.CumulativeDistribution(averageMoveDamage);
                 }
-                // Speed value calculation
+            }
+            // Defensive value calculation
+            {
+                // Gets hit by a ton of moves, both physical and special, equivalent to every single move stab in the game, average both
+                // This gives me the average punch in the face I get, my HP is evaluated inside this
+                // This makes underkills make my hp be close to 1 and overkills make it tend to 0
+                // Improvements will then involve moves move me in this curve but if I gain defense for nothing, or is not enough anyway, then it's ok
+                Move sampleMove = new Move()
                 {
-                    // Just compare my speed with opps speed, nothing crazy
-                    Normal oppSpeedDistro = new Normal(oppStats[5], Math.Sqrt(oppVariance[5])); // Get the std dev ofc
-                    result.SpeedScore = oppSpeedDistro.CumulativeDistribution(monStats[5]); // Compare my speed w opp speed
-                    if (result.AdditionalArchetypes.Contains(TeamArchetype.TRICK_ROOM)) // Trick room inverts this
-                    {
-                        result.SpeedScore = 1 - result.SpeedScore; // Inverts percentile since it will be symmetric around opp speed
-                    }
+                    Name = "Sample Move",
+                    Type = PokemonType.NONE, // Irrelevant for base damage calc
+                    Category = MoveCategory.PHYSICAL,
+                    Bp = 80, // The Bp doesn't matter too much I do 80/100 as an average OK move
+                    Acc = 100,
+                };
+                (double physicalDamage, double physicalVariance) = CalcMoveDamage(sampleMove, result, oppStats, monStats, oppVariance, teamCtx);
+                sampleMove.Category = MoveCategory.SPECIAL; // Also calc special move
+                (double specialDamage, double specialVariance) = CalcMoveDamage(sampleMove, result, oppStats, monStats, oppVariance, teamCtx);
+                double averageDamage = (physicalDamage + specialDamage) / 2;
+                double averageDamageVariance = (physicalVariance + specialVariance) / 4;
+                // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly
+                (PokemonType, PokemonType) defendingPokemonType = (result.TeraType != PokemonType.NONE) ? (result.TeraType, PokemonType.NONE) : result.PokemonTypes;
+                List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(defendingPokemonType, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
+                double averageStabReceived = IndymonUtilities.ArrayAverage(moveStabsReceived);
+                averageDamage *= averageStabReceived;
+                averageDamageVariance *= averageStabReceived * averageStabReceived;
+                // Do the normal thing now
+                Normal damageReceivedDistro = new Normal(averageDamage, Math.Sqrt(averageDamageVariance)); // Get the std dev ofc
+                result.DefenseScore = damageReceivedDistro.CumulativeDistribution(monStats[0]); // Compare my HP with this damage
+            }
+            // Speed value calculation
+            {
+                // Just compare my speed with opps speed, nothing crazy
+                Normal oppSpeedDistro = new Normal(oppStats[5], Math.Sqrt(oppVariance[5])); // Get the std dev ofc
+                result.SpeedScore = oppSpeedDistro.CumulativeDistribution(monStats[5]); // Compare my speed w opp speed
+                if (result.AdditionalArchetypes.Contains(TeamArchetype.TRICK_ROOM)) // Trick room inverts this
+                {
+                    result.SpeedScore = 1 - result.SpeedScore; // Inverts percentile since it will be symmetric around opp speed
                 }
             }
             return result;

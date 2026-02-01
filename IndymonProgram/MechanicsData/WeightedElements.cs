@@ -29,8 +29,6 @@ namespace MechanicsData
     public enum StatModifier
     {
         WEIGHT_MULTIPLIER, /// Things that modify weight
-        // Things that change a whole ass mon
-        SUFFIX_CHANGE, /// Format is a -Suffix which fetches the mon's bst lol
         // The base multiplier of stuff *X, caused by abilities, items etc
         HP_MULTIPLIER, /// Attack multiplications, usually reductions
         ATTACK_MULTIPLIER, /// Things that multiply attack

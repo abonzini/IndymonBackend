@@ -5,22 +5,6 @@ using Utilities;
 
 namespace AutomatedTeamBuilder
 {
-    public class TeamBuildConstraints
-    {
-        /// Options that could generate a valid team. Many mandatory conditions of optional combos ((A+B)*(C+D+E)*(F))
-        public List<List<(ElementType, string)>> AllConstraints = new List<List<(ElementType, string)>>();
-        /// <summary>
-        /// Adds all monotype constraint options (e.g. a team of one type, each with a possible solution
-        /// </summary>
-        public TeamBuildConstraints Clone()
-        {
-            TeamBuildConstraints clone = new TeamBuildConstraints
-            {
-                AllConstraints = [.. AllConstraints] // Just shallows copies the constraint list, OR constraints are not modified anyway
-            };
-            return clone;
-        }
-    }
     /// <summary>
     /// When attempting to check a valid team build, this structure contains all possible options that fulfill the desired constraints
     /// </summary>
@@ -97,7 +81,7 @@ namespace AutomatedTeamBuilder
                     bool constraintSatisfied = false;
                     foreach ((ElementType, string) constraintCheck in constraint)
                     {
-                        if (ValidateMonProperty(mon, constraintCheck.Item1, constraintCheck.Item2))
+                        if (ValidateBasicMonProperty(mon, constraintCheck.Item1, constraintCheck.Item2))
                         {
                             constraintSatisfied = true;
                             break; // No need to look at the rest
@@ -132,7 +116,7 @@ namespace AutomatedTeamBuilder
                             Ability setItemAbility = GetSetItemAbility(setItem);
                             if (setItemAbility != null) // Set items that grant ability may grant a satisfying ability
                             {
-                                if (ValidateAbilityProperty(setItemAbility, constraintCheck.Item1, constraintCheck.Item2))
+                                if (ValidateBasicAbilityProperty(setItemAbility, constraintCheck.Item1, constraintCheck.Item2))
                                 {
                                     constraintSatisfied = true;
                                     break;
@@ -141,7 +125,7 @@ namespace AutomatedTeamBuilder
                             Move setItemMove = GetSetItemMove(setItem);
                             if (setItemMove != null) // Set items that grant move may grant a satisfying move 
                             {
-                                if (ValidateMoveProperty(setItemMove, constraintCheck.Item1, constraintCheck.Item2))
+                                if (ValidateBasicMoveProperty(setItemMove, constraintCheck.Item1, constraintCheck.Item2))
                                 {
                                     constraintSatisfied = true;
                                     break;
@@ -186,7 +170,7 @@ namespace AutomatedTeamBuilder
                             bool constraintSatisfied = false;
                             foreach ((ElementType, string) constraintCheck in constraint)
                             {
-                                if (ValidateMonProperty(mon, constraintCheck.Item1, constraintCheck.Item2)) // If mon ok, then add to build and ditch
+                                if (ValidateBasicMonProperty(mon, constraintCheck.Item1, constraintCheck.Item2)) // If mon ok, then add to build and ditch
                                 {
                                     constraintSatisfied = true;
                                     break;

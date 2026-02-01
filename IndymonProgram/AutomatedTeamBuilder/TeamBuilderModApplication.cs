@@ -57,77 +57,6 @@ namespace AutomatedTeamBuilder
             }
         }
         /// <summary>
-        /// Obtains all flags applied to this move. To be called last to ensure everything has had time to modify flags
-        /// </summary>
-        /// <param name="move">Move</param>
-        /// <param name="monCtx">Context to see which flags are added/removed from move</param>
-        /// <returns>All flags in this move</returns>
-        static HashSet<EffectFlag> ExtractMoveFlags(Move move, PokemonBuildInfo monCtx)
-        {
-            HashSet<EffectFlag> moveFlags = [.. move.Flags]; // Copies moves base flags
-            HashSet<EffectFlag> removedFlags = [];
-            HashSet<EffectFlag> addedFlags = [];
-            // Check what has been added
-            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.MOVE, move.Name)]);
-            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.MOVE_CATEGORY, move.Category.ToString())]);
-            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.ANY_DAMAGING_MOVE, "-")]);
-            // Check what has been removed
-            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.MOVE, move.Name)]);
-            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.MOVE_CATEGORY, move.Category.ToString())]);
-            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.ANY_DAMAGING_MOVE, "-")]);
-            // For type mods, need to apply many times if the move's type has changed
-            bool moveTypeChanged;
-            PokemonType moveType = move.Type;
-            do
-            {
-                moveTypeChanged = false;
-                addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString())]);
-                removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString())]);
-                PokemonType moddedType = GetModifiedMoveType(move, monCtx);
-                if (moddedType != moveType)
-                {
-                    moveType = moddedType;
-                    moveTypeChanged = true;
-                }
-            } while (moveTypeChanged);
-            // Add then remove, better to forget some flag than have a wrong one
-            moveFlags.UnionWith(addedFlags);
-            moveFlags.ExceptWith(removedFlags);
-            return moveFlags;
-        }
-        /// <summary>
-        /// Gets a move's type by frantically checking every move type mod
-        /// </summary>
-        /// <param name="move">Move to check</param>
-        /// <param name="monCtx">Mon ctx to get mods</param>
-        /// <returns></returns>
-        static PokemonType GetModifiedMoveType(Move move, PokemonBuildInfo monCtx)
-        {
-            PokemonType moveType = move.Type;
-            if (move.Name == "Revelation Dance") // Revelation dance overrides everything so I don't get cool mods
-            {
-                moveType = (monCtx.TeraType != PokemonType.NONE) ? monCtx.TeraType : monCtx.PokemonTypes.Item1;
-            }
-            else
-            {
-                bool typeChanged = false;
-                do
-                {
-                    PokemonType newType = moveType;
-                    // Checks the move type mod everywhere (including own flagsbut not the added flags)
-                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.MOVE, move.Name), out PokemonType typeMod)) newType = typeMod;
-                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.MOVE_CATEGORY, move.Category.ToString()), out typeMod)) newType = typeMod;
-                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.ANY_DAMAGING_MOVE, "-"), out typeMod)) newType = typeMod;
-                    if (monCtx.MoveTypeMods.TryGetValue((ElementType.DAMAGING_MOVE_OF_TYPE, move.Type.ToString()), out typeMod)) newType = typeMod;
-                    if (newType != moveType)
-                    {
-                        typeChanged = true;
-                    }
-                } while (typeChanged);
-            }
-            return moveType;
-        }
-        /// <summary>
         /// Obtains all mods associated to this, updates Ctx
         /// </summary>
         /// <param name="mon">The pokemon in question</param>
@@ -185,9 +114,6 @@ namespace AutomatedTeamBuilder
                 int[] auxStatBoostArray;
                 switch (statMod.Item1)
                 {
-                    case StatModifier.SUFFIX_CHANGE:
-                        monCtx.MonSuffix = statMod.Item2; // Adds suffix
-                        break;
                     case StatModifier.WEIGHT_MULTIPLIER:
                         monCtx.MonWeight *= double.Parse(statMod.Item2);
                         break;

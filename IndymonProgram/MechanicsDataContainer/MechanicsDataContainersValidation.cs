@@ -1,5 +1,4 @@
 ﻿using MechanicsData;
-using System.Text.RegularExpressions;
 
 namespace MechanicsDataContainer
 {
@@ -40,7 +39,6 @@ namespace MechanicsDataContainer
         {
             bool modExists = mod switch
             {
-                StatModifier.SUFFIX_CHANGE => SuffixRegex().IsMatch(name), // Needs a -suffix
                 StatModifier.WEIGHT_MULTIPLIER or StatModifier.HP_MULTIPLIER or StatModifier.ATTACK_MULTIPLIER or StatModifier.DEFENSE_MULTIPLIER or StatModifier.SPECIAL_ATTACK_MULTIPLIER or StatModifier.SPECIAL_DEFENSE_MULTIPLIER or StatModifier.SPEED_MULTIPLIER or StatModifier.SPECIAL_ACCURACY_MULTIPLIER or StatModifier.PHYSICAL_ACCURACY_MULTIPLIER or StatModifier.OPP_HP_MULTIPLIER or StatModifier.OPP_ATTACK_MULTIPLIER or StatModifier.OPP_DEFENSE_MULTIPLIER or StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER or StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER or StatModifier.OPP_SPEED_MULTIPLIER or StatModifier.ALTER_RECV_NON_SE_DAMAGE or StatModifier.ALTER_RECV_SE_DAMAGE => double.TryParse(name, out _),
                 StatModifier.ATTACK_BOOST or StatModifier.DEFENSE_BOOST or StatModifier.SPECIAL_ATTACK_BOOST or StatModifier.SPECIAL_DEFENSE_BOOST or StatModifier.SPEED_BOOST or StatModifier.HIGHEST_STAT_BOOST or StatModifier.ALL_BOOSTS or StatModifier.HP_EV or StatModifier.ATK_EV or StatModifier.DEF_EV or StatModifier.SPATK_EV or StatModifier.SPDEF_EV or StatModifier.SPEED_EV or StatModifier.OPP_ATTACK_BOOST or StatModifier.OPP_DEFENSE_BOOST or StatModifier.OPP_SPECIAL_ATTACK_BOOST or StatModifier.OPP_SPECIAL_DEFENSE_BOOST or StatModifier.OPP_SPEED_BOOST or StatModifier.ALL_OPP_BOOSTS or StatModifier.CRIT_BOOST => int.TryParse(name, out _),
                 StatModifier.NATURE => Enum.TryParse<Nature>(name, true, out _),
@@ -65,8 +63,5 @@ namespace MechanicsDataContainer
             };
             if (!modExists) throw new Exception($"{name} is not a valid {mod}");
         }
-
-        [GeneratedRegex("^-\\w+$")]
-        private static partial Regex SuffixRegex();
     }
 }

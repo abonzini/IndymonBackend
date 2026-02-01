@@ -511,7 +511,7 @@ namespace MechanicsDataContainer
         void ParseFixedModifiers(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Fixed Mods List");
-            FixedModifiers.Clear();
+            FlatIncreaseModifiers.Clear();
             // Parse csv
             string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int MODIFIER_TYPE_COL = 0;
@@ -527,7 +527,7 @@ namespace MechanicsDataContainer
                 // Validate if all's good
                 AssertElementExistance(modifierType, modifierName);
                 // Add to the corresponding matrices
-                FixedModifiers.Add((modifierType, modifierName), weight); // This should be unique
+                FlatIncreaseModifiers.Add((modifierType, modifierName), weight); // This should be unique
             }
         }
     }

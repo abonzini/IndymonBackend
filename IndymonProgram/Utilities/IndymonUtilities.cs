@@ -120,58 +120,6 @@ namespace Utilities
             return new KeyValuePair<T, U>(key, dict[key]);
         }
         /// <summary>
-        /// Does a ture-false coin flip with P(true)
-        /// </summary>
-        /// <param name="chance">P(true)</param>
-        /// <returns>Result</returns>
-        public static bool RandomSuccess(int chance)
-        {
-            int roll = GetRandomNumber(100);
-            return (chance < roll);
-        }
-        /// <summary>
-        /// Returns a random double [0;1)
-        /// </summary>
-        /// <returns>A random double with uniform distribution</returns>
-        public static double RandomDouble()
-        {
-            // This is some black magic shit
-            _rngSemaphore.Wait();
-            byte[] bytes = RandomNumberGenerator.GetBytes(8);
-            // bit-shift 11 and 53 based on double's mantissa bits
-            _rngSemaphore.Release();
-            ulong ul = BitConverter.ToUInt64(bytes, 0) / (1 << 11);
-            double d = (double)ul / (double)(1UL << 53);
-            return d;
-        }
-        /// <summary>
-        /// Returns an index of a list. The list contains the weights so that chance is weighted towards bigger indices. No need to be normalized
-        /// </summary>
-        /// <param name="weights">List of weight</param>
-        /// <param name="power">Optional power to elevate weights, to skew the decision towards higher/lower weights</param>
-        /// <returns>A random index within the list. List is modified by the power</returns>
-        public static int RandomIndexOfWeights(List<double> weights, double power = 1.0f)
-        {
-            double totalSum = 0;
-            for (int i = 0; i < weights.Count; i++)
-            {
-                double weight = Math.Pow(weights[i], power);
-                weights[i] = weight;
-                totalSum += weight;
-            }
-            // Once processed, I'll get a random number, uniform within sum
-            double hit = totalSum * RandomDouble();
-            // Finally, search for which element is the winner, one by one
-            for (int i = 0; i < weights.Count; i++)
-            {
-                if (weights[i] > hit)
-                {
-                    return i - 1;
-                }
-            }
-            throw new Exception("Impossible chance reached");
-        }
-        /// <summary>
         /// Returns an array where every element is the max of all elements of array. Assumes all sub-arrays to be same size
         /// </summary>
         /// <param name="arrays">Array of arrays that contain numbers</param>

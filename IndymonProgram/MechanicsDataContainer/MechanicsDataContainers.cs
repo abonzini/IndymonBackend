@@ -55,6 +55,6 @@ namespace MechanicsDataContainer
         public Dictionary<(ElementType, string), HashSet<(StatModifier, string)>> StatModifiers { get; set; } = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> WeightModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
-        public Dictionary<(ElementType, string), double> FixedModifiers { get; set; } = new Dictionary<(ElementType, string), double>();
+        public Dictionary<(ElementType, string), double> FlatIncreaseModifiers { get; set; } = new Dictionary<(ElementType, string), double>();
     }
 }

@@ -18,13 +18,4 @@ White Monastery -> Justice -> Dawn Stone
 Need to manually ensure in team calc:
 - Setup (and speed setup) increasing their respective utility. Add defensive setup? Same idea? >1.1 or sth
 
-Distant future (ideas):
--	To do next time a player selects nature power/secret power or camouflage (or random person explore)
-	Exploration/Arena terrain info. Have an extra flag in ps.field which is something like arena-tag. Load arena tag from custom rule.
-	Custom ruleset, identical to "Force Monotype". Field loads it like "this.ruleTable.valueRules.get('arenatagmod')"
-	Modifies:
-		- Camouflage type
-		- Nature Power move
-		- Secret power effect
-		- Let default be, as before, tri-attack/paralysis/normal (??), and then else if chain
-		- Add mod to all dungeons
+- Dungeons to have their own modifiers n stuff
