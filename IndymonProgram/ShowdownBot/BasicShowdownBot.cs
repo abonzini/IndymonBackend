@@ -342,7 +342,10 @@ namespace ShowdownBot
                             foreach (AvailableMove move in _currentGameState.Active[0].Moves)
                             {
                                 int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Replace("102", "").Trim().ToLower()); // For some reason return is called return102
-                                currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
+                                if(moveIndex > 0)
+                                {
+                                    currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
+                                }
                             }
                         }
                     }
