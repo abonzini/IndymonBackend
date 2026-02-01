@@ -300,7 +300,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : [],
+  "CustomShowdownRules" : ["Environment Mod = temple"],
   "NextDungeon": "Northface Glacier",
   "NextDungeonShortcut": "Sky Castle"
 }

@@ -279,7 +279,7 @@
       "PreEventString": "... then the balance of power will change forever in the world.",
       "PostEventString": "The mythical beasts of creation will roam the lands once again."
   },
-  "CustomShowdownRules" : ["Continuous Snow Mod"],
+  "CustomShowdownRules" : ["Continuous Snow Mod", "Environment Mod = mountain"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

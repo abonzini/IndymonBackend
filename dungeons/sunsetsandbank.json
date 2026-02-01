@@ -195,7 +195,7 @@
     {
 				"ConditionType": "ABILITY",
 				"Which": ["Swift Swim"]
-		},
+		}
 	  ],
 	  "ShortcutClue": "You could probably swim across to reach ahead faster.",
 	  "ShortcutResolution": "Your $1 allows you to reach the distant sandbanks."
@@ -281,7 +281,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : [],
+  "CustomShowdownRules" : ["Environment Mod = beach"],
   "NextDungeon": "",
   "NextDungeonShortcut": "Deepest Trench"
 }

@@ -284,7 +284,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : [],
+  "CustomShowdownRules" : ["Environment Mod = meadow"],
   "NextDungeon": "Abandoned Power Plant",
   "NextDungeonShortcut": "Desert Ruins"
 }

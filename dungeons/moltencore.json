@@ -272,7 +272,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : ["Continuous Desolate Land Mod"],
+  "CustomShowdownRules" : ["Continuous Desolate Land Mod", "Environment Mod = volcano"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

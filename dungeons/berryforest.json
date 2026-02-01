@@ -293,7 +293,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : [],
+  "CustomShowdownRules" : ["Environment Mod = forest"],
   "NextDungeon": "Rub-a-Dub Pond",
   "NextDungeonShortcut": "Cursed Mansion"
 }
