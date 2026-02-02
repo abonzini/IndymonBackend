@@ -201,17 +201,8 @@ namespace AutomatedTeamBuilder
                 // This gives me the average punch in the face I get, my HP is evaluated inside this
                 // This makes underkills make my hp be close to 1 and overkills make it tend to 0
                 // Improvements will then involve moves move me in this curve but if I gain defense for nothing, or is not enough anyway, then it's ok
-                Move sampleMove = new Move()
-                {
-                    Name = "Sample Move",
-                    Type = PokemonType.NONE, // Irrelevant for base damage calc
-                    Category = MoveCategory.PHYSICAL,
-                    Bp = 80, // The Bp doesn't matter too much I do 80/100 as an average OK move
-                    Acc = 100,
-                };
-                (double physicalDamage, double physicalVariance) = CalcMoveDamage(sampleMove, result, oppStats, monStats, oppVariance, teamCtx);
-                sampleMove.Category = MoveCategory.SPECIAL; // Also calc special move
-                (double specialDamage, double specialVariance) = CalcMoveDamage(sampleMove, result, oppStats, monStats, oppVariance, teamCtx);
+                (double physicalDamage, double physicalVariance) = CalcPlaceholderMoveDamage(80, MoveCategory.PHYSICAL, oppStats, monStats, oppVariance); // Use 80 BP as indication of an OK move damage
+                (double specialDamage, double specialVariance) = CalcPlaceholderMoveDamage(80, MoveCategory.SPECIAL, oppStats, monStats, oppVariance);
                 double averageDamage = (physicalDamage + specialDamage) / 2;
                 double averageDamageVariance = (physicalVariance + specialVariance) / 4;
                 // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly

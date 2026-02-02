@@ -6,6 +6,30 @@ namespace AutomatedTeamBuilder
     {
         // Calc area
         /// <summary>
+        /// Calculated the damage of a simple placeholder move without any crazy mods or even a type. Just to have an idea of the defensive profile of a mon
+        /// </summary>
+        /// <param name="bp">Bp of move</param>
+        /// <param name="category">Category of move</param>
+        /// <param name="attackerStats">Stats of attacker entity</param>
+        /// <param name="defenderStats">Stats of defending entity</param>
+        /// <param name="attackingStatVariances">Variance of stats of attacking entity</param>
+        /// <returns></returns>
+        static (double, double) CalcPlaceholderMoveDamage(double bp, MoveCategory category, double[] attackerStats, double[] defenderStats, double[] attackingStatVariances)
+        {
+            double attackingStat = (category == MoveCategory.PHYSICAL) ? attackerStats[1] : attackerStats[3];
+            double attackingStatVariance = (category == MoveCategory.PHYSICAL) ? attackingStatVariances[1] : attackingStatVariances[3];
+            double defendingStat = (category == MoveCategory.PHYSICAL) ? defenderStats[2] : defenderStats[4];
+            // Actual calculation    
+            double hitDamage = 42; // This depends on mon level so keep in mind
+            hitDamage *= attackingStat;
+            double hitDamageVariance = attackingStatVariance * 42 * 42; // start doing variance at this point
+            double remainingFactor = bp / (defendingStat * 50); // rest of the damage formula
+            hitDamage *= remainingFactor;
+            hitDamageVariance *= remainingFactor * remainingFactor;
+            hitDamage += 2; // This is the hit damage, no variance needed here
+            return (hitDamage, hitDamageVariance);
+        }
+        /// <summary>
         /// Calculates the damage of a (damaging!) move
         /// </summary>
         /// <param name="move">The move itself</param>

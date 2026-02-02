@@ -114,11 +114,23 @@ namespace AutomatedTeamBuilder
                                     List<double> abilityScores = new List<double>();
                                     foreach (Ability nextAbility in acceptableAbilities)
                                     {
-                                        abilityScores.Add(GetAbilityWeight(nextAbility, mon, monCtx, buildCtx, monIndex == 0));
+                                        if (buildCtx.smartTeamBuild) // If smart, abilities are weighted according to how useful they are
+                                        {
+                                            abilityScores.Add(GetAbilityWeight(nextAbility, mon, monCtx, buildCtx, monIndex == 0));
+                                        }
+                                        else // Otherwise, 1 is added
+                                        {
+                                            abilityScores.Add(1);
+                                        }
                                     } // Gottem scores
                                     int chosenAbilityIndex = RandomIndexOfWeights(abilityScores, rng);
                                     Ability chosenAbility = acceptableAbilities[chosenAbilityIndex]; // Got the ability
                                     mon.ChosenAbility = chosenAbility; // Apply to mon, all good here
+                                    if (setItemAbilityLookup.ContainsKey(chosenAbility)) // If this was found through set item, need to equip set item
+                                    {
+                                        mon.SetItem = setItemAbilityLookup[chosenAbility];
+                                        IndymonUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, -1, true); // Remove 1 charge of set item from trainer
+                                    }
                                 }
                                 if (mon.ChosenAbility != null) // After this step, this should be true always and move on!
                                 {
