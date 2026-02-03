@@ -64,9 +64,8 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="pokemon">The Pokemon with its current set</param>
         /// <param name="teamCtx">Extra context of the fight, null if skips the context checks</param>
-        /// <param name="ignoreMostRecientMove">Ignores most recient move for off score, just to verify off score retroactive improvements without move dmaage affecting</param>
         /// <returns>The Pokemon build details</returns>
-        static PokemonBuildInfo ObtainPokemonSetContext(TrainerPokemon pokemon, TeamBuildContext teamCtx, bool ignoreMostRecientMove = false)
+        static PokemonBuildInfo ObtainPokemonSetContext(TrainerPokemon pokemon, TeamBuildContext teamCtx)
         {
             PokemonBuildInfo result = new PokemonBuildInfo();
             // First, need to load mon base stuff
@@ -167,11 +166,10 @@ namespace AutomatedTeamBuilder
                 List<double> movesDamage = [];
                 List<List<double>> movesTypeCoverage = [];
                 // Check all moves but ignore the last one if calculating improvement
-                for (int i = 0; i < (ignoreMostRecientMove ? pokemon.ChosenMoveset.Count - 1 : pokemon.ChosenMoveset.Count); i++)
+                for (int i = 0; i < pokemon.ChosenMoveset.Count; i++)
                 {
                     Move move = pokemon.ChosenMoveset[i];
                     if (move.Category == MoveCategory.STATUS) continue; // We don't check for status moves
-                    // Get move damage without variance
                     movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, monStatVariance, teamCtx,
                         (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
                         pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways

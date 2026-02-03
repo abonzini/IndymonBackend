@@ -1,4 +1,7 @@
-﻿using MechanicsData;
+﻿using GameData;
+using MechanicsData;
+using MechanicsDataContainer;
+using Utilities;
 
 namespace AutomatedTeamBuilder
 {
@@ -365,5 +368,254 @@ namespace AutomatedTeamBuilder
             return moveType;
         }
         // Scoring area
+        /// <summary>
+        /// The main dish, gets the move weight. Move is more complex as it needs to calculate damage, apply weights, and then other shit
+        /// </summary>
+        /// <param name="move">The move to evaluate</param>
+        /// <param name="mon">Mon that will equip move</param>
+        /// <param name="monCtx">Mon ctx whete move is evaluated</param>
+        /// <param name="buildCtx">Build context where everythign is evaluated</param>
+        /// <param name="isFirstMon">Whether it's the first mon evaluated or not</param>
+        /// <returns>A move score</returns>
+        static double GetMoveWeight(Move move, TrainerPokemon mon, PokemonBuildInfo monCtx, TeamBuildContext buildCtx, bool isFirstMon)
+        {
+            // Get the move mods
+            HashSet<EffectFlag> allMoveFlags = ExtractMoveFlags(move, monCtx); // Get all the flags a move has
+            PokemonType moveType = GetModifiedMoveType(move, monCtx); // Get the final move type for type effectiveness
+            // Beginning of scoring
+            double score = 1;
+            if (allMoveFlags.Contains(EffectFlag.BANNED)) // Banned moves can never be chosen
+            {
+                return 0;
+            }
+            else if (allMoveFlags.Contains(EffectFlag.DOUBLES_ONLY)) // Doubles moves can never be chosen
+            {
+                return 0;
+            }
+            else if (isFirstMon && allMoveFlags.Contains(EffectFlag.GOOD_FIRST_MON)) // Moves only for first mon are not chosen!
+            {
+                return 0;
+            }
+            else
+            {
+                // Assembly of tags rq
+                (ElementType, string) moveNameTag = (ElementType.MOVE, move.Name);
+                (ElementType, string) moveCatTag = (ElementType.MOVE_CATEGORY, move.Category.ToString());
+                (ElementType, string) moveOTypeTag = (ElementType.ORIGINAL_TYPE_OF_MOVE, move.Type.ToString());
+                (ElementType, string) moveTypeTag = (ElementType.DAMAGING_MOVE_OF_TYPE, moveType.ToString()); // Won't be used if move non-damaging
+                (ElementType, string) damagingMoveFlag = (ElementType.ANY_DAMAGING_MOVE, "-"); // Won't be used if move non-damaging
+                bool moveIsDamaging = move.Category != MoveCategory.STATUS;
+                // Quick check of what is disabled. Logic: If something was disabled and not re-enabled, then move can't be selected
+                double aux;
+                if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(moveNameTag))
+                {
+                    if (monCtx.EnabledOptions.TryGetValue(moveNameTag, out aux))
+                    {
+                        score *= aux;
+                    }
+                    else return 0;
+                }
+                if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(moveCatTag))
+                {
+                    if (monCtx.EnabledOptions.TryGetValue(moveCatTag, out aux))
+                    {
+                        score *= aux;
+                    }
+                    else return 0;
+                }
+                if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(moveOTypeTag))
+                {
+                    if (monCtx.EnabledOptions.TryGetValue(moveOTypeTag, out aux))
+                    {
+                        score *= aux;
+                    }
+                    else return 0;
+                }
+                if (moveIsDamaging) // Few extra checks for damaging moves
+                {
+                    if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(moveTypeTag))
+                    {
+                        if (monCtx.EnabledOptions.TryGetValue(moveTypeTag, out aux))
+                        {
+                            score *= aux;
+                        }
+                        else return 0;
+                    }
+                    if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(damagingMoveFlag))
+                    {
+                        if (monCtx.EnabledOptions.TryGetValue(damagingMoveFlag, out aux))
+                        {
+                            score *= aux;
+                        }
+                        else return 0;
+                    }
+                }
+                foreach (EffectFlag effect in allMoveFlags)
+                {
+                    (ElementType, string) effectTag = (ElementType.EFFECT_FLAGS, effect.ToString());
+                    if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(effectTag))
+                    {
+                        if (monCtx.EnabledOptions.TryGetValue(effectTag, out aux))
+                        {
+                            score *= aux;
+                        }
+                        else return 0;
+                    }
+                }
+                // Ok, nothing disabled, so move on to calc weight
+                if (!moveIsDamaging) // If status move, then the weight is its weight, but less if has low acc
+                {
+                    double moveAccuracy = move.Acc * GetMoveAccMods(move, monCtx) / 100; // 0-1 acc with mods
+                    if (moveAccuracy == 0) moveAccuracy = 1; // Acc of 0 is reserved for no-miss
+                    score *= moveAccuracy; // This is so if a status move is useful, but lower acc makes it less useful
+                }
+                else // If damage, then the damage it does will be scored too, with a value of 1 corresponding to 50% of the opp average HP
+                {
+                    // Check the actual stats of mon and opp
+                    (double[] monStats, double[] monStatVariance) = MonStatCalculation(monCtx); // Get mon stats (variance is 0 anyway)
+                    (double[] oppStats, _) = MonStatCalculation(monCtx, buildCtx, true); // Get opp stats and variance
+                    double moveDamage = CalcMoveDamage(move, monCtx, monStats, oppStats, monStatVariance, buildCtx,
+                        (mon.ChosenAbility?.Name == "Protean" || mon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
+                        mon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways
+                        mon.BattleItem?.Name == "Loaded Dice").Item1; // Only care about damage and not variance (it'd be 0)
+                    // Get the move coverage, making sure some specific crazy effects that modify moves
+                    List<double> moveCoverage = CalculateOffensiveTypeCoverage(moveType, buildCtx.OpponentsTypes,
+                        allMoveFlags.Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
+                        mon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
+                        move.Name == "Freeze Dry"); // Freeze dry is SE against water
+                    moveDamage *= IndymonUtilities.ArrayAverage(moveCoverage); // Average damage caused by move cvg
+                    // Finally, how damage affects score
+                    score *= (2 * moveDamage) / oppStats[0]; // A damage of 50% opp HP would have a score of 1
+                }
+                // Finally, all the mults associated with a move, another headache...
+                // Initial weights first
+                if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(moveNameTag, out aux))
+                {
+                    score *= aux;
+                }
+                if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(moveCatTag, out aux))
+                {
+                    score *= aux;
+                }
+                if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(moveOTypeTag, out aux))
+                {
+                    score *= aux;
+                }
+                if (moveIsDamaging) // Few extra checks for damaging moves
+                {
+                    if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(moveTypeTag, out aux))
+                    {
+                        score *= aux;
+                    }
+                    if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(damagingMoveFlag, out aux))
+                    {
+                        score *= aux;
+                    }
+                }
+                foreach (EffectFlag effect in allMoveFlags)
+                {
+                    (ElementType, string) effectTag = (ElementType.EFFECT_FLAGS, effect.ToString());
+                    if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(effectTag, out aux))
+                    {
+                        score *= aux;
+                    }
+                }
+                // Then the smart mods (weights?)
+                if (monCtx.WeightMods.TryGetValue(moveNameTag, out aux))
+                {
+                    score *= aux;
+                }
+                if (monCtx.WeightMods.TryGetValue(moveCatTag, out aux))
+                {
+                    score *= aux;
+                }
+                if (monCtx.WeightMods.TryGetValue(moveOTypeTag, out aux))
+                {
+                    score *= aux;
+                }
+                if (moveIsDamaging) // Few extra checks for damaging moves
+                {
+                    if (monCtx.WeightMods.TryGetValue(moveTypeTag, out aux))
+                    {
+                        score *= aux;
+                    }
+                    if (monCtx.WeightMods.TryGetValue(damagingMoveFlag, out aux))
+                    {
+                        score *= aux;
+                    }
+                }
+                foreach (EffectFlag effect in allMoveFlags)
+                {
+                    (ElementType, string) effectTag = (ElementType.EFFECT_FLAGS, effect.ToString());
+                    if (monCtx.WeightMods.TryGetValue(effectTag, out aux))
+                    {
+                        score *= aux;
+                    }
+                }
+                // And finally, if score non-0 add also the additive ones
+                if (score > 0)
+                {
+                    if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(moveNameTag, out aux))
+                    {
+                        score += aux;
+                    }
+                    if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(moveCatTag, out aux))
+                    {
+                        score += aux;
+                    }
+                    if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(moveOTypeTag, out aux))
+                    {
+                        score += aux;
+                    }
+                    if (moveIsDamaging) // Few extra checks for damaging moves
+                    {
+                        if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(moveTypeTag, out aux))
+                        {
+                            score += aux;
+                        }
+                        if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(damagingMoveFlag, out aux))
+                        {
+                            score += aux;
+                        }
+                    }
+                    foreach (EffectFlag effect in allMoveFlags)
+                    {
+                        (ElementType, string) effectTag = (ElementType.EFFECT_FLAGS, effect.ToString());
+                        if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(effectTag, out aux))
+                        {
+                            score += aux;
+                        }
+                    }
+                }
+                // Finally, we need to do the hypotetical, does this move add to defensive, offensive or speed utilities?
+                mon.ChosenMoveset.Add(move); // First, equip this move to mon
+                PokemonBuildInfo newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
+                double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
+                double defImprovement = newCtx.DefenseScore / monCtx.DefenseScore;
+                double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
+                // If needs an improvement, will be accepted as long as some of the improvements succeeds
+                int nImprovChecks = 0;
+                int nImproveFails = 0;
+                if (allMoveFlags.Contains(EffectFlag.OFF_UTILTIY))
+                {
+                    nImprovChecks++;
+                    if (dmgImprovement < 1.1) nImproveFails++;
+                }
+                if (allMoveFlags.Contains(EffectFlag.DEF_UTILITY))
+                {
+                    nImprovChecks++;
+                    if (defImprovement < 1.1) nImproveFails++;
+                }
+                if (allMoveFlags.Contains(EffectFlag.SPEED_UTILITY))
+                {
+                    nImprovChecks++;
+                    if (speedImprovement < 1.1) nImproveFails++;
+                }
+                if (nImproveFails == nImprovChecks) return 0; // If all checks failed, move not good
+                score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
+                mon.ChosenMoveset.RemoveAt(mon.ChosenMoveset.Count - 1); // Remove move ofc
+            }
+            return score;
+        }
     }
 }

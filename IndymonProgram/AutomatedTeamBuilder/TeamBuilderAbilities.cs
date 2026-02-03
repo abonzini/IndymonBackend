@@ -61,9 +61,25 @@ namespace AutomatedTeamBuilder
                 double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
                 double defImprovement = newCtx.DefenseScore / monCtx.DefenseScore;
                 double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
-                if (ability.Flags.Contains(EffectFlag.OFF_UTILTIY) && (dmgImprovement < 1.1)) score = 0; // If the ability REQUIRED this, then its gone if not fulfill
-                if (ability.Flags.Contains(EffectFlag.DEF_UTILITY) && (defImprovement < 1.1)) score = 0;
-                if (ability.Flags.Contains(EffectFlag.SPEED_UTILITY) && (speedImprovement < 1.1)) score = 0;
+                // If needs an improvement, will be accepted as long as some of the improvements succeeds
+                int nImprovChecks = 0;
+                int nImproveFails = 0;
+                if (ability.Flags.Contains(EffectFlag.OFF_UTILTIY))
+                {
+                    nImprovChecks++;
+                    if (dmgImprovement < 1.1) nImproveFails++;
+                }
+                if (ability.Flags.Contains(EffectFlag.DEF_UTILITY))
+                {
+                    nImprovChecks++;
+                    if (defImprovement < 1.1) nImproveFails++;
+                }
+                if (ability.Flags.Contains(EffectFlag.SPEED_UTILITY))
+                {
+                    nImprovChecks++;
+                    if (speedImprovement < 1.1) nImproveFails++;
+                }
+                if (nImproveFails == nImprovChecks) score = 0; // If all checks failed, ability not good
                 score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
                 theMon.ChosenAbility = oldAbility; // Revert this ofc
                 // Finally, we got a score, an ability needs to eb chosen so it'll always have a value, even if 0

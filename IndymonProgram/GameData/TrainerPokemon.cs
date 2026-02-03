@@ -20,6 +20,21 @@ namespace GameData
         public int[] Evs { get; set; } = new int[6];
         public Nature Nature { get; set; } = Nature.SERIOUS;
         public PokemonType TeraType { get; set; } = PokemonType.NONE;
-
+        public string PrintSet()
+        {
+            List<string> moveNames = new List<string>(4);
+            foreach (Move move in ChosenMoveset)
+            {
+                if (move != null)
+                {
+                    moveNames.Add(move.Name);
+                }
+                else
+                {
+                    moveNames.Add(" ");
+                }
+            }
+            return $"{ToString()}:{ChosenAbility.Name}:{string.Join(",", moveNames)}";
+        }
     }
 }
