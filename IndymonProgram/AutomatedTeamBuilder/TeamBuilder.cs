@@ -16,13 +16,70 @@ namespace AutomatedTeamBuilder
             DONE
         }
         /// <summary>
+        /// Defines all sets for a trainer
+        /// </summary>
+        /// <param name="trainer">Which trainer I'll do</param>
+        /// <param name="smart">Smart build or not (i.e. "Thinks" of a set instead of random stuff)</param>
+        /// <param name="Archetypes">Valid archetypes for this mon set</param>
+        /// <param name="buildConstraints">Specific constraints needed for mon</param>
+        /// <param name="pokemonFaced">All the pokemon that may be faced, to calculate types and stats</param>
+        /// <param name="seed">Seed if the trainer set, to ensure consistency if saved</param>
+        public static void DefineTrainerSets(Trainer trainer, bool smart, HashSet<TeamArchetype> Archetypes, TeamBuildConstraints buildConstraints, List<Pokemon> pokemonFaced, int seed = 0)
+        {
+            // Create a build ctx to start team build
+            TeamBuildContext buildCtx = new TeamBuildContext
+            {
+                smartTeamBuild = smart
+            };
+            buildCtx.CurrentTeamArchetypes.UnionWith(Archetypes); // Add archetypes
+            buildCtx.TeamBuildConstraints.AllConstraints.AddRange(buildConstraints.AllConstraints); // Add design constraints
+            if (smart) // In smart build, theres a constraint where every mon needs to have an attackign move no matter what (to avoid locks)
+            {
+                buildCtx.TeamBuildConstraints.AllConstraints.Add([(ElementType.ANY_DAMAGING_MOVE, "-")]);
+            }
+            // Finally, if building against other pokemon, need to fetch the stats and other things
+            if (pokemonFaced.Count > 0)
+            {
+                // Initial pass, load all data
+                foreach (Pokemon facedMon in pokemonFaced)
+                {
+                    buildCtx.OpponentsTypes.Add(facedMon.Types); // Add type combo (base) to list
+                    for (int i = 0; i < 6; i++)
+                    {
+                        buildCtx.OpponentsStats[i] += facedMon.Stats[i] / pokemonFaced.Count;
+                    }
+                    buildCtx.AverageOpponentWeight += facedMon.Weight / pokemonFaced.Count;
+                }
+                // Another pass for variance
+                foreach (Pokemon facedMon in pokemonFaced)
+                {
+                    for (int i = 0; i < 6; i++)
+                    {
+                        double meanDifference = (facedMon.Stats[i] - buildCtx.OpponentsStats[i]);
+                        meanDifference *= meanDifference; // Square it
+                        buildCtx.OppStatVariance[i] += meanDifference / pokemonFaced.Count; // Variance
+                    }
+                }
+            }
+            else if (smart)
+            {
+                throw new Exception("Smart teambuild needs data about opp mons!");
+            }
+            else
+            {
+                // Stupid build, reserved for wild mons
+            }
+            BuildTeam(trainer, buildCtx, seed);
+        }
+        /// <summary>
         /// Sets the movesets of all mons of a trainer's battle team
         /// </summary>
         /// <param name="trainer">Which trainer to build</param>
         /// <param name="buildCtx">Context containing other team build things that may be important (May be modified by a set)</param>
-        public static void BuildTeam(Trainer trainer, TeamBuildContext buildCtx)
+        /// <param name="seed">Team building seed, 0 to generate a random one</param>
+        static void BuildTeam(Trainer trainer, TeamBuildContext buildCtx, int seed)
         {
-            int teamSeed = IndymonUtilities.GetRandomNumber(int.MaxValue);
+            int teamSeed = (seed == 0) ? IndymonUtilities.GetRandomNumber(int.MaxValue) : seed;
             bool teamAccepted = false, seedAccepted = true;
             while (!teamAccepted)
             {
@@ -52,7 +109,11 @@ namespace AutomatedTeamBuilder
                     MonBuildState state = MonBuildState.CHOOSING_ABILITY; // Begin with ability
                     while (state != MonBuildState.DONE)
                     {
-                        PokemonBuildInfo monCtx = ObtainPokemonSetContext(mon, buildCtx); // Obtain current Pokemon mods and score and such
+                        PokemonBuildInfo monCtx = new PokemonBuildInfo();
+                        if (buildCtx.smartTeamBuild) // Build info needs to do scoring stuff if in a smart build
+                        {
+                            monCtx = ObtainPokemonSetContext(mon, buildCtx); // Obtain current Pokemon mods and score and such
+                        }
                         buildCtx.CurrentTeamArchetypes.UnionWith(monCtx.AdditionalArchetypes); // New archetypes found here are added into all team's archetypes
                         // Monctx contains all the ongoing constraints, need only the ones which haven't been fulfilled yet
                         TeamBuildConstraints ongoingConstraints = new TeamBuildConstraints();
@@ -118,9 +179,16 @@ namespace AutomatedTeamBuilder
                                         {
                                             abilityScores.Add(GetAbilityWeight(nextAbility, mon, monCtx, buildCtx, monIndex == 0));
                                         }
-                                        else // Otherwise, 1 is added
+                                        else // Otherwise, 1 is added unless banned
                                         {
-                                            abilityScores.Add(1);
+                                            if (nextAbility.Flags.Contains(EffectFlag.BANNED))
+                                            {
+                                                abilityScores.Add(0);
+                                            }
+                                            else
+                                            {
+                                                abilityScores.Add(1);
+                                            }
                                         }
                                     } // Gottem scores
                                     int chosenAbilityIndex = RandomIndexOfWeights(abilityScores, rng);
@@ -206,9 +274,16 @@ namespace AutomatedTeamBuilder
                                             {
                                                 moveScores.Add(GetMoveWeight(nextMove, mon, monCtx, buildCtx, monIndex == 0));
                                             }
-                                            else // Otherwise, 1 is added
+                                            else // Otherwise, 1 is added unless banned
                                             {
-                                                moveScores.Add(1);
+                                                if (nextMove.Flags.Contains(EffectFlag.BANNED)) // This doesnt deal with moves that are added "banned" as a special mod but this hasn't happened still 
+                                                {
+                                                    moveScores.Add(0);
+                                                }
+                                                else
+                                                {
+                                                    moveScores.Add(1);
+                                                }
                                             }
                                         } // Gottem scores
                                         int chosenMoveIndex = RandomIndexOfWeights(moveScores, rng);
@@ -422,7 +497,7 @@ namespace AutomatedTeamBuilder
                                 throw new NotImplementedException("State machine broke");
                         }
                     }
-                    Console.WriteLine($"Chosen set for mon: {mon.PrintSet()}");
+                    Console.WriteLine($"Chosen set for mon ({teamSeed}): {mon.PrintSet()}");
                 }
                 Console.WriteLine("Accept set? Y/n/Reroll");
                 string readKey = Console.ReadLine();

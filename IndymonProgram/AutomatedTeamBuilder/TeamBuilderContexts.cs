@@ -9,7 +9,7 @@ namespace AutomatedTeamBuilder
     /// <summary>
     /// A context of things going on, to be able to build mons sets. Includes opp average profile, typechart, and ongoing archetypes if present
     /// </summary>
-    public class TeamBuildContext
+    internal class TeamBuildContext
     {
         public HashSet<TeamArchetype> CurrentTeamArchetypes = new HashSet<TeamArchetype>(); // Contains an ongoing archetype that applies for all team
         public TeamBuildConstraints TeamBuildConstraints = new TeamBuildConstraints(); // Constraints applied to this team building. Different meaning to team build, as this is a list of all necessary stuff (A+B)*(C+D)

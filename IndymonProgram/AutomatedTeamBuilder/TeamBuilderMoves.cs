@@ -97,6 +97,19 @@ namespace AutomatedTeamBuilder
                     moveBp = (25 * defenderStats[5] / attackerStats[5]) + 1;
                     moveBp = Math.Min(150, moveBp);
                 }
+                else if (moveFlags.Contains(EffectFlag.POSITIVE_STAT_BOOST))
+                {
+                    int numberOfStatBoosts = 0;
+                    for (int i = 0; i < monCtx.StatBoosts.Length; i++)
+                    {
+                        if (monCtx.StatBoosts[i] > 0) // Only positive boosts are counted
+                        {
+                            numberOfStatBoosts += monCtx.StatBoosts[i];
+                        }
+                    }
+                    moveBp = 20 * numberOfStatBoosts; //20* boosts
+                    if (moveBp < 20) moveBp = 20; // Min dmg of 20 unboosted
+                }
                 else if (move.Bp == 0)
                 {
                     moveBp = 60; // Average of weird remaining moves of variable powers
