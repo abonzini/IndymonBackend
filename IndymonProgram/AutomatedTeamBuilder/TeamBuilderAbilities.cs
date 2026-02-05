@@ -64,7 +64,7 @@ namespace AutomatedTeamBuilder
                 // If needs an improvement, will be accepted as long as some of the improvements succeeds
                 int nImprovChecks = 0;
                 int nImproveFails = 0;
-                if (ability.Flags.Contains(EffectFlag.OFF_UTILTIY))
+                if (ability.Flags.Contains(EffectFlag.OFF_UTILITY))
                 {
                     nImprovChecks++;
                     if (dmgImprovement < 1.1) nImproveFails++;
@@ -81,6 +81,10 @@ namespace AutomatedTeamBuilder
                 }
                 if (nImproveFails == nImprovChecks) score = 0; // If all checks failed, ability not good
                 score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
+                if (ability.Flags.Contains(EffectFlag.HEAL)) // Healing abilities that are healer are weighted on whether the mon can actually make decent use of this
+                {
+                    score *= newCtx.Survivability;
+                }
                 theMon.ChosenAbility = oldAbility; // Revert this ofc
                 // Finally, we got a score, an ability needs to eb chosen so it'll always have a value, even if 0
                 if (score <= MIN_ABILITY_SCORE)

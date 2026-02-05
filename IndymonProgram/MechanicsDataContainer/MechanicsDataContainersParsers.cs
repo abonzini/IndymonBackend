@@ -264,7 +264,7 @@ namespace MechanicsDataContainer
             // Parse csv
             string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
-            const int FLAGS_COL = 9; // Contains all effect keys of this particular item
+            const int FLAGS_COL = 10; // Contains all effect keys of this particular item
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {

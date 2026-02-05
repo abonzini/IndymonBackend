@@ -9,7 +9,7 @@ namespace MechanicsData
         BANNED, // Forbidden moves
         DOUBLES_ONLY, // Moves that are good in doubles only, do not use in singles
         DRAIN, // Draining moves, benefit from root
-        HEAL, // Moves that heal the user (triage)
+        HEAL, // Status moves that heal the user (non-damaging)
         CHANCE, // Moves with a chance of something nice, for serene grace
         SECONDARY_EFFECT, // Moves with a chance (can be 100%) of secondary effect, for sheer force
         PIVOT, // Pivot moves (but not stuff like memento)
@@ -41,7 +41,7 @@ namespace MechanicsData
         SETUP_DAMAGING, // Damaging moves that increase stat
         SELF_DEBUFF, // Debuff user (contrary, sure crit)
         SETUP_STATUS, // Collection of all the status setup moves
-        OFF_UTILTIY, // Moves with an off utility only
+        OFF_UTILITY, // Moves with an off utility only
         DEF_UTILITY, // Moves with a def utility only
         SPEED_UTILITY, // Moves with a speed utility only
         DAMAGE_PROP_WEIGTH_DIFFERENCE, // Damage increases with weight difference

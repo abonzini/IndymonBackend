@@ -96,14 +96,15 @@ namespace AutomatedTeamBuilder
                     Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
                     // First thing is to check if mon has set item equipped, if so, add the move/ability already
                     Ability setItemAbility = GetSetItemAbility(mon.SetItem);
-                    if (setItemAbility != null)
-                    {
-                        mon.ChosenAbility = setItemAbility;
-                    }
+                    mon.ChosenAbility = setItemAbility;
                     Move setItemMove = GetSetItemMove(mon.SetItem);
                     if (setItemMove != null)
                     {
                         mon.ChosenMoveset = [setItemMove];
+                    }
+                    else
+                    {
+                        mon.ChosenMoveset = [];
                     }
                     // Now that the initial set is assembled, evaluate with a state machine
                     MonBuildState state = MonBuildState.CHOOSING_ABILITY; // Begin with ability
@@ -473,6 +474,10 @@ namespace AutomatedTeamBuilder
                                             score = 0; // If all checks failed, item not good
                                         }
                                         score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
+                                        if (battleItem.Flags.Contains(ItemFlag.HEAL)) // Healing items are scored on whether they can actually make sense on the mon
+                                        {
+                                            score *= newCtx.Survivability;
+                                        }
                                         mon.BattleItem = null; // Remove item ofc
                                         if (score > 0)
                                         {
@@ -514,6 +519,18 @@ namespace AutomatedTeamBuilder
                 else
                 {
                     teamAccepted = true;
+                }
+            }
+            // If team accepted, then get all mons ctx one last time, and apply the necessary things to them
+            foreach (TrainerPokemon mon in trainer.BattleTeam)
+            {
+                PokemonBuildInfo monCtx = new PokemonBuildInfo(); // Get all the mons context data
+                // Copy all the relevant build (mod?) stats too
+                mon.TeraType = monCtx.TeraType;
+                mon.Nature = monCtx.Nature;
+                for (int i = 0; i < 6; i++)
+                {
+                    mon.Evs[i] = monCtx.Evs[i];
                 }
             }
         }

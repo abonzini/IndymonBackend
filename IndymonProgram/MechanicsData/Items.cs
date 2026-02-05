@@ -15,6 +15,7 @@ namespace MechanicsData
         REQUIRES_OFF_INCREASE, // Item requires offensive increase to be selected (to avoid giving specs to physicals and stuff like that)
         REQUIRES_DEF_INCREASE, // Item requires defensive increase to be selected (tera shard e.g.)
         REQUIRES_SPEED_INCREASE, // Item requires meaningful speed increase to be selected (to avoid giving scarf to fast (or too slow) mons)
+        HEAL, // Items that restore HP
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum Nature

@@ -56,6 +56,7 @@ namespace AutomatedTeamBuilder
         public double DamageScore = 1;
         public double DefenseScore = 1;
         public double SpeedScore = 1;
+        public double Survivability = 1;
     }
     public static partial class TeamBuilder
     {
@@ -149,31 +150,52 @@ namespace AutomatedTeamBuilder
             }
             foreach (Move move in pokemon.ChosenMoveset)
             {
-                if (move != null)
-                {
-                    allFlags.UnionWith(ExtractMoveFlags(move, result));
-                }
+                allFlags.UnionWith(ExtractMoveFlags(move, result));
             }
             foreach (EffectFlag flag in allFlags) // Finally, apply all flag mods once per flag
             {
                 ExtractMods((ElementType.EFFECT_FLAGS, flag.ToString()), result);
             }
+            // Weather effects modify defenses accordingly
+            if (result.AdditionalArchetypes.Contains(TeamArchetype.SNOW)) // Snow makes the mon have 1.5xdef if ice
+            {
+                // Check either tera 
+                bool isValidTera = (result.TeraType == PokemonType.ICE);
+                bool hasValidMainType = (result.PokemonTypes.Item1 == PokemonType.ICE) || (result.PokemonTypes.Item2 == PokemonType.ICE);
+                if (isValidTera || hasValidMainType)
+                {
+                    result.StatMultipliers[2] *= 1.5;
+                }
+            }
+            if (result.AdditionalArchetypes.Contains(TeamArchetype.SAND)) // Sand makes the mon have 1.5 x spdef if rock
+            {
+                // Check either tera 
+                bool isValidTera = (result.TeraType == PokemonType.ROCK);
+                bool hasValidMainType = (result.PokemonTypes.Item1 == PokemonType.ROCK) || (result.PokemonTypes.Item2 == PokemonType.ROCK);
+                if (isValidTera || hasValidMainType)
+                {
+                    result.StatMultipliers[4] *= 1.5;
+                }
+            }
             // Finally, need to obtain offensive/defensive/speed scores
             (double[] monStats, double[] monStatVariance) = MonStatCalculation(result); // Get mon stats (variance is 0 anyway)
             (double[] oppStats, double[] oppVariance) = MonStatCalculation(result, teamCtx, true); // Get opp stats and variance
-            // Offensive value calculation (this can be only done with 1 or more moves naturally otherwise set to 1
+            // Offensive value calculation (this can be only done with 2 or more moves, otherwise comparing offensive utility gets weird when adding the first move
+            if (pokemon.ChosenMoveset.Count > 1)
             {
                 List<double> movesDamage = [];
                 List<List<double>> movesTypeCoverage = [];
-                // Check all moves but ignore the last one if calculating improvement
+                // Check all moves
                 for (int i = 0; i < pokemon.ChosenMoveset.Count; i++)
                 {
                     Move move = pokemon.ChosenMoveset[i];
+                    if (move == null) continue; // Nothing to calculate if hard switch
                     if (move.Category == MoveCategory.STATUS) continue; // We don't check for status moves
                     movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, monStatVariance, teamCtx,
                         (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
-                        pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways
-                        pokemon.BattleItem?.Name == "Loaded Dice").Item1);
+                        pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper adds to crit dmg
+                        pokemon.BattleItem?.Name == "Loaded Dice",
+                        pokemon.ChosenAbility?.Name == "Sniper").Item1);
                     PokemonType moveType = GetModifiedMoveType(move, result); // Get the final move type for type effectiveness
                     // Get the move coverage, making sure some specific crazy effects that modify moves
                     movesTypeCoverage.Add(CalculateOffensiveTypeCoverage(moveType, teamCtx.OpponentsTypes,
@@ -212,6 +234,7 @@ namespace AutomatedTeamBuilder
                 // Do the normal thing now
                 Normal damageReceivedDistro = new Normal(averageDamage, Math.Sqrt(averageDamageVariance)); // Get the std dev ofc
                 result.DefenseScore = damageReceivedDistro.CumulativeDistribution(monStats[0]); // Compare my HP with this damage
+                result.Survivability = monStats[0] / (1.5 * averageDamage); // Survibaility means the mon is left with approx 33% after damage (or, 1.5 times health to damage received)
             }
             // Speed value calculation
             {

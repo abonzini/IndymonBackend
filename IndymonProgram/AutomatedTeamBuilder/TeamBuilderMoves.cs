@@ -43,8 +43,9 @@ namespace AutomatedTeamBuilder
         /// <param name="alwaysStab">Libero/protean which cause move to always be stab</param>
         /// <param name="extraStab">Adaptability complex stab check</param>
         /// <param name="loadedDice">Loaded dice modifies moves like crazy</param>
+        /// <param name="highCritDamage">Sniper multilies crit damage</param>
         /// <returns>The damage (in HP) the opp receives</returns>
-        static (double, double) CalcMoveDamage(Move move, PokemonBuildInfo monCtx, double[] attackerStats, double[] defenderStats, double[] attackingStatVariances, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false)
+        static (double, double) CalcMoveDamage(Move move, PokemonBuildInfo monCtx, double[] attackerStats, double[] defenderStats, double[] attackingStatVariances, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false, bool highCritDamage = false)
         {
             // First, get the ACTUAL flags of the move (because some may have been added/removed
             HashSet<EffectFlag> moveFlags = ExtractMoveFlags(move, monCtx);
@@ -118,7 +119,11 @@ namespace AutomatedTeamBuilder
                 {
                     moveBp = move.Bp;
                 }
-                // Then get the Bp mods
+                // Then clamp to min 60 if theres tera involved, and apply the Bp mods after (even tho it may not always be correct)
+                if (monCtx.TeraType == GetModifiedMoveType(move, monCtx) && moveBp < 60)
+                {
+                    moveBp = 60;
+                }
                 moveBp *= GetMoveBpMods(move, monCtx);
                 // Cleanup of Acc
                 moveAccuracy *= GetMoveAccMods(move, monCtx);
@@ -161,7 +166,7 @@ namespace AutomatedTeamBuilder
                 hitDamageVariance *= remainingFactor * remainingFactor;
                 hitDamage += 2; // This is the hit damage, no variance needed here
                 // Crit chance
-                int critStages = 0; // Th
+                int critStages = 0;
                 if (moveFlags.Contains(EffectFlag.HIGH_CRIT)) critStages++;
                 if (moveFlags.Contains(EffectFlag.CRITICAL)) critStages = 3;
                 critStages += monCtx.CriticalStages;
@@ -173,7 +178,8 @@ namespace AutomatedTeamBuilder
                     3 => 1,
                     _ => 4.17
                 };
-                double critMultiplier = (critChance * 1.5) + ((1 - critChance) * 1); // Crit may increase a hit damage in average
+                double critDamage = (highCritDamage) ? 2.25 : 1.5;
+                double critMultiplier = (critChance * critDamage) + ((1 - critChance) * 1); // Crit may increase a hit damage in average
                 hitDamage *= critMultiplier;
                 hitDamageVariance *= critMultiplier * critMultiplier;
                 // Stab, check if tera is involved
@@ -326,6 +332,7 @@ namespace AutomatedTeamBuilder
         /// <returns>All flags in this move</returns>
         static HashSet<EffectFlag> ExtractMoveFlags(Move move, PokemonBuildInfo monCtx)
         {
+            if (move == null) return [EffectFlag.PIVOT]; // Null move (switch) is basically a pivot
             HashSet<EffectFlag> moveFlags = [.. move.Flags]; // Copies moves base flags
             HashSet<EffectFlag> removedFlags = [];
             HashSet<EffectFlag> addedFlags = [];
@@ -489,8 +496,9 @@ namespace AutomatedTeamBuilder
                     (double[] oppStats, _) = MonStatCalculation(monCtx, buildCtx, true); // Get opp stats and variance
                     double moveDamage = CalcMoveDamage(move, monCtx, monStats, oppStats, monStatVariance, buildCtx,
                         (mon.ChosenAbility?.Name == "Protean" || mon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
-                        mon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways
-                        mon.BattleItem?.Name == "Loaded Dice").Item1; // Only care about damage and not variance (it'd be 0)
+                        mon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper increases crit damage
+                        mon.BattleItem?.Name == "Loaded Dice",
+                        mon.ChosenAbility?.Name == "Sniper").Item1;
                     // Get the move coverage, making sure some specific crazy effects that modify moves
                     List<double> moveCoverage = CalculateOffensiveTypeCoverage(moveType, buildCtx.OpponentsTypes,
                         allMoveFlags.Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
@@ -609,7 +617,7 @@ namespace AutomatedTeamBuilder
                 // If needs an improvement, will be accepted as long as some of the improvements succeeds
                 int nImprovChecks = 0;
                 int nImproveFails = 0;
-                if (allMoveFlags.Contains(EffectFlag.OFF_UTILTIY))
+                if (allMoveFlags.Contains(EffectFlag.OFF_UTILITY))
                 {
                     nImprovChecks++;
                     if (dmgImprovement < 1.1) nImproveFails++;
@@ -626,6 +634,10 @@ namespace AutomatedTeamBuilder
                 }
                 if (nImproveFails == nImprovChecks) return 0; // If all checks failed, move not good
                 score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
+                if (move.Flags.Contains(EffectFlag.HEAL)) // Healing status moves are weighted on whether the mon can actually make decent use of this
+                {
+                    score *= newCtx.Survivability;
+                }
                 mon.ChosenMoveset.RemoveAt(mon.ChosenMoveset.Count - 1); // Remove move ofc
             }
             return score;

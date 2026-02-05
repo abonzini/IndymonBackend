@@ -47,6 +47,7 @@ namespace AutomatedTeamBuilder
         /// <param name="monCtx">Context where to add the mods</param>
         static void ExtractMoveMods(Move move, PokemonBuildInfo monCtx)
         {
+            if (move == null) return; // Null (pivot) doesn't have any of these
             // Moves are the most complex ones
             ExtractMods((ElementType.MOVE, move.Name), monCtx);
             ExtractMods((ElementType.MOVE_CATEGORY, move.Category.ToString()), monCtx);
@@ -102,9 +103,14 @@ namespace AutomatedTeamBuilder
                 }
             }
             // Then, forceds. If an item/ability/move asks for something to exist no matter what
-            foreach ((ElementType, string) nextForced in MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds[element]) // Finds what this element forces
+            List<(ElementType, string)> forcedList = new List<(ElementType, string)>();
+            foreach ((ElementType, string) nextForced in MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds[element]) // Finds what this element forces, if forces multiple things, only one needs to fulfill
             {
-                monCtx.AdditionalConstraints.AllConstraints.Add([nextForced]); // Add to all the big list of constrtaints (no issue if repeated anyway)
+                forcedList.Add(nextForced);
+            }
+            if (forcedList.Count > 0)
+            {
+                monCtx.AdditionalConstraints.AllConstraints.Add(forcedList);
             }
             // Then, stat mods, these are funny because some mods are applied directly
             foreach ((StatModifier, string) statMod in MechanicsDataContainers.GlobalMechanicsData.StatModifiers[element])
