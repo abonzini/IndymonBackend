@@ -4,7 +4,7 @@ namespace MechanicsDataContainer
 {
     public partial class MechanicsDataContainers
     {
-        public static MechanicsDataContainers GlobalMechanicsData { get; set; } = new MechanicsDataContainers();
+        public static MechanicsDataContainers GlobalMechanicsData = new MechanicsDataContainers();
         /// <summary>
         /// Initializes data
         /// </summary>
@@ -42,19 +42,19 @@ namespace MechanicsDataContainer
             string fixedModsTab = lines[14].Split(",")[0];
             ParseFixedModifiers(sheetId, fixedModsTab);
         }
-        public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart { get; set; } = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
-        public Dictionary<string, Move> Moves { get; set; } = new Dictionary<string, Move>();
-        public Dictionary<string, Ability> Abilities { get; set; } = new Dictionary<string, Ability>();
-        public Dictionary<string, Pokemon> Dex { get; set; } = new Dictionary<string, Pokemon>();
-        public Dictionary<string, Item> ModItems { get; set; } = new Dictionary<string, Item>();
-        public Dictionary<string, Item> BattleItems { get; set; } = new Dictionary<string, Item>();
-        public Dictionary<(ElementType, string), double> InitialWeights { get; set; } = new Dictionary<(ElementType, string), double>();
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> Enablers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
-        public HashSet<(ElementType, string)> DisabledOptions { get; set; } = new HashSet<(ElementType, string)>();
-        public Dictionary<(ElementType, string), HashSet<(ElementType, string)>> ForcedBuilds { get; set; } = new Dictionary<(ElementType, string), HashSet<(ElementType, string)>>();
-        public Dictionary<(ElementType, string), HashSet<(StatModifier, string)>> StatModifiers { get; set; } = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> WeightModifiers { get; set; } = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
-        public Dictionary<(ElementType, string), double> FlatIncreaseModifiers { get; set; } = new Dictionary<(ElementType, string), double>();
+        public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
+        public Dictionary<string, Move> Moves = new Dictionary<string, Move>();
+        public Dictionary<string, Ability> Abilities = new Dictionary<string, Ability>();
+        public Dictionary<string, Pokemon> Dex = new Dictionary<string, Pokemon>();
+        public Dictionary<string, Item> ModItems = new Dictionary<string, Item>();
+        public Dictionary<string, Item> BattleItems = new Dictionary<string, Item>();
+        public Dictionary<(ElementType, string), double> InitialWeights = new Dictionary<(ElementType, string), double>();
+        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> Enablers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
+        public HashSet<(ElementType, string)> DisabledOptions = new HashSet<(ElementType, string)>();
+        public Dictionary<(ElementType, string), HashSet<(ElementType, string)>> ForcedBuilds = new Dictionary<(ElementType, string), HashSet<(ElementType, string)>>();
+        public Dictionary<(ElementType, string), HashSet<(StatModifier, string)>> StatModifiers = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
+        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
+        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> WeightModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
+        public Dictionary<(ElementType, string), double> FlatIncreaseModifiers = new Dictionary<(ElementType, string), double>();
     }
 }

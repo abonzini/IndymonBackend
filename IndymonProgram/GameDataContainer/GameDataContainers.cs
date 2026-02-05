@@ -6,7 +6,7 @@ namespace GameDataContainer
 {
     public partial class GameDataContainers
     {
-        public static GameDataContainers GlobalGameData { get; set; } = new GameDataContainers();
+        public static GameDataContainers GlobalGameData = new GameDataContainers();
         /// <summary>
         /// Initializes dungeon data
         /// </summary>
@@ -48,9 +48,9 @@ namespace GameDataContainer
             else if (TrainerData.TryGetValue(Name, out foundTrainer)) return foundTrainer;
             else throw new Exception($"Trainer {Name} does not exist!");
         }
-        public Dictionary<string, Dungeon> Dungeons { get; set; } = new Dictionary<string, Dungeon>();
-        public Dictionary<string, Trainer> TrainerData { get; set; } = new Dictionary<string, Trainer>();
-        public Dictionary<string, Trainer> NpcData { get; set; } = new Dictionary<string, Trainer>();
-        public Dictionary<string, Trainer> FamousNpcData { get; set; } = new Dictionary<string, Trainer>();
+        public Dictionary<string, Dungeon> Dungeons = new Dictionary<string, Dungeon>();
+        public Dictionary<string, Trainer> TrainerData = new Dictionary<string, Trainer>();
+        public Dictionary<string, Trainer> NpcData = new Dictionary<string, Trainer>();
+        public Dictionary<string, Trainer> FamousNpcData = new Dictionary<string, Trainer>();
     }
 }

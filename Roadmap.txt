@@ -16,9 +16,6 @@ White Monastery -> Justice -> Dawn Stone
 
 ---
 TODO:
-- Add remaining needed mon stuff, like status
-- "Heal mon" function, restores mon to full status 
-- Add exporter to mon, to get packed data
 - Fix bot, takes trainer -> operates with mon data now
 - Have basic showdown bot and bot battle working well
 - Helper bot too

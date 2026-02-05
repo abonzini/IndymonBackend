@@ -37,10 +37,10 @@ namespace ParsersAndData
     public class RoomEvent
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public RoomEventType EventType { get; set; }
-        public string PreEventString { get; set; }
-        public string PostEventString { get; set; }
-        public string SpecialParams { get; set; }
+        public RoomEventType EventType;
+        public string PreEventString;
+        public string PostEventString;
+        public string SpecialParams;
         public override string ToString()
         {
             return EventType.ToString();
@@ -59,8 +59,8 @@ namespace ParsersAndData
     public class ShortcutCondition
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public ShortcutConditionType ConditionType { get; set; }
-        public List<string> Which { get; set; } = new List<string>();
+        public ShortcutConditionType ConditionType;
+        public List<string> Which = new List<string>();
         public override string ToString()
         {
             return $"{ConditionType} -> {Which}";
@@ -69,53 +69,53 @@ namespace ParsersAndData
     public class DungeonFloor
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public ConsoleColor RoomColor { get; set; } = ConsoleColor.White;
-        public char NeWallTile { get; set; }
-        public char NwWallTile { get; set; }
-        public char SeWallTile { get; set; }
-        public char SwWallTile { get; set; }
-        public char EWallTile { get; set; }
-        public char WWallTile { get; set; }
-        public char NWallTile { get; set; }
-        public char SWallTile { get; set; }
-        public char EWallPassageTile { get; set; }
-        public char WWallPassageTile { get; set; }
-        public char NWallPassageTile { get; set; }
-        public char SWallPassageTile { get; set; }
-        public char NWallShortcutTile { get; set; }
-        public char SWallShortcutTile { get; set; }
+        public ConsoleColor RoomColor = ConsoleColor.White;
+        public char NeWallTile;
+        public char NwWallTile;
+        public char SeWallTile;
+        public char SwWallTile;
+        public char EWallTile;
+        public char WWallTile;
+        public char NWallTile;
+        public char SWallTile;
+        public char EWallPassageTile;
+        public char WWallPassageTile;
+        public char NWallPassageTile;
+        public char SWallPassageTile;
+        public char NWallShortcutTile;
+        public char SWallShortcutTile;
         [JsonConverter(typeof(StringEnumConverter))]
-        public ConsoleColor PassageColor { get; set; } = ConsoleColor.White;
-        public char VerticalPassageTile { get; set; }
+        public ConsoleColor PassageColor = ConsoleColor.White;
+        public char VerticalPassageTile;
         [JsonConverter(typeof(StringEnumConverter))]
-        public ConsoleColor ShortcutColor { get; set; } = ConsoleColor.White;
-        public char NeShortcutTile { get; set; }
-        public char NwShortcutTile { get; set; }
-        public char SeShortcutTile { get; set; }
-        public char SwShortcutTile { get; set; }
-        public char HorizontalShortcutTile { get; set; }
-        public char VerticalShortcutTile { get; set; }
-        public List<ShortcutCondition> ShortcutConditions { get; set; } = new List<ShortcutCondition>();
-        public string ShortcutClue { get; set; }
-        public string ShortcutResolution { get; set; }
+        public ConsoleColor ShortcutColor = ConsoleColor.White;
+        public char NeShortcutTile;
+        public char NwShortcutTile;
+        public char SeShortcutTile;
+        public char SwShortcutTile;
+        public char HorizontalShortcutTile;
+        public char VerticalShortcutTile;
+        public List<ShortcutCondition> ShortcutConditions = new List<ShortcutCondition>();
+        public string ShortcutClue;
+        public string ShortcutResolution;
     }
     public class Dungeon
     {
-        public string Name { get; set; }
-        public bool GoesDownwards { get; set; }
-        public List<RoomEvent> Events { get; set; }
-        public List<List<string>> PokemonEachFloor { get; set; }
-        public List<string> CommonItems { get; set; }
-        public List<string> RareItems { get; set; }
-        public string BossItem { get; set; }
-        public List<DungeonFloor> Floors { get; set; }
-        public RoomEvent BossEvent { get; set; }
-        public RoomEvent CampingEvent { get; set; }
-        public RoomEvent PreBossEvent { get; set; }
-        public RoomEvent PostBossEvent { get; set; }
-        public string NextDungeon { get; set; }
-        public string NextDungeonShortcut { get; set; }
-        public List<string> CustomShowdownRules { get; set; }
+        public string Name;
+        public bool GoesDownwards;
+        public List<RoomEvent> Events;
+        public List<List<string>> PokemonEachFloor;
+        public List<string> CommonItems;
+        public List<string> RareItems;
+        public string BossItem;
+        public List<DungeonFloor> Floors;
+        public RoomEvent BossEvent;
+        public RoomEvent CampingEvent;
+        public RoomEvent PreBossEvent;
+        public RoomEvent PostBossEvent;
+        public string NextDungeon;
+        public string NextDungeonShortcut;
+        public List<string> CustomShowdownRules;
         public override string ToString()
         {
             return Name;
