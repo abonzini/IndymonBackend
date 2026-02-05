@@ -474,7 +474,7 @@ namespace AutomatedTeamBuilder
                                             score = 0; // If all checks failed, item not good
                                         }
                                         score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
-                                        if (battleItem.Flags.Contains(ItemFlag.HEAL)) // Healing items are scored on whether they can actually make sense on the mon
+                                        if (battleItem.Flags.Contains(ItemFlag.BULKY)) // Healing items are scored on whether they can actually make sense on the mon
                                         {
                                             score *= newCtx.Survivability;
                                         }
