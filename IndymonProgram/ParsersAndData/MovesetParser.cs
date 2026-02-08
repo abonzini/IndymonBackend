@@ -33,8 +33,11 @@ namespace ParsersAndData
                         ObjectInstance monLearnset = monObject.Get("learnset").AsObject();
                         foreach (KeyValuePair<JsValue, PropertyDescriptor> moveData in monLearnset.GetOwnProperties())
                         {
-                            string move = moveData.Key.ToString().ToLower();
-                            pokemon.Moves.Add(move);
+                            if (true/*moveData.Value.Value.AsArray().GetOwnProperties().First().Value.Value.ToString().StartsWith("9")*/)
+                            {
+                                string move = moveData.Key.ToString().ToLower();
+                                pokemon.Moves.Add(move);
+                            }
                         }
                     }
                 }
