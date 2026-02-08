@@ -828,7 +828,6 @@ namespace IndymonBackendProgram
                             copiedTeam.Teamsheet.Add(copiedMon);
                         }
                         GenericMessageCommand(roomEvent.PreEventString);
-                        copiedTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.SMART); // Randomize enemy team (movesets, etc), boss/alpha is a bit smarter than normal dungeon mon
                         int remainingMons = ResolveEncounter(trainerData, copiedTeam);
                         if (remainingMons == 0) // Means player lost
                         {

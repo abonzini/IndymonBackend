@@ -334,7 +334,7 @@ namespace ShowdownBot
                 {
                     if (pokemon.Active) // This is the current mon, definitely
                     {
-                        string monId = pokemon.Ident.Split(':')[1].Trim().ToLower(); // Id(ent) of the mon in question
+                        string monId = pokemon.Ident.Split(':')[1].Trim().ToLower().Replace("’", "'"); ; // Id(ent) of the mon in question
                         currentPokemon = _monsById[monId]; // Find wtf mon am i referring to, this is also the active pokemon btw
                         if (currentPokemon.ExplorationStatus != null)
                         {
@@ -342,7 +342,7 @@ namespace ShowdownBot
                             foreach (AvailableMove move in _currentGameState.Active[0].Moves)
                             {
                                 int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Replace("102", "").Trim().ToLower()); // For some reason return is called return102
-                                if (moveIndex > 0)
+                                if (moveIndex >= 0)
                                 {
                                     currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
                                 }
