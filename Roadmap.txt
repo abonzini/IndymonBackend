@@ -16,8 +16,6 @@ White Monastery -> Justice -> Dawn Stone
 
 ---
 TODO:
-- Add discord data to trainers
-- Add trainer rank to trainers (for expl)
 - Reincorporate tournament data
 - Revise tourn data, improve algo if any, and dont need to save tourn midway, do team seeding on beginning of tourn as part of the system
 - Save/load tourn stuff in own folder, export tourn data if needed

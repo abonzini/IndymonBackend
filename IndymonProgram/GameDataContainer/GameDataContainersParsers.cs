@@ -40,6 +40,8 @@ namespace GameDataContainer
                     nextTrainer.AutoModItem = bool.Parse(nextLine[j + 10]);
                     nextTrainer.AutoBattleItem = bool.Parse(nextLine[j + 12]);
                     nextTrainer.AutoFavour = bool.Parse(nextLine[j + 14]);
+                    nextTrainer.DiscordNumber = nextLine[j + 15].Trim();
+                    Enum.TryParse<TrainerRank>(nextLine[j + 16], out nextTrainer.TrainerRank);
                     // Second line is skipped, just headers for me to manually access
                     // Then, relative rows 2->21 have all the data always in order
                     for (int remainingRows = 2; (remainingRows < TRAINER_CARD_ROWS && remainingRows + i < rows.Length); remainingRows++)

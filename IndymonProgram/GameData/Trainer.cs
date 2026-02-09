@@ -2,12 +2,21 @@
 
 namespace GameData
 {
+    public enum TrainerRank
+    {
+        UNRANKED,
+        GYM,
+        ELITE4,
+        CHAMPION
+    }
     public class Trainer
     {
         public const int MAX_MONS_IN_TEAM = 12; /// How many mons top can the team have (rest goes to box)
         public string Name = "";
         public string DungeonIdentifier = "?";
         public string Avatar = "";
+        public string DiscordNumber = "";
+        public TrainerRank TrainerRank = TrainerRank.UNRANKED;
         public bool AutoTeam = true;
         public bool AutoFavour = true;
         public bool AutoSetItem = true;
