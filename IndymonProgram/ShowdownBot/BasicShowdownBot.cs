@@ -1,5 +1,6 @@
-﻿using System.Net.WebSockets;
-using System.Security.Cryptography;
+﻿using Newtonsoft.Json;
+using ParsersAndData;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -185,6 +186,10 @@ namespace ShowdownBot
             {
                 Console.WriteLine($"NAME BOT REGISTRATION ERROR! {message}");
             }
+            else if (message.Contains("Your team was rejected")) // Name registration error
+            {
+                Console.WriteLine($"TEAM FORMAT ERROR! {message}");
+            }
             else if (message.Contains("|request|")) // Battle request, bot needs to do a decision
             {
                 if (CurrentState == BotState.IN_FIGHT)
@@ -214,15 +219,15 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
-                        string monSpecies = m.Groups[2].Value.Trim().ToLower(); // Species of the mon
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question (FUCK YOU FARFETCHD)
+                        string monSpecies = m.Groups[2].Value.Trim().ToLower().Replace("’", "'"); // Species of the mon (FUCK YOU FARFETCHD)
                         string status = m.Groups[3].Value.Trim().ToLower(); // Hp status
                         //Console.WriteLine($"Switch debug: {monId}->{monSpecies}->{status}");
                         if (!_monsById.TryGetValue(monId, out PokemonSet pokemonInTeam)) // Id not known yet
                         {
                             // Try all I can to identify my mon
-                            pokemonInTeam = _botTrainer.Teamsheet.FirstOrDefault(p => p.NickName == monId) // Ideally nickname
-                                ?? _botTrainer.Teamsheet.FirstOrDefault(p => p.Species == monId || p.Species == monSpecies); // Otherwise scramble towards any identifier I can get
+                            pokemonInTeam = _botTrainer.Teamsheet.FirstOrDefault(p => p.NickName.ToLower() == monId) // Ideally nickname
+                                ?? _botTrainer.Teamsheet.FirstOrDefault(p => p.Species.ToLower() == monId || p.Species.ToLower() == monSpecies); // Otherwise scramble towards any identifier I can get
                             //Console.WriteLine($"Switch debug added {monId} key");
                             _monsById.Add(monId, pokemonInTeam);
                         }
@@ -329,15 +334,18 @@ namespace ShowdownBot
                 {
                     if (pokemon.Active) // This is the current mon, definitely
                     {
-                        string monId = pokemon.Ident.Split(':')[1].Trim().ToLower(); // Id(ent) of the mon in question
+                        string monId = pokemon.Ident.Split(':')[1].Trim().ToLower().Replace("’", "'"); ; // Id(ent) of the mon in question
                         currentPokemon = _monsById[monId]; // Find wtf mon am i referring to, this is also the active pokemon btw
                         if (currentPokemon.ExplorationStatus != null)
                         {
                             // Means the active field also has data of the moves current PP, load here
                             foreach (AvailableMove move in _currentGameState.Active[0].Moves)
                             {
-                                int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Trim().ToLower());
-                                currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
+                                int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Replace("102", "").Trim().ToLower()); // For some reason return is called return102
+                                if (moveIndex >= 0)
+                                {
+                                    currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
+                                }
                             }
                         }
                     }
@@ -369,7 +377,7 @@ namespace ShowdownBot
                 bool invalidChoice;
                 do
                 {
-                    int moveChoice = RandomNumberGenerator.GetInt32(0, 4); // 0 -> 3 can be the choice
+                    int moveChoice = Utilities.GetRandomNumber(0, 4); // 0 -> 3 can be the choice
                     ActiveOptions playOptions = _currentGameState.Active.FirstOrDefault();
                     // Move is valid as long its in a valid slot and usable (not disabled, pp)
                     invalidChoice = moveChoice >= playOptions.Moves.Count || playOptions.Moves[moveChoice].Disabled || (playOptions.Moves[moveChoice].Pp == 0);
@@ -380,7 +388,7 @@ namespace ShowdownBot
                             List<int> switchIns = _currentGameState.Side.GetValidSwitchIns();
                             if (switchIns.Count > 0) // Can switch then, so theres a valid move
                             {
-                                int switchChoice = RandomNumberGenerator.GetInt32(0, switchIns.Count);
+                                int switchChoice = Utilities.GetRandomNumber(0, switchIns.Count);
                                 int switchedInMon = switchIns[switchChoice];
                                 command = $"{battle}|/choose switch {switchedInMon}"; // Switch to random mon
                                 invalidChoice = false; // Move valid after all

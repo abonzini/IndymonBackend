@@ -191,6 +191,10 @@
 		{
 				"ConditionType": "MOVE",
 				"Which": ["Surf"]
+		},
+    {
+				"ConditionType": "ABILITY",
+				"Which": ["Swift Swim"]
 		}
 	  ],
 	  "ShortcutClue": "You could probably swim across to reach ahead faster.",
@@ -275,7 +279,9 @@
     "PreEventString": "Nothing like the relaxing sunset to forget all of your troubles. It's a perfect place for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
-  "CustomShowdownRules" : [],
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
+  "CustomShowdownRules" : ["Environment Mod = beach"],
   "NextDungeon": "",
-  "NextDungeonShortcut": ""
+  "NextDungeonShortcut": "Deepest Trench"
 }

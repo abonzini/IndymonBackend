@@ -5,7 +5,7 @@
     {
       "EventType": "TREASURE",
       "PreEventString": "There's a golden chest on a nearby peak.",
-      "PostEventString": "Whith a lot of effort, you manage to climb and retrieve the treasure."
+      "PostEventString": "Whith a lot of effort, you manage to climb and retrieve the treasure ($1)."
     },
 	{
       "EventType": "ALPHA",
@@ -82,7 +82,7 @@
 		"Kubfu",
 		"Darumaka-Galar",
 		"Taillow",
-		"Farfetch\u2019d-Galar",
+		"Farfetch'd-Galar",
 		"Riolu"
 	],
 	[
@@ -298,7 +298,9 @@
     "PreEventString": "Proper recovery and rest are just as important as training itself. It's time to take a small break.",
     "PostEventString": "But now it's time to move on..."
   },
-  "CustomShowdownRules" : [],
-  "NextDungeon": "",
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
+  "CustomShowdownRules" : ["Environment Mod = temple"],
+  "NextDungeon": "Northface Glacier",
   "NextDungeonShortcut": "Sky Castle"
 }

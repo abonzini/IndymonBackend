@@ -132,7 +132,7 @@
   ],
   "CommonItems": [
 	"Lonely Mint",
-    "Adamant Mint",
+  "Adamant Mint",
 	"Naughty Mint",
 	"Brave Mint",
 	"Bold Mint",
@@ -163,7 +163,7 @@
 	"Magnet",
 	"Terrain Extender"
   ],
-  "BossItem": "Sun Stone",
+  "BossItem": "Thunder Stone",
   "Floors": [
     {
       "RoomColor": "DarkGreen",
@@ -251,25 +251,25 @@
       "SWallShortcutTile": " ",
       "PassageColor": "Green",
       "VerticalPassageTile": "░",
-      "ShortcutColor": "White",
-      "NeShortcutTile": "▢",
-      "NwShortcutTile": "▢",
-      "SeShortcutTile": "▢",
-      "SwShortcutTile": "▢",
-      "HorizontalShortcutTile": "▢",
-      "VerticalShortcutTile": "▢",
+      "ShortcutColor": "DarkYellow",
+      "NeShortcutTile": "▒",
+      "NwShortcutTile": "▒",
+      "SeShortcutTile": "▒",
+      "SwShortcutTile": "▒",
+      "HorizontalShortcutTile": "▒",
+      "VerticalShortcutTile": "▒",
 	  "ShortcutConditions": [
 		{
 				"ConditionType": "MOVE",
-				"Which": ["Signal Beam", "Heat Wave", "Shock Wave", "Sludge Wave", "Thunder Wave", "Wave Crash", "Vacuum Wave", "Thousand Waves", "Psywave"]
+				"Which": ["Rain Dance", "Sunny Day", "Snowscape", "Hail", "Chilly Reception"]
 		},
 		{
-				"ConditionType": "ITEM",
-				"Which": ["Wave Incense"]
+				"ConditionType": "ABILITY",
+				"Which": ["Air Lock", "Cloud Nine", "Delta Stream", "Desolate Land", "Drizzle", "Drought", "Orichalcum Pulse", "Primordial Sea", "Snow Warning"]
 		}
 	  ],
-	  "ShortcutClue": "There's a strange hatch buried in the ground. It has an electric security system. You think a strong enough WAVE or SIGNAL may override it.",
-	  "ShortcutResolution": "Your $1 overwhelms the security system. The hatch opens..."
+	  "ShortcutClue": "There's a huge sandstorm blocking your way. You won't be able to go through this specific weather.",
+	  "ShortcutResolution": "Your $1 makes the sandstorm go away. The passage through a canyon is clear now."
     }
   ],
   "BossEvent": {
@@ -282,7 +282,9 @@
     "PreEventString": "The sun is shining and there's a gentle breeze. A perfect place for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
-  "CustomShowdownRules" : [],
-  "NextDungeon": "",
-  "NextDungeonShortcut": ""
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
+  "CustomShowdownRules" : ["Environment Mod = meadow"],
+  "NextDungeon": "Abandoned Power Plant",
+  "NextDungeonShortcut": "Desert Ruins"
 }

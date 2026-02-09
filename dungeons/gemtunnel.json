@@ -77,7 +77,7 @@
 		"Drilbur",
 		"Rolycoly",
 		"Nacli",
-        "Noibat",
+    "Noibat",
 		"Nosepass",
 		"Bunnelby"
 	],
@@ -268,7 +268,7 @@
 		}
 	  ],
 	  "ShortcutClue": "You see a wall made of dense diamonds and gemstones. It's magnificent. You also see a way out refracted through the crystals. But you'll need a Pokemon that can understand gemstones perfectly to find a way through safely.",
-	  "ShortcutResolution": "Your $1 shines bright like a diamond. It helped you find the way."
+	  "ShortcutResolution": "Your $1 shines bright like a diamond. The crystals resonate with this, and light up the way through a dark opening."
     }
   ],
   "BossEvent": {
@@ -281,7 +281,9 @@
     "PreEventString": "Even though it's dark, rest is important. You should find some time for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
-  "CustomShowdownRules" : [],
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
+  "CustomShowdownRules" : ["Environment Mod = cave"],
   "NextDungeon": "",
-  "NextDungeonShortcut": ""
+  "NextDungeonShortcut": "Molten Core"
 }

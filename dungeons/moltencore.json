@@ -1,0 +1,278 @@
+{
+  "Name": "Molten Core",
+  "GoesDownwards": true,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "Floating in the molten rock, there's an undamaged $1.",
+      "PostEventString": "You carefully retrieve it and continue on your way."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "A $1 sees you an immediately moves on to attack you. In this area, you're easy prey!",
+      "PostEventString": "The attacker has been defeated, you take it's $1."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "A $1 sees you an immediately moves on to attack you. In this area, you're easy prey!",
+      "PostEventString": "The attacker has been defeated, you take it's $1."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "Embedded in the black rock walls you see a huge shining crystal: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on."
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "Someone has left a triage box in the way, with medicines and water bottles, good opportunity to heal up.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "BIG_HEAL",
+      "PreEventString": "Someone has left a triage box in the way, but it only has one last ointment remaining.",
+      "PostEventString": "$1 needs it the most, you use the ointment on it and it becomes fully healed."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "This place is so hostile, so dangerous that your partner Pokemon forget all of their other status conditions.",
+      "PostEventString": "No condition seems too bad when the air is burning and you can hardly breathe..."
+    },
+	{
+      "EventType": "PP_HEAL",
+      "PreEventString": "You reach out to your pocket, you find a leppa berries you didn't remember you had.",
+      "PostEventString": "Your Pokemon moves have recovered some PP."
+    },
+	{
+      "EventType": "SWARM",
+      "PreEventString": "Even the baby Pokemon are tough in this place. They gang up on you and try to take you down.",
+      "PostEventString": "You have succesfully defeated the babies."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "There's lava everywhere, lava in the floor, in the ceiling...",
+      "PostEventString": "Some of it burns your Pokemon, they're gravely injured."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "There's lava everywhere, lava in the floor, in the ceiling...",
+      "PostEventString": "Some of it burns $1.",
+	  "SpecialParams": "brn"
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "You find a group of Team Paradox members just hanging about. For some reason they're all wearing winter jackets.",
+      "PostEventString": "'Hey I've seen you around before!', one of them says. They give you $1, they seem to be in a good mood."
+    },
+	{
+      "EventType": "FIRELORD",
+      "PreEventString": "A group of weirdos are trying to summon a legendary fiery creature to bring destruction into this world. They get spooked when they see you, and go away. The legendary creature is summoned, but TOO SOON. It is severely weakened and it's your chance to bring it down.",
+      "PostEventString": "You have vanquished the creature, it dropped some loot: $1"
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+      "Vulpix",
+      "Growlithe-Hisui",
+      "Magby",
+      "Cyndaquil",
+      "Slugma",
+      "Houndour",
+      "Onix",
+      "Numel",
+      "Castform",
+      "Pansear",
+      "Larvesta",
+      "Rolycoly",
+      "Sizzlipede",
+      "Fuecoco",
+      "Charcadet"
+	],
+	[
+      "Ninetales",
+      "Magmar",
+      "Quilava",
+      "Magcargo",
+      "Camerupt",
+      "Torkoal",
+      "Simisear",
+      "Carkol",
+      "Centiskorch",
+      "Crocalor"
+  ],
+	[
+      "Arcanine-Hisui",
+      "Magmortar",
+      "Typhlosion",
+      "Houndoom",
+      "Steelix",
+      "Volcarona",
+      "Turtonator",
+      "Coalossal",
+      "Skeledirge",
+      "Armarouge",
+      "Ceruledge"
+	],
+	[
+      "Moltres",
+      "Heatran",
+      "Volcanion"
+	]
+  ],
+  "CommonItems": [
+		"Steel Gem",
+		"Dark Gem",
+		"Flying Gem",
+		"Rock Gem",
+		"Fighting Gem",
+		"Dragon Gem",
+		"Ghost Gem",
+		"Fire Gem",
+		"Psychic Gem",
+		"Water Gem",
+		"Grass Gem",
+		"Fairy Gem",
+		"Ground Gem",
+		"Bug Gem",
+		"Ice Gem",
+		"Electric Gem",
+		"Poison Gem",
+		"Normal Gem",
+		"Passho Berry",
+		"Shuca Berry",
+		"Charti Berry"
+  ],
+  "RareItems": [
+		"Heat Rock",
+    "Flame Orb",
+    "Rawst Berry",
+    "Binding Band",
+    "Charcoal",
+    "Rock Incense",
+    "Red Card",
+    "Muscle Band",
+    "Focus Band"
+  ],
+  "BossItem": "Fire Stone",
+  "Floors": [
+    {
+      "RoomColor": "DarkGray",
+      "NeWallTile": "▲",
+      "NwWallTile": "▲",
+      "SeWallTile": "▲",
+      "SwWallTile": "▲",
+      "EWallTile": "▲",
+      "WWallTile": "▲",
+      "NWallTile": "▲",
+      "SWallTile": "▲",
+	    "EWallPassageTile": " ",
+      "WWallPassageTile": " ",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "DarkRed",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "DarkMagenta",
+      "NeShortcutTile": "◎",
+      "NwShortcutTile": "◎",
+      "SeShortcutTile": "◎",
+      "SwShortcutTile": "◎",
+      "HorizontalShortcutTile": "P",
+      "VerticalShortcutTile": "P",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE_DISK",
+			"Which": [""]
+		}
+	  ],
+	  "ShortcutClue": "You find a group of Team Paradox members just hanging about and blocking the way. For some reason they're all wearing winter jackets. They're in a bad mood and say 'I've never seen you around before', you'll need to show them something to prove you're on their side.",
+	  "ShortcutResolution": "They see your $1 and go crazy. They start cheering and headbanging and move out of the way."
+    },
+	{
+      "RoomColor": "DarkRed",
+      "NeWallTile": "▩",
+      "NwWallTile": "▩",
+      "SeWallTile": "▩",
+      "SwWallTile": "▩",
+      "EWallTile": "▩",
+      "WWallTile": "▩",
+      "NWallTile": "▩",
+      "SWallTile": "▩",
+	  "EWallPassageTile": "░",
+      "WWallPassageTile": "░",
+      "NWallPassageTile": "░",
+      "SWallPassageTile": "░",
+      "NWallShortcutTile": "░",
+      "SWallShortcutTile": "░",
+      "PassageColor": "White",
+      "VerticalPassageTile": "░",
+      "ShortcutColor": "DarkYellow",
+      "NeShortcutTile": "░",
+      "NwShortcutTile": "░",
+      "SeShortcutTile": "░",
+      "SwShortcutTile": "░",
+      "HorizontalShortcutTile": "░",
+      "VerticalShortcutTile": "░",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": ["Sand Attack", "Sand Tomb", "Sandstorm", "Scorching Sands"]
+		},
+    {
+			"ConditionType": "ITEM",
+			"Which": ["Soft Sand"]
+		},
+    {
+			"ConditionType": "ABILITY",
+			"Which": ["Sand Force", "Sand Rush", "Sand Spit", "Sand Stream", "Sand Veil"]
+		}
+	  ],
+	  "ShortcutClue": "The floor is so hot on this passage that the stone is soft. Anything touching it will combust immediately. You figure if you cover the surface with sand you may have enough time to cross safely.",
+	  "ShortcutResolution": "Your $1 fills the surface with sand. You cross just in time before the sand melts too."
+    },
+	{
+      "RoomColor": "Red",
+      "NeWallTile": "ঌ",
+      "NwWallTile": "ঌ",
+      "SeWallTile": "ঌ",
+      "SwWallTile": "ঌ",
+      "EWallTile": "ঌ",
+      "WWallTile": "ঌ",
+      "NWallTile": "ঌ",
+      "SWallTile": "ঌ",
+	  "EWallPassageTile": " ",
+      "WWallPassageTile": " ",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "Red",
+      "VerticalPassageTile": " ",
+      "ShortcutColor": "Red",
+      "NeShortcutTile": " ",
+      "NwShortcutTile": " ",
+      "SeShortcutTile": " ",
+      "SwShortcutTile": " ",
+      "HorizontalShortcutTile": " ",
+      "VerticalShortcutTile": " ",
+      "ShortcutConditions": [],
+	    "ShortcutClue": "This is the end of the line. No more shortcuts ahead.",
+	    "ShortcutResolution": ""
+  }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "At the bottom of the underground cave you see it. A raging creature with a burning body, hotter than the sun.",
+    "PostEventString": "You defeat the raging creature, which retreats under the lava. It will sure return. But now it's time to return home."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "The air is burning. You can barely continue on, your eyes and dry and can barely breathe. This is a hostile land, and you can't even know where it ends, the air filled with thick smoke. You find a small grotto, where you could establish a camping location.",
+    "PostEventString": "But for now it's time to move on..."
+  },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
+  "CustomShowdownRules" : ["Continuous Desolate Land Mod", "Environment Mod = volcano"],
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

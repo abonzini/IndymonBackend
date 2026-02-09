@@ -1,0 +1,282 @@
+{
+  "Name": "Abandoned Power Plant",
+  "GoesDownwards": false,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "In the recycle bin, you see a perfectly functional $1 inside.",
+      "PostEventString": "You pick it up and continue on your way."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "In the middle of a room, a raging $1 is thrashing around.",
+      "PostEventString": "After the power overloading it dissipates, the Pokemon calmly leaves away, leaving $1 behind."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "Inside of a glass panel, a purple evolution crystal is connected to a number of cables. It whispers: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on."
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "You find an old first-aid kit.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "You find an old first-aid kit.",
+      "PostEventString": "Your Pokemon have recovered from their status conditions."
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "A young $1 appears in front of you and starts flexing. It's showing off!",
+      "PostEventString": "It decides to follow you, show you what it's made of."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "You walk on top of a decrepit catwalk.",
+      "PostEventString": "It obviously was a terrible idea! You and your Pokemon have sustained a bit of damage."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "You arrive to an area that is partly flooded.",
+      "PostEventString": "Unfortunately, a live wire is touching the water! $1 is electrocuted!",
+	  "SpecialParams": "par"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "$1 is in the Abandoned Plant, as lost as you are. 'The only thing to do now is to battle!' They heal your pokemon to full health.",
+      "PostEventString": "$1 goes home defeated. You continue onwards."
+    },
+	{
+      "EventType": "IMP_GAIN",
+      "PreEventString": "You find an old ATM machine on a wall.",
+      "PostEventString": "Surprisingly, it still has $1 inside."
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "You find some Team Paradox members carrying a crate full of blank disks. You are extremely suspicious of them.",
+      "PostEventString": "They give you $1 as a bribe to look away."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+    "Magnemite",
+    "Grimer",
+    "Grimer-Alola",
+    "Voltorb",
+    "Koffing",
+    "Elekid",
+    "Plusle",
+    "Minun",
+    "Beldum",
+    "Tynamo",
+    "Klink",
+    "Dedenne",
+    "Toxel",
+    "Pincurchin",
+    "Tadbulb",
+    "Varoom"
+	],
+	[
+    "Magneton",
+    "Muk",
+    "Electrode",
+    "Weezing",
+    "Electabuzz",
+    "Metang",
+    "Pachirisu",
+    "Rotom",
+    "Emolga",
+    "Eelektrik",
+    "Stunfisk",
+    "Stunfisk-Galar",
+    "Klang",
+    "Charjabug",
+    "Togedemaru"
+	],
+	[
+    "Magnezone",
+    "Muk-Alola",
+    "Weezing-Galar",
+    "Electivire",
+    "Metagross",
+    "Eelektross",
+    "Klinklang",
+    "Vikavolt",
+    "Xurkitree",
+    "Toxtricity",
+    "Toxtricity-Low-Key",
+    "Morpeko",
+    "Bellibolt",
+    "Revavroom"
+	],
+	[
+		"Regieleki"
+	]
+  ],
+  "CommonItems": [
+		"Lonely Mint",
+    "Adamant Mint",
+    "Naughty Mint",
+    "Brave Mint",
+    "Bold Mint",
+    "Impish Mint",
+    "Lax Mint",
+    "Relaxed Mint",
+    "Modest Mint",
+    "Mild Mint",
+    "Rash Mint",
+    "Quiet Mint",
+    "Calm Mint",
+    "Gentle Mint",
+    "Careful Mint",
+    "Sassy Mint",
+    "Timid Mint",
+    "Hasty Mint",
+    "Jolly Mint",
+    "Naive Mint",
+		"Shuca Berry"
+  ],
+  "RareItems": [
+		"Thunder Stone",
+    "Electirizer",
+    "Magnet",
+		"Cell Battery",
+    "Wide Lens",
+    "Zoom Lens",
+    "Power Herb",
+    "Terrain Extender",
+    "Electric Seed",
+    "Eject Button",
+    "Eject Pack"
+  ],
+  "BossItem": "Titan Plate 1",
+  "Floors": [
+    {
+      "RoomColor": "White",
+      "NeWallTile": "┐",
+      "NwWallTile": "┌",
+      "SeWallTile": "┘",
+      "SwWallTile": "└",
+      "EWallTile": "│",
+      "WWallTile": "│",
+      "NWallTile": "─",
+      "SWallTile": "─",
+	    "EWallPassageTile": " ",
+      "WWallPassageTile": " ",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": "~",
+      "SWallShortcutTile": "~",
+      "PassageColor": "White",
+      "VerticalPassageTile": "═",
+      "ShortcutColor": "DarkYellow",
+      "NeShortcutTile": "⏚",
+      "NwShortcutTile": "⏚",
+      "SeShortcutTile": "⏚",
+      "SwShortcutTile": "⏚",
+      "HorizontalShortcutTile": "⏚",
+      "VerticalShortcutTile": "⏚",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "TYPE",
+				"Which": ["Ground"]
+		},
+    {
+				"ConditionType": "ABILITY",
+				"Which": ["Volt Absorb", "Motor Drive", "Lightning Rod"]
+		}
+	  ],
+	  "ShortcutClue": "This is a high voltage area. Electric arcs all over. You'll need help from a Pokemon that is not affected by this electricity.",
+	  "ShortcutResolution": "Your $1 neutralizes the electricity. The team can now pass safely."
+    },
+	{
+      "RoomColor": "Yellow",
+      "NeWallTile": "┐",
+      "NwWallTile": "┌",
+      "SeWallTile": "┘",
+      "SwWallTile": "└",
+      "EWallTile": "⌁",
+      "WWallTile": "⌁",
+      "NWallTile": "⌁",
+      "SWallTile": "⌁",
+	    "EWallPassageTile": " ",
+      "WWallPassageTile": " ",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": "~",
+      "SWallShortcutTile": "~",
+      "PassageColor": "White",
+      "VerticalPassageTile": " ",
+      "ShortcutColor": "Red",
+      "NeShortcutTile": "~",
+      "NwShortcutTile": "~",
+      "SeShortcutTile": "~",
+      "SwShortcutTile": "~",
+      "HorizontalShortcutTile": "~",
+      "VerticalShortcutTile": "~",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": ["Signal Beam", "Heat Wave", "Shock Wave", "Sludge Wave", "Thunder Wave", "Wave Crash", "Vacuum Wave", "Thousand Waves", "Psywave"]
+		},
+		{
+				"ConditionType": "ITEM",
+				"Which": ["Wave Incense"]
+		}
+	  ],
+	  "ShortcutClue": "There's an electric security gate. You think a strong enough WAVE or SIGNAL may override the security system.",
+	  "ShortcutResolution": "Your $1 overwhelms the security system. The hatch opens..."
+    },
+	{
+      "RoomColor": "Cyan",
+      "NeWallTile": "≋",
+      "NwWallTile": "≈",
+      "SeWallTile": "⌁",
+      "SwWallTile": "∂",
+      "EWallTile": "∆",
+      "WWallTile": "∇",
+      "NWallTile": "≀",
+      "SWallTile": "⏧",
+	    "EWallPassageTile": "+",
+      "WWallPassageTile": "-",
+      "NWallPassageTile": "+",
+      "SWallPassageTile": "-",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "Green",
+      "VerticalPassageTile": "-",
+      "ShortcutColor": "White",
+      "NeShortcutTile": " ",
+      "NwShortcutTile": " ",
+      "SeShortcutTile": " ",
+      "SwShortcutTile": " ",
+      "HorizontalShortcutTile": " ",
+      "VerticalShortcutTile": " ",
+	  "ShortcutConditions": [],
+	  "ShortcutClue": "You have reached deep into the power plant. The air smells weird, and it feels eerily deserted in here.",
+	  "ShortcutResolution": ""
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "You reach the power plant's generator. The energy in this room is out of control. In the center, absorbing most of the energy a titan made of pure electricity. Before you can react, it starts moving all over the place...",
+    "PostEventString": "As you defeat the titan, the whole power plant starts to make a deafening noise. Parts start moving. Your actions here have are changing the world."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "You find an abandoned staff cafeteria. The perfect place for a picnic.",
+    "PostEventString": "But now it's time to move on..."
+  },
+  "PreBossEvent": { "EventType": "REGIELEKI" },
+  "PostBossEvent":
+  {
+      "EventType": "PLOT_CLUE",
+      "PreEventString": "All the legendary titans were first created in the image of Regigigas.",
+      "PostEventString": "From the moment they were born, a great task fell in their hands..."
+  },
+  "CustomShowdownRules" : ["Continuous Electric Terrain Mod", "Environment Mod = electric"],
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

@@ -1,0 +1,285 @@
+{
+  "Name": "Northface Glacier",
+  "GoesDownwards": true,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "You hear a crunching sound while stepping on the snow. You find a $1 buried inside.",
+      "PostEventString": "It's not broken. You pick it up and continue on your way."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "You find yourself alone in the mountains with a threatening $1.",
+      "PostEventString": "The Pokemon leaves you alone, dropping $1 behind."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "There's a purple shining crystal buried in the snow. It's refracted glow looks quite mystical. It whispers: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on."
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "You arrive to an operational chair-lift. The operator shares a first-aid kit with you.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "You arrive to an operational chair-lift. The operator shares a first-aid kit with you.",
+      "PostEventString": "Your Pokemon have recovered from their status conditions."
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "A $1 rolls down from the mountains and bumps into you. It's disoriented.",
+      "PostEventString": "You decided to take care of it for a while."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "Before you could react, the snow below starts shaking! You get caught in a mini avalanche.",
+      "PostEventString": "You are ok, but your Pokemon have sustained a bit of damage."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "Your pokemon are carefully walking on an icy area.",
+      "PostEventString": "Suddenly, the ice breaks and $1 falls into a puddle of freezing water. It got frostbite.",
+	  "SpecialParams": "frz"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "$1 is sitting on a bench, wearing some winter clothes. 'What do you say to a battle?' They then heal your pokemon to full health.",
+      "PostEventString": "$1 is satisfied with the battle, you continue onwards."
+    },
+	{
+      "EventType": "RESEARCHER",
+      "PreEventString": "The Pokemon research society is having a skiing trip. They wave when they see you.",
+      "PostEventString": "After spending a bit of time with them, they hand you a $1."
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "Team Paradox is having a skiing trip. They wave when they see you.",
+      "PostEventString": "After spending a bit of time with them, they hand you a $1."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+    "Sandshrew-Alola",
+    "Vulpix-Alola",
+    "Mr. Mime-Galar",
+    "Sneasel",
+    "Teddiursa",
+    "Swinub",
+    "Smoochum",
+    "Castform",
+    "Snorunt",
+    "Snover",
+    "Darumaka-Galar",
+    "Zorua-Hisui",
+    "Cubchoo",
+    "Bergmite",
+    "Snom",
+    "Cetoddle",
+    "Frigibax"
+	],
+	[
+    "Sandslash-Alola",
+    "Jynx",
+    "Sneasel-Hisui",
+    "Ursaring",
+    "Piloswine",
+    "Delibird",
+    "Stantler",
+    "Glalie",
+    "Abomasnow",
+    "Beartic",
+    "Cryogonal",
+    "Mr. Rime",
+    "Frosmoth",
+    "Eiscue",
+    "Arctibax"
+	],
+	[
+    "Ninetales-Alola",
+    "Weavile",
+    "Sneasler",
+    "Ursaluna",
+    "Mamoswine",
+    "Wyrdeer",
+    "Froslass",
+    "Darmanitan-Galar",
+    "Zoroark-Hisui",
+    "Avalugg",
+    "Avalugg-Hisui",
+    "Crabominable",
+    "Cetitan",
+    "Baxcalibur"
+	],
+	[
+		"Regice"
+	]
+  ],
+  "CommonItems": [
+		"Health Feather",
+		"Muscle Feather",
+		"Resist Feather",
+		"Genius Feather",
+		"Clever Feather",
+		"Swift Feather",
+		"Scout Feather",
+		"Wall Feather",
+		"Scholar Feather",
+		"Force-Field Feather",
+		"Athlete Feather",
+		"Bruiser Feather",
+		"Danger Feather",
+		"Zen Feather",
+		"Assassin Feather",
+		"Phantom Feather",
+		"Tank Feather",
+		"Guardian Feather",
+		"Amnesia Feather",
+		"Sniper Feather",
+		"Mystic Feather",
+		"Occa Berry",
+		"Charti Berry",
+		"Chople Berry",
+    "Babiri Berry"
+  ],
+  "RareItems": [
+		"Rainbow Feather",
+    "Snowball",
+    "Never-Melt Ice",
+		"Fairy Feather",
+    "Binding Band",
+    "Ice Stone",
+    "Eject Pack",
+    "Grip Claw",
+    "Icy Rock"
+  ],
+  "BossItem": "Titan Plate 5",
+  "Floors": [
+    {
+      "RoomColor": "White",
+      "NeWallTile": " ",
+      "NwWallTile": "╲",
+      "SeWallTile": "╲",
+      "SwWallTile": " ",
+      "EWallTile": " ",
+      "WWallTile": "█",
+      "NWallTile": " ",
+      "SWallTile": "█",
+	    "EWallPassageTile": " ",
+      "WWallPassageTile": "█",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": "┘",
+      "SWallShortcutTile": "┘",
+      "PassageColor": "White",
+      "VerticalPassageTile": " ",
+      "ShortcutColor": "Gray",
+      "NeShortcutTile": "┘",
+      "NwShortcutTile": "┘",
+      "SeShortcutTile": "┘",
+      "SwShortcutTile": "┘",
+      "HorizontalShortcutTile": "┘",
+      "VerticalShortcutTile": "┘",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": ["Shock Wave", "Double Shock", "Freeze Shock", "Thunder Shock", "Psyshock", "Venoshock"]
+		},
+    {
+				"ConditionType": "POKEMON",
+				"Which": ["Sandy Shocks"]
+		},
+		{
+				"ConditionType": "ABILITY",
+				"Which": ["Slow Start"]
+		}
+	  ],
+	  "ShortcutClue": "You see a chair-lift system that is currently turned off. If you give it a shock, it may start up.",
+	  "ShortcutResolution": "Your $1 starts the machine back again, allowing you to descend to the next part of the mountain."
+    },
+	{
+      "RoomColor": "White",
+      "NeWallTile": "/",
+      "NwWallTile": "\\",
+      "SeWallTile": "/",
+      "SwWallTile": "\\",
+      "EWallTile": "/",
+      "WWallTile": "\\",
+      "NWallTile": " ",
+      "SWallTile": " ",
+	    "EWallPassageTile": " ",
+      "WWallPassageTile": " ",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": "►",
+      "SWallShortcutTile": "►",
+      "PassageColor": "White",
+      "VerticalPassageTile": " ",
+      "ShortcutColor": "White",
+      "NeShortcutTile": "►",
+      "NwShortcutTile": "►",
+      "SeShortcutTile": "►",
+      "SwShortcutTile": "►",
+      "HorizontalShortcutTile": "►",
+      "VerticalShortcutTile": "▼",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": ["Rock Slide", "Grassy Glide"]
+		}
+	  ],
+	  "ShortcutClue": "The next slope is not so steep, so you may be able to slide down with the right move...",
+	  "ShortcutResolution": "Your $1 lets you slide down to the bottom of the mountain!"
+    },
+	{
+      "RoomColor": "White",
+      "NeWallTile": " ",
+      "NwWallTile": " ",
+      "SeWallTile": "_",
+      "SwWallTile": "_",
+      "EWallTile": " ",
+      "WWallTile": " ",
+      "NWallTile": " ",
+      "SWallTile": "─",
+	    "EWallPassageTile": " ",
+      "WWallPassageTile": " ",
+      "NWallPassageTile": " ",
+      "SWallPassageTile": " ",
+      "NWallShortcutTile": " ",
+      "SWallShortcutTile": " ",
+      "PassageColor": "White",
+      "VerticalPassageTile": " ",
+      "ShortcutColor": "White",
+      "NeShortcutTile": " ",
+      "NwShortcutTile": " ",
+      "SeShortcutTile": " ",
+      "SwShortcutTile": " ",
+      "HorizontalShortcutTile": " ",
+      "VerticalShortcutTile": " ",
+	  "ShortcutConditions": [],
+	  "ShortcutClue": "You have reached the base of the mountain, but the area is strangely deserted. Better investigate around for a while.",
+	  "ShortcutResolution": ""
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "In a desolate clearing in the mountain base, you see a slumbering titan made of ice. As you approach, the floor starts rumbling...",
+    "PostEventString": "As you defeat the titan, the ground rumbles again. Your actions here have are changing the world."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "You find a small cabin in the mountains. There's enough space inside for a picnic.",
+    "PostEventString": "But now it's time to move on..."
+  },
+  "PreBossEvent": { "EventType": "REGICE" },
+  "PostBossEvent":
+  {
+      "EventType": "PLOT_CLUE",
+      "PreEventString": "... then the balance of power will change forever in the world.",
+      "PostEventString": "The mythical beasts of creation will roam the lands once again."
+  },
+  "CustomShowdownRules" : ["Continuous Snow Mod", "Environment Mod = mountain"],
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

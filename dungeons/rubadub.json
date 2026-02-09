@@ -1,0 +1,303 @@
+{
+  "Name": "Rub-a-Dub Pond",
+  "GoesDownwards": false,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "A cute Pokemon is happily bouncing around, it gifts you $1 with a smile.",
+      "PostEventString": "After giving you the gift, the shy pokemon bounces away"
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "A bully $1 is annoying everyone else in this pleasant day. This can't be allowed to happen!",
+      "PostEventString": "The bully learned it's lesson. They give you a $1 as an apology and leaves."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "All the Pokemon in the lake are singing around a purple shining crystal. It talks to you: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on."
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "Relax time! You find an Azumarrill who is giving everyone massages!",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "Relax time! You find an Azumarrill who is giving everyone massages!",
+      "PostEventString": "Your Pokemon have recovered from their status conditions."
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "A happy $1 follows you for a while.",
+      "PostEventString": "It's in a really good mood, and wants to join your team!"
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "You were running by the edge of the water! A big no-no. You slip and hit yourself...",
+      "PostEventString": "Better be more careful next time!"
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "You were running by the edge of the water! A big no-no. You slip and hit yourself...",
+      "PostEventString": "$1 got hit quite bad, and injured it's hip. Its mobility is reduced",
+	  "SpecialParams": "par"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "$1 is chilling by the pond. It sees you and waves! What do you say to a quick fun battle?",
+      "PostEventString": "$1 had so much fun. You both wish this day would never end"
+    },
+	{
+      "EventType": "RESEARCHER",
+      "PreEventString": "There's some ruins buried by the pond. I wonder what was here before?",
+      "PostEventString": "You don't see anything of value, but you do find a $1."
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "Team Paradox members are chilling by the pond. They're playing music out loud and annoying everyone.",
+      "PostEventString": "They quickly apologize, they didn't realise the music was so loud. They lower the volume and give you $1."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Squirtle",
+		"Poliwag",
+		"Slowpoke",
+		"Magikarp",
+		"Totodile",
+		"Azuril",
+		"Marill",
+		"Lotad",
+		"Surskit",
+		"Feebas",
+		"Bidoof",
+		"Buizel",
+		"Oshawott",
+		"Panpour",
+		"Ducklett",
+		"Dewpider",
+		"Wimpod",
+		"Sobble",
+		"Chewtle",
+		"Quaxly",
+    "Farfetch'd",
+		"Castform",
+    "Corphish"
+	],
+	[
+		"Wartortle",
+		"Poliwhirl",
+		"Croconaw",
+		"Azumarrill",
+		"Lombre",
+		"Masquerain",
+		"Bibarel",
+		"Floatzel",
+		"Dewott",
+		"Simipour",
+		"Swanna",
+		"Drizzile",
+		"Drednaw",
+		"Cramorant",
+		"Quaxwell",
+    "Bellibolt"
+	],
+	[
+		"Blastoise",
+		"Poliwrath",
+		"Politoed",
+		"Slowbro",
+		"Slowking",
+		"Feraligatr",
+		"Ludicolo",
+		"Milotic",
+		"Samurott",
+		"Araquanid",
+		"Golisopod",
+		"Inteleon",
+		"Quaquaval",
+		"Dondozo",
+		"Tatsugiri",
+    "Crawdaunt"
+	],
+	[
+		"Registeel"
+	]
+  ],
+  "CommonItems": [
+		"Aguav Berry",
+		"Apicot Berry",
+		"Aspear Berry",
+		"Cheri Berry",
+		"Chesto Berry",
+		"Chilan Berry",
+		"Custap Berry",
+		"Enigma Berry",
+		"Figy Berry",
+		"Ganlon Berry",
+		"Iapapa Berry",
+		"Jaboca Berry",
+		"Kee Berry",
+		"Lansat Berry",
+		"Leppa Berry",
+		"Liechi Berry",
+		"Lum Berry",
+		"Mago Berry",
+		"Maranga Berry",
+		"Micle Berry",
+		"Oran Berry",
+		"Pecha Berry",
+		"Persim Berry",
+		"Petaya Berry",
+		"Rawst Berry",
+		"Rowap Berry",
+		"Salac Berry",
+		"Sitrus Berry",
+		"Starf Berry",
+		"Wiki Berry",
+		"Rindo Berry",
+		"Wacan Berry"
+  ],
+  "RareItems": [
+		"Absorb Bulb",
+		"Big Root",
+		"Electric Seed",
+		"Psychic Seed",
+		"Misty Seed",
+		"Grassy Seed",
+		"Leftovers",
+		"Luminous Moss",
+		"Miracle Seed",
+		"Silver Powder",
+    "Water Stone"
+  ],
+  "BossItem": "Titan Plate 3",
+  "Floors": [
+    {
+      "RoomColor": "Blue",
+      "NeWallTile": "╮",
+      "NwWallTile": "╭",
+      "SeWallTile": "╯",
+      "SwWallTile": "╯",
+      "EWallTile": "│",
+      "WWallTile": "│",
+      "NWallTile": "─",
+      "SWallTile": "─",
+	  "EWallPassageTile": "│",
+      "WWallPassageTile": "│",
+      "NWallPassageTile": "╯",
+      "SWallPassageTile": "╮",
+      "NWallShortcutTile": "┃",
+      "SWallShortcutTile": "┃",
+      "PassageColor": "Blue",
+      "VerticalPassageTile": "┃",
+      "ShortcutColor": "Green",
+      "NeShortcutTile": "●",
+      "NwShortcutTile": "●",
+      "SeShortcutTile": "●",
+      "SwShortcutTile": "●",
+      "HorizontalShortcutTile": "●",
+      "VerticalShortcutTile": "●",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": ["Bounce", "Surf"]
+		},
+		{
+				"ConditionType": "ABILITY",
+				"Which": ["Magic Bounce", "Swift Swim"]
+		}
+	  ],
+	  "ShortcutClue": "You may be able to make it faster by bouncing through the lillypads, or just swim across..",
+	  "ShortcutResolution": "Your $1 allows to cross the lillypad brook."
+    },
+	{
+      "RoomColor": "Cyan",
+      "NeWallTile": "▒",
+      "NwWallTile": "▒",
+      "SeWallTile": "▒",
+      "SwWallTile": "▒",
+      "EWallTile": "▒",
+      "WWallTile": "▒",
+      "NWallTile": "▒",
+      "SWallTile": "▒",
+	  "EWallPassageTile": "▒",
+      "WWallPassageTile": "▒",
+      "NWallPassageTile": "▒",
+      "SWallPassageTile": "▒",
+      "NWallShortcutTile": "▒",
+      "SWallShortcutTile": "▒",
+      "PassageColor": "Cyan",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "Blue",
+      "NeShortcutTile": "▧",
+      "NwShortcutTile": "▨",
+      "SeShortcutTile": "▨",
+      "SwShortcutTile": "▧",
+      "HorizontalShortcutTile": "▥",
+      "VerticalShortcutTile": "▤",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": ["Waterfall"]
+		},
+		{
+			"ConditionType": "ABILITY",
+			"Which": ["Swift Swim"]
+		}
+	  ],
+	  "ShortcutClue": "A huge waterfall connects the ponds. Maybe you can find a way to quickly swim upwards through it.",
+	  "ShortcutResolution": "Your $1 allows the party to cross the waterfall quickly."
+    },
+	{
+      "RoomColor": "Cyan",
+      "NeWallTile": "╮",
+      "NwWallTile": "▟",
+      "SeWallTile": "▞",
+      "SwWallTile": "╰",
+      "EWallTile": "│",
+      "WWallTile": "│",
+      "NWallTile": "─",
+      "SWallTile": "─",
+	  "EWallPassageTile": "▒",
+      "WWallPassageTile": "▒",
+      "NWallPassageTile": "▒",
+      "SWallPassageTile": "▒",
+      "NWallShortcutTile": "▒",
+      "SWallShortcutTile": "▒",
+      "PassageColor": "Cyan",
+      "VerticalPassageTile": "▒",
+      "ShortcutColor": "White",
+      "NeShortcutTile": " ",
+      "NwShortcutTile": " ",
+      "SeShortcutTile": " ",
+      "SwShortcutTile": " ",
+      "HorizontalShortcutTile": " ",
+      "VerticalShortcutTile": " ",
+	  "ShortcutConditions": [],
+	  "ShortcutClue": "You have reached the ruins of an old temple, partially sunk in the lake. Doesn't seem there's any way but forward.",
+	  "ShortcutResolution": ""
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "In the center of the ruins, a slumbering titan made of steel. As you approach, the floor starts rumbling...",
+    "PostEventString": "As you defeat the titan, the ground rumbles again. Your actions here have are changing the world."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "This are by the pond's shore is so pleasant. A perfect place for a picnic.",
+    "PostEventString": "But now it's time to move on..."
+  },
+  "PreBossEvent": { "EventType": "REGISTEEL" },
+  "PostBossEvent":
+  {
+      "EventType": "PLOT_CLUE",
+      "PreEventString": "... After their hard work was done, the titans began their well deserved slumber.",
+      "PostEventString": "They were never seen since. Despite the efforts of their most devout followers, they were never found. ..."
+  },
+  "CustomShowdownRules" : ["Continuous Rain Mod", "Environment Mod = pond"],
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}
