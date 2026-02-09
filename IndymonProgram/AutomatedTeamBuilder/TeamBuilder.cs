@@ -87,13 +87,27 @@ namespace AutomatedTeamBuilder
                 {
                     teamSeed = IndymonUtilities.GetRandomNumber(int.MaxValue);
                 }
-                Random rng = new Random(teamSeed); // Not ideal but lets us retry with same value
+                Random teamRng = new Random(teamSeed); // Not ideal but lets us retry with same value
+                int monSeed = teamRng.Next(seed); // Get the next seed of mon
                 // Will build a set for each mon
                 for (int monIndex = 0; monIndex < trainer.BattleTeam.Count; monIndex++)
                 {
+                    // Init stuff
+                    Random monRng = new Random(seed); // Will use this for the mon, in order to be able to reuse seed
                     TrainerPokemon mon = trainer.BattleTeam[monIndex];
+                    bool monHadSetItem = mon.SetItem != "";
+                    bool monHadModItem = mon.ModItem != null;
+                    bool monHadBattleItem = mon.ModItem != null;
                     // Also get the mons ability and moveset here
-                    Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
+                    Pokemon monData;
+                    if (mon.Species.ToLower().Contains("unown")) // Weird case because the species is always unown even if many aesthetic formes that are not in the dex
+                    {
+                        monData = MechanicsDataContainers.GlobalMechanicsData.Dex["Unown"];
+                    }
+                    else
+                    {
+                        monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
+                    }
                     // First thing is to check if mon has set item equipped, if so, add the move/ability already
                     Ability setItemAbility = GetSetItemAbility(mon.SetItem);
                     mon.ChosenAbility = setItemAbility;
@@ -137,7 +151,7 @@ namespace AutomatedTeamBuilder
                                 {
                                     List<Ability> possibleAbilities = [.. monData.Abilities]; // All possible abilities
                                     Dictionary<Ability, string> setItemAbilityLookup = new Dictionary<Ability, string>();
-                                    if (trainer.AutoSetItem) // If I can equip other set items AND set item provides useful abilities, I'll add them too
+                                    if (trainer.AutoSetItem && mon.SetItem == "") // If I can equip other set items AND set item provides useful abilities, I'll add them too
                                     {
                                         foreach (string setItem in trainer.SetItems.Keys) // Need to check which set items are available
                                         {
@@ -192,7 +206,7 @@ namespace AutomatedTeamBuilder
                                             }
                                         }
                                     } // Gottem scores
-                                    int chosenAbilityIndex = RandomIndexOfWeights(abilityScores, rng);
+                                    int chosenAbilityIndex = RandomIndexOfWeights(abilityScores, monRng);
                                     Ability chosenAbility = acceptableAbilities[chosenAbilityIndex]; // Got the ability
                                     mon.ChosenAbility = chosenAbility; // Apply to mon, all good here
                                     if (setItemAbilityLookup.TryGetValue(chosenAbility, out string equippedSetItem)) // If this was found through set item, need to equip set item
@@ -211,8 +225,13 @@ namespace AutomatedTeamBuilder
                                 if (mon.ChosenMoveset.Count < NUMBER_OF_MOVES_PER_MON) // Time to add a next move (or empty)
                                 {
                                     List<Move> possibleMoves = [.. monData.Moveset]; // All possible moves
+                                    if (mon.Species.ToLower().Contains("unown")) // And then again, weird mechanic because I can only allow the moves that start with the unown letter
+                                    {
+                                        char letter = mon.Species.ToLower().Last();
+                                        possibleMoves = [.. possibleMoves.Where(m => m.Name.StartsWith(letter))]; // Additional move filter
+                                    }
                                     Dictionary<Move, string> setItemMoveLookup = new Dictionary<Move, string>();
-                                    if (trainer.AutoSetItem) // If I can equip other set items AND set item provides useful moves, I'll add them too
+                                    if (trainer.AutoSetItem && mon.SetItem == "") // If I can equip other set items AND set item provides useful moves, I'll add them too
                                     {
                                         foreach (string setItem in trainer.SetItems.Keys) // Need to check which set items are available
                                         {
@@ -255,7 +274,7 @@ namespace AutomatedTeamBuilder
                                             pivotModdedChance = 1;
                                         }
                                         pivotModdedChance *= BASE_PIVOT_CHANCE;
-                                        if (pivotModdedChance > rng.NextDouble()) // Roll this chance
+                                        if (pivotModdedChance > monRng.NextDouble()) // Roll this chance
                                         {
                                             // Forced pivot, choose only pivot moves
                                             acceptableMoves = [.. possibleMoves.Where(m => m.Flags.Contains(EffectFlag.PIVOT))];
@@ -287,7 +306,7 @@ namespace AutomatedTeamBuilder
                                                 }
                                             }
                                         } // Gottem scores
-                                        int chosenMoveIndex = RandomIndexOfWeights(moveScores, rng);
+                                        int chosenMoveIndex = RandomIndexOfWeights(moveScores, monRng);
                                         Move chosenMove = acceptableMoves[chosenMoveIndex]; // Got the move
                                         mon.ChosenMoveset.Add(chosenMove); // Apply to mon, all good here
                                         if (setItemMoveLookup.TryGetValue(chosenMove, out string equippedSetItem)) // If this was found through set item, need to equip set item
@@ -353,7 +372,7 @@ namespace AutomatedTeamBuilder
                                     }
                                     if (validModItems.Count > 0) // Choose between reasonable mod items
                                     {
-                                        int chosenItemIndex = RandomIndexOfWeights(modItemScores, rng);
+                                        int chosenItemIndex = RandomIndexOfWeights(modItemScores, monRng);
                                         Item chosenModitem = validModItems[chosenItemIndex]; // Got the item
                                         mon.ModItem = chosenModitem; // Apply to mon, all good here
                                         IndymonUtilities.AddtemToCountDictionary(trainer.ModItems, chosenModitem, -1, true); // Remove 1 charge of mod item from trainer
@@ -487,7 +506,7 @@ namespace AutomatedTeamBuilder
                                     }
                                     if (validBattleItems.Count > 0) // Choose between reasonable battle items
                                     {
-                                        int chosenItemIndex = RandomIndexOfWeights(battleItemScores, rng);
+                                        int chosenItemIndex = RandomIndexOfWeights(battleItemScores, monRng);
                                         Item chosenBattleitem = validBattleItems[chosenItemIndex]; // Got the item
                                         if (chosenBattleitem != noItem) // Check if winner was actually an item
                                         {
@@ -503,22 +522,37 @@ namespace AutomatedTeamBuilder
                         }
                     }
                     Console.WriteLine($"Chosen set for mon ({teamSeed}): {mon.PrintSet()}");
-                }
-                Console.WriteLine("Accept set? Y/n/Reroll");
-                string readKey = Console.ReadLine();
-                if (readKey.ToLower() == "n") // Whether need to rebuild whole thign or retry seed to debug
-                {
-                    teamAccepted = false;
-                    seedAccepted = false;
-                }
-                else if (readKey.ToLower() == "r")
-                {
-                    teamAccepted = false;
-                    seedAccepted = true;
-                }
-                else
-                {
-                    teamAccepted = true;
+                    Console.WriteLine("Accept? Y, n (redo seed for debug)");
+                    string monAccepted = Console.ReadLine();
+                    bool redoMon = false;
+                    bool newSeed = true;
+                    // Depending on the choice, a new seed is chosen and the mon is redone
+                    if (monAccepted.ToLower() == "n")
+                    {
+                        // Ok, need to restore mon then
+                        if (mon.SetItem != "" && !monHadSetItem) // If mon needs to return set item
+                        {
+                            IndymonUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, 1); // Re-adds item
+                            mon.SetItem = "";
+                        }
+                        if (mon.ModItem != null && !monHadModItem) // If mon needs to return mod item
+                        {
+                            IndymonUtilities.AddtemToCountDictionary(trainer.ModItems, mon.ModItem, 1); // Re-adds item
+                            mon.ModItem = null;
+                        }
+                        if (mon.SetItem != "" && !monHadSetItem) // If mon needs to return battle item
+                        {
+                            IndymonUtilities.AddtemToCountDictionary(trainer.BattleItems, mon.BattleItem, 1); // Re-adds item
+                            mon.BattleItem = null;
+                        }
+                        // Also redo the mon ofc
+                        monIndex--; // Horrible but makes the loop go again
+                    }
+                    else
+                    {
+                        // All good, do next seed then
+                        monSeed = teamRng.Next(seed);
+                    }
                 }
             }
             // If team accepted, then get all mons ctx one last time, and apply the necessary things to them

@@ -185,22 +185,25 @@ namespace AutomatedTeamBuilder
                 // Stab, check if tera is involved
                 double stabBonus = 1;
                 PokemonType moveType = GetModifiedMoveType(move, monCtx);
-                if (monCtx.TeraType == moveType) // Tera-induced stab
+                if (moveType != PokemonType.STELLAR && moveType != PokemonType.NONE) // If move type is not crazy, then may apply stab
                 {
-                    if (monCtx.PokemonTypes.Item1 == monCtx.TeraType || monCtx.PokemonTypes.Item2 == monCtx.TeraType) // Depending on whether new type or not
+                    if (monCtx.TeraType == moveType) // Tera-induced stab
                     {
-                        stabBonus = (extraStab) ? 2.25 : 2;
+                        if (monCtx.PokemonTypes.Item1 == monCtx.TeraType || monCtx.PokemonTypes.Item2 == monCtx.TeraType) // Depending on whether new type or not
+                        {
+                            stabBonus = (extraStab) ? 2.25 : 2;
+                        }
+                        else
+                        {
+                            stabBonus = (extraStab) ? 2 : 1.5;
+                        }
                     }
-                    else
+                    else // Otherwise check for normal stab
                     {
-                        stabBonus = (extraStab) ? 2 : 1.5;
-                    }
-                }
-                else // Otherwise check for normal stab
-                {
-                    if (monCtx.PokemonTypes.Item1 == monCtx.TeraType || monCtx.PokemonTypes.Item2 == monCtx.TeraType || alwaysStab)
-                    {
-                        stabBonus = (extraStab) ? 2 : 1.5;
+                        if (monCtx.PokemonTypes.Item1 == monCtx.TeraType || monCtx.PokemonTypes.Item2 == monCtx.TeraType || alwaysStab)
+                        {
+                            stabBonus = (extraStab) ? 2 : 1.5;
+                        }
                     }
                 }
                 hitDamage *= stabBonus;
@@ -366,7 +369,7 @@ namespace AutomatedTeamBuilder
             PokemonType moveType = move.Type;
             if (move.Name == "Revelation Dance") // Revelation dance overrides everything so I don't get cool mods
             {
-                moveType = (monCtx.TeraType != PokemonType.NONE) ? monCtx.TeraType : monCtx.PokemonTypes.Item1;
+                moveType = (monCtx.TeraType != PokemonType.NONE && monCtx.TeraType != PokemonType.STELLAR) ? monCtx.TeraType : monCtx.PokemonTypes.Item1;
             }
             else
             {

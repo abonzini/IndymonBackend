@@ -231,7 +231,7 @@ namespace AutomatedTeamBuilder
                 double averageStabReceived = IndymonUtilities.ArrayAverage(moveStabsReceived);
                 averageDamage *= averageStabReceived;
                 averageDamageVariance *= averageStabReceived * averageStabReceived;
-                // Do the normal thing now
+                // Do the normal thing now. Checks how "bulky" a mon is, which increases surv rating
                 Normal damageReceivedDistro = new Normal(averageDamage, Math.Sqrt(averageDamageVariance)); // Get the std dev ofc
                 result.DefenseScore = damageReceivedDistro.CumulativeDistribution(monStats[0]); // Compare my HP with this damage
                 result.Survivability = monStats[0] / (1.5 * averageDamage); // Survibaility means the mon is left with approx 33% after damage (or, 1.5 times health to damage received)

@@ -21,6 +21,7 @@ namespace AutomatedTeamBuilder
             {
                 static double damageFromType(PokemonType attackingType, PokemonType defendingType, bool ignoresImmunity, bool seAgainstWater)
                 {
+                    if (attackingType == PokemonType.NONE) return 1; // Typeless moves just hit
                     if (seAgainstWater && defendingType == PokemonType.WATER) return 2; // Skip the whole damage calc idc
                     double result = MechanicsDataContainers.GlobalMechanicsData.DefensiveTypeChart[defendingType][attackingType];
                     if (ignoresImmunity && result == 0) result = 1;
@@ -56,6 +57,7 @@ namespace AutomatedTeamBuilder
                 // Consider this as 2 separate attacks now, first T1 and then T2. Get basic damage, multiply, then decide if nullify
                 static double DefensiveTypeCheck(PokemonType attackingType, (PokemonType, PokemonType) defendingType, HashSet<(StatModifier, string)> ModifiedTypeEffectiveness)
                 {
+                    if (attackingType == PokemonType.NONE) return 1; // Typeless moves just hit
                     double damage = CalculateOffensiveTypeCoverage(attackingType, [defendingType], false, false, false)[0]; // Reuse the attackign formula, check how much this messes me up, don''t know enemy abilities so all false
                     // SE checks here before extra modifiers
                     if (damage > 1) // SE!
