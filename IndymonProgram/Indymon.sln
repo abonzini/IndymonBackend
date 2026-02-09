@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IndymonBackendProgram", "In
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowdownBot", "ShowdownBot\ShowdownBot.csproj", "{B3D26ACF-1CC6-470B-BEB7-B103F1A56D27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BotTest", "BotTest\BotTest.csproj", "{ABC63DB3-2059-4E4A-7970-F427C8663D62}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -40,10 +38,6 @@ Global
 		{B3D26ACF-1CC6-470B-BEB7-B103F1A56D27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3D26ACF-1CC6-470B-BEB7-B103F1A56D27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3D26ACF-1CC6-470B-BEB7-B103F1A56D27}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ABC63DB3-2059-4E4A-7970-F427C8663D62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ABC63DB3-2059-4E4A-7970-F427C8663D62}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ABC63DB3-2059-4E4A-7970-F427C8663D62}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ABC63DB3-2059-4E4A-7970-F427C8663D62}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7BFE40E0-523D-4EC6-96B5-04752B800443}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7BFE40E0-523D-4EC6-96B5-04752B800443}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BFE40E0-523D-4EC6-96B5-04752B800443}.Release|Any CPU.ActiveCfg = Release|Any CPU

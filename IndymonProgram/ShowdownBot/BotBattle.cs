@@ -1,13 +1,9 @@
-﻿namespace ShowdownBot
+﻿using GameData;
+
+namespace ShowdownBot
 {
     public class BotBattle
     {
-        readonly DataContainers _backend;
-        public BotBattle(DataContainers backend)
-        {
-            _backend = backend;
-        }
-
         /// <summary>
         /// Runs a bot battle
         /// </summary>
@@ -16,13 +12,13 @@
         /// <param name="nMons1">Number of mons in first player team</param>
         /// <param name="nMons2">Number of mons in second player team</param>
         /// <returns>The score</returns>
-        public (int, int) SimulateBotBattle(TrainerData player1, TrainerData player2, int nMons1, int nMons2, string gameType)
+        public (int, int) SimulateBotBattle(Trainer player1, Trainer player2, int nMons1, int nMons2, string gameType)
         {
-            BasicShowdownBot acceptBot = new BasicShowdownBot(_backend)
+            BasicShowdownBot acceptBot = new BasicShowdownBot()
             {
                 Verbose = false
             };
-            BasicShowdownBot challengeBot = new BasicShowdownBot(_backend)
+            BasicShowdownBot challengeBot = new BasicShowdownBot()
             {
                 Verbose = false
             };
@@ -60,9 +56,9 @@
         /// <param name="player1">Bot player</param>
         /// <param name="nMons1">Number of mons</param>
         /// <returns>This bot score</returns>
-        public int SimulateBotBattle(TrainerData player1, int nMons1)
+        public int SimulateBotBattle(Trainer player1, int nMons1)
         {
-            BasicShowdownBot acceptBot = new BasicShowdownBot(_backend)
+            BasicShowdownBot acceptBot = new BasicShowdownBot()
             {
                 Verbose = false
             };

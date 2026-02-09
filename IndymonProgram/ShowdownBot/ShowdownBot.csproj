@@ -6,4 +6,15 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.5-beta1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GameDataContainer\GameDataContainer.csproj" />
+    <ProjectReference Include="..\GameData\GameData.csproj" />
+    <ProjectReference Include="..\MechanicsDataContainer\MechanicsDataContainer.csproj" />
+    <ProjectReference Include="..\MechanicsData\MechanicsData.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,9 @@
-﻿using System.Net.WebSockets;
+﻿using GameData;
+using Newtonsoft.Json;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using Utilities;
 
 namespace ShowdownBot
 {
@@ -21,8 +24,7 @@ namespace ShowdownBot
         string _challstr;
         ClientWebSocket _socket = null;
         public ConsoleColor Color = ConsoleColor.White;
-        TrainerData _botTrainer;
-        readonly DataContainers _backend;
+        Trainer _botTrainer;
         public string BotName;
         string _selfId;
         string _battleName;
@@ -30,11 +32,7 @@ namespace ShowdownBot
         public int BotRemainingMons;
         GameState _currentGameState;
         public string Challenger;
-        readonly Dictionary<string, PokemonSet> _monsById = new Dictionary<string, PokemonSet>();
-        public BasicShowdownBot(DataContainers backend)
-        {
-            _backend = backend;
-        }
+        readonly Dictionary<string, TrainerPokemon> _monsById = new Dictionary<string, TrainerPokemon>();
         /// <summary>
         /// Tries to establish connection to localhost:8000 server and get all i need to actually log in
         /// </summary>
@@ -53,7 +51,7 @@ namespace ShowdownBot
         /// Log in as specific trainer
         /// </summary>
         /// <param name="trainer">All data for the trainer who will fight</param>
-        public void Login(TrainerData trainer)
+        public void Login(Trainer trainer)
         {
             if (CurrentState == BotState.CONNECTED)
             {
@@ -90,7 +88,7 @@ namespace ShowdownBot
         {
             if (CurrentState == BotState.PROFILE_INITIALISED) // Can only start challenge from idle
             {
-                string packedTeamData = _botTrainer.GetPacked(_backend, nMons); // Get packed string of N mons
+                string packedTeamData = _botTrainer.GetShowdownPackedString();
                 string command = "|/utm " + packedTeamData;
                 byte[] commandBytes = Encoding.UTF8.GetBytes(command);
                 _socket.SendAsync(new ArraySegment<byte>(commandBytes), WebSocketMessageType.Text, true, default).Wait();
@@ -109,7 +107,7 @@ namespace ShowdownBot
         {
             if (CurrentState == BotState.BEING_CHALLENGED) // Can only accept challenge from here
             {
-                string packedTeamData = _botTrainer.GetPacked(_backend, nMons); // Get packed string of N mons
+                string packedTeamData = _botTrainer.GetShowdownPackedString(); // Get packed string of N mons
                 string command = "|/utm " + packedTeamData;
                 byte[] commandBytes = Encoding.UTF8.GetBytes(command);
                 _socket.SendAsync(new ArraySegment<byte>(commandBytes), WebSocketMessageType.Text, true, default).Wait();
@@ -217,19 +215,19 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question (FUCK YOU FARFETCHD)
-                        string monSpecies = m.Groups[2].Value.Trim().ToLower().Replace("’", "'"); // Species of the mon (FUCK YOU FARFETCHD)
-                        string status = m.Groups[3].Value.Trim().ToLower(); // Hp status
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().Replace("’", "'"); // Id of the mon in question (FUCK YOU FARFETCHD)
+                        string monSpecies = m.Groups[2].Value.Trim().Replace("’", "'"); // Species of the mon (FUCK YOU FARFETCHD)
+                        string status = m.Groups[3].Value.Trim(); // Hp status
                         //Console.WriteLine($"Switch debug: {monId}->{monSpecies}->{status}");
-                        if (!_monsById.TryGetValue(monId, out PokemonSet pokemonInTeam)) // Id not known yet
+                        if (!_monsById.TryGetValue(monId, out TrainerPokemon pokemonInTeam)) // Id not known yet
                         {
                             // Try all I can to identify my mon
-                            pokemonInTeam = _botTrainer.Teamsheet.FirstOrDefault(p => p.NickName.ToLower() == monId) // Ideally nickname
-                                ?? _botTrainer.Teamsheet.FirstOrDefault(p => p.Species.ToLower() == monId || p.Species.ToLower() == monSpecies); // Otherwise scramble towards any identifier I can get
+                            pokemonInTeam = _botTrainer.BattleTeam.FirstOrDefault(p => p.Nickname == monId) // Ideally nickname
+                                ?? _botTrainer.BattleTeam.FirstOrDefault(p => p.Species == monId || p.Species == monSpecies); // Otherwise scramble towards any identifier I can get
                             //Console.WriteLine($"Switch debug added {monId} key");
                             _monsById.Add(monId, pokemonInTeam);
                         }
-                        pokemonInTeam.ExplorationStatus?.SetStatus(status);
+                        pokemonInTeam.ImportShowdownStatus(status);
                     }
                 }
                 // Mon receives direct damage or hp change
@@ -238,11 +236,11 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
-                        string status = m.Groups[2].Value.Trim().ToLower(); // Hp status
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim(); // Id of the mon in question
+                        string status = m.Groups[2].Value.Trim(); // Hp status
                         //Console.WriteLine($"Damage debug: {monId}->{status}");
-                        PokemonSet pokemonInTeam = _monsById[monId];
-                        pokemonInTeam.ExplorationStatus?.SetStatus(status);
+                        TrainerPokemon pokemonInTeam = _monsById[monId];
+                        pokemonInTeam.ImportShowdownStatus(status);
                     }
                 }
                 // Mon's HP is changed for some reason (i honestly don't believe this is used)
@@ -251,10 +249,10 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
-                        string status = m.Groups[2].Value.Trim().ToLower(); // Hp (status blank i guess?)
-                        PokemonSet pokemonInTeam = _monsById[monId];
-                        pokemonInTeam.ExplorationStatus?.SetStatus(status);
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim(); // Id of the mon in question
+                        string status = m.Groups[2].Value.Trim(); // Hp (status blank i guess?)
+                        TrainerPokemon pokemonInTeam = _monsById[monId];
+                        pokemonInTeam.ImportShowdownStatus(status);
                     }
                 }
                 // Mon's nonvolatile status is changed (mon gained status)
@@ -263,13 +261,10 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
-                        string status = m.Groups[2].Value.Trim().ToLower(); // Non-volatile status
-                        PokemonSet pokemonInTeam = _monsById[monId];
-                        if (pokemonInTeam.ExplorationStatus != null)
-                        {
-                            pokemonInTeam.ExplorationStatus.NonVolatileStatus = status;
-                        }
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim(); // Id of the mon in question
+                        string status = m.Groups[2].Value.Trim(); // Non-volatile status
+                        TrainerPokemon pokemonInTeam = _monsById[monId];
+                        pokemonInTeam.NonVolatileStatus = status;
                     }
                 }
                 // Mon's nonvolatile status is cured
@@ -278,12 +273,12 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
-                        string status = m.Groups[2].Value.Trim().ToLower(); // Non-volatile status cured
-                        PokemonSet pokemonInTeam = _monsById[monId];
-                        if (pokemonInTeam.ExplorationStatus != null && pokemonInTeam.ExplorationStatus.NonVolatileStatus == status)
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim(); // Id of the mon in question
+                        string status = m.Groups[2].Value.Trim(); // Non-volatile status cured
+                        TrainerPokemon pokemonInTeam = _monsById[monId];
+                        if (pokemonInTeam.NonVolatileStatus == status)
                         {
-                            pokemonInTeam.ExplorationStatus.NonVolatileStatus = "";
+                            pokemonInTeam.NonVolatileStatus = "";
                         }
                     }
                 }
@@ -293,20 +288,17 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
-                        PokemonSet pokemonInTeam = _monsById[monId];
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim(); // Id of the mon in question
+                        TrainerPokemon pokemonInTeam = _monsById[monId];
                         //Console.WriteLine($"Faint debug: {monId}");
-                        if (pokemonInTeam.ExplorationStatus != null)
-                        {
-                            pokemonInTeam.ExplorationStatus.HealthPercentage = 1;
-                            pokemonInTeam.ExplorationStatus.NonVolatileStatus = "";
-                        }
+                        pokemonInTeam.HealthPercentage = 1;
+                        pokemonInTeam.NonVolatileStatus = "";
                     }
                 }
                 // If a player won game, this is relevant to end the simulation
                 if (message.Contains("|win|")) // Battle ended, no matter who won
                 {
-                    Winner = message.Split("|win|")[1].Trim().ToLower();
+                    Winner = message.Split("|win|")[1].Trim();
                     BotRemainingMons = _currentGameState.Side.GetAliveMons();
                     if (BotName.ToLower() != Winner)
                     {
@@ -322,7 +314,7 @@ namespace ShowdownBot
         private void BotDecision(string battle, string state)
         {
             _currentGameState = JsonConvert.DeserializeObject<GameState>(state);
-            PokemonSet currentPokemon = null;
+            TrainerPokemon currentPokemon = null;
             // Identify current pokemon only in states it's needed (wait, team preview, forceswitch, non-active states don't get them)
             if (_currentGameState.Active != null &&
                 !_currentGameState.Wait &&
@@ -332,18 +324,16 @@ namespace ShowdownBot
                 {
                     if (pokemon.Active) // This is the current mon, definitely
                     {
-                        string monId = pokemon.Ident.Split(':')[1].Trim().ToLower().Replace("’", "'"); ; // Id(ent) of the mon in question
+                        string monId = pokemon.Ident.Split(':')[1].Trim().Replace("’", "'"); ; // Id(ent) of the mon in question
                         currentPokemon = _monsById[monId]; // Find wtf mon am i referring to, this is also the active pokemon btw
-                        if (currentPokemon.ExplorationStatus != null)
+                        // Means the active field also has data of the moves current PP, load here
+                        foreach (AvailableMove move in _currentGameState.Active[0].Moves)
                         {
-                            // Means the active field also has data of the moves current PP, load here
-                            foreach (AvailableMove move in _currentGameState.Active[0].Moves)
+                            string moveNameCleaned = move.Move.Replace("102", "").Trim();
+                            int moveIndex = currentPokemon.ChosenMoveset.FindIndex(m => m.Name == moveNameCleaned); // For some reason return is called return102
+                            if (moveIndex >= 0)
                             {
-                                int moveIndex = Array.IndexOf(currentPokemon.Moves, move.Move.Replace("102", "").Trim().ToLower()); // For some reason return is called return102
-                                if (moveIndex >= 0)
-                                {
-                                    currentPokemon.ExplorationStatus.MovePp[moveIndex] = move.Pp;
-                                }
+                                currentPokemon.MovePp[moveIndex] = move.Pp;
                             }
                         }
                     }
@@ -375,7 +365,7 @@ namespace ShowdownBot
                 bool invalidChoice;
                 do
                 {
-                    int moveChoice = Utilities.GetRandomNumber(0, 4); // 0 -> 3 can be the choice
+                    int moveChoice = IndymonUtilities.GetRandomNumber(0, 4); // 0 -> 3 can be the choice
                     ActiveOptions playOptions = _currentGameState.Active.FirstOrDefault();
                     // Move is valid as long its in a valid slot and usable (not disabled, pp)
                     invalidChoice = moveChoice >= playOptions.Moves.Count || playOptions.Moves[moveChoice].Disabled || (playOptions.Moves[moveChoice].Pp == 0);
@@ -386,7 +376,7 @@ namespace ShowdownBot
                             List<int> switchIns = _currentGameState.Side.GetValidSwitchIns();
                             if (switchIns.Count > 0) // Can switch then, so theres a valid move
                             {
-                                int switchChoice = Utilities.GetRandomNumber(0, switchIns.Count);
+                                int switchChoice = IndymonUtilities.GetRandomNumber(0, switchIns.Count);
                                 int switchedInMon = switchIns[switchChoice];
                                 command = $"{battle}|/choose switch {switchedInMon}"; // Switch to random mon
                                 invalidChoice = false; // Move valid after all
@@ -396,8 +386,8 @@ namespace ShowdownBot
                     else // try the move then
                     {
                         command = $"{battle}|/choose move {moveChoice + 1}"; // Choose move (slot 1-4)
-                        string possibleTera = _currentGameState.Active.First().CanTerastallize.Trim().ToLower();
-                        if (possibleTera != "" && (possibleTera == currentPokemon.GetTera(_backend))) // Means the current mon can tera and it's consistent
+                        string possibleTera = _currentGameState.Active.First().CanTerastallize.Trim();
+                        if (possibleTera != "" && (possibleTera.ToUpper() == currentPokemon.TeraType.ToString().ToUpper())) // Means the current mon can tera and it's consistent
                         {
                             command += " terastallize";
                         }

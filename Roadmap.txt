@@ -16,9 +16,6 @@ White Monastery -> Justice -> Dawn Stone
 
 ---
 TODO:
-- Fix bot, takes trainer -> operates with mon data now
-- Have basic showdown bot and bot battle working well
-- Helper bot too
 - Add discord data to trainers
 - Add trainer rank to trainers (for expl)
 - Reincorporate tournament data
@@ -30,3 +27,4 @@ TODO:
 - Save/load expl stuff in own folder, similarly, just store teambuild seed for trainer, all can be generated from this
 - Use dungeon modifiers, add modifier (archetype) to dungeon, add some to camouflage system, some others to nature power/secret power doc. May just remove the chances and yolo
 - At this point indymon should be working? Test for a while
+- Add "test bot" option in indymon menu
