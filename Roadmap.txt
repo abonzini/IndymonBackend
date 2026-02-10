@@ -16,10 +16,8 @@ White Monastery -> Justice -> Dawn Stone
 
 ---
 TODO:
-- Reincorporate tournament data
-- Revise tourn data, improve algo if any, and dont need to save tourn midway, do team seeding on beginning of tourn as part of the system
-- Save/load tourn stuff in own folder, export tourn data if needed
-- Step where trainer stuff is also consumed, consumption of move disks and stuff, pastable importing of csv for rest. Create text manually
+- Debugging of teambuilder, have a tournament working. Phase 1 complete.
+- Step where trainer stuff is also consumed, exporting of trainer in files each, consumption of move disks and stuff, pastable importing of csv for rest. Create text manually
 - Reincorporate exploration manager, redo exploration manager context to include "buffable" exploration contexts (e.g. shiny stone)
 - Revise manager, fix whats wrong, team builder based on whats in the exploration, make it build too... Dungeon has seed too? in which case can just load seed. Ask for score instead of just bot, create wrapper function to share w tourn
 - Save/load expl stuff in own folder, similarly, just store teambuild seed for trainer, all can be generated from this

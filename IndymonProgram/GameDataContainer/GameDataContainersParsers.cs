@@ -19,7 +19,7 @@ namespace GameDataContainer
             // Parse csv
             const int TRAINER_CARD_ROWS = 22; // Number of lines per trainer card
             const int TRAINER_CARD_COLS = 21; // Number of columns per trainer card
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] rows = csv.Split("\n");
             string[] cols = rows[0].Trim().Split(',');
             for (int i = 0; i < rows.Length; i += TRAINER_CARD_ROWS) // Parse all trainer rows, one by one, each i will be a row of trainers
@@ -90,7 +90,7 @@ namespace GameDataContainer
                         if (itemName != "") // A set item here
                         {
                             int itemCount = int.Parse(nextLine[j + 7]);
-                            IndymonUtilities.AddtemToCountDictionary(nextTrainer.SetItems, itemName, itemCount);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.SetItems, itemName, itemCount);
                         }
                         // Next, mod items
                         itemName = nextLine[j + 9];
@@ -98,7 +98,7 @@ namespace GameDataContainer
                         {
                             Item modItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[itemName];
                             int itemCount = int.Parse(nextLine[j + 10]);
-                            IndymonUtilities.AddtemToCountDictionary(nextTrainer.ModItems, modItem, itemCount);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.ModItems, modItem, itemCount);
                         }
                         // Next, battle items
                         itemName = nextLine[j + 12];
@@ -106,7 +106,7 @@ namespace GameDataContainer
                         {
                             Item battleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[itemName];
                             int itemCount = int.Parse(nextLine[j + 13]);
-                            IndymonUtilities.AddtemToCountDictionary(nextTrainer.BattleItems, battleItem, itemCount);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.BattleItems, battleItem, itemCount);
                         }
                         // Finally for now, favours
                         itemName = nextLine[j + 15];
@@ -117,11 +117,11 @@ namespace GameDataContainer
                             {
                                 string trainerFavour = itemName.Split("'")[0].Trim(); // Got trainer who owns the favour
                                 GetTrainer(trainerFavour);
-                                IndymonUtilities.AddtemToCountDictionary(nextTrainer.TrainerFavours, trainerFavour, itemCount);
+                                GeneralUtilities.AddtemToCountDictionary(nextTrainer.TrainerFavours, trainerFavour, itemCount);
                             }
                             else // Regular key item
                             {
-                                IndymonUtilities.AddtemToCountDictionary(nextTrainer.KeyItems, itemName, itemCount);
+                                GeneralUtilities.AddtemToCountDictionary(nextTrainer.KeyItems, itemName, itemCount);
                             }
                         }
                         // Finally, Ballz
@@ -129,12 +129,84 @@ namespace GameDataContainer
                         if (itemName != "")
                         {
                             int itemCount = int.Parse(nextLine[j + 19]);
-                            IndymonUtilities.AddtemToCountDictionary(nextTrainer.PokeBalls, itemName, itemCount);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.PokeBalls, itemName, itemCount);
                         }
                     }
                     trainerContainer.Add(nextTrainer.Name, nextTrainer);
                 }
             }
+        }
+        /// <summary>
+        /// Finds battle stats and parses it into place
+        /// </summary>
+        /// <param name="sheetId">Google sheet ID</param>
+        /// <param name="sheetTab">Google Sheet tab</param>
+        void ParseBattleStats(string sheetId, string sheetTab)
+        {
+            BattleStats = new BattleStats();
+            // Parse csv
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            // Obtained tournament data csv
+            // Assumes the row order is same as column order!
+            string[] rows = csv.Split("\n");
+            // First pass is to obtain list of players in the order given no matter what
+            for (int row = 2; row < rows.Length; row++)
+            {
+                string[] cols = rows[row].Split(',');
+                string playerName = cols[0].Trim().ToLower(); // Contains player name
+                PlayerAndStats nextPlayer = new PlayerAndStats
+                {
+                    Name = playerName,
+                    // Statistics...
+                    TournamentWins = int.Parse(cols[1]),
+                    TournamentsPlayed = int.Parse(cols[2]),
+                    GamesWon = int.Parse(cols[4]),
+                    GamesPlayed = int.Parse(cols[5]),
+                    Kills = int.Parse(cols[7]),
+                    Deaths = int.Parse(cols[8])
+                };
+                // Finally add to the right place
+                if (TrainerData.ContainsKey(playerName)) // This was an actual player, add to correct array
+                {
+                    BattleStats.PlayerStats.Add(nextPlayer);
+                }
+                else if (NpcData.ContainsKey(playerName)) // Otherwise it's NPC data
+                {
+                    BattleStats.NpcStats.Add(nextPlayer);
+                }
+                else
+                {
+                    throw new Exception("Found a non-npc and non-player in tournament data!");
+                }
+            }
+            // Once the players are in the correct order, we begin the parsing
+            for (int row = 0; row < BattleStats.PlayerStats.Count; row++) // Next part is to examine each PLAYER CHARACTER ONLY FOR STATS
+            {
+                int yOffset = 2; // 2nd row begins
+                string[] cols = rows[yOffset + row].Split(',');
+                int xOffset = 10; // Beginning of "vs trainer" data
+                PlayerAndStats thisPlayer = BattleStats.PlayerStats[row]; // Get player owner of this data
+                thisPlayer.EachMuWr = new Dictionary<string, IndividualMu>();
+                for (int col = 0; col < BattleStats.PlayerStats.Count; col++) // Check all players score first
+                {
+                    if (row == col) continue; // No MU agains oneself
+                    // Get data for this opp
+                    string oppName = BattleStats.PlayerStats[col].Name;
+                    int wins = int.Parse(cols[xOffset + (3 * col)]); // Data has 3 columns per player
+                    int losses = int.Parse(cols[xOffset + (3 * col) + 1]);
+                    thisPlayer.EachMuWr.Add(oppName, new IndividualMu { Wins = wins, Losses = losses }); // Add this data to the stats
+                }
+                xOffset = 10 + (3 * BattleStats.PlayerStats.Count); // Offset to NPC data
+                for (int col = 0; col < BattleStats.NpcStats.Count; col++) // Check NPC score now
+                {
+                    // Get data for this opp
+                    string oppName = BattleStats.NpcStats[col].Name;
+                    int wins = int.Parse(cols[xOffset + (3 * col)]);
+                    int losses = int.Parse(cols[xOffset + (3 * col) + 1]);
+                    thisPlayer.EachMuWr.Add(oppName, new IndividualMu { Wins = wins, Losses = losses });
+                }
+            }
+            // And thats it, tourn data has been found
         }
     }
 }

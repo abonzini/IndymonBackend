@@ -1,60 +1,16 @@
-﻿using ParsersAndData;
+﻿using AutomatedTeamBuilder;
+using GameData;
+using GameDataContainer;
+using MechanicsData;
+using MechanicsDataContainer;
 using ShowdownBot;
+using Utilities;
 
 namespace IndymonBackendProgram
 {
-    public class IndividualMu
-    {
-        public int Wins { get; set; } = 0;
-        public int Losses { get; set; } = 0;
-        public float Winrate { get { return ((Losses + Wins) > 0) ? (float)Wins / (float)(Losses + Wins) : 0.0f; } }
-        public override string ToString()
-        {
-            return $"{Wins} ({Winrate})";
-        }
-    }
-    public class PlayerAndStats
-    {
-        public string Name { get; set; }
-        public Dictionary<string, IndividualMu> EachMuWr { get; set; } = new Dictionary<string, IndividualMu>(); // Contains each matchup
-        public int TournamentWins { get; set; } = 0;
-        public int TournamentsPlayed { get; set; } = 1;
-        public float Winrate { get { return (float)TournamentWins / (float)TournamentsPlayed; } }
-        public int GamesWon { get; set; } = 0;
-        public int GamesPlayed { get; set; } = 1;
-        public float GameWinrate { get { return (float)GamesWon / (float)GamesPlayed; } }
-        public int Kills { get; set; } = 0;
-        public int Deaths { get; set; } = 0;
-        public int Diff { get { return Kills - Deaths; } }
-        public override string ToString()
-        {
-            return $"{Name}: {TournamentWins}/{TournamentsPlayed})";
-        }
-    }
-    public class TournamentHistory
-    {
-        public List<PlayerAndStats> PlayerStats { get; set; } = new List<PlayerAndStats>();
-        public List<PlayerAndStats> NpcStats { get; set; } = new List<PlayerAndStats>();
-    }
     public class TournamentManager
     {
         public Tournament OngoingTournament { get; set; }
-        DataContainers _backEndData = null;
-        TournamentHistory _leaderboard = null;
-        public TournamentManager(DataContainers backEndData, TournamentHistory leaderboard)
-        {
-            _backEndData = backEndData;
-            _leaderboard = leaderboard;
-        }
-        public TournamentManager()
-        {
-
-        }
-        public void SetBackEndData(DataContainers backEndData, TournamentHistory leaderboard)
-        {
-            _backEndData = backEndData;
-            _leaderboard = leaderboard;
-        }
         /// <summary>
         /// Generates a new tournament, dialog asking for tpy, n players, n mons, and which participants
         /// </summary>
@@ -92,15 +48,15 @@ namespace IndymonBackendProgram
             OngoingTournament.NMons = int.Parse(Console.ReadLine());
             OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
             // Finally, player selection, pre-filter traines whether they can participate in this event
-            List<TrainerData> trainers = [.. _backEndData.TrainerData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
-            List<TrainerData> npcs = [.. _backEndData.NpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
-            List<TrainerData> namedNpcs = [.. _backEndData.NamedNpcData.Values.Where(t => t.GetValidTeamComps(_backEndData, OngoingTournament.NMons, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings).Count > 0)];
-            List<TrainerData> currentChosenTrainers = null;
+            List<Trainer> trainers = [.. GameDataContainers.GlobalGameData.TrainerData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamConstraints).Any())];
+            List<Trainer> npcs = [.. GameDataContainers.GlobalGameData.NpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamConstraints).Any())];
+            List<Trainer> namedNpcs = [.. GameDataContainers.GlobalGameData.FamousNpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamConstraints).Any())];
+            List<Trainer> currentChosenTrainers = null;
             int remainingPlayersNeeded = OngoingTournament.NPlayers;
             bool randomizeFill = false;
             while (remainingPlayersNeeded > 0) // Will do addition loop until all players are selected
             {
-                TrainerData nextTrainer = null;
+                Trainer nextTrainer = null;
                 if (currentChosenTrainers == null)
                 {
                     Console.WriteLine("Which group of trainers to load? 1-Players, 2-NPCs, 3-Named NPCs. 4-Fill with random NPCs");
@@ -128,8 +84,7 @@ namespace IndymonBackendProgram
                 {
                     if (currentChosenTrainers.Count > 0)
                     {
-                        int nextTrainerIndex = Utilities.GetRandomNumber(currentChosenTrainers.Count); // Will pick one of them
-                        nextTrainer = currentChosenTrainers[nextTrainerIndex];
+                        nextTrainer = GeneralUtilities.GetRandomPick(currentChosenTrainers); // Will pick one of them
                     }
                     else
                     {
@@ -160,7 +115,7 @@ namespace IndymonBackendProgram
                 {
                     currentChosenTrainers.Remove(nextTrainer);
                     remainingPlayersNeeded--;
-                    OngoingTournament.Participants.Add(nextTrainer.Name);
+                    OngoingTournament.ParticipantsWithRandomSeed.Add((nextTrainer.Name, GeneralUtilities.GetRandomNumber()));
                     Console.WriteLine($"{nextTrainer.Name} added");
                 }
             }
@@ -172,19 +127,19 @@ namespace IndymonBackendProgram
         public void UpdateTournamentTeams()
         {
             // First, shuffle the participants (use seed if needed)
-            List<string> Seeds = new List<string>();
+            List<(string, int)> Seeds = new List<(string, int)>();
             Console.WriteLine("Want to add specific seeding? y/N");
             string seedInput = Console.ReadLine();
             if (seedInput.Trim().ToLower() == "y") // One last seeding step
             {
-                List<string> seedOptions = [.. OngoingTournament.Participants];
+                List<(string, int)> seedOptions = [.. OngoingTournament.ParticipantsWithRandomSeed];
                 bool seedingFinished = false;
-                while (!seedingFinished && Seeds.Count < OngoingTournament.Participants.Count) // Continue seeding until finished or all players seeded
+                while (!seedingFinished && Seeds.Count < OngoingTournament.ParticipantsWithRandomSeed.Count) // Continue seeding until finished or all players seeded
                 {
                     Console.WriteLine("Choose next seed, or anything if finished seeding:");
                     for (int i = 0; i < seedOptions.Count; i++)
                     {
-                        Console.Write($"{i + 1}: " + seedOptions[i] + ",");
+                        Console.Write($"{i + 1}: " + seedOptions[i].Item1 + ",");
                     }
                     if (int.TryParse(Console.ReadLine(), out int seedChoice)) // If user chose one...
                     {
@@ -201,14 +156,37 @@ namespace IndymonBackendProgram
             // Reset the tournament if one was already in progress
             OngoingTournament.ResetTournament();
             // Ok not bad, next step is to update participant team sheet if needed
-            foreach (string participantName in OngoingTournament.Participants)
+            List<Trainer> allParticipants = new List<Trainer>();
+            foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // First, choose all trainer mons
             {
+                string participantName = participantData.Item1;
+                int participantSeed = participantData.Item2;
                 // Try to find the participant in the place where located
-                if (_backEndData.TrainerData.TryGetValue(participantName, out TrainerData participant)) { }
-                else if (_backEndData.NpcData.TryGetValue(participantName, out participant)) { }
-                else if (_backEndData.NamedNpcData.TryGetValue(participantName, out participant)) { }
-                else throw new Exception("Trainer not found!?");
-                participant.ConfirmSets(_backEndData, OngoingTournament.NMons, OngoingTournament.NMons, OngoingTournament.TeamBuildSettings); // Gets the team for everyone with the settings needed for the tournament
+                Trainer participant = IndymonUtilities.GetTrainerByName(participantName);
+                // Indymon S2 addition, confirm sets now does the smart teambuild
+                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamConstraints); // Get all of the possible sets that would satisfy this
+                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds); // Chooses one of the sets, prepares the mons
+                allParticipants.Add(participant);
+            }
+            foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // Then, build for each trainer
+            {
+                // Consider that this involves building against every opp
+                string participantName = participantData.Item1;
+                int participantSeed = participantData.Item2;
+                // Try to find the participant in the place where located
+                Trainer participant = IndymonUtilities.GetTrainerByName(participantName);
+                List<Pokemon> enemyMons = new List<Pokemon>();
+                foreach ((string, int) oppData in OngoingTournament.ParticipantsWithRandomSeed) // Find all opps
+                {
+                    if (participantData == oppData) continue; // Won't build against myself
+                    Trainer opp = IndymonUtilities.GetTrainerByName(oppData.Item1);
+                    foreach (TrainerPokemon oppMon in opp.BattleTeam)
+                    {
+                        enemyMons.Add(MechanicsDataContainers.GlobalMechanicsData.Dex[oppMon.Species]); // Add mon to faced mons
+                    }
+                }
+                // Define sets for this trainer. Smart build, no archetypes included at beginning. Build with constraints and enemy mons in mind. Use seed.
+                TeamBuilder.DefineTrainerSets(participant, true, [], OngoingTournament.BuildConstraints, enemyMons, participantData.Item2);
             }
         }
         /// <summary>
@@ -216,7 +194,7 @@ namespace IndymonBackendProgram
         /// </summary>
         public void ExecuteTournament()
         {
-            OngoingTournament.PlayTournament(_backEndData);
+            OngoingTournament.PlayTournament();
         }
         /// <summary>
         /// Does the animation and stuff
@@ -230,16 +208,8 @@ namespace IndymonBackendProgram
             {
                 OngoingTournament.FinaliseTournament();
             }
-            // Then, a small helper text to show which items were consumed
-            foreach (string pariticpant in OngoingTournament.Participants)
-            {
-                TrainerData trainer = Utilities.GetTrainerByName(pariticpant, _backEndData);
-                Console.WriteLine(trainer.ListConsumedItems(OngoingTournament.NMons));
-            }
-            Console.ReadLine();
-            Console.Clear();
             // Also, ask the tournament to update the sheets
-            OngoingTournament.UpdateLeaderboard(_leaderboard, _backEndData);
+            OngoingTournament.UpdateLeaderboard();
         }
     }
     public class TournamentMatch()
@@ -261,10 +231,11 @@ namespace IndymonBackendProgram
     {
         public bool Official { get; set; } = true;
         public bool FirstInstallment { get; set; } = true;
-        public TeambuildSettings TeamBuildSettings { get; set; } = TeambuildSettings.SMART; // Teams will be smart always in tournaments (human v human)
+        public TeamBuildConstraints BuildConstraints { get; set; } = new TeamBuildConstraints();
+        public List<TeamBuildConstraints> TeamConstraints { get; set; } = new List<TeamBuildConstraints>();
         public int NPlayers { get; set; } = 0;
         public int NMons { get; set; } = 3;
-        public List<string> Participants { get; set; } = new List<string>();
+        public List<(string, int)> ParticipantsWithRandomSeed { get; set; } = new List<(string, int)>(); // Participants and teambuild seed
         /// <summary>
         /// Duting tournament init, asks for extra info if needed
         /// </summary>
@@ -277,12 +248,11 @@ namespace IndymonBackendProgram
         /// From a tournament, it shuffles players, but also has a list of top seeds (from best to worst) if needed in some tournament
         /// </summary>
         /// <param name="Seeds">Seed list to be used in tournament</param>
-        public abstract void ShuffleWithSeeds(List<string> Seeds);
+        public abstract void ShuffleWithSeeds(List<(string, int)> Seeds);
         /// <summary>
         /// Will play the tournament, organising the bracket and asking for results or simulating it
         /// </summary>
-        /// <param name="_backEndData">Back end just in case needs to simulate bot</param>
-        public abstract void PlayTournament(DataContainers _backEndData);
+        public abstract void PlayTournament();
         /// <summary>
         /// Performs tournament animation once complete
         /// </summary>
@@ -290,16 +260,14 @@ namespace IndymonBackendProgram
         /// <summary>
         /// Asks tournament to update leaderboard according to match history
         /// </summary>
-        /// <param name="leaderboard">The leaderboard to update</param>
-        /// <param name="backend">Backend, to determine whether a character is added into leaderboard</param>
-        public abstract void UpdateLeaderboard(TournamentHistory leaderboard, DataContainers backend);
+        public abstract void UpdateLeaderboard();
         /// <summary>
         /// Resolves a match, including the possibility of creating a bot battle, or manual score input. This sometimes writes into console current cursor.
         /// </summary>
         /// <param name="match">Match to evaluate</param>
         /// <param name="backendData">Backend used to find players, etc</param>
         /// <returns>True if match succesfully concluded, false otherwise</returns>
-        public bool ResolveMatch(TournamentMatch match, DataContainers backendData)
+        public bool ResolveMatch(TournamentMatch match)
         {
             if (match.IsBye)
             {
@@ -309,29 +277,15 @@ namespace IndymonBackendProgram
             {
                 (int cursorX, int cursorY) = Console.GetCursorPosition(); // Just in case I need to write in same place
                 string scoreString = Console.ReadLine();
-                if (scoreString == "0")
-                {
-                    if (Utilities.GetRandomNumber(2) == 0) // Winner was 1
-                    {
-                        match.Score1 = Utilities.GetRandomNumber(1, NMons + 1);
-                        match.Score2 = 0;
-                    }
-                    else // Winner was 2
-                    {
-                        match.Score1 = 0;
-                        match.Score2 = Utilities.GetRandomNumber(1, NMons + 1);
-                    }
-                    Console.Write($"{match.Score1}-{match.Score2}");
-                }
-                else if (scoreString.ToLower() == "q") // If q, just stop here we'll need to restart after
+                if (scoreString.ToLower() == "q") // If q, just stop here we'll need to restart after
                 {
                     return false;
                 }
                 else if (scoreString.ToLower() == "b") // If b, do battle bots
                 {
-                    TrainerData p1 = Utilities.GetTrainerByName(match.Player1, backendData);
-                    TrainerData p2 = Utilities.GetTrainerByName(match.Player2, backendData);
-                    BotBattle automaticBattle = new BotBattle(backendData);
+                    Trainer p1 = IndymonUtilities.GetTrainerByName(match.Player1);
+                    Trainer p2 = IndymonUtilities.GetTrainerByName(match.Player2);
+                    BotBattle automaticBattle = new BotBattle();
                     string challengeString = "gen9customgame@@@OHKO Clause,Evasion Moves Clause,Moody Clause";
                     (match.Score1, match.Score2) = automaticBattle.SimulateBotBattle(p1, p2, NMons, NMons, challengeString);
                     Console.SetCursorPosition(cursorX, cursorY);
@@ -360,24 +314,25 @@ namespace IndymonBackendProgram
         /// </summary>
         /// <param name="leaderboard">Leaderboard to add</param>
         /// <param name="backend">Backend for data</param>
-        protected void RegisterTournamentParticipation(TournamentHistory leaderboard, DataContainers backend)
+        protected void RegisterTournamentParticipation()
         {
             if (!FirstInstallment) return; // Dont do anything if tournament had already begun
             if (!Official) return; // Non official tournaments are not tallied
-            foreach (string participant in Participants)
+            foreach ((string, int) participant in ParticipantsWithRandomSeed)
             {
                 List<PlayerAndStats> participantLocation = null;
-                if (backend.TrainerData.ContainsKey(participant)) participantLocation = leaderboard.PlayerStats; // Is it a trainer?
-                else if (backend.NpcData.ContainsKey(participant)) participantLocation = leaderboard.NpcStats; // Is it NPC?
+                BattleStats leaderboard = GameDataContainers.GlobalGameData.BattleStats;
+                if (GameDataContainers.GlobalGameData.TrainerData.ContainsKey(participant.Item1)) participantLocation = leaderboard.PlayerStats; // Is it a trainer?
+                else if (GameDataContainers.GlobalGameData.NpcData.ContainsKey(participant.Item1)) participantLocation = leaderboard.NpcStats; // Is it NPC?
                 else { } // Never mind then (leave null)
                 if (participantLocation != null) // Add participant if relevant
                 {
-                    PlayerAndStats playerStats = participantLocation.FirstOrDefault(p => (p.Name == participant)); // Get data for player
+                    PlayerAndStats playerStats = participantLocation.FirstOrDefault(p => (p.Name == participant.Item1)); // Get data for player
                     if (playerStats == null) // Player wasn't there, need to add
                     {
                         PlayerAndStats newPlayer = new PlayerAndStats()
                         {
-                            Name = participant,
+                            Name = participant.Item1,
                             TournamentsPlayed = 1,
                             Deaths = 0,
                             Kills = 0,
@@ -399,18 +354,19 @@ namespace IndymonBackendProgram
         /// <param name="match">The match</param>
         /// <param name="leaderboard">Leaderboard to update</param>
         /// <param name="backend">Backend for extra data</param>
-        protected void ProcessMatchStandings(TournamentMatch match, TournamentHistory leaderboard, DataContainers backend)
+        protected void ProcessMatchStandings(TournamentMatch match)
         {
+            BattleStats leaderboard = GameDataContainers.GlobalGameData.BattleStats;
             // Try to find where P1 is
             List<PlayerAndStats> p1Location = null;
-            if (backend.TrainerData.ContainsKey(match.Player1)) p1Location = leaderboard.PlayerStats; // Is it a trainer?
-            else if (backend.NpcData.ContainsKey(match.Player1)) p1Location = leaderboard.NpcStats; // Is it NPC?
+            if (GameDataContainers.GlobalGameData.TrainerData.ContainsKey(match.Player1)) p1Location = leaderboard.PlayerStats; // Is it a trainer?
+            else if (GameDataContainers.GlobalGameData.NpcData.ContainsKey(match.Player1)) p1Location = leaderboard.NpcStats; // Is it NPC?
             else { } // Never mind then
             List<PlayerAndStats> p2Location = null;
             if (!match.IsBye) // If there's actually a p2...
             {
-                if (backend.TrainerData.ContainsKey(match.Player2)) p2Location = leaderboard.PlayerStats; // Is it a trainer?
-                else if (backend.NpcData.ContainsKey(match.Player2)) p2Location = leaderboard.NpcStats; // Is it NPC?
+                if (GameDataContainers.GlobalGameData.TrainerData.ContainsKey(match.Player2)) p2Location = leaderboard.PlayerStats; // Is it a trainer?
+                else if (GameDataContainers.GlobalGameData.NpcData.ContainsKey(match.Player2)) p2Location = leaderboard.NpcStats; // Is it NPC?
                 else { } // Never mind then
             }
             // After that is done, guaranteed everything is in place, just update each match stats individually
@@ -479,12 +435,13 @@ namespace IndymonBackendProgram
         /// <param name="winner">Who won</param>
         /// <param name="leaderboard">Leaderboard to update</param>
         /// <param name="backend">Backend for extra data</param>
-        protected void SetTournamentWinner(string winnerName, TournamentHistory leaderboard, DataContainers backend)
+        protected void SetTournamentWinner(string winnerName)
         {
             if (!Official) return; // Non official tournaments are not tallied
+            BattleStats leaderboard = GameDataContainers.GlobalGameData.BattleStats;
             List<PlayerAndStats> winnerLocation = null;
-            if (backend.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
-            else if (backend.NpcData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?
+            if (GameDataContainers.GlobalGameData.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
+            else if (GameDataContainers.GlobalGameData.NpcData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?
             else { } // Never mind then
             PlayerAndStats winnerStats = winnerLocation?.FirstOrDefault(p => (p.Name == winnerName));
             if (winnerStats != null) winnerStats.TournamentWins++;
@@ -526,17 +483,35 @@ namespace IndymonBackendProgram
         /// </summary>
         protected void AskSpecialRulesets()
         {
-            Console.WriteLine("Is this a monotype tournament? y/N");
+            // Ones that add to the build constraints
+            Console.WriteLine("Is this a dance-off tournament? y/N");
             string response = Console.ReadLine();
             if (response.Trim().ToLower() == "y")
             {
-                TeamBuildSettings |= TeambuildSettings.MONOTYPE; // If so, then this is monotype
+                // Either a dance move or dancer ability
+                BuildConstraints.AllConstraints.Add([(ElementType.EFFECT_FLAGS, "DANCE"), (ElementType.ABILITY, "Dancer")]);
             }
-            Console.WriteLine("Is this a dance-off tournament? y/N");
+            // Finally, this one is rough because need to add all 18 types! Creates way more constraints here
+            Console.WriteLine("Is this a monotype tournament? y/N");
             response = Console.ReadLine();
             if (response.Trim().ToLower() == "y")
             {
-                TeamBuildSettings |= TeambuildSettings.DANCERS; // If so, then this is dance-off
+                List<(ElementType, string)> typeConstraints = new List<(ElementType, string)>();
+                foreach (PokemonType type in Enum.GetValues<PokemonType>())
+                {
+                    if (type == PokemonType.NONE || type == PokemonType.STELLAR) continue; // Skip these
+                    typeConstraints.Add((ElementType.POKEMON_TYPE, type.ToString())); // Add the type as an additional constraint
+                }
+                foreach ((ElementType, string) newConstraint in typeConstraints)
+                {
+                    TeamBuildConstraints thisConstraint = BuildConstraints.Clone();
+                    thisConstraint.AllConstraints.Add([newConstraint]);
+                    TeamConstraints.Add(thisConstraint);
+                }
+            }
+            else // Normal tournament
+            {
+                TeamConstraints = [BuildConstraints];
             }
         }
     }
@@ -559,7 +534,7 @@ namespace IndymonBackendProgram
         {
             RoundHistory = null;
         }
-        public override void ShuffleWithSeeds(List<string> Seeds)
+        public override void ShuffleWithSeeds(List<(string, int)> Seeds)
         {
             // First, assemble a list of seeds, for all players get seed order from that to the closest power of 2
             int closestPowerOf2 = 1;
@@ -592,19 +567,19 @@ namespace IndymonBackendProgram
                 }
             }
             // Ok now shuffle everything
-            Utilities.ShuffleList(Participants, 0, Participants.Count);
+            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed, 0, ParticipantsWithRandomSeed.Count);
             // Seeding will involve putting the best first
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
-                int currentIndex = Participants.IndexOf(Seeds[seed]); // Find where seed is currently
+                int currentIndex = ParticipantsWithRandomSeed.IndexOf(Seeds[seed]); // Find where seed is currently
                 // Perform switch
                 if (currentIndex != seed)
                 {
-                    (Participants[currentIndex], Participants[seed]) = (Participants[seed], Participants[currentIndex]); // Swap
+                    (ParticipantsWithRandomSeed[currentIndex], ParticipantsWithRandomSeed[seed]) = (ParticipantsWithRandomSeed[seed], ParticipantsWithRandomSeed[currentIndex]); // Swap
                 }
             }
         }
-        public override void PlayTournament(DataContainers backEndData)
+        public override void PlayTournament()
         {
             Console.CursorVisible = true;
             if (RoundHistory == null) // Brand new tournament
@@ -621,12 +596,12 @@ namespace IndymonBackendProgram
                     // Find both players
                     int p1Index = SeedOrder[i];
                     int p2Index = SeedOrder[i + 1];
-                    thisMatch.Player1 = Participants[p1Index];
+                    thisMatch.Player1 = ParticipantsWithRandomSeed[p1Index].Item1;
                     thisMatch.DrawHelper1 = drawHelper * 2; // Go to the next even (leave a space between names)
                     drawHelper++; // Draw next
                     if (p2Index < NPlayers) // Meaning the next seed MU is valid
                     {
-                        thisMatch.Player2 = Participants[p2Index]; // Got the second player
+                        thisMatch.Player2 = ParticipantsWithRandomSeed[p2Index].Item1; // Got the second player
                         thisMatch.IsBye = false;
                         thisMatch.DrawHelper2 = drawHelper * 2;
                         drawHelper++;
@@ -647,7 +622,7 @@ namespace IndymonBackendProgram
                 List<TournamentMatch> nextRound = new List<TournamentMatch>();
                 int playerProcessed = 0;
                 Console.Clear();
-                Console.WriteLine("Insert scores for each match. 0 if you want it randomized, q to stop input temporarily. b FOR ROBOTS");
+                Console.WriteLine("Insert scores for each match. q to stop input temporarily. b FOR ROBOTS");
                 int consoleEndPosition = currentRound.Count + 1; // Where the cursor will be after data entry
                 int maxStringLength = 0;
                 foreach (TournamentMatch match in currentRound) // Print all rounds first (so that they can be simulated if needed
@@ -668,7 +643,7 @@ namespace IndymonBackendProgram
                 {
                     TournamentMatch match = currentRound[i];
                     Console.SetCursorPosition(maxStringLength + 1, i + 1); // Put the cursor on the right, and starting from 1 (to avoid message string)
-                    if (!ResolveMatch(match, backEndData)) // Do the match, if not succesful (e.g. aborted), then we stop here
+                    if (!ResolveMatch(match)) // Do the match, if not succesful (e.g. aborted), then we stop here
                     {
                         return;
                     }
@@ -707,9 +682,9 @@ namespace IndymonBackendProgram
         {
             // Find person with the longest name
             int nameLength = 0;
-            foreach (string participant in Participants)
+            foreach ((string, int) participant in ParticipantsWithRandomSeed)
             {
-                nameLength = Math.Max(nameLength, participant.Length + 1);
+                nameLength = Math.Max(nameLength, participant.Item1.Length + 1);
             }
             // Need to resize console so this fits
             int minXSize = ((RoundHistory.Count + 1) * nameLength) + RoundHistory.Count; // Need to fit names and brackets
@@ -835,20 +810,20 @@ namespace IndymonBackendProgram
             return average;
         }
         #endregion
-        public override void UpdateLeaderboard(TournamentHistory leaderboard, DataContainers backend)
+        public override void UpdateLeaderboard()
         {
-            RegisterTournamentParticipation(leaderboard, backend); // First, make sure all players who participated have their tournament # increased
+            RegisterTournamentParticipation(); // First, make sure all players who participated have their tournament # increased
             for (int round = 0; round < RoundHistory.Count; round++) // Check round by round
             {
                 List<TournamentMatch> matchesThisRound = RoundHistory[round]; // Get matches for this round
                 foreach (TournamentMatch match in matchesThisRound) // Need to gather the matches to calculate each match stat
                 {
-                    ProcessMatchStandings(match, leaderboard, backend);
+                    ProcessMatchStandings(match);
                 }
             }
             // Ok! finally need the winner
             string winnerName = RoundHistory.Last().Last().Winner; // Last winner of last match of last round is tournament winner
-            SetTournamentWinner(winnerName, leaderboard, backend);
+            SetTournamentWinner(winnerName);
         }
     }
     public class KingOfTheHillTournament : Tournament
@@ -868,23 +843,23 @@ namespace IndymonBackendProgram
         {
             MatchHistory = null;
         }
-        public override void ShuffleWithSeeds(List<string> Seeds)
+        public override void ShuffleWithSeeds(List<(string, int)> Seeds)
         {
             // Shuffle everything
-            Utilities.ShuffleList(Participants, 0, Participants.Count);
+            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed, 0, ParticipantsWithRandomSeed.Count);
             // Seeding in KOH means putting the best in the bottom
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
-                int currentIndex = Participants.IndexOf(Seeds[seed]); // Find where seed is currently
-                int targetIndex = Participants.Count - 1 - seed; // Bottom up
+                int currentIndex = ParticipantsWithRandomSeed.IndexOf(Seeds[seed]); // Find where seed is currently
+                int targetIndex = ParticipantsWithRandomSeed.Count - 1 - seed; // Bottom up
                 // Perform switch
                 if (currentIndex != targetIndex)
                 {
-                    (Participants[currentIndex], Participants[targetIndex]) = (Participants[targetIndex], Participants[currentIndex]); // Swap
+                    (ParticipantsWithRandomSeed[currentIndex], ParticipantsWithRandomSeed[targetIndex]) = (ParticipantsWithRandomSeed[targetIndex], ParticipantsWithRandomSeed[currentIndex]); // Swap
                 }
             }
         }
-        public override void PlayTournament(DataContainers _backEndData)
+        public override void PlayTournament()
         {
             Console.CursorVisible = true;
             if (MatchHistory == null) // Brand new tournament
@@ -892,11 +867,11 @@ namespace IndymonBackendProgram
                 MatchHistory = new List<TournamentMatch>();
                 TournamentMatch firstMatch = new TournamentMatch
                 {
-                    Player1 = Participants[0] // First person is first player
+                    Player1 = ParticipantsWithRandomSeed[0].Item1 // First person is first player
                 };
-                if (Participants.Count > 1) // One would assume...
+                if (ParticipantsWithRandomSeed.Count > 1) // One would assume...
                 {
-                    firstMatch.Player2 = Participants[1]; // Add the 2nd
+                    firstMatch.Player2 = ParticipantsWithRandomSeed[1].Item1; // Add the 2nd
                 }
                 else
                 {
@@ -907,11 +882,11 @@ namespace IndymonBackendProgram
             // This is the part that loads the tournament, visually it prints all matches and prompts user one by one
             Console.Clear();
             Console.WriteLine("Insert scores for each match. 0 if you want it randomized, q to stop input temporarily. b FOR ROBOTS");
-            int consoleEndPosition = Participants.Count + 1; // Where the cursor will be after data entry (there's n matches total)
+            int consoleEndPosition = ParticipantsWithRandomSeed.Count + 1; // Where the cursor will be after data entry (there's n matches total)
             int maxStringLength = 0;
-            foreach (string participant in Participants) // Matchups are not known, so just assume max v max is the text
+            foreach ((string, int) participant in ParticipantsWithRandomSeed) // Matchups are not known, so just assume max v max is the text
             {
-                maxStringLength = Math.Max(maxStringLength, (2 * participant.Length) + 3); // Need to fit "p1 v p1"
+                maxStringLength = Math.Max(maxStringLength, (2 * participant.Item1.Length) + 3); // Need to fit "p1 v p1"
             }
             bool finished = false;
             while (!finished) // In this case, it'll be battle by battle, each decided by the winner of previous
@@ -921,12 +896,12 @@ namespace IndymonBackendProgram
                 Console.SetCursorPosition(0, MatchHistory.Count);
                 Console.Write($"{match.Player1} v {match.Player2}");
                 Console.SetCursorPosition(maxStringLength, MatchHistory.Count); // Put the cursor on the right, able to fit "p1 v p1" with p1 the longest possible player name
-                if (!ResolveMatch(match, _backEndData))
+                if (!ResolveMatch(match))
                 {
                     return;
                 }
                 // Check end condition
-                if (matchNumber >= (Participants.Count - 1)) // This signifies end of tournament
+                if (matchNumber >= (ParticipantsWithRandomSeed.Count - 1)) // This signifies end of tournament
                 {
                     finished = true;
                     Console.SetCursorPosition(0, consoleEndPosition); // Sets the console in the right place
@@ -938,8 +913,8 @@ namespace IndymonBackendProgram
                     MatchHistory.Add(nextMatch); // Add to pile
                     // Winner will advance in the same pos as they were
                     bool winnerWas1 = (match.Winner == match.Player1);
-                    nextMatch.Player1 = winnerWas1 ? match.Winner : Participants[MatchHistory.Count];
-                    nextMatch.Player2 = winnerWas1 ? Participants[MatchHistory.Count] : match.Winner;
+                    nextMatch.Player1 = winnerWas1 ? match.Winner : ParticipantsWithRandomSeed[MatchHistory.Count].Item1;
+                    nextMatch.Player2 = winnerWas1 ? ParticipantsWithRandomSeed[MatchHistory.Count].Item1 : match.Winner;
                 }
             }
             Console.CursorVisible = false;
@@ -948,9 +923,9 @@ namespace IndymonBackendProgram
         {
             // Find person with the longest name
             int nameLength = 0;
-            foreach (string participant in Participants)
+            foreach ((string, int) participant in ParticipantsWithRandomSeed)
             {
-                nameLength = Math.Max(nameLength, participant.Length); // Need to fit "p1 v p1" so keep in mind
+                nameLength = Math.Max(nameLength, participant.Item1.Length); // Need to fit "p1 v p1" so keep in mind
             }
             // Need to resize console so this fits
             int minXSize = (2 * nameLength) + 3; // Need to fit number of matches
@@ -1006,17 +981,17 @@ namespace IndymonBackendProgram
             Console.Clear();
             // And that should be it?!
         }
-        public override void UpdateLeaderboard(TournamentHistory leaderboard, DataContainers backend)
+        public override void UpdateLeaderboard()
         {
-            RegisterTournamentParticipation(leaderboard, backend); // First, make sure all players who participated have their tournament # increased
+            RegisterTournamentParticipation(); // First, make sure all players who participated have their tournament # increased
             // Now, need to gather the matches to calculate each match stat
             foreach (TournamentMatch match in MatchHistory)
             {
-                ProcessMatchStandings(match, leaderboard, backend);
+                ProcessMatchStandings(match);
             }
             // Ok! finally need the winner
             string winnerName = MatchHistory.Last().Winner; // Winner of last match is tournament winner
-            SetTournamentWinner(winnerName, leaderboard, backend);
+            SetTournamentWinner(winnerName);
         }
     }
     public class GroupStageTournament : Tournament
@@ -1055,25 +1030,25 @@ namespace IndymonBackendProgram
         {
             MatchHistory = null;
         }
-        public override void ShuffleWithSeeds(List<string> Seeds)
+        public override void ShuffleWithSeeds(List<(string, int)> Seeds)
         {
             // Shuffle everything
-            Utilities.ShuffleList(Participants, 0, Participants.Count);
+            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed, 0, ParticipantsWithRandomSeed.Count);
             // Seeding will involve putting the best first
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
-                int currentIndex = Participants.IndexOf(Seeds[seed]); // Find where seed is currently
+                int currentIndex = ParticipantsWithRandomSeed.IndexOf(Seeds[seed]); // Find where seed is currently
                 // Perform switch
                 if (currentIndex != seed)
                 {
-                    (Participants[currentIndex], Participants[seed]) = (Participants[seed], Participants[currentIndex]); // Swap
+                    (ParticipantsWithRandomSeed[currentIndex], ParticipantsWithRandomSeed[seed]) = (ParticipantsWithRandomSeed[seed], ParticipantsWithRandomSeed[currentIndex]); // Swap
                 }
             }
             // Another shuffle to shuffle "pots" of players, players will be segregated by skill tiers and distributed
             for (int tier = 0; tier < PlayersPerGroup; tier++)
             {
                 int pot = tier * NGroups; // Next pot is the next n players
-                Utilities.ShuffleList(Participants, pot, NGroups);
+                GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed, pot, NGroups);
             }
             // Finally, place in each position of group
             int participant = 0;
@@ -1081,12 +1056,12 @@ namespace IndymonBackendProgram
             {
                 for (int group = 0; group < NGroups; group++)
                 {
-                    Groups[group, level] = Participants[participant];
+                    Groups[group, level] = ParticipantsWithRandomSeed[participant].Item1;
                     participant++;
                 }
             }
         }
-        public override void PlayTournament(DataContainers backEndData)
+        public override void PlayTournament()
         {
             Console.CursorVisible = true;
             if (MatchHistory == null) // Brand new tournament
@@ -1109,9 +1084,9 @@ namespace IndymonBackendProgram
                 Console.WriteLine("Insert scores for each match. 0 if you want it randomized, q to stop input temporarily. b FOR ROBOTS");
                 int consoleEndPosition = (NGroups * MatchesPerWeek) + 1; // Where the cursor will be after data entry
                 int maxStringLength = 0;
-                foreach (string participant in Participants) // Matchups are not known, so just assume max v max is the text
+                foreach ((string, int) participant in ParticipantsWithRandomSeed) // Matchups are not known, so just assume max v max is the text
                 {
-                    maxStringLength = Math.Max(maxStringLength, (2 * participant.Length) + 3); // Need to fit "p1 v p1"
+                    maxStringLength = Math.Max(maxStringLength, (2 * participant.Item1.Length) + 3); // Need to fit "p1 v p1"
                 }
                 int line = 1;
                 foreach (List<TournamentMatch> matchesThisGroup in currentWeek)
@@ -1128,7 +1103,7 @@ namespace IndymonBackendProgram
                             Console.Write($"{match.Player1} v {match.Player2}");
                         }
                         Console.SetCursorPosition(maxStringLength + 1, line); // Put the cursor on the right, and starting from 1 (to avoid message string)
-                        if (!ResolveMatch(match, backEndData))
+                        if (!ResolveMatch(match))
                         {
                             return;
                         }
@@ -1202,9 +1177,9 @@ namespace IndymonBackendProgram
             // Find person with the longest name
             int groupTextLength = "group 000".Length; // Minimum size needs to fit header and 999 (!) groups
             int matchUpLength = 0;
-            foreach (string participant in Participants)
+            foreach ((string, int) participant in ParticipantsWithRandomSeed)
             {
-                matchUpLength = Math.Max(matchUpLength, (2 * (participant.Length)) + " v ".Length);
+                matchUpLength = Math.Max(matchUpLength, (2 * (participant.Item1.Length)) + " v ".Length);
                 groupTextLength = Math.Max(groupTextLength, matchUpLength + " (0-0)".Length); // Need to fit "p1 v p1 (X-X)"
             }
             // Need to resize console so this fits
@@ -1271,9 +1246,9 @@ namespace IndymonBackendProgram
             Console.Clear();
             // And that should be it?!
         }
-        public override void UpdateLeaderboard(TournamentHistory leaderboard, DataContainers backend)
+        public override void UpdateLeaderboard()
         {
-            RegisterTournamentParticipation(leaderboard, backend); // First, make sure all players who participated have their tournament # increased
+            RegisterTournamentParticipation(); // First, make sure all players who participated have their tournament # increased
             // Now, need to gather the matches to calculate each match stat
             foreach (List<List<TournamentMatch>> weekResults in MatchHistory)
             {
@@ -1281,7 +1256,7 @@ namespace IndymonBackendProgram
                 {
                     foreach (TournamentMatch match in groupResults)
                     {
-                        ProcessMatchStandings(match, leaderboard, backend);
+                        ProcessMatchStandings(match);
                     }
                 }
             }

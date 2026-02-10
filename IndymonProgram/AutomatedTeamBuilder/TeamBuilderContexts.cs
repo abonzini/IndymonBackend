@@ -206,8 +206,8 @@ namespace AutomatedTeamBuilder
                 if (movesDamage.Count > 0) // There will be a offensive score then
                 {
                     // Do some magic to calculate average move damage with average type coverage
-                    List<double> bestCaseMoveCoverage = IndymonUtilities.ArrayMax(movesTypeCoverage);
-                    double averageMoveDamage = IndymonUtilities.ArrayAverage(movesDamage) * IndymonUtilities.ArrayAverage(bestCaseMoveCoverage);
+                    List<double> bestCaseMoveCoverage = GeneralUtilities.ArrayMax(movesTypeCoverage);
+                    double averageMoveDamage = GeneralUtilities.ArrayAverage(movesDamage) * GeneralUtilities.ArrayAverage(bestCaseMoveCoverage);
                     // Finally the offensive score will be a function of the damage I do as a fucntion of the normal distro of opp HP
                     // This makes underkills have values of <0.5, and overkills values that ->1
                     // Improvements will then involve moves that make the move approach overkill, but increasing overkill will have diminishing returns
@@ -228,7 +228,7 @@ namespace AutomatedTeamBuilder
                 // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly
                 (PokemonType, PokemonType) defendingPokemonType = (result.TeraType != PokemonType.NONE) ? (result.TeraType, PokemonType.NONE) : result.PokemonTypes;
                 List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(defendingPokemonType, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
-                double averageStabReceived = IndymonUtilities.ArrayAverage(moveStabsReceived);
+                double averageStabReceived = GeneralUtilities.ArrayAverage(moveStabsReceived);
                 averageDamage *= averageStabReceived;
                 averageDamageVariance *= averageStabReceived * averageStabReceived;
                 // Do the normal thing now. Checks how "bulky" a mon is, which increases surv rating

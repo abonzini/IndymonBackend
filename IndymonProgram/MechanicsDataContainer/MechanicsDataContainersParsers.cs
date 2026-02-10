@@ -15,7 +15,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Typechart");
             DefensiveTypeChart.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] lines = csv.Split("\n");
             List<PokemonType> columnTags = new List<PokemonType>();
             for (int i = 0; i < lines.Length; i++)
@@ -58,7 +58,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Moves");
             Moves.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
             const int TYPE_COL = 1;
             const int CATEGORY_COL = 2;
@@ -98,7 +98,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Abilities");
             Abilities.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
             const int FLAGS_COL = 1; // Contains all effect keys of this particular ability (more manual...)
             string[] lines = csv.Split("\n");
@@ -131,8 +131,8 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Pokedex");
             Dex.Clear();
             // Parse csv
-            string pokemonCsv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, dexSheetTab);
-            string learnsetCsv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, learnsetSheetTab);
+            string pokemonCsv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, dexSheetTab);
+            string learnsetCsv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, learnsetSheetTab);
             string[] pokemonLines = pokemonCsv.Split('\n');
             // First pass, add all pokemon into the dictionary with an empty Pokemon, this is to first know the existance of all mons
             for (int i = 1; i < pokemonLines.Length; i++)
@@ -230,7 +230,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Mod Item List");
             ModItems.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
             const int FLAGS_COL = 4; // Contains all effect keys of this particular item
             string[] lines = csv.Split("\n");
@@ -262,7 +262,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Battle Items");
             BattleItems.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int NAME_COL = 0;
             const int FLAGS_COL = 10; // Contains all effect keys of this particular item
             string[] lines = csv.Split("\n");
@@ -295,7 +295,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Initial Weights");
             InitialWeights.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int ELEMENT_TYPE_COL = 0;
             const int NAME_COL = 1;
             const int WEIGHT_COL = 2;
@@ -322,7 +322,7 @@ namespace MechanicsDataContainer
             Enablers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
             DisabledOptions.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int ENABLER_TYPE_COL = 0;
             const int ENABLER_NAME_COL = 1;
             const int ENABLED_TYPE_COL = 2;
@@ -361,7 +361,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Forced Build List");
             ForcedBuilds.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int FORCER_TYPE_COL = 0;
             const int FORCER_NAME_COL = 1;
             const int FORCED_TYPE_COL = 2;
@@ -396,7 +396,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Stat Mods List");
             StatModifiers.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int ELEMENT_TYPE_COL = 0;
             const int ELEMENT_NAME_COL = 1;
             const int STAT_MOD_TYPE_COL = 2;
@@ -431,7 +431,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Move Mods List");
             MoveModifiers.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int MODIFIER_TYPE_COL = 0;
             const int MODIFIER_NAME_COL = 1;
             const int MODIFIED_TYPE_COL = 2;
@@ -476,7 +476,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Weight Mods List");
             WeightModifiers.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int MODIFIER_TYPE_COL = 0;
             const int MODIFIER_NAME_COL = 1;
             const int MODIFIED_TYPE_COL = 2;
@@ -513,7 +513,7 @@ namespace MechanicsDataContainer
             Console.WriteLine("Parsing Fixed Mods List");
             FlatIncreaseModifiers.Clear();
             // Parse csv
-            string csv = IndymonUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int MODIFIER_TYPE_COL = 0;
             const int MODIFIER_NAME_COL = 1;
             const int WEIGHT_COL = 2;

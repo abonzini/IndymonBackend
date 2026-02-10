@@ -11,7 +11,7 @@ namespace AutomatedTeamBuilder
     public class TeamBuildConstraints
     {
         /// Options that could generate a valid team. Many mandatory conditions of optional combos ((A+B)*(C+D+E)*(F))
-        public List<List<(ElementType, string)>> AllConstraints = new List<List<(ElementType, string)>>();
+        public List<List<(ElementType, string)>> AllConstraints { get; set; } = new List<List<(ElementType, string)>>();
         /// <summary>
         /// Adds all monotype constraint options (e.g. a team of one type, each with a possible solution
         /// </summary>

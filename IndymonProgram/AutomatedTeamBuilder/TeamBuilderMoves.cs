@@ -507,7 +507,7 @@ namespace AutomatedTeamBuilder
                         allMoveFlags.Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
                         mon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
                         move.Name == "Freeze Dry"); // Freeze dry is SE against water
-                    moveDamage *= IndymonUtilities.ArrayAverage(moveCoverage); // Average damage caused by move cvg
+                    moveDamage *= GeneralUtilities.ArrayAverage(moveCoverage); // Average damage caused by move cvg
                     // Finally, how damage affects score
                     score *= (2 * moveDamage) / oppStats[0]; // A damage of 50% opp HP would have a score of 1
                 }

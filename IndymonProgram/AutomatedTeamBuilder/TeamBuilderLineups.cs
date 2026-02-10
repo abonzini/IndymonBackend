@@ -32,7 +32,7 @@ namespace AutomatedTeamBuilder
         /// <param name="nMons">Number of mons desired in the team</param>
         /// <param name="constraintSets">All the different valid constraints that apply separately, only one needs to succeed</param>
         /// <returns></returns>
-        public static List<PossibleTeamBuild> GetAllTrainersPossibleBuilds(Trainer trainer, int nMons, List<TeamBuildConstraints> constraintSets)
+        public static List<PossibleTeamBuild> GetTrainersPossibleBuilds(Trainer trainer, int nMons, List<TeamBuildConstraints> constraintSets)
         {
             List<PossibleTeamBuild> resultingBuilds = new List<PossibleTeamBuild>();
             int mostOwnMonsUsed = 0; // Will try to only use the options that use the most own mons to not overuse set items or favors if don't need
@@ -203,13 +203,13 @@ namespace AutomatedTeamBuilder
         /// <param name="teamBuild">All the possible builds for the trainers</param>
         public static void AssembleTrainersBattleTeam(Trainer trainer, int nMons, List<PossibleTeamBuild> teamBuild)
         {
-            PossibleTeamBuild usedBuild = IndymonUtilities.GetRandomPick(teamBuild); // TODO: May need to be chosen in some crazy monotypes instead of random
+            PossibleTeamBuild usedBuild = GeneralUtilities.GetRandomPick(teamBuild); // TODO: May need to be chosen in some crazy monotypes instead of random
             List<TrainerPokemon> finalBattleTeam = []; // This is the result
             // Now, begin the sequence of try to add trainer mons
             // If trainer defined a strict order, will add them in the order of team as stated, otherwise do mon>set item>favor
             if (trainer.AutoTeam) // If shuffling is allowed, all is shuffled then and picks prioritising item efficiency
             {
-                IndymonUtilities.ShuffleList(usedBuild.TrainerOwnPokemon);
+                GeneralUtilities.ShuffleList(usedBuild.TrainerOwnPokemon);
                 for (int i = 0; i < usedBuild.TrainerOwnPokemon.Count && finalBattleTeam.Count < nMons; i++) // Fill as much as possible from here until done or ran out of mons
                 {
                     finalBattleTeam.Add(usedBuild.TrainerOwnPokemon[i]); // Add to final team
@@ -221,13 +221,13 @@ namespace AutomatedTeamBuilder
                     while (usedBuild.TrainerOwnPokemonUsingSetItem.Count > 0 && finalBattleTeam.Count < nMons)
                     {
                         // Pick a random set item, a random mon from the list, decrement uses of set item
-                        string chosenSetItem = IndymonUtilities.GetRandomPick(usedBuild.TrainerOwnPokemonUsingSetItem.Keys.ToList()); // Choose an item
+                        string chosenSetItem = GeneralUtilities.GetRandomPick(usedBuild.TrainerOwnPokemonUsingSetItem.Keys.ToList()); // Choose an item
                         List<TrainerPokemon> potentialMons = [.. usedBuild.TrainerOwnPokemonUsingSetItem[chosenSetItem].Where(p => !finalBattleTeam.Contains(p))];
                         if (potentialMons.Count > 0) // ok theres something to work with
                         {
-                            TrainerPokemon chosenMon = IndymonUtilities.GetRandomPick(potentialMons);
+                            TrainerPokemon chosenMon = GeneralUtilities.GetRandomPick(potentialMons);
                             chosenMon.SetItem = chosenSetItem; // Equip the thing
-                            int finalSetItemAmount = IndymonUtilities.AddtemToCountDictionary(trainer.SetItems, chosenSetItem, -1, true);
+                            int finalSetItemAmount = GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, chosenSetItem, -1, true);
                             if (finalSetItemAmount <= 0) // If this was the last use of this item, then remove it from options from now on
                             {
                                 usedBuild.TrainerOwnPokemonUsingSetItem.Remove(chosenSetItem); // This set item no longer valid
@@ -263,9 +263,9 @@ namespace AutomatedTeamBuilder
                         }
                         if (potentialSetItems.Count > 0) // Ok this mon can have the set item...
                         {
-                            string chosenSetItem = IndymonUtilities.GetRandomPick(potentialSetItems); // Choose one at random
+                            string chosenSetItem = GeneralUtilities.GetRandomPick(potentialSetItems); // Choose one at random
                             mon.SetItem = chosenSetItem; // Equip the thing
-                            int finalSetItemAmount = IndymonUtilities.AddtemToCountDictionary(trainer.SetItems, chosenSetItem, -1, true);
+                            int finalSetItemAmount = GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, chosenSetItem, -1, true);
                             if (finalSetItemAmount <= 0) // If this was the last use of this item, then remove it from options from now on
                             {
                                 usedBuild.TrainerOwnPokemonUsingSetItem.Remove(chosenSetItem); // This set item no longer valid
@@ -279,10 +279,10 @@ namespace AutomatedTeamBuilder
             while (finalBattleTeam.Count < nMons)
             {
                 // First, find which random favor I will cash in
-                KeyValuePair<string, List<TrainerPokemon>> nextFavour = IndymonUtilities.GetRandomKvp(usedBuild.FavourPokemon);
+                KeyValuePair<string, List<TrainerPokemon>> nextFavour = GeneralUtilities.GetRandomKvp(usedBuild.FavourPokemon);
                 int remainingFavours = trainer.TrainerFavours[nextFavour.Key] - 1;
-                IndymonUtilities.AddtemToCountDictionary(trainer.TrainerFavours, nextFavour.Key, -1, true); // Remove 1 from the remaining favors of trainer
-                TrainerPokemon borrowedMon = IndymonUtilities.GetRandomPick(nextFavour.Value);
+                GeneralUtilities.AddtemToCountDictionary(trainer.TrainerFavours, nextFavour.Key, -1, true); // Remove 1 from the remaining favors of trainer
+                TrainerPokemon borrowedMon = GeneralUtilities.GetRandomPick(nextFavour.Value);
                 if (trainer.TrainerFavours[nextFavour.Key] <= 0)// If i used the last trainer's favour
                 {
                     usedBuild.FavourPokemon.Remove(nextFavour.Key); // This trainer can't be used anymore

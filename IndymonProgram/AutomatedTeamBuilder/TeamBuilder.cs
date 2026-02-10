@@ -79,13 +79,13 @@ namespace AutomatedTeamBuilder
         /// <param name="seed">Team building seed, 0 to generate a random one</param>
         static void BuildTeam(Trainer trainer, TeamBuildContext buildCtx, int seed)
         {
-            int teamSeed = (seed == 0) ? IndymonUtilities.GetRandomNumber(int.MaxValue) : seed;
+            int teamSeed = (seed == 0) ? GeneralUtilities.GetRandomNumber(int.MaxValue) : seed;
             bool teamAccepted = false, seedAccepted = true;
             while (!teamAccepted)
             {
                 if (!seedAccepted) // Change the seed I guess
                 {
-                    teamSeed = IndymonUtilities.GetRandomNumber(int.MaxValue);
+                    teamSeed = GeneralUtilities.GetRandomNumber(int.MaxValue);
                 }
                 Random teamRng = new Random(teamSeed); // Not ideal but lets us retry with same value
                 int monSeed = teamRng.Next(seed); // Get the next seed of mon
@@ -212,7 +212,7 @@ namespace AutomatedTeamBuilder
                                     if (setItemAbilityLookup.TryGetValue(chosenAbility, out string equippedSetItem)) // If this was found through set item, need to equip set item
                                     {
                                         mon.SetItem = equippedSetItem;
-                                        IndymonUtilities.AddtemToCountDictionary(trainer.SetItems, equippedSetItem, -1, true); // Remove 1 charge of set item from trainer
+                                        GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, equippedSetItem, -1, true); // Remove 1 charge of set item from trainer
                                     }
                                 }
                                 if (mon.ChosenAbility != null) // After this step, this should be true always and move on!
@@ -312,7 +312,7 @@ namespace AutomatedTeamBuilder
                                         if (setItemMoveLookup.TryGetValue(chosenMove, out string equippedSetItem)) // If this was found through set item, need to equip set item
                                         {
                                             mon.SetItem = equippedSetItem;
-                                            IndymonUtilities.AddtemToCountDictionary(trainer.SetItems, equippedSetItem, -1, true); // Remove 1 charge of set item from trainer
+                                            GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, equippedSetItem, -1, true); // Remove 1 charge of set item from trainer
                                         }
                                     }
                                     else
@@ -375,7 +375,7 @@ namespace AutomatedTeamBuilder
                                         int chosenItemIndex = RandomIndexOfWeights(modItemScores, monRng);
                                         Item chosenModitem = validModItems[chosenItemIndex]; // Got the item
                                         mon.ModItem = chosenModitem; // Apply to mon, all good here
-                                        IndymonUtilities.AddtemToCountDictionary(trainer.ModItems, chosenModitem, -1, true); // Remove 1 charge of mod item from trainer
+                                        GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, chosenModitem, -1, true); // Remove 1 charge of mod item from trainer
                                     }
                                 }
                                 state = MonBuildState.CHOOSING_BATTLE_ITEM; // Regardless I'm done
@@ -511,7 +511,7 @@ namespace AutomatedTeamBuilder
                                         if (chosenBattleitem != noItem) // Check if winner was actually an item
                                         {
                                             mon.ModItem = chosenBattleitem; // Apply to mon, all good here
-                                            IndymonUtilities.AddtemToCountDictionary(trainer.BattleItems, chosenBattleitem, -1, true); // Remove 1 charge of battle item from trainer
+                                            GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, chosenBattleitem, -1, true); // Remove 1 charge of battle item from trainer
                                         }
                                     }
                                 }
@@ -532,17 +532,17 @@ namespace AutomatedTeamBuilder
                         // Ok, need to restore mon then
                         if (mon.SetItem != "" && !monHadSetItem) // If mon needs to return set item
                         {
-                            IndymonUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, 1); // Re-adds item
+                            GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, 1); // Re-adds item
                             mon.SetItem = "";
                         }
                         if (mon.ModItem != null && !monHadModItem) // If mon needs to return mod item
                         {
-                            IndymonUtilities.AddtemToCountDictionary(trainer.ModItems, mon.ModItem, 1); // Re-adds item
+                            GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, mon.ModItem, 1); // Re-adds item
                             mon.ModItem = null;
                         }
                         if (mon.SetItem != "" && !monHadSetItem) // If mon needs to return battle item
                         {
-                            IndymonUtilities.AddtemToCountDictionary(trainer.BattleItems, mon.BattleItem, 1); // Re-adds item
+                            GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, mon.BattleItem, 1); // Re-adds item
                             mon.BattleItem = null;
                         }
                         // Also redo the mon ofc

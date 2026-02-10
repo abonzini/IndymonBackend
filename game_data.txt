@@ -2,3 +2,4 @@
 1004710684, trainer data
 437555654, npc data
 1487588958, famous npc data
+1914081293, battle stats

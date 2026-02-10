@@ -2,7 +2,7 @@
 
 namespace Utilities
 {
-    public static class IndymonUtilities
+    public static class GeneralUtilities
     {
         /// <summary>
         /// Gets a csv from a google sheets id+tab combo
@@ -99,6 +99,14 @@ namespace Utilities
         public static int GetRandomNumber(int maxExclusive)
         {
             return GetRandomNumber(0, maxExclusive);
+        }
+        /// <summary>
+        /// Same but [0,MAX_INT)
+        /// </summary>
+        /// <returns></returns>
+        public static int GetRandomNumber()
+        {
+            return GetRandomNumber(0, int.MaxValue);
         }
         /// <summary>
         /// Gets random pick of an element from a list
