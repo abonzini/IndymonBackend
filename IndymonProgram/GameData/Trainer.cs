@@ -24,7 +24,7 @@ namespace GameData
         public bool AutoBattleItem = true;
         public List<TrainerPokemon> PartyPokemon = new List<TrainerPokemon>();
         public List<TrainerPokemon> BoxedPokemon = new List<TrainerPokemon>();
-        public Dictionary<string, int> SetItems = new Dictionary<string, int>();
+        public Dictionary<SetItem, int> SetItems = new Dictionary<SetItem, int>();
         public Dictionary<Item, int> ModItems = new Dictionary<Item, int>();
         public Dictionary<Item, int> BattleItems = new Dictionary<Item, int>();
         public Dictionary<string, int> TrainerFavours = new Dictionary<string, int>();
@@ -36,6 +36,16 @@ namespace GameData
         }
         // Things related to an assembled team ready for battle
         public List<TrainerPokemon> BattleTeam = new List<TrainerPokemon>(); // A subset of team but can also have borrowed mons ready to battle
+        /// <summary>
+        /// Reset the state of all mons pre-battle
+        /// </summary>
+        public void RestoreAll()
+        {
+            foreach (TrainerPokemon mon in BattleTeam)
+            {
+                mon.HealFull();
+            }
+        }
         /// <summary>
         /// Gets trainer data as part of a packed string as is received by (my modified version of) showdown
         /// </summary>

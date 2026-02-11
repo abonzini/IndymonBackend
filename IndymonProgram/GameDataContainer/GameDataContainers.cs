@@ -6,7 +6,14 @@ namespace GameDataContainer
 {
     public partial class GameDataContainers
     {
-        public static GameDataContainers GlobalGameData = new GameDataContainers();
+        public static GameDataContainers GlobalGameData { get; set; } = new GameDataContainers();
+        public Dictionary<string, Dungeon> Dungeons = new Dictionary<string, Dungeon>();
+        public Dictionary<string, Trainer> TrainerData = new Dictionary<string, Trainer>();
+        public Dictionary<string, Trainer> NpcData = new Dictionary<string, Trainer>();
+        public Dictionary<string, Trainer> FamousNpcData = new Dictionary<string, Trainer>();
+        public Dictionary<string, SetItem> SetItems = new Dictionary<string, SetItem>();
+        public BattleStats BattleStats = new BattleStats();
+        /// <summary>
         /// <summary>
         /// Initializes dungeon data
         /// </summary>
@@ -51,12 +58,6 @@ namespace GameDataContainer
             else if (TrainerData.TryGetValue(Name, out foundTrainer)) return foundTrainer;
             else throw new Exception($"Trainer {Name} does not exist!");
         }
-        public Dictionary<string, Dungeon> Dungeons = new Dictionary<string, Dungeon>();
-        public Dictionary<string, Trainer> TrainerData = new Dictionary<string, Trainer>();
-        public Dictionary<string, Trainer> NpcData = new Dictionary<string, Trainer>();
-        public Dictionary<string, Trainer> FamousNpcData = new Dictionary<string, Trainer>();
-        public BattleStats BattleStats = new BattleStats();
-        /// <summary>
         /// Exports the battle statistics into a file
         /// </summary>
         /// <param name="directory">Directory where to store file</param>

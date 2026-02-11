@@ -24,7 +24,7 @@ namespace AutomatedTeamBuilder
         /// <param name="buildConstraints">Specific constraints needed for mon</param>
         /// <param name="pokemonFaced">All the pokemon that may be faced, to calculate types and stats</param>
         /// <param name="seed">Seed if the trainer set, to ensure consistency if saved</param>
-        public static void DefineTrainerSets(Trainer trainer, bool smart, HashSet<TeamArchetype> Archetypes, TeamBuildConstraints buildConstraints, List<Pokemon> pokemonFaced, int seed = 0)
+        public static void DefineTrainerSets(Trainer trainer, bool smart, HashSet<TeamArchetype> Archetypes, Constraint buildConstraints, List<Pokemon> pokemonFaced, int seed = 0)
         {
             // Create a build ctx to start team build
             TeamBuildContext buildCtx = new TeamBuildContext
@@ -32,10 +32,12 @@ namespace AutomatedTeamBuilder
                 smartTeamBuild = smart
             };
             buildCtx.CurrentTeamArchetypes.UnionWith(Archetypes); // Add archetypes
-            buildCtx.TeamBuildConstraints.AllConstraints.AddRange(buildConstraints.AllConstraints); // Add design constraints
+            buildCtx.TeamBuildConstraints.Add(buildConstraints); // Add design constraints
             if (smart) // In smart build, theres a constraint where every mon needs to have an attackign move no matter what (to avoid locks)
             {
-                buildCtx.TeamBuildConstraints.AllConstraints.Add([(ElementType.ANY_DAMAGING_MOVE, "-")]);
+                Constraint damagingMoveConstraint = new Constraint();
+                damagingMoveConstraint.AllConstraints.Add((ElementType.ANY_DAMAGING_MOVE, "-"));
+                buildCtx.TeamBuildConstraints.Add(damagingMoveConstraint);
             }
             // Finally, if building against other pokemon, need to fetch the stats and other things
             if (pokemonFaced.Count > 0)
@@ -95,7 +97,7 @@ namespace AutomatedTeamBuilder
                     // Init stuff
                     Random monRng = new Random(seed); // Will use this for the mon, in order to be able to reuse seed
                     TrainerPokemon mon = trainer.BattleTeam[monIndex];
-                    bool monHadSetItem = mon.SetItem != "";
+                    bool monHadSetItem = mon.SetItem != null;
                     bool monHadModItem = mon.ModItem != null;
                     bool monHadBattleItem = mon.ModItem != null;
                     // Also get the mons ability and moveset here
@@ -109,16 +111,11 @@ namespace AutomatedTeamBuilder
                         monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
                     }
                     // First thing is to check if mon has set item equipped, if so, add the move/ability already
-                    Ability setItemAbility = GetSetItemAbility(mon.SetItem);
-                    mon.ChosenAbility = setItemAbility;
-                    Move setItemMove = GetSetItemMove(mon.SetItem);
-                    if (setItemMove != null)
+                    if (mon.SetItem != null)
                     {
-                        mon.ChosenMoveset = [setItemMove];
-                    }
-                    else
-                    {
-                        mon.ChosenMoveset = [];
+                        if (!mon.SetItem.CanEquip(mon)) throw new Exception($"Mon {mon.Species} can't equip {mon.SetItem.Name}"); // Verif to ensure no one equipped an invalid item
+                        mon.ChosenAbility = mon.SetItem.AddedAbility;
+                        mon.ChosenMoveset = [.. mon.SetItem.AddedMoves];
                     }
                     // Now that the initial set is assembled, evaluate with a state machine
                     MonBuildState state = MonBuildState.CHOOSING_ABILITY; // Begin with ability
@@ -131,16 +128,11 @@ namespace AutomatedTeamBuilder
                         }
                         buildCtx.CurrentTeamArchetypes.UnionWith(monCtx.AdditionalArchetypes); // New archetypes found here are added into all team's archetypes
                         // Monctx contains all the ongoing constraints, need only the ones which haven't been fulfilled yet
-                        TeamBuildConstraints ongoingConstraints = new TeamBuildConstraints();
-                        foreach (List<(ElementType, string)> constraintSet in monCtx.AdditionalConstraints.AllConstraints) // filter constraint set out
+                        List<Constraint> ongoingConstraints = new List<Constraint>();
+                        foreach (Constraint constraint in monCtx.AdditionalConstraints) // filter constraint set out
                         {
-                            bool constraintSetSatisfied = false;
-                            foreach ((ElementType, string) constraintCheck in constraintSet) // Check if this OR combination is satisfied by anything, returns at first valid one
-                            {
-                                constraintSetSatisfied |= ValidateComplexMonProperty(mon, monCtx, constraintCheck.Item1, constraintCheck.Item2);
-                                if (constraintSetSatisfied) break;
-                            }
-                            if (!constraintSetSatisfied) ongoingConstraints.AllConstraints.Add(constraintSet); // Add for later
+                            // If constraint not yet satisfied, add to list to requirements
+                            if (!constraint.SatisfiedByMon(mon, false)) ongoingConstraints.Add(constraint);
                         }
                         // Got constraint list finally! Now just do state machine
                         switch (state)
@@ -150,38 +142,29 @@ namespace AutomatedTeamBuilder
                                 if (mon.ChosenAbility == null) // Mon needs an ability
                                 {
                                     List<Ability> possibleAbilities = [.. monData.Abilities]; // All possible abilities
-                                    Dictionary<Ability, string> setItemAbilityLookup = new Dictionary<Ability, string>();
-                                    if (trainer.AutoSetItem && mon.SetItem == "") // If I can equip other set items AND set item provides useful abilities, I'll add them too
+                                    if (trainer.AutoSetItem && mon.SetItem != null) // If I can equip other set items AND set item provides useful abilities, I'll add them too
                                     {
-                                        foreach (string setItem in trainer.SetItems.Keys) // Need to check which set items are available
+                                        foreach (SetItem setItem in trainer.SetItems.Keys) // Need to check which set items are available
                                         {
-                                            if (CanEquipSetItem(mon, setItem))
+                                            if (setItem.CanEquip(mon))
                                             {
-                                                setItemAbility = GetSetItemAbility(setItem);
-                                                if (setItemAbility != null && !possibleAbilities.Contains(setItemAbility)) // if available and not included yet, I add to possibilities
+                                                if (setItem.AddedAbility != null && !possibleAbilities.Contains(setItem.AddedAbility)) // if available and not included yet, I add to possibilities
                                                 {
-                                                    possibleAbilities.Add(setItemAbility);
-                                                    setItemAbilityLookup.Add(setItemAbility, setItem);
+                                                    possibleAbilities.Add(setItem.AddedAbility);
                                                 }
                                             }
                                         }
                                     }
                                     // If there's a constraint that requires specific abilities, need to filter list further
                                     List<Ability> acceptableAbilities = new List<Ability>();
-                                    foreach (List<(ElementType, string)> constraintSet in monCtx.AdditionalConstraints.AllConstraints) // Quick check of which constraints an ability could solve
+                                    foreach (Constraint constraint in monCtx.AdditionalConstraints) // Quick check of which constraints an ability could solve
                                     {
                                         // This has the effect where if an ability fills many constraints, it is added many times but that may be good? (Multiply chances I guess....)
                                         foreach (Ability constraintFillingAbility in possibleAbilities)
                                         {
-                                            bool abilityAccepted = false;
-                                            foreach ((ElementType, string) constraintCheck in constraintSet) // Check if this OR combination is satisfied by anything, returns at first valid one
+                                            if (constraint.SatisfiedByAbility(constraintFillingAbility))
                                             {
-                                                abilityAccepted |= ValidateBasicAbilityProperty(constraintFillingAbility, constraintCheck.Item1, constraintCheck.Item2); // Check if ability ok
-                                                if (abilityAccepted)
-                                                {
-                                                    acceptableAbilities.Add(constraintFillingAbility); // This is an ability I can consider then!
-                                                    break;
-                                                }
+                                                acceptableAbilities.Add(constraintFillingAbility); // This is an ability I can consider then!
                                             }
                                         }
                                     }
@@ -209,10 +192,12 @@ namespace AutomatedTeamBuilder
                                     int chosenAbilityIndex = RandomIndexOfWeights(abilityScores, monRng);
                                     Ability chosenAbility = acceptableAbilities[chosenAbilityIndex]; // Got the ability
                                     mon.ChosenAbility = chosenAbility; // Apply to mon, all good here
-                                    if (setItemAbilityLookup.TryGetValue(chosenAbility, out string equippedSetItem)) // If this was found through set item, need to equip set item
+                                    if (!monData.Abilities.Contains(chosenAbility)) // If not in mon, this was seen as a set item then
                                     {
-                                        mon.SetItem = equippedSetItem;
-                                        GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, equippedSetItem, -1, true); // Remove 1 charge of set item from trainer
+                                        mon.SetItem = trainer.SetItems.Keys.First(i => i.AddedAbility == chosenAbility); // Get the first set item that satisfies
+                                        GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, -1, true); // Remove 1 charge of set item from trainer
+                                        // If set item just equipped, also means the mon has been added moves
+                                        mon.ChosenMoveset.AddRange(mon.SetItem.AddedMoves);
                                     }
                                 }
                                 if (mon.ChosenAbility != null) // After this step, this should be true always and move on!
@@ -221,7 +206,7 @@ namespace AutomatedTeamBuilder
                                 }
                                 break;
                             case MonBuildState.CHOOSING_MOVES:
-                                const int NUMBER_OF_MOVES_PER_MON = 4; // 4 moves, classic
+                                const int NUMBER_OF_MOVES_PER_MON = 4; // 4 moves, classic unless like, added via crazy move disk
                                 if (mon.ChosenMoveset.Count < NUMBER_OF_MOVES_PER_MON) // Time to add a next move (or empty)
                                 {
                                     List<Move> possibleMoves = [.. monData.Moveset]; // All possible moves
@@ -230,38 +215,29 @@ namespace AutomatedTeamBuilder
                                         char letter = mon.Species.ToLower().Last();
                                         possibleMoves = [.. possibleMoves.Where(m => m.Name.StartsWith(letter))]; // Additional move filter
                                     }
-                                    Dictionary<Move, string> setItemMoveLookup = new Dictionary<Move, string>();
-                                    if (trainer.AutoSetItem && mon.SetItem == "") // If I can equip other set items AND set item provides useful moves, I'll add them too
+                                    if (trainer.AutoSetItem && mon.SetItem == null) // If I can equip other set items AND set item provides useful moves, I'll add them too
                                     {
-                                        foreach (string setItem in trainer.SetItems.Keys) // Need to check which set items are available
+                                        foreach (SetItem setItem in trainer.SetItems.Keys) // Need to check which set items are available
                                         {
-                                            if (CanEquipSetItem(mon, setItem))
+                                            if (setItem.CanEquip(mon))
                                             {
-                                                setItemMove = GetSetItemMove(setItem);
-                                                if (setItemAbility != null && !possibleMoves.Contains(setItemMove)) // if available and not included yet, I add to possibilities
+                                                if (setItem.AddedMoves.Count > 0 && possibleMoves.Except(setItem.AddedMoves).Any()) // if available and some move would be new, add to option
                                                 {
-                                                    possibleMoves.Add(setItemMove);
-                                                    setItemMoveLookup.Add(setItemMove, setItem);
+                                                    possibleMoves = possibleMoves.Union(setItem.AddedMoves).ToList(); // Adds the missing moves to list
                                                 }
                                             }
                                         }
                                     }
                                     // If there's a constraint that requires specific moves, need to filter list further
                                     List<Move> acceptableMoves = new List<Move>();
-                                    foreach (List<(ElementType, string)> constraintSet in monCtx.AdditionalConstraints.AllConstraints) // Quick check of which constraints a move could solve
+                                    foreach (Constraint constraint in monCtx.AdditionalConstraints) // Quick check of which constraints a move could solve
                                     {
                                         // This has the effect where if an ability fills many constraints, it is added many times but that may be good? (Multiply chances I guess....)
                                         foreach (Move constraintFillingMove in possibleMoves)
                                         {
-                                            bool moveAccepted = false;
-                                            foreach ((ElementType, string) constraintCheck in constraintSet) // Check if this OR combination is satisfied by anything, returns at first valid one
+                                            if (constraint.SatisfiedByMove(constraintFillingMove))
                                             {
-                                                moveAccepted |= ValidateBasicMoveProperty(constraintFillingMove, constraintCheck.Item1, constraintCheck.Item2); // Check if move ok (basic, before mods)
-                                                if (moveAccepted)
-                                                {
-                                                    acceptableMoves.Add(constraintFillingMove); // This is a move I can consider then!
-                                                    break;
-                                                }
+                                                acceptableMoves.Add(constraintFillingMove); // This is a move I can consider then!
                                             }
                                         }
                                     }
@@ -308,11 +284,17 @@ namespace AutomatedTeamBuilder
                                         } // Gottem scores
                                         int chosenMoveIndex = RandomIndexOfWeights(moveScores, monRng);
                                         Move chosenMove = acceptableMoves[chosenMoveIndex]; // Got the move
-                                        mon.ChosenMoveset.Add(chosenMove); // Apply to mon, all good here
-                                        if (setItemMoveLookup.TryGetValue(chosenMove, out string equippedSetItem)) // If this was found through set item, need to equip set item
+                                        // Check if it was part of a set item or not
+                                        if (!monData.Moveset.Contains(chosenMove)) // In this case it was caused by a set item
                                         {
-                                            mon.SetItem = equippedSetItem;
-                                            GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, equippedSetItem, -1, true); // Remove 1 charge of set item from trainer
+                                            mon.SetItem = trainer.SetItems.Keys.First(i => i.AddedMoves.Contains(chosenMove));
+                                            GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, -1, true); // Remove 1 charge of set item from trainer
+                                            // Add all the item moves to the dict
+                                            mon.ChosenMoveset.AddRange(mon.SetItem.AddedMoves);
+                                        }
+                                        else
+                                        {
+                                            mon.ChosenMoveset.Add(chosenMove); // Apply to mon, all good here
                                         }
                                     }
                                     else
@@ -524,23 +506,21 @@ namespace AutomatedTeamBuilder
                     Console.WriteLine($"Chosen set for mon ({teamSeed}): {mon.PrintSet()}");
                     Console.WriteLine("Accept? Y, n (redo seed for debug)");
                     string monAccepted = Console.ReadLine();
-                    bool redoMon = false;
-                    bool newSeed = true;
                     // Depending on the choice, a new seed is chosen and the mon is redone
                     if (monAccepted.ToLower() == "n")
                     {
                         // Ok, need to restore mon then
-                        if (mon.SetItem != "" && !monHadSetItem) // If mon needs to return set item
+                        if (mon.SetItem != null && !monHadSetItem) // If mon needs to return set item
                         {
                             GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, 1); // Re-adds item
-                            mon.SetItem = "";
+                            mon.SetItem = null;
                         }
                         if (mon.ModItem != null && !monHadModItem) // If mon needs to return mod item
                         {
                             GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, mon.ModItem, 1); // Re-adds item
                             mon.ModItem = null;
                         }
-                        if (mon.SetItem != "" && !monHadSetItem) // If mon needs to return battle item
+                        if (mon.BattleItem != null && !monHadBattleItem) // If mon needs to return battle item
                         {
                             GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, mon.BattleItem, 1); // Re-adds item
                             mon.BattleItem = null;

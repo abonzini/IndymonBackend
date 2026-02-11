@@ -103,14 +103,15 @@ namespace AutomatedTeamBuilder
                 }
             }
             // Then, forceds. If an item/ability/move asks for something to exist no matter what
-            List<(ElementType, string)> forcedList = new List<(ElementType, string)>();
+            Constraint moddedConstraints = new Constraint();
+            moddedConstraints.Operation = ConstraintOperation.OR;
             foreach ((ElementType, string) nextForced in MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds[element]) // Finds what this element forces, if forces multiple things, only one needs to fulfill
             {
-                forcedList.Add(nextForced);
+                moddedConstraints.AllConstraints.Add(nextForced);
             }
-            if (forcedList.Count > 0)
+            if (moddedConstraints.AllConstraints.Count > 0)
             {
-                monCtx.AdditionalConstraints.AllConstraints.Add(forcedList);
+                monCtx.AdditionalConstraints.Add(moddedConstraints);
             }
             // Then, stat mods, these are funny because some mods are applied directly
             foreach ((StatModifier, string) statMod in MechanicsDataContainers.GlobalMechanicsData.StatModifiers[element])

@@ -365,7 +365,7 @@ namespace ShowdownBot
                 bool invalidChoice;
                 do
                 {
-                    int moveChoice = GeneralUtilities.GetRandomNumber(0, 4); // 0 -> 3 can be the choice
+                    int moveChoice = GeneralUtilities.GetRandomNumber(0, currentPokemon.ChosenMoveset.Count); // Choose one of all random moves
                     ActiveOptions playOptions = _currentGameState.Active.FirstOrDefault();
                     // Move is valid as long its in a valid slot and usable (not disabled, pp)
                     invalidChoice = moveChoice >= playOptions.Moves.Count || playOptions.Moves[moveChoice].Disabled || (playOptions.Moves[moveChoice].Pp == 0);
@@ -385,7 +385,7 @@ namespace ShowdownBot
                     }
                     else // try the move then
                     {
-                        command = $"{battle}|/choose move {moveChoice + 1}"; // Choose move (slot 1-4)
+                        command = $"{battle}|/choose move {moveChoice + 1}"; // Choose move (slot 1-max)
                         string possibleTera = _currentGameState.Active.First().CanTerastallize.Trim();
                         if (possibleTera != "" && (possibleTera.ToUpper() == currentPokemon.TeraType.ToString().ToUpper())) // Means the current mon can tera and it's consistent
                         {

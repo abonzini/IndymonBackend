@@ -48,9 +48,9 @@ namespace IndymonBackendProgram
             OngoingTournament.NMons = int.Parse(Console.ReadLine());
             OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
             // Finally, player selection, pre-filter traines whether they can participate in this event
-            List<Trainer> trainers = [.. GameDataContainers.GlobalGameData.TrainerData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamConstraints).Any())];
-            List<Trainer> npcs = [.. GameDataContainers.GlobalGameData.NpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamConstraints).Any())];
-            List<Trainer> namedNpcs = [.. GameDataContainers.GlobalGameData.FamousNpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamConstraints).Any())];
+            List<Trainer> trainers = [.. GameDataContainers.GlobalGameData.TrainerData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions).Count > 0)];
+            List<Trainer> npcs = [.. GameDataContainers.GlobalGameData.NpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions).Count > 0)];
+            List<Trainer> namedNpcs = [.. GameDataContainers.GlobalGameData.FamousNpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions).Count > 0)];
             List<Trainer> currentChosenTrainers = null;
             int remainingPlayersNeeded = OngoingTournament.NPlayers;
             bool randomizeFill = false;
@@ -160,11 +160,10 @@ namespace IndymonBackendProgram
             foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // First, choose all trainer mons
             {
                 string participantName = participantData.Item1;
-                int participantSeed = participantData.Item2;
                 // Try to find the participant in the place where located
                 Trainer participant = IndymonUtilities.GetTrainerByName(participantName);
                 // Indymon S2 addition, confirm sets now does the smart teambuild
-                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamConstraints); // Get all of the possible sets that would satisfy this
+                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions); // Get all of the possible sets that would satisfy this
                 TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds); // Chooses one of the sets, prepares the mons
                 allParticipants.Add(participant);
             }
@@ -186,7 +185,7 @@ namespace IndymonBackendProgram
                     }
                 }
                 // Define sets for this trainer. Smart build, no archetypes included at beginning. Build with constraints and enemy mons in mind. Use seed.
-                TeamBuilder.DefineTrainerSets(participant, true, [], OngoingTournament.BuildConstraints, enemyMons, participantData.Item2);
+                TeamBuilder.DefineTrainerSets(participant, true, [], OngoingTournament.BaseConstraint, enemyMons, participantData.Item2);
             }
         }
         /// <summary>
@@ -231,8 +230,8 @@ namespace IndymonBackendProgram
     {
         public bool Official { get; set; } = true;
         public bool FirstInstallment { get; set; } = true;
-        public TeamBuildConstraints BuildConstraints { get; set; } = new TeamBuildConstraints();
-        public List<TeamBuildConstraints> TeamConstraints { get; set; } = new List<TeamBuildConstraints>();
+        public Constraint BaseConstraint { get; set; } = new Constraint();
+        public List<Constraint> TeamBuildConstrainOptions { get; set; } = new List<Constraint>();
         public int NPlayers { get; set; } = 0;
         public int NMons { get; set; } = 3;
         public List<(string, int)> ParticipantsWithRandomSeed { get; set; } = new List<(string, int)>(); // Participants and teambuild seed
@@ -284,7 +283,9 @@ namespace IndymonBackendProgram
                 else if (scoreString.ToLower() == "b") // If b, do battle bots
                 {
                     Trainer p1 = IndymonUtilities.GetTrainerByName(match.Player1);
+                    p1.RestoreAll();
                     Trainer p2 = IndymonUtilities.GetTrainerByName(match.Player2);
+                    p2.RestoreAll();
                     BotBattle automaticBattle = new BotBattle();
                     string challengeString = "gen9customgame@@@OHKO Clause,Evasion Moves Clause,Moody Clause";
                     (match.Score1, match.Score2) = automaticBattle.SimulateBotBattle(p1, p2, NMons, NMons, challengeString);
@@ -484,34 +485,33 @@ namespace IndymonBackendProgram
         protected void AskSpecialRulesets()
         {
             // Ones that add to the build constraints
-            Console.WriteLine("Is this a dance-off tournament? y/N");
+            Console.WriteLine("Choose special rules [monotype, dancer]");
             string response = Console.ReadLine();
-            if (response.Trim().ToLower() == "y")
+            if (response.Trim().ToLower() == "dancer")
             {
                 // Either a dance move or dancer ability
-                BuildConstraints.AllConstraints.Add([(ElementType.EFFECT_FLAGS, "DANCE"), (ElementType.ABILITY, "Dancer")]);
+                BaseConstraint.AllConstraints = [(ElementType.EFFECT_FLAGS, "DANCE"), (ElementType.ABILITY, "Dancer")];
+                BaseConstraint.Operation = ConstraintOperation.OR;
+                TeamBuildConstrainOptions = [BaseConstraint];
             }
-            // Finally, this one is rough because need to add all 18 types! Creates way more constraints here
-            Console.WriteLine("Is this a monotype tournament? y/N");
-            response = Console.ReadLine();
-            if (response.Trim().ToLower() == "y")
+            else if (response.Trim().ToLower() == "monotype")
             {
-                List<(ElementType, string)> typeConstraints = new List<(ElementType, string)>();
                 foreach (PokemonType type in Enum.GetValues<PokemonType>())
                 {
                     if (type == PokemonType.NONE || type == PokemonType.STELLAR) continue; // Skip these
-                    typeConstraints.Add((ElementType.POKEMON_TYPE, type.ToString())); // Add the type as an additional constraint
-                }
-                foreach ((ElementType, string) newConstraint in typeConstraints)
-                {
-                    TeamBuildConstraints thisConstraint = BuildConstraints.Clone();
-                    thisConstraint.AllConstraints.Add([newConstraint]);
-                    TeamConstraints.Add(thisConstraint);
+                    Constraint nextTypeConstraint = new Constraint
+                    {
+                        AllConstraints = [(ElementType.POKEMON_TYPE, type.ToString())],
+                        Operation = ConstraintOperation.OR
+                    };
+                    TeamBuildConstrainOptions.Add(nextTypeConstraint);
+                    BaseConstraint = new Constraint(); // No additional base constraints here
                 }
             }
-            else // Normal tournament
+            else // Normal tournament, empty constraint
             {
-                TeamConstraints = [BuildConstraints];
+                BaseConstraint.AllConstraints = [];
+                TeamBuildConstrainOptions = [BaseConstraint];
             }
         }
     }

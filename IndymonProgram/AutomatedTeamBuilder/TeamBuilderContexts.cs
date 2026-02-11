@@ -12,7 +12,7 @@ namespace AutomatedTeamBuilder
     internal class TeamBuildContext
     {
         public HashSet<TeamArchetype> CurrentTeamArchetypes = new HashSet<TeamArchetype>(); // Contains an ongoing archetype that applies for all team
-        public TeamBuildConstraints TeamBuildConstraints = new TeamBuildConstraints(); // Constraints applied to this team building. Different meaning to team build, as this is a list of all necessary stuff (A+B)*(C+D)
+        public List<Constraint> TeamBuildConstraints = new List<Constraint>(); // Constraints applied to this team building
         public List<(PokemonType, PokemonType)> OpponentsTypes = new List<(PokemonType, PokemonType)>(); // Contains a list of all types found in opp teams
         public double[] OpponentsStats = new double[6]; // All opp stats in average
         public double[] OppStatVariance = new double[6]; // The variance of opp stat
@@ -26,7 +26,7 @@ namespace AutomatedTeamBuilder
     {
         // Things that are added on the transcourse of building a set, makes some other stuff more or less desirable
         public HashSet<TeamArchetype> AdditionalArchetypes = new HashSet<TeamArchetype>(); /// Contains archetypes created by this mon
-        public TeamBuildConstraints AdditionalConstraints = new TeamBuildConstraints(); /// Teambuild constraint that are added due to required builds (unless unable to complete obviously)
+        public List<Constraint> AdditionalConstraints = new List<Constraint>(); /// Teambuild constraint that are added due to required builds for example I NEED a specific move
         public Dictionary<(ElementType, string), double> EnabledOptions = new Dictionary<(ElementType, string), double>(); /// Things that normally are disabled but are now enabled, and the weight by where they were just enabled
         public HashSet<(StatModifier, string)> ModifiedTypeEffectiveness = new HashSet<(StatModifier, string)>(); /// Some modified type effectiveness for receiving damage
         public Dictionary<(ElementType, string), double> MoveBpMods = new Dictionary<(ElementType, string), double>(); /// All the stat mods that modified a moves BP
@@ -76,7 +76,7 @@ namespace AutomatedTeamBuilder
             result.MonWeight = monData.Weight;
             // Dump all the team-based data into here
             result.AdditionalArchetypes.UnionWith(teamCtx.CurrentTeamArchetypes); // Add all archetypes present overall in the team
-            result.AdditionalConstraints = teamCtx.TeamBuildConstraints.Clone();
+            result.AdditionalConstraints.AddRange(teamCtx.TeamBuildConstraints);
             // Then, a calculation of mon's current type that may involve some hardcoded shenanigans
             result.PokemonTypes = monData.Types;// Set base type
             if (pokemon.ChosenAbility?.Name == "Forecast") // Change type on weather
@@ -181,14 +181,64 @@ namespace AutomatedTeamBuilder
             (double[] monStats, double[] monStatVariance) = MonStatCalculation(result); // Get mon stats (variance is 0 anyway)
             (double[] oppStats, double[] oppVariance) = MonStatCalculation(result, teamCtx, true); // Get opp stats and variance
             // Offensive value calculation (this can be only done with 2 or more moves, otherwise comparing offensive utility gets weird when adding the first move
-            if (pokemon.ChosenMoveset.Count > 1)
             {
                 List<double> movesDamage = [];
                 List<List<double>> movesTypeCoverage = [];
-                // Check all moves
-                for (int i = 0; i < pokemon.ChosenMoveset.Count; i++)
+                // Calculate damage of moves, if no moves yet, will do some basic stab placeholders at 80BP
+                List<Move> movesToEvaluate;
+                if (pokemon.ChosenMoveset.Count > 0) // Either use the current moves
                 {
-                    Move move = pokemon.ChosenMoveset[i];
+                    movesToEvaluate = [.. pokemon.ChosenMoveset];
+                }
+                else // Otherwise add some generic stabs, to be able to atleast evaluate off abilities somewhat
+                {
+                    movesToEvaluate = new List<Move>();
+                    if (result.PokemonTypes.Item1 != PokemonType.NONE)
+                    {
+                        movesToEvaluate.Add(new Move()
+                        {
+                            Name = "Physical 1",
+                            Type = result.PokemonTypes.Item1,
+                            Bp = 80,
+                            Acc = 100,
+                            Category = MoveCategory.PHYSICAL,
+                            Flags = []
+                        });
+                        movesToEvaluate.Add(new Move()
+                        {
+                            Name = "Special 1",
+                            Type = result.PokemonTypes.Item1,
+                            Bp = 80,
+                            Acc = 100,
+                            Category = MoveCategory.SPECIAL,
+                            Flags = []
+                        });
+                    }
+                    if (result.PokemonTypes.Item2 != PokemonType.NONE)
+                    {
+                        movesToEvaluate.Add(new Move()
+                        {
+                            Name = "Physical 2",
+                            Type = result.PokemonTypes.Item2,
+                            Bp = 80,
+                            Acc = 100,
+                            Category = MoveCategory.PHYSICAL,
+                            Flags = []
+                        });
+                        movesToEvaluate.Add(new Move()
+                        {
+                            Name = "Special 2",
+                            Type = result.PokemonTypes.Item2,
+                            Bp = 80,
+                            Acc = 100,
+                            Category = MoveCategory.SPECIAL,
+                            Flags = []
+                        });
+                    }
+                }
+                // Check all moves
+                foreach (Move move in movesToEvaluate)
+                {
                     if (move == null) continue; // Nothing to calculate if hard switch
                     if (move.Category == MoveCategory.STATUS) continue; // We don't check for status moves
                     movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, monStatVariance, teamCtx,

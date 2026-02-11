@@ -7,7 +7,7 @@ namespace GameData
         public string Species = "";
         public string Nickname = "";
         public bool IsShiny = false;
-        public string SetItem = "";
+        public SetItem SetItem = null;
         public Item ModItem = null;
         public Item BattleItem = null;
         public override string ToString()
@@ -43,8 +43,7 @@ namespace GameData
         // Showdown related, importable/exportable data for the battle sim
         public int HealthPercentage = 100; // 100 percent default
         public string NonVolatileStatus = "";
-        const int INITIAL_PP = 99; // Starts with a big value idc
-        public int[] MovePp = [INITIAL_PP, INITIAL_PP, INITIAL_PP, INITIAL_PP];
+        public List<int> MovePp = [];
         public int Level = 100; // Default is 100
         /// <summary>
         /// Imports status as seen in showdown
@@ -73,7 +72,11 @@ namespace GameData
         {
             HealthPercentage = 100;
             NonVolatileStatus = "";
-            MovePp = [INITIAL_PP, INITIAL_PP, INITIAL_PP, INITIAL_PP];
+            MovePp.Clear();
+            foreach (Move move in ChosenMoveset)
+            {
+                MovePp.Add(99); // Add default highest
+            }
         }
         /// <summary>
         /// Gets mon set data as part of a packed string as is received by (my modified version of) showdown

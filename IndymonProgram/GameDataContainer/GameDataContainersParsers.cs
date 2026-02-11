@@ -41,7 +41,7 @@ namespace GameDataContainer
                     nextTrainer.AutoBattleItem = bool.Parse(nextLine[j + 12]);
                     nextTrainer.AutoFavour = bool.Parse(nextLine[j + 14]);
                     nextTrainer.DiscordNumber = nextLine[j + 15].Trim();
-                    Enum.TryParse<TrainerRank>(nextLine[j + 16], out nextTrainer.TrainerRank);
+                    nextTrainer.TrainerRank = Enum.Parse<TrainerRank>(nextLine[j + 16]);
                     // Second line is skipped, just headers for me to manually access
                     // Then, relative rows 2->21 have all the data always in order
                     for (int remainingRows = 2; (remainingRows < TRAINER_CARD_ROWS && remainingRows + i < rows.Length); remainingRows++)
@@ -61,7 +61,12 @@ namespace GameDataContainer
                             string setItemName = nextLine[j + 3];
                             if (setItemName != "")
                             {
-                                newPokemon.SetItem = setItemName;
+                                if (!SetItems.TryGetValue(setItemName, out SetItem item)) // Creates it if doesn't exist
+                                {
+                                    item = ParseSetItem(setItemName);
+                                    SetItems.Add(setItemName, item);
+                                }
+                                newPokemon.SetItem = item;
                             }
                             // Mod item, and verify if goes to trainer or mon
                             string modItemName = nextLine[j + 4];
@@ -89,8 +94,9 @@ namespace GameDataContainer
                         string itemName = nextLine[j + 6];
                         if (itemName != "") // A set item here
                         {
+                            SetItem setItem = ParseSetItem(itemName);
                             int itemCount = int.Parse(nextLine[j + 7]);
-                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.SetItems, itemName, itemCount);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.SetItems, setItem, itemCount);
                         }
                         // Next, mod items
                         itemName = nextLine[j + 9];
@@ -207,6 +213,43 @@ namespace GameDataContainer
                 }
             }
             // And thats it, tourn data has been found
+        }
+        /// <summary>
+        /// Obtains a set item given the name. They're done here because set items are generated randomly
+        /// </summary>
+        /// <param name="itemName">Name of set item</param>
+        /// <returns>A parsed set item</returns>
+        static SetItem ParseSetItem(string itemName)
+        {
+            const string BASIC_DISK_STRING = "Basic Disk";
+            const string ADVANCED_DISK_STRING = "Advanced Disk";
+            const string WATER_STONE = "Water Stone";
+            SetItem resultingItem = new SetItem
+            {
+                Name = itemName
+            };
+            // Checks moves granted
+            string[] addedMoveNames = [];
+            if (itemName.Contains(BASIC_DISK_STRING))
+            {
+                addedMoveNames = itemName.Split(BASIC_DISK_STRING)[0].Trim().Split(";"); // Remove the tag and then add the Move(s) separated by ;
+                resultingItem.AlwaysAllowedItem = false; // Basic disks only work if mon already had the moves
+            }
+            if (itemName.Contains(ADVANCED_DISK_STRING))
+            {
+                addedMoveNames = itemName.Split(ADVANCED_DISK_STRING)[0].Trim().Split(";"); // Remove the tag and then add the Move(s) separated by ;
+            }
+            if (itemName.Contains(WATER_STONE)) // Adds a lot of crazy water moves
+            {
+                addedMoveNames = ["Splash", "Water Sport", "Surf", "Waterfall", "Water Spout", "Origin Pulse", "Octazooka", "Muddy Water", "Wave Crash", "Water Shuriken", "Triple Dive", "Scald", "Steam Eruption", "Soak", "Aqua Jet", "Aqua Ring", "Jet Punch", "Clamp", "Flip Turn", "Fishious Rend"];
+            }
+            foreach (string addedMove in addedMoveNames)
+            {
+                Move nextMove = MechanicsDataContainers.GlobalMechanicsData.Moves[addedMove];
+                resultingItem.AddedMoves.Add(nextMove);
+            }
+            // Set item finished parsing
+            return resultingItem;
         }
     }
 }

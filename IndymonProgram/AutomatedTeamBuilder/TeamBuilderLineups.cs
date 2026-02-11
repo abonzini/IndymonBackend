@@ -1,6 +1,5 @@
 ﻿using GameData;
 using GameDataContainer;
-using MechanicsData;
 using Utilities;
 
 namespace AutomatedTeamBuilder
@@ -17,7 +16,7 @@ namespace AutomatedTeamBuilder
         /// <summary>
         /// The set items that can be used to satisfy strict move/ability requirements and which mons to apply to
         /// </summary>
-        public Dictionary<string, List<TrainerPokemon>> TrainerOwnPokemonUsingSetItem = new Dictionary<string, List<TrainerPokemon>>();
+        public Dictionary<SetItem, List<TrainerPokemon>> TrainerOwnPokemonUsingSetItem = new Dictionary<SetItem, List<TrainerPokemon>>();
         /// <summary>
         /// Pokemon that a trainer could lend you as a favor that satisfy req
         /// </summary>
@@ -32,16 +31,17 @@ namespace AutomatedTeamBuilder
         /// <param name="nMons">Number of mons desired in the team</param>
         /// <param name="constraintSets">All the different valid constraints that apply separately, only one needs to succeed</param>
         /// <returns></returns>
-        public static List<PossibleTeamBuild> GetTrainersPossibleBuilds(Trainer trainer, int nMons, List<TeamBuildConstraints> constraintSets)
+        public static List<PossibleTeamBuild> GetTrainersPossibleBuilds(Trainer trainer, int nMons, List<Constraint> constraintSets)
         {
             List<PossibleTeamBuild> resultingBuilds = new List<PossibleTeamBuild>();
             int mostOwnMonsUsed = 0; // Will try to only use the options that use the most own mons to not overuse set items or favors if don't need
-            foreach (TeamBuildConstraints constraintSet in constraintSets)
+            foreach (Constraint constraint in constraintSets)
             {
                 // Get the possible lineup for this constraint
-                PossibleTeamBuild thisTeamBuild = GetTrainersBuildOptions(trainer, constraintSet);
+                PossibleTeamBuild thisTeamBuild = GetTrainersBuildOptions(trainer, constraint);
                 int usableMons = thisTeamBuild.TrainerOwnPokemon.Count; // Mons that can be used
-                foreach (KeyValuePair<string, List<TrainerPokemon>> setItemOptions in thisTeamBuild.TrainerOwnPokemonUsingSetItem) // Then check how many equippable items options
+                // The next foreach is not correct because it would potentially add mons multiple times but this may be a non issue unless thigns get really heated up
+                foreach (KeyValuePair<SetItem, List<TrainerPokemon>> setItemOptions in thisTeamBuild.TrainerOwnPokemonUsingSetItem) // Then check how many equippable items options
                 {
                     int setItemCount = trainer.SetItems[setItemOptions.Key]; // How many of these items I have?
                     int potentialMonCount = setItemOptions.Value.Count;
@@ -66,34 +66,16 @@ namespace AutomatedTeamBuilder
         /// For a given trainer, gives me all the possible teams they could build with the corresponding constraint sets
         /// </summary>
         /// <param name="trainer">Which trainer</param>
-        /// <param name="constraints">The teambuild constraints</param>
+        /// <param name="constraint">The teambuild constraints</param>
         /// <returns>The teambuild that could satisfy all these</returns>
-        public static PossibleTeamBuild GetTrainersBuildOptions(Trainer trainer, TeamBuildConstraints constraints)
+        public static PossibleTeamBuild GetTrainersBuildOptions(Trainer trainer, Constraint constraint)
         {
             PossibleTeamBuild resultingBuild = new PossibleTeamBuild();
             // First, check all own mons that satisfy by themselves
             List<TrainerPokemon> invalidPokemon = new List<TrainerPokemon>(); // Will contain pokemon that can't fill the case naturally
             foreach (TrainerPokemon mon in trainer.PartyPokemon)
             {
-                bool monIsValid = true; // Mon starts valid unless its found that it can fulfill conditions
-                foreach (List<(ElementType, string)> constraint in constraints.AllConstraints) // Need to satisfy all of these
-                {
-                    bool constraintSatisfied = false;
-                    foreach ((ElementType, string) constraintCheck in constraint)
-                    {
-                        if (ValidateBasicMonProperty(mon, constraintCheck.Item1, constraintCheck.Item2))
-                        {
-                            constraintSatisfied = true;
-                            break; // No need to look at the rest
-                        }
-                    }
-                    if (!constraintSatisfied) // If a single constraint is not satisfied, mon is invalid
-                    {
-                        monIsValid = false;
-                        break; // No need to continue then
-                    }
-                }
-                if (!monIsValid) // If a mon didn't make it, add to list
+                if (!constraint.SatisfiedByMon(mon, true)) // Check if mon would potentially satisfy constraint
                 {
                     invalidPokemon.Add(mon);
                 }
@@ -105,46 +87,15 @@ namespace AutomatedTeamBuilder
             // Then, need to check if mon could satisfy by just having a set item equipped
             if (trainer.AutoSetItem)
             {
-                foreach (string setItem in trainer.SetItems.Keys)
+                foreach (SetItem setItem in trainer.SetItems.Keys)
                 {
-                    bool setItemIsValid = true;
-                    foreach (List<(ElementType, string)> constraint in constraints.AllConstraints) // Need to satisfy all of these
-                    {
-                        bool constraintSatisfied = false;
-                        foreach ((ElementType, string) constraintCheck in constraint)
-                        {
-                            Ability setItemAbility = GetSetItemAbility(setItem);
-                            if (setItemAbility != null) // Set items that grant ability may grant a satisfying ability
-                            {
-                                if (ValidateBasicAbilityProperty(setItemAbility, constraintCheck.Item1, constraintCheck.Item2))
-                                {
-                                    constraintSatisfied = true;
-                                    break;
-                                }
-                            }
-                            Move setItemMove = GetSetItemMove(setItem);
-                            if (setItemMove != null) // Set items that grant move may grant a satisfying move 
-                            {
-                                if (ValidateBasicMoveProperty(setItemMove, constraintCheck.Item1, constraintCheck.Item2))
-                                {
-                                    constraintSatisfied = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!constraintSatisfied) // If a single constraint is not satisfied, mon is invalid
-                        {
-                            setItemIsValid = false;
-                            break; // No need to continue then
-                        }
-                    }
                     // If set item satisfies, then check which mons can use it and add them to result
-                    if (setItemIsValid)
+                    if (constraint.SatisfiedBySetItem(setItem))
                     {
                         List<TrainerPokemon> validMons = new List<TrainerPokemon>();
                         foreach (TrainerPokemon mon in invalidPokemon)
                         {
-                            if (CanEquipSetItem(mon, setItem))
+                            if (setItem.CanEquip(mon))
                             {
                                 validMons.Add(mon);
                             }
@@ -164,25 +115,7 @@ namespace AutomatedTeamBuilder
                     Trainer theTrainer = GameDataContainers.GlobalGameData.GetTrainer(friendlyTrainer); // Find the trainer whoever it is
                     foreach (TrainerPokemon mon in theTrainer.PartyPokemon)
                     {
-                        bool monIsVaild = true;
-                        foreach (List<(ElementType, string)> constraint in constraints.AllConstraints) // Need to satisfy all of these
-                        {
-                            bool constraintSatisfied = false;
-                            foreach ((ElementType, string) constraintCheck in constraint)
-                            {
-                                if (ValidateBasicMonProperty(mon, constraintCheck.Item1, constraintCheck.Item2)) // If mon ok, then add to build and ditch
-                                {
-                                    constraintSatisfied = true;
-                                    break;
-                                }
-                            }
-                            if (!constraintSatisfied) // If a single constraint is not satisfied, mon is invalid
-                            {
-                                monIsVaild = false;
-                                break; // No need to continue then
-                            }
-                        }
-                        if (monIsVaild)
+                        if (constraint.SatisfiedByMon(mon, true)) // If mon could potentially fit
                         {
                             if (!resultingBuild.FavourPokemon.TryGetValue(friendlyTrainer, out List<TrainerPokemon> value))
                             {
@@ -221,7 +154,7 @@ namespace AutomatedTeamBuilder
                     while (usedBuild.TrainerOwnPokemonUsingSetItem.Count > 0 && finalBattleTeam.Count < nMons)
                     {
                         // Pick a random set item, a random mon from the list, decrement uses of set item
-                        string chosenSetItem = GeneralUtilities.GetRandomPick(usedBuild.TrainerOwnPokemonUsingSetItem.Keys.ToList()); // Choose an item
+                        SetItem chosenSetItem = GeneralUtilities.GetRandomPick(usedBuild.TrainerOwnPokemonUsingSetItem.Keys.ToList()); // Choose an item
                         List<TrainerPokemon> potentialMons = [.. usedBuild.TrainerOwnPokemonUsingSetItem[chosenSetItem].Where(p => !finalBattleTeam.Contains(p))];
                         if (potentialMons.Count > 0) // ok theres something to work with
                         {
@@ -253,8 +186,8 @@ namespace AutomatedTeamBuilder
                     }
                     else // Then, may still be able to add it with a set item
                     {
-                        List<string> potentialSetItems = new List<string>();
-                        foreach (KeyValuePair<string, List<TrainerPokemon>> monsWSetItems in usedBuild.TrainerOwnPokemonUsingSetItem)
+                        List<SetItem> potentialSetItems = new List<SetItem>();
+                        foreach (KeyValuePair<SetItem, List<TrainerPokemon>> monsWSetItems in usedBuild.TrainerOwnPokemonUsingSetItem)
                         {
                             if (monsWSetItems.Value.Contains(mon)) // Mon can use this
                             {
@@ -263,7 +196,7 @@ namespace AutomatedTeamBuilder
                         }
                         if (potentialSetItems.Count > 0) // Ok this mon can have the set item...
                         {
-                            string chosenSetItem = GeneralUtilities.GetRandomPick(potentialSetItems); // Choose one at random
+                            SetItem chosenSetItem = GeneralUtilities.GetRandomPick(potentialSetItems); // Choose one at random
                             mon.SetItem = chosenSetItem; // Equip the thing
                             int finalSetItemAmount = GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, chosenSetItem, -1, true);
                             if (finalSetItemAmount <= 0) // If this was the last use of this item, then remove it from options from now on

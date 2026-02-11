@@ -1,168 +1,343 @@
 ﻿using GameData;
 using MechanicsData;
 using MechanicsDataContainer;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace AutomatedTeamBuilder
 {
-    /// <summary>
-    /// Defines a set of constraints that need to be in a team (or in an ongoing mon set!) Form is a list of lists, the first list is AND and the second a series of OR
-    /// E.g. (A+B)*(C+D+E)*F
-    /// </summary>
-    public class TeamBuildConstraints
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum ConstraintOperation
     {
-        /// Options that could generate a valid team. Many mandatory conditions of optional combos ((A+B)*(C+D+E)*(F))
-        public List<List<(ElementType, string)>> AllConstraints { get; set; } = new List<List<(ElementType, string)>>();
-        /// <summary>
-        /// Adds all monotype constraint options (e.g. a team of one type, each with a possible solution
-        /// </summary>
-        public TeamBuildConstraints Clone()
-        {
-            TeamBuildConstraints clone = new TeamBuildConstraints
-            {
-                AllConstraints = [.. AllConstraints] // Just shallows copies the constraint list, OR constraints are not modified anyway
-            };
-            return clone;
-        }
+        OR,
+        AND
     }
-    public static partial class TeamBuilder
+    public class Constraint
     {
+        public List<(ElementType, string)> AllConstraints { get; set; } = new List<(ElementType, string)>();
+        public ConstraintOperation Operation { get; set; }
         /// <summary>
-        /// Checks whether a mon fills property or not
+        /// Checks if this constraint could be potentially satisfied by a pokemon
         /// </summary>
-        /// <param name="mon">Which mon</param>
-        /// <param name="elementToCheck">What property to check for</param>
-        /// <param name="elementToCheckName">Name of property to look for</param>
+        /// <param name="mon">The mon to check</param>
+        /// <param name="potentialConstraintVerification">To see if the mon could potentially fill this constraint</param>
         /// <returns></returns>
-        static bool ValidateBasicMonProperty(TrainerPokemon mon, ElementType elementToCheck, string elementToCheckName)
+        public bool SatisfiedByMon(TrainerPokemon mon, bool potentialConstraintVerification)
         {
+            if (AllConstraints.Count == 0) return true; // No constraints needed
             Pokemon pokemonData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species]; // Obtain mon data
-            // Elements that may be of use when checking stuff
-            Enum.TryParse(elementToCheckName, true, out PokemonType typeToCheck);
-            Enum.TryParse(elementToCheckName, true, out ItemFlag itemFlagToCheck);
-            Enum.TryParse(elementToCheckName, true, out EffectFlag effectFlagToCheck);
-            Enum.TryParse(elementToCheckName, true, out MoveCategory moveCategoryToCheck);
-            return elementToCheck switch // Some won't apply
+            // Obtain moveset and ability of mon
+            List<Ability> monAbilities;
+            if (mon.SetItem != null && mon.SetItem.AddedAbility != null)
             {
-                ElementType.POKEMON => pokemonData.Name == elementToCheckName,
-                ElementType.POKEMON_TYPE => (pokemonData.Types.Item1 == typeToCheck || pokemonData.Types.Item2 == typeToCheck),
-                ElementType.POKEMON_HAS_EVO => pokemonData.Evos.Count > 0,
-                ElementType.BATTLE_ITEM => mon.BattleItem?.Name == elementToCheckName,
-                ElementType.ITEM_FLAGS => mon.BattleItem?.Flags.Contains(itemFlagToCheck) == true,
-                ElementType.MOD_ITEM => mon.ModItem?.Name == elementToCheckName,
-                ElementType.ABILITY => pokemonData.Abilities.Append(GetSetItemAbility(mon.SetItem)).Any(a => a?.Name == elementToCheckName), // If has ability or set item adds it
-                ElementType.MOVE => pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Name == elementToCheckName), // If has move or set item adds it
-                // Complex one because both moves and abilities may have it!
-                ElementType.EFFECT_FLAGS => pokemonData.Abilities.Append(GetSetItemAbility(mon.SetItem)).Any(a => a?.Flags.Contains(effectFlagToCheck) == true) ||
-                    pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Flags.Contains(effectFlagToCheck) == true),
-                ElementType.DAMAGING_MOVE_OF_TYPE or ElementType.ORIGINAL_TYPE_OF_MOVE => pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Category != MoveCategory.STATUS && m?.Type == typeToCheck),
-                ElementType.MOVE_CATEGORY => pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Category == moveCategoryToCheck),
-                ElementType.ANY_DAMAGING_MOVE => pokemonData.Moveset.Append(GetSetItemMove(mon.SetItem)).Any(m => m?.Category != MoveCategory.STATUS),
-                _ => false,
-            };
-        }
-        /// <summary>
-        /// Checks whether ability fulfills property or not
-        /// </summary>
-        /// <param name="ability">Ability to check</param>
-        /// <param name="elementToCheck">Element to check</param>
-        /// <param name="elementToCheckName">Name of element to check</param>
-        /// <returns>True if the ability satisfies property</returns>
-        static bool ValidateBasicAbilityProperty(Ability ability, ElementType elementToCheck, string elementToCheckName)
-        {
-            if (ability == null) return false;
-            // Elements that may be of use when checking stuff
-            Enum.TryParse(elementToCheckName, true, out EffectFlag effectFlagToCheck);
-            return elementToCheck switch
-            {
-                ElementType.ABILITY => ability.Name == elementToCheckName,
-                ElementType.EFFECT_FLAGS => ability.Flags.Contains(effectFlagToCheck) == true,
-                _ => false,
-            };
-        }
-        /// <summary>
-        /// Checks whether move fulfills property or not
-        /// </summary>
-        /// <param name="move">Move to check</param>
-        /// <param name="elementToCheck">Element to check</param>
-        /// <param name="elementToCheckName">Name of element to check</param>
-        /// <returns>True if the ability satisfies property</returns>
-        static bool ValidateBasicMoveProperty(Move move, ElementType elementToCheck, string elementToCheckName)
-        {
-            if (move == null) return false;
-            // Elements that may be of use when checking stuff
-            Enum.TryParse(elementToCheckName, true, out PokemonType typeToCheck);
-            Enum.TryParse(elementToCheckName, true, out EffectFlag effectFlagToCheck);
-            Enum.TryParse(elementToCheckName, true, out MoveCategory moveCategoryToCheck);
-            return elementToCheck switch // Some won't apply
-            {
-                ElementType.MOVE => move.Name == elementToCheckName,
-                ElementType.EFFECT_FLAGS => move.Flags.Contains(effectFlagToCheck),
-                ElementType.DAMAGING_MOVE_OF_TYPE or ElementType.ORIGINAL_TYPE_OF_MOVE => move.Category != MoveCategory.STATUS && move.Type == typeToCheck,
-                ElementType.MOVE_CATEGORY => move.Category == moveCategoryToCheck,
-                ElementType.ANY_DAMAGING_MOVE => move.Category != MoveCategory.STATUS,
-                _ => false,
-            };
-        }
-        /// <summary>
-        /// Constrant validation for a mon, but a complex one, assuming mods and stuff
-        /// </summary>
-        /// <param name="mon">Which mon</param>
-        /// <param name="monCtx">COntext that adds stuff to the elements</param>
-        /// <param name="elementToCheck">Which element we look for</param>
-        /// <param name="elementToCheckName">Name of what we look for</param>
-        /// <returns></returns>
-        static bool ValidateComplexMonProperty(TrainerPokemon mon, PokemonBuildInfo monCtx, ElementType elementToCheck, string elementToCheckName)
-        {
-            // Elements that may be of use when checking stuff
-            Enum.TryParse(elementToCheckName, true, out PokemonType typeToCheck);
-            Enum.TryParse(elementToCheckName, true, out TeamArchetype archetypeToCheck);
-            Enum.TryParse(elementToCheckName, true, out ItemFlag itemFlagToCheck);
-            Enum.TryParse(elementToCheckName, true, out EffectFlag effectFlagToCheck);
-            Enum.TryParse(elementToCheckName, true, out MoveCategory moveCategoryToCheck);
-            bool anyMoveFulfillsCheck = false; // Move checking is wild because they're heavily modded so this bool is a quick solution to checking "if any move"
-            switch (elementToCheck) // Validates but now we know all mods of the mon so can be finer checks
-            {
-                case ElementType.POKEMON:
-                    return mon.Species == elementToCheckName;
-                case ElementType.POKEMON_TYPE:
-                    return (monCtx.PokemonTypes.Item1 == typeToCheck || monCtx.PokemonTypes.Item2 == typeToCheck);
-                case ElementType.POKEMON_HAS_EVO:
-                    return MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species].Evos.Count > 0;
-                case ElementType.ARCHETYPE:
-                    return monCtx.AdditionalArchetypes.Contains(archetypeToCheck);
-                case ElementType.BATTLE_ITEM:
-                    return mon.BattleItem?.Name == elementToCheckName;
-                case ElementType.ITEM_FLAGS:
-                    return (mon.BattleItem != null && mon.BattleItem.Flags.Contains(itemFlagToCheck)) || (mon.ModItem != null && mon.ModItem.Flags.Contains(itemFlagToCheck));
-                case ElementType.MOD_ITEM:
-                    return mon.ModItem?.Name == elementToCheckName;
-                case ElementType.ABILITY:
-                    return mon.ChosenAbility?.Name == elementToCheckName;
-                case ElementType.MOVE:
-                    return mon.ChosenMoveset.Any(m => m.Name == elementToCheckName);
-                case ElementType.EFFECT_FLAGS: // This one is a bit harder because it can be ability or move, but if it's move it can be added later
-                    foreach (Move move in mon.ChosenMoveset) // Check if the moves have flags
-                    {
-                        anyMoveFulfillsCheck |= ExtractMoveFlags(move, monCtx).Contains(effectFlagToCheck);
-                        if (anyMoveFulfillsCheck) break;
-                    }
-                    return anyMoveFulfillsCheck || (mon.ChosenAbility != null && mon.ChosenAbility.Flags.Contains(effectFlagToCheck));
-                case ElementType.ORIGINAL_TYPE_OF_MOVE:
-                    return mon.ChosenMoveset.Any(m => m.Type == typeToCheck);
-                case ElementType.DAMAGING_MOVE_OF_TYPE:
-                    foreach (Move move in mon.ChosenMoveset) // Check if the moves have flags
-                    {
-                        anyMoveFulfillsCheck |= (move.Category != MoveCategory.STATUS) && (GetModifiedMoveType(move, monCtx) == typeToCheck);
-                        if (anyMoveFulfillsCheck) break;
-                    }
-                    return anyMoveFulfillsCheck;
-                case ElementType.MOVE_CATEGORY:
-                    return mon.ChosenMoveset.Any(m => m.Category == moveCategoryToCheck);
-                case ElementType.ANY_DAMAGING_MOVE:
-                    return mon.ChosenMoveset.Any(m => m.Category != MoveCategory.STATUS);
-                default:
-                    return false;
+                monAbilities = [mon.SetItem.AddedAbility];
             }
+            else if (potentialConstraintVerification)
+            {
+                monAbilities = pokemonData.Abilities;
+            }
+            else
+            {
+                monAbilities = [mon.ChosenAbility];
+            }
+            List<Move> monMoves;
+            if (potentialConstraintVerification) // This would imply the moves plus some of the possible mon moves
+            {
+                if (mon.SetItem != null && mon.SetItem.AddedMoves.Count > 0)
+                {
+                    monMoves = [.. mon.SetItem.AddedMoves];
+                }
+                else
+                {
+                    monMoves = [];
+                }
+                if (monMoves.Count > 4) // If more moves could fit, add all
+                {
+                    monMoves.AddRange(pokemonData.Moveset);
+                }
+            }
+            else
+            {
+                // In this case, I believe the moveset would already contain the moves
+                monMoves = mon.ChosenMoveset;
+            }
+            // Now check constraint
+            foreach ((ElementType, string) elementToCheck in AllConstraints)
+            {
+                ElementType elementType = elementToCheck.Item1;
+                string elementName = elementToCheck.Item2;
+                bool checkPassed = false; // Will need to see if this check passes
+                // Elements that may be of use when checking stuff
+                Enum.TryParse(elementName, true, out PokemonType typeToCheck);
+                Enum.TryParse(elementName, true, out ItemFlag itemFlagToCheck);
+                Enum.TryParse(elementName, true, out EffectFlag effectFlagToCheck);
+                Enum.TryParse(elementName, true, out MoveCategory moveCategoryToCheck);
+                switch (elementType)
+                {
+                    case ElementType.POKEMON:
+                        checkPassed = mon.Species == elementName;
+                        break;
+                    case ElementType.POKEMON_TYPE:
+                        checkPassed = (pokemonData.Types.Item1 == typeToCheck || pokemonData.Types.Item2 == typeToCheck);
+                        break;
+                    case ElementType.POKEMON_HAS_EVO:
+                        checkPassed = pokemonData.Evos.Count > 0;
+                        break;
+                    case ElementType.BATTLE_ITEM:
+                        checkPassed = mon.BattleItem?.Name == elementName;
+                        break;
+                    case ElementType.ITEM_FLAGS:
+                        HashSet<ItemFlag> itemFlags = new HashSet<ItemFlag>();
+                        if (mon.ModItem != null) itemFlags.UnionWith(mon.ModItem.Flags);
+                        if (mon.BattleItem != null) itemFlags.UnionWith(mon.BattleItem.Flags);
+                        checkPassed = itemFlags.Contains(itemFlagToCheck);
+                        break;
+                    case ElementType.MOD_ITEM:
+                        checkPassed = mon.ModItem?.Name == elementName;
+                        break;
+                    case ElementType.ABILITY: // Verify mon has ability in set item or would have ability
+                        checkPassed |= monAbilities.Any(a => a.Name == elementName);
+                        break;
+                    case ElementType.MOVE:
+                        checkPassed |= monMoves.Any(m => m.Name == elementName);
+                        break;
+                    case ElementType.EFFECT_FLAGS:
+                        checkPassed |= monMoves.Any(m => m.Flags.Contains(effectFlagToCheck)) || monAbilities.Any(a => a.Flags.Contains(effectFlagToCheck));
+                        break;
+                    case ElementType.ORIGINAL_TYPE_OF_MOVE:
+                    case ElementType.DAMAGING_MOVE_OF_TYPE:
+                        checkPassed |= monMoves.Any(m => m.Category != MoveCategory.STATUS && m.Type == typeToCheck);
+                        break;
+                    case ElementType.MOVE_CATEGORY:
+                        checkPassed |= monMoves.Any(m => m.Category == moveCategoryToCheck);
+                        break;
+                    case ElementType.ANY_DAMAGING_MOVE:
+                        checkPassed |= monMoves.Any(m => m.Category != MoveCategory.STATUS);
+                        break;
+                    case ElementType.ARCHETYPE:
+                    default:
+                        checkPassed = false; // No pass
+                        break;
+                }
+                if (Operation == ConstraintOperation.OR && checkPassed)
+                {
+                    return true; // A single check passing will be fine
+                }
+                if (Operation == ConstraintOperation.AND && !checkPassed)
+                {
+                    return false; // A single check passing will be over
+                }
+            }
+            if (Operation == ConstraintOperation.OR)
+            {
+                return false; // Failed because not a single constraint passed
+            }
+            if (Operation == ConstraintOperation.AND)
+            {
+                return true; // Passed because not a single constraint failed
+            }
+            throw new NotImplementedException("Unreachable Code");
+        }
+        /// <summary>
+        /// Tells me if this set item would verify constraints
+        /// </summary>
+        /// <param name="item">Which item</param>
+        /// <returns>Whether it satisfies or not</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public bool SatisfiedBySetItem(SetItem item)
+        {
+            if (AllConstraints.Count == 0) return true; // No constraints needed
+            // Now check constraint
+            foreach ((ElementType, string) elementToCheck in AllConstraints)
+            {
+                ElementType elementType = elementToCheck.Item1;
+                string elementName = elementToCheck.Item2;
+                bool checkPassed = false; // Will need to see if this check passes
+                // Elements that may be of use when checking stuff
+                Enum.TryParse(elementName, true, out PokemonType typeToCheck);
+                Enum.TryParse(elementName, true, out EffectFlag effectFlagToCheck);
+                Enum.TryParse(elementName, true, out MoveCategory moveCategoryToCheck);
+                switch (elementType)
+                {
+                    case ElementType.ABILITY: // Verify mon has ability in set item or would have ability
+                        checkPassed |= item.AddedAbility?.Name == elementName;
+                        break;
+                    case ElementType.MOVE:
+                        checkPassed |= item.AddedMoves.Any(m => m.Name == elementName);
+                        break;
+                    case ElementType.EFFECT_FLAGS:
+                        // This is horrible but works because if an item doesnt have moves it should have ability
+                        checkPassed |= item.AddedMoves.Any(m => m.Flags.Contains(effectFlagToCheck)) || item.AddedAbility.Flags.Contains(effectFlagToCheck);
+                        break;
+                    case ElementType.ORIGINAL_TYPE_OF_MOVE:
+                    case ElementType.DAMAGING_MOVE_OF_TYPE:
+                        checkPassed |= item.AddedMoves.Any(m => m.Category != MoveCategory.STATUS && m.Type == typeToCheck);
+                        break;
+                    case ElementType.MOVE_CATEGORY:
+                        checkPassed |= item.AddedMoves.Any(m => m.Category == moveCategoryToCheck);
+                        break;
+                    case ElementType.ANY_DAMAGING_MOVE:
+                        checkPassed |= item.AddedMoves.Any(m => m.Category != MoveCategory.STATUS);
+                        break;
+                    case ElementType.POKEMON:
+                    case ElementType.POKEMON_TYPE:
+                    case ElementType.POKEMON_HAS_EVO:
+                    case ElementType.BATTLE_ITEM:
+                    case ElementType.ITEM_FLAGS:
+                    case ElementType.MOD_ITEM:
+                    case ElementType.ARCHETYPE:
+                    default:
+                        checkPassed = false; // No pass
+                        break;
+                }
+                if (Operation == ConstraintOperation.OR && checkPassed)
+                {
+                    return true; // A single check passing will be fine
+                }
+                if (Operation == ConstraintOperation.AND && !checkPassed)
+                {
+                    return false; // A single check passing will be over
+                }
+            }
+            if (Operation == ConstraintOperation.OR)
+            {
+                return false; // Failed because not a single constraint passed
+            }
+            if (Operation == ConstraintOperation.AND)
+            {
+                return true; // Passed because not a single constraint failed
+            }
+            throw new NotImplementedException("Unreachable Code");
+        }
+        /// <summary>
+        /// Tells me if this ability would verify constraints
+        /// </summary>
+        /// <param name="ability">Which item</param>
+        /// <returns>Whether it satisfies or not</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public bool SatisfiedByAbility(Ability ability)
+        {
+            if (AllConstraints.Count == 0) return true; // No constraints needed
+            // Now check constraint
+            foreach ((ElementType, string) elementToCheck in AllConstraints)
+            {
+                ElementType elementType = elementToCheck.Item1;
+                string elementName = elementToCheck.Item2;
+                bool checkPassed = false; // Will need to see if this check passes
+                // Elements that may be of use when checking stuff
+                Enum.TryParse(elementName, true, out EffectFlag effectFlagToCheck);
+                switch (elementType)
+                {
+                    case ElementType.ABILITY: // Verify mon has ability in set item or would have ability
+                        checkPassed |= ability.Name == elementName;
+                        break;
+                    case ElementType.EFFECT_FLAGS:
+                        // This is horrible but works because if an item doesnt have moves it should have ability
+                        checkPassed |= ability.Flags.Contains(effectFlagToCheck);
+                        break;
+                    case ElementType.ORIGINAL_TYPE_OF_MOVE:
+                    case ElementType.DAMAGING_MOVE_OF_TYPE:
+                    case ElementType.MOVE_CATEGORY:
+                    case ElementType.ANY_DAMAGING_MOVE:
+                    case ElementType.MOVE:
+                    case ElementType.POKEMON:
+                    case ElementType.POKEMON_TYPE:
+                    case ElementType.POKEMON_HAS_EVO:
+                    case ElementType.BATTLE_ITEM:
+                    case ElementType.ITEM_FLAGS:
+                    case ElementType.MOD_ITEM:
+                    case ElementType.ARCHETYPE:
+                    default:
+                        checkPassed = false; // No pass
+                        break;
+                }
+                if (Operation == ConstraintOperation.OR && checkPassed)
+                {
+                    return true; // A single check passing will be fine
+                }
+                if (Operation == ConstraintOperation.AND && !checkPassed)
+                {
+                    return false; // A single check passing will be over
+                }
+            }
+            if (Operation == ConstraintOperation.OR)
+            {
+                return false; // Failed because not a single constraint passed
+            }
+            if (Operation == ConstraintOperation.AND)
+            {
+                return true; // Passed because not a single constraint failed
+            }
+            throw new NotImplementedException("Unreachable Code");
+        }
+        /// <summary>
+        /// Tells me if this move would verify constraints
+        /// </summary>
+        /// <param name="move">Which move</param>
+        /// <returns>Whether it satisfies or not</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public bool SatisfiedByMove(Move move)
+        {
+            if (AllConstraints.Count == 0) return true; // No constraints needed
+            // Now check constraint
+            foreach ((ElementType, string) elementToCheck in AllConstraints)
+            {
+                ElementType elementType = elementToCheck.Item1;
+                string elementName = elementToCheck.Item2;
+                bool checkPassed = false; // Will need to see if this check passes
+                // Elements that may be of use when checking stuff
+                Enum.TryParse(elementName, true, out PokemonType typeToCheck);
+                Enum.TryParse(elementName, true, out EffectFlag effectFlagToCheck);
+                Enum.TryParse(elementName, true, out MoveCategory moveCategoryToCheck);
+                switch (elementType)
+                {
+                    case ElementType.MOVE:
+                        checkPassed |= move.Name == elementName;
+                        break;
+                    case ElementType.EFFECT_FLAGS:
+                        // This is horrible but works because if an item doesnt have moves it should have ability
+                        checkPassed |= move.Flags.Contains(effectFlagToCheck);
+                        break;
+                    case ElementType.ORIGINAL_TYPE_OF_MOVE:
+                    case ElementType.DAMAGING_MOVE_OF_TYPE:
+                        checkPassed |= move.Category != MoveCategory.STATUS && move.Type == typeToCheck;
+                        break;
+                    case ElementType.MOVE_CATEGORY:
+                        checkPassed |= move.Category == moveCategoryToCheck;
+                        break;
+                    case ElementType.ANY_DAMAGING_MOVE:
+                        checkPassed |= move.Category != MoveCategory.STATUS;
+                        break;
+                    case ElementType.ABILITY: // Verify mon has ability in set item or would have ability
+                    case ElementType.POKEMON:
+                    case ElementType.POKEMON_TYPE:
+                    case ElementType.POKEMON_HAS_EVO:
+                    case ElementType.BATTLE_ITEM:
+                    case ElementType.ITEM_FLAGS:
+                    case ElementType.MOD_ITEM:
+                    case ElementType.ARCHETYPE:
+                    default:
+                        checkPassed = false; // No pass
+                        break;
+                }
+                if (Operation == ConstraintOperation.OR && checkPassed)
+                {
+                    return true; // A single check passing will be fine
+                }
+                if (Operation == ConstraintOperation.AND && !checkPassed)
+                {
+                    return false; // A single check passing will be over
+                }
+            }
+            if (Operation == ConstraintOperation.OR)
+            {
+                return false; // Failed because not a single constraint passed
+            }
+            if (Operation == ConstraintOperation.AND)
+            {
+                return true; // Passed because not a single constraint failed
+            }
+            throw new NotImplementedException("Unreachable Code");
         }
     }
 }
