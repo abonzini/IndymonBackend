@@ -372,7 +372,7 @@ namespace ParsersAndData
             packedStrings.Add(string.Join(",", GetEvs(backEndData)));
             packedStrings.Add("");
             packedStrings.Add(""); // No IVs I don't care
-            packedStrings.Add(Shiny ? "S" : ""); // Depending if shiny
+            packedStrings.Add((Shiny || Item?.Name == "Shiny Stone") ? "S" : ""); // Depending if shiny
             packedStrings.Add(Level.ToString()); // Mon level is "usually" 100
             string lastPackedString = $",,,,,{GetTera(backEndData)}"; // Add the "remaining" useless stuff needed for tera, etc
             if (ExplorationStatus != null) // This is new, status will be ,%health,status condition too after the tera, so it can be picked up from a modified showdown

@@ -64,6 +64,7 @@ namespace IndymonBackendProgram
         public List<ExplorationStep> ExplorationSteps { get; set; }
         public ExplorationPrizes Prizes { get; set; } = new ExplorationPrizes();
         Dungeon _dungeonDetails = null;
+        int _shinyChance = 500; // Chance for a shiny (1 in 500)
         public ExplorationManager(DataContainers backEndData)
         {
             _backEndData = backEndData;
@@ -97,10 +98,16 @@ namespace IndymonBackendProgram
                 selection--; // Make it array-indexable
             }
             Dungeon = options[selection];
+            Console.WriteLine(Dungeon);
             // Then which player
             TrainerData trainerData = Utilities.ChooseOneTrainerDialog(TeambuildSettings.EXPLORATION | TeambuildSettings.SMART, _backEndData);
             Trainer = trainerData.Name;
             trainerData.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status), if need to randomize, smart
+            // At this point I can check the dungeon "mods", for now just the shiny chance
+            if (trainerData.Teamsheet.Any(p => p.Item?.Name == "Shiny Stone")) // A shiny stone equipped makes the chances 1 in 5 (100 times more likely)
+            {
+                _shinyChance /= 100;
+            }
         }
         public void InitializeNextDungeon()
         {
@@ -111,7 +118,6 @@ namespace IndymonBackendProgram
         }
         const int STANDARD_MESSAGE_PAUSE = 5000; // Show text for this amount of time
         const int DRAW_ROOM_PAUSE = 1000; // Show text for this amount of time
-        const int SHINY_CHANCE = 500; // Chance for a shiny (1 in 500)
         const int DUNGEON_NUMBER_OF_FLOORS = 3; // Hardcoded for now unless we need to make it flexible later on
         const int DUNGEON_ROOMS_PER_FLOOR = 5;
         #region EXECUTION
@@ -275,7 +281,7 @@ namespace IndymonBackendProgram
                         Console.WriteLine($"Boss {enemySpecies} holding {item}");
                         string bossString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
+                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0); // Will be shiny if i get a 0 dice roll
                         PokemonSet bossPokemon = new PokemonSet()
                         {
                             Species = enemySpecies,
@@ -319,7 +325,7 @@ namespace IndymonBackendProgram
                         Console.WriteLine($"Strong {enemySpecies} holding {item}");
                         string alphaString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
+                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0); // Will be shiny if i get a 0 dice roll
                         PokemonSet alphaPokemon = new PokemonSet()
                         {
                             Species = enemySpecies,
@@ -548,7 +554,7 @@ namespace IndymonBackendProgram
                         for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
                         {
                             string pokemonSpecies = pokemonThisFloor[Utilities.GetRandomNumber(pokemonThisFloor.Count)].Trim().ToLower();
-                            bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1);
+                            bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0);
                             PokemonSet pokemon = new PokemonSet()
                             {
                                 Species = pokemonSpecies,
@@ -610,7 +616,7 @@ namespace IndymonBackendProgram
                         for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
                         {
                             string pokemonSpecies = pokemonThisFloor[Utilities.GetRandomNumber(pokemonThisFloor.Count)].Trim().ToLower();
-                            bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1);
+                            bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0);
                             int level = Utilities.GetRandomNumber(60, 76); // Lvl between 60-75
                             PokemonSet pokemon = new PokemonSet()
                             {
@@ -667,8 +673,9 @@ namespace IndymonBackendProgram
                             {
                                 letter = (char)Utilities.GetRandomNumber('A', 'Z' + 1); // Shoudl give me a random letter lol
                             } while (usedLetters.Contains(letter)); // Get unique letters please
+                            usedLetters.Add(letter);
                             string pokemonSpecies = (letter == 'A') ? $"Unown" : $"Unown-{letter}"; // Unown or Unown-*
-                            bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1);
+                            bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0);
                             PokemonSet pokemon = new PokemonSet()
                             {
                                 Species = pokemonSpecies,
@@ -718,7 +725,7 @@ namespace IndymonBackendProgram
                         List<string> validMons = ["moltres", "entei", "ho-oh", "groudon", "heatran", "chi-yu", "koraidon", "volcaion", "blacephalon"];
                         string pokemonSpecies = validMons[Utilities.GetRandomNumber(validMons.Count)];
                         List<PokemonSet> encounterPokemon = new List<PokemonSet>();
-                        bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1);
+                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0);
                         PokemonSet pokemon = new PokemonSet()
                         {
                             Species = pokemonSpecies,
@@ -766,7 +773,7 @@ namespace IndymonBackendProgram
                         int level = Utilities.GetRandomNumber(110, 126); // Get lvls 110-125
                         string alphaString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
                         GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
+                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0); // Will be shiny if i get a 0 dice roll
                         PokemonSet giantPokemon = new PokemonSet()
                         {
                             Species = pokemonSpecies,
@@ -857,7 +864,7 @@ namespace IndymonBackendProgram
                         Console.WriteLine($"Joiner {pokemonSpecies}");
                         string joinerString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
                         GenericMessageCommand(joinerString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Utilities.GetRandomNumber(SHINY_CHANCE) == 1); // Will be shiny if i get a 1 dice roll
+                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0); // Will be shiny if i get a 0 dice roll
                         string nickName = $"{pokemonSpecies} friend";
                         if (nickName.Length > 18) // Sanitize, name has to be shorter than 19 and no spaces
                         {
