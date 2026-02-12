@@ -3,6 +3,7 @@
     public enum TeamArchetype
     {
         NONE,
+        BACKGROUND_TERRAIN,
         BACKGROUND_WEATHER,
         SUN,
         RAIN,

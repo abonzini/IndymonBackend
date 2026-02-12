@@ -197,7 +197,7 @@ namespace AutomatedTeamBuilder
                                         mon.SetItem = trainer.SetItems.Keys.First(i => i.AddedAbility == chosenAbility); // Get the first set item that satisfies
                                         GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, -1, true); // Remove 1 charge of set item from trainer
                                         // If set item just equipped, also means the mon has been added moves
-                                        mon.ChosenMoveset.AddRange(mon.SetItem.AddedMoves);
+                                        mon.ChosenMoveset = [.. mon.ChosenMoveset.Union(mon.SetItem.AddedMoves)];
                                     }
                                 }
                                 if (mon.ChosenAbility != null) // After this step, this should be true always and move on!
@@ -223,11 +223,13 @@ namespace AutomatedTeamBuilder
                                             {
                                                 if (setItem.AddedMoves.Count > 0 && possibleMoves.Except(setItem.AddedMoves).Any()) // if available and some move would be new, add to option
                                                 {
-                                                    possibleMoves = possibleMoves.Union(setItem.AddedMoves).ToList(); // Adds the missing moves to list
+                                                    possibleMoves = [.. possibleMoves.Union(setItem.AddedMoves)]; // Adds the missing moves to list
                                                 }
                                             }
                                         }
                                     }
+                                    // Remove the ones I already have!
+                                    possibleMoves = [.. possibleMoves.Except(mon.ChosenMoveset)];
                                     // If there's a constraint that requires specific moves, need to filter list further
                                     List<Move> acceptableMoves = new List<Move>();
                                     foreach (Constraint constraint in monCtx.AdditionalConstraints) // Quick check of which constraints a move could solve
@@ -290,7 +292,7 @@ namespace AutomatedTeamBuilder
                                             mon.SetItem = trainer.SetItems.Keys.First(i => i.AddedMoves.Contains(chosenMove));
                                             GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, -1, true); // Remove 1 charge of set item from trainer
                                             // Add all the item moves to the dict
-                                            mon.ChosenMoveset.AddRange(mon.SetItem.AddedMoves);
+                                            mon.ChosenMoveset = [.. mon.ChosenMoveset.Union(mon.SetItem.AddedMoves)];
                                         }
                                         else
                                         {
@@ -309,11 +311,29 @@ namespace AutomatedTeamBuilder
                                 break;
                             // Item cases are slightly different because no item is valid option either if no item good or no other better ones
                             case MonBuildState.CHOOSING_MOD_ITEM:
-                                if (mon.ModItem != null || !trainer.AutoModItem) // If mon already has mod item or trainer doesnt allow the auto item, then skip
+                                if (mon.ModItem == null && trainer.AutoModItem) // If mon already has battle item or trainer doesnt allow the auto item, then finished
                                 {
+                                    // If there's a constraint that requires specific mod items, need to filter list further
+                                    bool modItemMandatory = false;
+                                    List<Item> possibleModItems = [.. trainer.ModItems.Keys];
+                                    List<Item> acceptableModItems = new List<Item>();
+                                    foreach (Constraint constraint in monCtx.AdditionalConstraints) // Quick check of which constraints an ability could solve
+                                    {
+                                        // This has the effect where if an ability fills many constraints, it is added many times but that may be good? (Multiply chances I guess....)
+                                        foreach (Item constraintFillingModItem in possibleModItems)
+                                        {
+                                            if (constraint.SatisfiedByItem(constraintFillingModItem))
+                                            {
+                                                acceptableModItems.Add(constraintFillingModItem); // This is an ability I can consider then!
+                                                modItemMandatory = true; // Usage of mod item becomes mandatory
+                                            }
+                                        }
+                                    }
+                                    if (acceptableModItems.Count == 0) acceptableModItems = possibleModItems; // If no ability fills constraint (or no constraint) then just use all, yolo.
+                                    // Now the sorting itself
                                     List<Item> validModItems = new List<Item>();
                                     List<double> modItemScores = new List<double>();
-                                    foreach (Item modItem in trainer.ModItems.Keys) // Check each of the trainers mod items
+                                    foreach (Item modItem in acceptableModItems) // Check each of the trainers mod items
                                     {
                                         // Fortunately mod items are not scored so just need to calc improvements
                                         double score = 1;
@@ -340,7 +360,7 @@ namespace AutomatedTeamBuilder
                                             nImprovChecks++;
                                             if (dmgImprovement < 1.1) nImproveFails++;
                                         }
-                                        if (nImproveFails == nImprovChecks)
+                                        if (!modItemMandatory && nImproveFails == nImprovChecks)
                                         {
                                             continue; // If all checks failed, item not good, skip it
                                         }
@@ -363,19 +383,39 @@ namespace AutomatedTeamBuilder
                                 state = MonBuildState.CHOOSING_BATTLE_ITEM; // Regardless I'm done
                                 break;
                             case MonBuildState.CHOOSING_BATTLE_ITEM:
-                                if (mon.BattleItem != null || !trainer.AutoBattleItem) // If mon already has battle item or trainer doesnt allow the auto item, then finished
+                                if (mon.BattleItem == null && trainer.AutoBattleItem) // If mon already has battle item or trainer doesnt allow the auto item, then finished
                                 {
+                                    // If there's a constraint that requires specific mod items, need to filter list further
+                                    bool battleItemMandatory = false;
+                                    List<Item> possibleBattleItems = [.. trainer.BattleItems.Keys];
+                                    List<Item> acceptableBattleItems = new List<Item>();
+                                    foreach (Constraint constraint in monCtx.AdditionalConstraints) // Quick check of which constraints an ability could solve
+                                    {
+                                        // This has the effect where if an ability fills many constraints, it is added many times but that may be good? (Multiply chances I guess....)
+                                        foreach (Item constraintFillingBattleItem in possibleBattleItems)
+                                        {
+                                            if (constraint.SatisfiedByItem(constraintFillingBattleItem))
+                                            {
+                                                acceptableBattleItems.Add(constraintFillingBattleItem); // This is an ability I can consider then!
+                                                battleItemMandatory = true; // Usage of mod item becomes mandatory
+                                            }
+                                        }
+                                    }
+                                    if (acceptableBattleItems.Count == 0) acceptableBattleItems = possibleBattleItems; // If no ability fills constraint (or no constraint) then just use all, yolo.
+                                    // Now the sorting itself
                                     List<Item> validBattleItems = new List<Item>();
                                     List<double> battleItemScores = new List<double>();
-                                    List<Item> battleItemsToTry = [.. trainer.BattleItems.Keys]; // Will try these items
                                     // And also, a secret "no item" that is only equipped if makes sense
                                     Item noItem = new Item()
                                     {
                                         Name = "No item",
                                         Flags = [ItemFlag.REQUIRES_OFF_INCREASE, ItemFlag.NO_ITEM]
                                     };
-                                    battleItemsToTry.Add(noItem);
-                                    foreach (Item battleItem in battleItemsToTry) // Check each of the trainers battle items
+                                    if (!battleItemMandatory)
+                                    {
+                                        acceptableBattleItems.Add(noItem);
+                                    }
+                                    foreach (Item battleItem in acceptableBattleItems) // Check each of the trainers battle items
                                     {
                                         // Score battle item according to context. First, check if disableds
                                         double score = 1;
@@ -470,9 +510,9 @@ namespace AutomatedTeamBuilder
                                             nImprovChecks++;
                                             if (dmgImprovement < 1.1) nImproveFails++;
                                         }
-                                        if (nImproveFails == nImprovChecks)
+                                        if (!battleItemMandatory && nImproveFails == nImprovChecks)
                                         {
-                                            score = 0; // If all checks failed, item not good
+                                            continue;
                                         }
                                         score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
                                         if (battleItem.Flags.Contains(ItemFlag.BULKY)) // Healing items are scored on whether they can actually make sense on the mon

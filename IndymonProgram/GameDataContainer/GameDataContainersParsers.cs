@@ -63,7 +63,7 @@ namespace GameDataContainer
                             {
                                 if (!SetItems.TryGetValue(setItemName, out SetItem item)) // Creates it if doesn't exist
                                 {
-                                    item = ParseSetItem(setItemName);
+                                    item = SetItem.Parse(setItemName);
                                     SetItems.Add(setItemName, item);
                                 }
                                 newPokemon.SetItem = item;
@@ -94,7 +94,7 @@ namespace GameDataContainer
                         string itemName = nextLine[j + 6];
                         if (itemName != "") // A set item here
                         {
-                            SetItem setItem = ParseSetItem(itemName);
+                            SetItem setItem = SetItem.Parse(itemName);
                             int itemCount = int.Parse(nextLine[j + 7]);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.SetItems, setItem, itemCount);
                         }
@@ -213,43 +213,6 @@ namespace GameDataContainer
                 }
             }
             // And thats it, tourn data has been found
-        }
-        /// <summary>
-        /// Obtains a set item given the name. They're done here because set items are generated randomly
-        /// </summary>
-        /// <param name="itemName">Name of set item</param>
-        /// <returns>A parsed set item</returns>
-        static SetItem ParseSetItem(string itemName)
-        {
-            const string BASIC_DISK_STRING = "Basic Disk";
-            const string ADVANCED_DISK_STRING = "Advanced Disk";
-            const string WATER_STONE = "Water Stone";
-            SetItem resultingItem = new SetItem
-            {
-                Name = itemName
-            };
-            // Checks moves granted
-            string[] addedMoveNames = [];
-            if (itemName.Contains(BASIC_DISK_STRING))
-            {
-                addedMoveNames = itemName.Split(BASIC_DISK_STRING)[0].Trim().Split(";"); // Remove the tag and then add the Move(s) separated by ;
-                resultingItem.AlwaysAllowedItem = false; // Basic disks only work if mon already had the moves
-            }
-            if (itemName.Contains(ADVANCED_DISK_STRING))
-            {
-                addedMoveNames = itemName.Split(ADVANCED_DISK_STRING)[0].Trim().Split(";"); // Remove the tag and then add the Move(s) separated by ;
-            }
-            if (itemName.Contains(WATER_STONE)) // Adds a lot of crazy water moves
-            {
-                addedMoveNames = ["Splash", "Water Sport", "Surf", "Waterfall", "Water Spout", "Origin Pulse", "Octazooka", "Muddy Water", "Wave Crash", "Water Shuriken", "Triple Dive", "Scald", "Steam Eruption", "Soak", "Aqua Jet", "Aqua Ring", "Jet Punch", "Clamp", "Flip Turn", "Fishious Rend"];
-            }
-            foreach (string addedMove in addedMoveNames)
-            {
-                Move nextMove = MechanicsDataContainers.GlobalMechanicsData.Moves[addedMove];
-                resultingItem.AddedMoves.Add(nextMove);
-            }
-            // Set item finished parsing
-            return resultingItem;
         }
     }
 }

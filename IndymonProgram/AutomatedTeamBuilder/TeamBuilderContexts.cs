@@ -130,6 +130,10 @@ namespace AutomatedTeamBuilder
             {
                 ExtractItemMods(pokemon.BattleItem, result);
             }
+            else
+            {
+                ExtractMods((ElementType.ITEM_FLAGS, ItemFlag.NO_ITEM.ToString()), result); // Add "no item" to results flag
+            }
             if (pokemon.ChosenAbility != null)
             {
                 ExtractAbilityMods(pokemon.ChosenAbility, result);
@@ -142,7 +146,7 @@ namespace AutomatedTeamBuilder
                 }
             }
             ExtractMonMods(pokemon, result);
-            // Finally, gather all flags and apply flag mods but onyl once (e.g. 2 instances of same flag don't stack)
+            // Finally, gather all flags and apply flag mods but only once (e.g. 2 instances of same flag don't stack)
             HashSet<EffectFlag> allFlags = [];
             if (pokemon.ChosenAbility != null)
             {

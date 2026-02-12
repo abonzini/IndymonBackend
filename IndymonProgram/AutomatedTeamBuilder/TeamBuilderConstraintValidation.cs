@@ -210,6 +210,68 @@ namespace AutomatedTeamBuilder
             throw new NotImplementedException("Unreachable Code");
         }
         /// <summary>
+        /// Checks if this constraint could be potentially satisfied by an item (mod or battle)
+        /// </summary>
+        /// <param name="item">The item to check</param>
+        /// <returns></returns>
+        public bool SatisfiedByItem(Item item)
+        {
+            if (AllConstraints.Count == 0) return true; // No constraints needed
+            // Now check constraint
+            foreach ((ElementType, string) elementToCheck in AllConstraints)
+            {
+                ElementType elementType = elementToCheck.Item1;
+                string elementName = elementToCheck.Item2;
+                bool checkPassed = false; // Will need to see if this check passes
+                // Elements that may be of use when checking stuff
+                Enum.TryParse(elementName, true, out ItemFlag itemFlagToCheck);
+                switch (elementType)
+                {
+                    case ElementType.BATTLE_ITEM:
+                        checkPassed = MechanicsDataContainers.GlobalMechanicsData.BattleItems.ContainsKey(item.Name) && item.Name == elementName;
+                        break;
+                    case ElementType.ITEM_FLAGS:
+                        HashSet<ItemFlag> itemFlags = new HashSet<ItemFlag>();
+                        checkPassed = item.Flags.Contains(itemFlagToCheck);
+                        break;
+                    case ElementType.MOD_ITEM:
+                        checkPassed = MechanicsDataContainers.GlobalMechanicsData.ModItems.ContainsKey(item.Name) && item.Name == elementName;
+                        break;
+                    case ElementType.ABILITY:
+                    case ElementType.MOVE:
+                    case ElementType.EFFECT_FLAGS:
+                    case ElementType.ORIGINAL_TYPE_OF_MOVE:
+                    case ElementType.DAMAGING_MOVE_OF_TYPE:
+                    case ElementType.MOVE_CATEGORY:
+                    case ElementType.ANY_DAMAGING_MOVE:
+                    case ElementType.ARCHETYPE:
+                    case ElementType.POKEMON:
+                    case ElementType.POKEMON_TYPE:
+                    case ElementType.POKEMON_HAS_EVO:
+                    default:
+                        checkPassed = false; // No pass
+                        break;
+                }
+                if (Operation == ConstraintOperation.OR && checkPassed)
+                {
+                    return true; // A single check passing will be fine
+                }
+                if (Operation == ConstraintOperation.AND && !checkPassed)
+                {
+                    return false; // A single check passing will be over
+                }
+            }
+            if (Operation == ConstraintOperation.OR)
+            {
+                return false; // Failed because not a single constraint passed
+            }
+            if (Operation == ConstraintOperation.AND)
+            {
+                return true; // Passed because not a single constraint failed
+            }
+            throw new NotImplementedException("Unreachable Code");
+        }
+        /// <summary>
         /// Tells me if this ability would verify constraints
         /// </summary>
         /// <param name="ability">Which item</param>

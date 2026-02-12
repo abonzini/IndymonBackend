@@ -518,8 +518,8 @@ namespace IndymonBackendProgram
     public class ElimTournament : Tournament
     {
         // Internal draw helpers
-        const float DRAW_RYTHM_PERIOD = 1.0f;
-        const float BLINK_TOGGLE_PERIOD = 0.5f;
+        const double DRAW_RYTHM_PERIOD = 1.0f;
+        const double BLINK_TOGGLE_PERIOD = 0.5f;
         const int NUMBER_OF_BLINKS = 3;
         public List<List<TournamentMatch>> RoundHistory { get; set; } = null;
         // Seed helper
@@ -829,8 +829,8 @@ namespace IndymonBackendProgram
     public class KingOfTheHillTournament : Tournament
     {
         // Internal draw helpers
-        const float DRAW_RYTHM_PERIOD = 1.0f;
-        const float BLINK_TOGGLE_PERIOD = 0.5f;
+        const double DRAW_RYTHM_PERIOD = 1.0f;
+        const double BLINK_TOGGLE_PERIOD = 0.5f;
         const int NUMBER_OF_BLINKS = 3;
         public List<TournamentMatch> MatchHistory { get; set; } = null;
         public override void RequestAdditionalInfo()

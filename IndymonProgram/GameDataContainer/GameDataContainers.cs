@@ -48,7 +48,7 @@ namespace GameDataContainer
             string trainerDataTab = lines[1].Split(",")[0];
             ParseTrainerCards(sheetId, trainerDataTab, TrainerData);
             Console.WriteLine("Parsing Battle Stats");
-            string battleStatsTab = lines[3].Split(",")[0];
+            string battleStatsTab = lines[4].Split(",")[0];
             ParseBattleStats(sheetId, battleStatsTab);
         }
         public Trainer GetTrainer(string Name)
@@ -98,7 +98,7 @@ namespace GameDataContainer
             secondLine[6] = "(WR%)";
             secondLine[7] = "K";
             secondLine[8] = "D";
-            secondLine[9] = "DIFF";
+            secondLine[9] = "DIFF%";
             // Then all together
             xOffset = 10;
             for (int player = 0; player < (BattleStats.PlayerStats.Count + BattleStats.NpcStats.Count); player++)

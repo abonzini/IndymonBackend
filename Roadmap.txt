@@ -21,6 +21,6 @@ TODO:
 - Reincorporate exploration manager, redo exploration manager context to include "buffable" exploration contexts (e.g. shiny stone)
 - Revise manager, fix whats wrong, team builder based on whats in the exploration, make it build too... Dungeon has seed too? in which case can just load seed. Ask for score instead of just bot, create wrapper function to share w tourn
 - Save/load expl stuff in own folder, similarly, just store teambuild seed for trainer, all can be generated from this
-- Use dungeon modifiers, add modifier (archetype) to dungeon, add some to camouflage system, some others to nature power/secret power doc. May just remove the chances and yolo
+- Use dungeon modifiers, add modifier (archetype) to dungeon, add some to camouflage system, some others to nature power/secret power doc. May just remove the chances and yolo (Shiny Stone)
 - At this point indymon should be working? Test for a while
 - Add "test bot" option in indymon menu

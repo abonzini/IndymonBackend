@@ -33,7 +33,10 @@ namespace IndymonBackendProgram
                 TypeNameHandling = TypeNameHandling.Auto,
                 Formatting = Formatting.Indented
             };
-            tournamentManager = JsonConvert.DeserializeObject<TournamentManager>(File.ReadAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE)));
+            if (Path.Exists(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE)))
+            {
+                tournamentManager = JsonConvert.DeserializeObject<TournamentManager>(File.ReadAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE)));
+            }
             // Beginning of indymon program
             string InputString;
             do
