@@ -303,7 +303,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : ["Continuous Hail Mod", "Environment Mod = sky"],
+  "CustomShowdownRules" : ["Continuous Hail Mod"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

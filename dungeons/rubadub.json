@@ -297,7 +297,7 @@
       "PreEventString": "... After their hard work was done, the titans began their well deserved slumber.",
       "PostEventString": "They were never seen since. Despite the efforts of their most devout followers, they were never found. ..."
   },
-  "CustomShowdownRules" : ["Continuous Rain Mod", "Environment Mod = pond"],
+  "CustomShowdownRules" : ["Continuous Rain Mod"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

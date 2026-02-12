@@ -283,7 +283,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : ["Environment Mod = cave"],
+  "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": "Molten Core"
 }

@@ -281,7 +281,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : ["Environment Mod = beach"],
+  "CustomShowdownRules" : [],
   "NextDungeon": "",
   "NextDungeonShortcut": "Deepest Trench"
 }
