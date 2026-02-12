@@ -276,7 +276,7 @@
       "PreEventString": "All the legendary titans were first created in the image of Regigigas.",
       "PostEventString": "From the moment they were born, a great task fell in their hands..."
   },
-  "CustomShowdownRules" : ["Continuous Electric Terrain Mod", "Environment Mod = electric"],
+  "CustomShowdownRules" : ["Continuous Electric Terrain Mod"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

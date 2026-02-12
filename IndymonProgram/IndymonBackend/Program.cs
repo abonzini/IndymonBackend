@@ -630,7 +630,7 @@ namespace IndymonBackendProgram
             secondLine[6] = "(WR%)";
             secondLine[7] = "K";
             secondLine[8] = "D";
-            secondLine[9] = "DIFF";
+            secondLine[9] = "DIFF%";
             // Then all together
             xOffset = 10;
             for (int player = 0; player < (_allData.TournamentHistory.PlayerStats.Count + _allData.TournamentHistory.NpcStats.Count); player++)

@@ -289,7 +289,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : ["Continuous Sand Mod", "Environment Mod = desert"],
+  "CustomShowdownRules" : ["Continuous Sand Mod"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

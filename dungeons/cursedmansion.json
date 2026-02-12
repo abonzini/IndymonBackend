@@ -292,7 +292,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : ["Continuous Trick Room Mod", "Environment Mod = eerie"],
+  "CustomShowdownRules" : ["Continuous Trick Room Mod"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

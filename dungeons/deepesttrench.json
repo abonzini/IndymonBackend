@@ -288,7 +288,7 @@
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : ["Continuous Primordial Sea Mod", "Environment Mod = water"],
+  "CustomShowdownRules" : ["Continuous Primordial Sea Mod"],
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }
