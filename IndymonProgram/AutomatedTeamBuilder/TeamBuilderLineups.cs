@@ -1,5 +1,4 @@
 ﻿using GameData;
-using GameDataContainer;
 using Utilities;
 
 namespace AutomatedTeamBuilder
@@ -20,7 +19,7 @@ namespace AutomatedTeamBuilder
         /// <summary>
         /// Pokemon that a trainer could lend you as a favor that satisfy req
         /// </summary>
-        public Dictionary<string, List<TrainerPokemon>> FavourPokemon = new Dictionary<string, List<TrainerPokemon>>();
+        public Dictionary<Trainer, List<TrainerPokemon>> FavourPokemon = new Dictionary<Trainer, List<TrainerPokemon>>();
     }
     public static partial class TeamBuilder
     {
@@ -47,7 +46,7 @@ namespace AutomatedTeamBuilder
                     int potentialMonCount = setItemOptions.Value.Count;
                     usableMons += Math.Min(setItemCount, potentialMonCount); // Can use these to add more mons, but only if i have enough items/mons
                 }
-                foreach (KeyValuePair<string, List<TrainerPokemon>> favorOption in thisTeamBuild.FavourPokemon) // Then, see how much I can borrow from each trainer
+                foreach (KeyValuePair<Trainer, List<TrainerPokemon>> favorOption in thisTeamBuild.FavourPokemon) // Then, see how much I can borrow from each trainer
                 {
                     int numberOfFavors = trainer.TrainerFavours[favorOption.Key];
                     usableMons += Math.Min(favorOption.Value.Count, numberOfFavors); // Can borrow only the valid mon but also limited by number of fav available
@@ -110,10 +109,9 @@ namespace AutomatedTeamBuilder
             // Then, check trainer's favours and add the mons that satisfy, similarly
             if (trainer.AutoFavour)
             {
-                foreach (string friendlyTrainer in trainer.TrainerFavours.Keys)
+                foreach (Trainer friendlyTrainer in trainer.TrainerFavours.Keys)
                 {
-                    Trainer theTrainer = GameDataContainers.GlobalGameData.GetTrainer(friendlyTrainer); // Find the trainer whoever it is
-                    foreach (TrainerPokemon mon in theTrainer.PartyPokemon)
+                    foreach (TrainerPokemon mon in friendlyTrainer.PartyPokemon)
                     {
                         if (constraint.SatisfiedByMon(mon, true)) // If mon could potentially fit
                         {
@@ -212,7 +210,7 @@ namespace AutomatedTeamBuilder
             while (finalBattleTeam.Count < nMons)
             {
                 // First, find which random favor I will cash in
-                KeyValuePair<string, List<TrainerPokemon>> nextFavour = GeneralUtilities.GetRandomKvp(usedBuild.FavourPokemon);
+                KeyValuePair<Trainer, List<TrainerPokemon>> nextFavour = GeneralUtilities.GetRandomKvp(usedBuild.FavourPokemon);
                 int remainingFavours = trainer.TrainerFavours[nextFavour.Key] - 1;
                 GeneralUtilities.AddtemToCountDictionary(trainer.TrainerFavours, nextFavour.Key, -1, true); // Remove 1 from the remaining favors of trainer
                 TrainerPokemon borrowedMon = GeneralUtilities.GetRandomPick(nextFavour.Value);

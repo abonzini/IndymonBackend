@@ -18,7 +18,7 @@ namespace GameDataContainer
             trainerContainer.Clear();
             // Parse csv
             const int TRAINER_CARD_ROWS = 22; // Number of lines per trainer card
-            const int TRAINER_CARD_COLS = 21; // Number of columns per trainer card
+            const int TRAINER_CARD_COLS = 18; // Number of columns per trainer card
             string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] rows = csv.Split("\n");
             string[] cols = rows[0].Trim().Split(',');
@@ -34,9 +34,11 @@ namespace GameDataContainer
                     if (name == "") continue; // No trainer here, move on
                     nextTrainer.Name = name;
                     nextTrainer.DungeonIdentifier = nextLine[j + 1];
+                    nextTrainer.IMP = int.Parse(nextLine[j + 2]);
                     nextTrainer.AutoTeam = bool.Parse(nextLine[j + 4]);
                     nextTrainer.AutoSetItem = bool.Parse(nextLine[j + 6]);
                     nextTrainer.Avatar = nextLine[j + 7];
+                    nextTrainer.AvatarUrl = nextLine[j + 8];
                     nextTrainer.AutoModItem = bool.Parse(nextLine[j + 10]);
                     nextTrainer.AutoBattleItem = bool.Parse(nextLine[j + 12]);
                     nextTrainer.AutoFavour = bool.Parse(nextLine[j + 14]);
@@ -57,7 +59,7 @@ namespace GameDataContainer
                                 Nickname = nextLine[j + 1],
                                 IsShiny = bool.Parse(nextLine[j + 2]),
                             };
-                            // Set item, and verify if goes to trainer or mon
+                            // Set item
                             string setItemName = nextLine[j + 3];
                             if (setItemName != "")
                             {
@@ -68,19 +70,19 @@ namespace GameDataContainer
                                 }
                                 newPokemon.SetItem = item;
                             }
-                            // Mod item, and verify if goes to trainer or mon
+                            // Mod item
                             string modItemName = nextLine[j + 4];
                             if (modItemName != "")
                             {
                                 newPokemon.ModItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[modItemName];
                             }
-                            // Battle item, and verify if goes to trainer or mon
+                            // Battle item
                             string battleItemName = nextLine[j + 5];
                             if (battleItemName != "")
                             {
                                 newPokemon.BattleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[battleItemName];
                             }
-                            // Finally, add Pokemon to team (or nowhere if team full)
+                            // Finally, add Pokemon to team
                             if (nextTrainer.PartyPokemon.Count < Trainer.MAX_MONS_IN_TEAM) // Add to team
                             {
                                 nextTrainer.PartyPokemon.Add(newPokemon);
@@ -94,47 +96,50 @@ namespace GameDataContainer
                         string itemName = nextLine[j + 6];
                         if (itemName != "") // A set item here
                         {
-                            SetItem setItem = SetItem.Parse(itemName);
+                            if (!SetItems.TryGetValue(itemName, out SetItem item)) // Creates it if doesn't exist
+                            {
+                                item = SetItem.Parse(itemName);
+                                SetItems.Add(itemName, item);
+                            }
                             int itemCount = int.Parse(nextLine[j + 7]);
-                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.SetItems, setItem, itemCount);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.SetItems, item, itemCount);
                         }
                         // Next, mod items
-                        itemName = nextLine[j + 9];
+                        itemName = nextLine[j + 8];
                         if (itemName != "") // A set item here
                         {
                             Item modItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[itemName];
-                            int itemCount = int.Parse(nextLine[j + 10]);
+                            int itemCount = int.Parse(nextLine[j + 9]);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.ModItems, modItem, itemCount);
                         }
                         // Next, battle items
-                        itemName = nextLine[j + 12];
+                        itemName = nextLine[j + 10];
                         if (itemName != "") // A set item here
                         {
                             Item battleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[itemName];
-                            int itemCount = int.Parse(nextLine[j + 13]);
+                            int itemCount = int.Parse(nextLine[j + 11]);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.BattleItems, battleItem, itemCount);
                         }
-                        // Finally for now, favours
-                        itemName = nextLine[j + 15];
+                        // Then, Key Items
+                        itemName = nextLine[j + 12];
                         if (itemName != "")
                         {
-                            int itemCount = int.Parse(nextLine[j + 16]);
-                            if (itemName.Contains("Favour")) // A key item here, is it favour?
-                            {
-                                string trainerFavour = itemName.Split("'")[0].Trim(); // Got trainer who owns the favour
-                                GetTrainer(trainerFavour);
-                                GeneralUtilities.AddtemToCountDictionary(nextTrainer.TrainerFavours, trainerFavour, itemCount);
-                            }
-                            else // Regular key item
-                            {
-                                GeneralUtilities.AddtemToCountDictionary(nextTrainer.KeyItems, itemName, itemCount);
-                            }
+                            int itemCount = int.Parse(nextLine[j + 13]);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.KeyItems, itemName, itemCount);
+                        }
+                        itemName = nextLine[j + 14];
+                        if (itemName != "")
+                        {
+                            int itemCount = int.Parse(nextLine[j + 15]);
+                            string trainerFavour = itemName.Split("'")[0].Trim(); // Got trainer who owns the favour
+                            Trainer trainer = GetTrainer(trainerFavour);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.TrainerFavours, trainer, itemCount);
                         }
                         // Finally, Ballz
-                        itemName = nextLine[j + 18];
+                        itemName = nextLine[j + 16];
                         if (itemName != "")
                         {
-                            int itemCount = int.Parse(nextLine[j + 19]);
+                            int itemCount = int.Parse(nextLine[j + 17]);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.PokeBalls, itemName, itemCount);
                         }
                     }

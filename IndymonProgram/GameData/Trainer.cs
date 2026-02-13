@@ -14,7 +14,9 @@ namespace GameData
         public const int MAX_MONS_IN_TEAM = 12; /// How many mons top can the team have (rest goes to box)
         public string Name = "";
         public string DungeonIdentifier = "?";
+        public int IMP = 0;
         public string Avatar = "";
+        public string AvatarUrl = "";
         public string DiscordNumber = "";
         public TrainerRank TrainerRank = TrainerRank.UNRANKED;
         public bool AutoTeam = true;
@@ -27,8 +29,8 @@ namespace GameData
         public Dictionary<SetItem, int> SetItems = new Dictionary<SetItem, int>();
         public Dictionary<Item, int> ModItems = new Dictionary<Item, int>();
         public Dictionary<Item, int> BattleItems = new Dictionary<Item, int>();
-        public Dictionary<string, int> TrainerFavours = new Dictionary<string, int>();
         public Dictionary<string, int> KeyItems = new Dictionary<string, int>();
+        public Dictionary<Trainer, int> TrainerFavours = new Dictionary<Trainer, int>();
         public Dictionary<string, int> PokeBalls = new Dictionary<string, int>();
         public override string ToString()
         {
