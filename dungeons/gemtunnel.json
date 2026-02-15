@@ -284,6 +284,6 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : [],
-  "NextDungeon": "",
+  "NextDungeon": "Apricorn Swamp",
   "NextDungeonShortcut": "Molten Core"
 }
