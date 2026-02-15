@@ -69,6 +69,7 @@ namespace GameDataContainer
                                     SetItems.Add(setItemName, item);
                                 }
                                 newPokemon.SetItem = item;
+                                if (!item.CanEquip(newPokemon)) throw new Exception("Pokemon has an invalid set item");
                             }
                             // Mod item
                             string modItemName = nextLine[j + 4];

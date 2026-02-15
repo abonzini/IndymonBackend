@@ -15,7 +15,6 @@ namespace GameData
         }
         public bool CanEquip(TrainerPokemon mon)
         {
-            if (mon.SetItem != null) return false; // Mon already has set item so it can't equip more!
             if (AlwaysAllowedItem) return true; // If its always allowed, then it's fine too
             // Otherwise need to make sure mon can learn every single thing
             Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
