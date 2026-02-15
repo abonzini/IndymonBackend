@@ -240,7 +240,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); ; // Id of the mon in question
                         string status = m.Groups[2].Value.Trim().ToLower(); // Hp status
                         //Console.WriteLine($"Damage debug: {monId}->{status}");
                         PokemonSet pokemonInTeam = _monsById[monId];
@@ -253,7 +253,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); ; // Id of the mon in question
                         string status = m.Groups[2].Value.Trim().ToLower(); // Hp (status blank i guess?)
                         PokemonSet pokemonInTeam = _monsById[monId];
                         pokemonInTeam.ExplorationStatus?.SetStatus(status);
@@ -265,7 +265,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); ; // Id of the mon in question
                         string status = m.Groups[2].Value.Trim().ToLower(); // Non-volatile status
                         PokemonSet pokemonInTeam = _monsById[monId];
                         if (pokemonInTeam.ExplorationStatus != null)
@@ -280,7 +280,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); ; // Id of the mon in question
                         string status = m.Groups[2].Value.Trim().ToLower(); // Non-volatile status cured
                         PokemonSet pokemonInTeam = _monsById[monId];
                         if (pokemonInTeam.ExplorationStatus != null && pokemonInTeam.ExplorationStatus.NonVolatileStatus == status)
@@ -295,7 +295,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower(); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); ; // Id of the mon in question
                         PokemonSet pokemonInTeam = _monsById[monId];
                         //Console.WriteLine($"Faint debug: {monId}");
                         if (pokemonInTeam.ExplorationStatus != null)
@@ -308,7 +308,7 @@ namespace ShowdownBot
                 // If a player won game, this is relevant to end the simulation
                 if (message.Contains("|win|")) // Battle ended, no matter who won
                 {
-                    Winner = message.Split("|win|")[1].Trim().ToLower();
+                    Winner = message.Split("|win|")[1].Trim().ToLower().Replace("’", "'"); ;
                     BotRemainingMons = _currentGameState.Side.GetAliveMons();
                     if (BotName.ToLower() != Winner)
                     {

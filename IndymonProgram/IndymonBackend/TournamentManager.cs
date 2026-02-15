@@ -25,7 +25,7 @@ namespace IndymonBackendProgram
         public float GameWinrate { get { return (float)GamesWon / (float)GamesPlayed; } }
         public int Kills { get; set; } = 0;
         public int Deaths { get; set; } = 0;
-        public int Diff { get { return ((float)Kills - (float)Deaths)/((float)GamesPlayed); } }
+        public double Diff { get { return ((double)Kills - (double)Deaths) / ((double)GamesPlayed); } }
         public override string ToString()
         {
             return $"{Name}: {TournamentWins}/{TournamentsPlayed})";

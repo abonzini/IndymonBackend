@@ -1,0 +1,293 @@
+{
+  "Name": "Apricorn Swamp",
+  "GoesDownwards": false,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "You find a $1 buried under the mud.",
+      "PostEventString": "You pick it up, clean it and put it in your bag."
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "A $1 is resting in the mud, when it sees you, it gives you a hungry look.",
+      "PostEventString": "The Pokemon slowly goes away, leaving $1 behind."
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "Buried in the mud, you see an evolution crystal. YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on."
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "You managed to find some berries in this swamp, even if not too common.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "You managed to find some berries in this swamp, even if not too common.",
+      "PostEventString": "Your Pokemon have recovered from their status conditions."
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "A hungry $1 smells something nice coming from your bag.",
+      "PostEventString": "You try to leave it behind, but it keeps following you."
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "You unfortunately stepped on deep mud and start sinking.",
+      "PostEventString": "After struggling, you managed to get out but your team is injured."
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "A wave of toxic fumes suddenly fill the air.",
+      "PostEventString": "$1 breathed some of it and got badly poisoned.",
+	  "SpecialParams": "tox"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "You find a camping spot. $1 is there and clearly has been lost in the swamp for days. They are going insane and challenge you to a fight.",
+      "PostEventString": "After beating $1, you show them the way out and continue on your way."
+    },
+	{
+      "EventType": "RESEARCHER",
+      "PreEventString": "Researcher Kaspar is sifting for treasures buried in the mud.",
+      "PostEventString": "'Earlier today I found $1, here, have one'"
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "You find an abandoned vehicle completely stuck in the mud and covered in vines.",
+      "PostEventString": "It has the Paradox Logo, and inside you find an old $1."
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Bulbasaur",
+    "Oddish",
+    "Bellsprout",
+    "Slowpoke-Galar",
+    "Tangela",
+    "Wooper",
+    "Wooper-Paldea",
+    "Mudkip",
+    "Budew",
+    "Gulpin",
+    "Barboach",
+    "Stunky",
+    "Croagunk",
+    "Tympole",
+    "Trubbish",
+    "Foongus",
+    "Froakie",
+    "Skiddo",
+    "Goomy",
+    "Bounsweet",
+    "Shroodle",
+    "Toedscool",
+    "Capsakid",
+    "Sobble"
+	],
+	[
+    "Ivysaur",
+    "Gloom",
+    "Weepinbell",
+    "Slowbro-Galar",
+    "Quagsire",
+    "Marshtomp",
+    "Roselia",
+    "Swalot",
+    "Whiscash",
+    "Kecleon",
+    "Skuntank",
+    "Toxicroak",
+    "Palpitoad",
+    "Frogadier",
+    "Sliggoo",
+    "Steenee",
+    "Grafaiai",
+    "Scovillain",
+    "Drizzile"
+	],
+	[
+    "Venusaur",
+    "Vileplume",
+    "Victreebel",
+    "Slowking-Galar",
+    "Tangrowth",
+    "Clodsire",
+    "Swampert",
+    "Roserade",
+    "Seismitoad",
+    "Garbodor",
+    "Amoonguss",
+    "Greninja",
+    "Gogoat",
+    "Goodra",
+    "Tsareena",
+    "Toedscruel",
+    "Inteleon"
+	],
+	[
+		"Regirock"
+	]
+  ],
+  "CommonItems": [
+		"Steel Gem",
+		"Dark Gem",
+		"Flying Gem",
+		"Rock Gem",
+		"Fighting Gem",
+		"Dragon Gem",
+		"Ghost Gem",
+		"Fire Gem",
+		"Psychic Gem",
+		"Water Gem",
+		"Grass Gem",
+		"Fairy Gem",
+		"Ground Gem",
+		"Bug Gem",
+		"Ice Gem",
+		"Electric Gem",
+		"Poison Gem",
+		"Normal Gem",
+    "Payapa Bery",
+    "Coba Bery",
+    "Wacan Bery"
+  ],
+  "RareItems": [
+		"Absorb Bulb",
+		"Big Root",
+		"Electric Seed",
+		"Psychic Seed",
+		"Misty Seed",
+		"Grassy Seed",
+		"Toxic Orb",
+		"Luminous Moss",
+		"Poison Barb",
+		"Leaf Stone",
+		"Black Sludge"
+  ],
+  "BossItem": "Titan Plate 2",
+  "Floors": [
+    {
+      "RoomColor": "Magenta",
+      "NeWallTile": "♣",
+      "NwWallTile": "♣",
+      "SeWallTile": "♣",
+      "SwWallTile": "♣",
+      "EWallTile": "♣",
+      "WWallTile": "♣",
+      "NWallTile": "♣",
+      "SWallTile": "♣",
+	  "EWallPassageTile": "❍",
+      "WWallPassageTile": "❍",
+      "NWallPassageTile": "❍",
+      "SWallPassageTile": "❍",
+      "NWallShortcutTile": "~",
+      "SWallShortcutTile": "~",
+      "PassageColor": "DarkMagenta",
+      "VerticalPassageTile": "❍",
+      "ShortcutColor": "Red",
+      "NeShortcutTile": "~",
+      "NwShortcutTile": "~",
+      "SeShortcutTile": "~",
+      "SwShortcutTile": "~",
+      "HorizontalShortcutTile": "~",
+      "VerticalShortcutTile": "~",
+	  "ShortcutConditions": [
+		{
+				"ConditionType": "MOVE",
+				"Which": ["Sweet Scent", "Smelling Salts", "Aromatic Mist", "Aromatherapy"]
+		},
+		{
+				"ConditionType": "ABILITY",
+				"Which": ["Stench", "Aroma Veil", "Lingering Aroma"]
+		}
+	  ],
+	  "ShortcutClue": "You think there's a shortcut by the swamp, but the smell is unbearable.",
+	  "ShortcutResolution": "Your $1 masks the swamp smell and allows you to go through."
+    },
+	{
+      "RoomColor": "Magenta",
+      "NeWallTile": "♣",
+      "NwWallTile": "♣",
+      "SeWallTile": "♣",
+      "SwWallTile": "♣",
+      "EWallTile": "≋",
+      "WWallTile": "≋",
+      "NWallTile": "≋",
+      "SWallTile": "≋",
+	    "EWallPassageTile": "♣",
+      "WWallPassageTile": "♣",
+      "NWallPassageTile": "♣",
+      "SWallPassageTile": "♣",
+      "NWallShortcutTile": "▚",
+      "SWallShortcutTile": "▚",
+      "PassageColor": "Green",
+      "VerticalPassageTile": "♣",
+      "ShortcutColor": "White",
+      "NeShortcutTile": "▚",
+      "NwShortcutTile": "▚",
+      "SeShortcutTile": "▚",
+      "SwShortcutTile": "▚",
+      "HorizontalShortcutTile": "▚",
+      "VerticalShortcutTile": "▚",
+	  "ShortcutConditions": [
+		{
+			"ConditionType": "Item",
+			"Which": ["Fire Stone", "Thunder Stone", "Leaf Stone", "Water Stone", "Sun Stone", "Shiny Stone", "Dawn Stone", "Dusk Stone", "Ice Stone", "Moon Stone"]
+		}
+	  ],
+	  "ShortcutClue": "You find the remains of old ruins in the swamp. There's a mystical gate, with a symbol of what seems to be Evolutionary Stones.",
+	  "ShortcutResolution": "Your $1 shines and opens the gate. The path forward is clear."
+    },
+	{
+      "RoomColor": "Magenta",
+      "NeWallTile": "▒",
+      "NwWallTile": "▒",
+      "SeWallTile": "▒",
+      "SwWallTile": "▒",
+      "EWallTile": "▒",
+      "WWallTile": "▒",
+      "NWallTile": "▒",
+      "SWallTile": "▒",
+	    "EWallPassageTile": "▙",
+      "WWallPassageTile": "▚",
+      "NWallPassageTile": "▙",
+      "SWallPassageTile": "▚",
+      "NWallShortcutTile": "▚",
+      "SWallShortcutTile": " ",
+      "PassageColor": "White",
+      "VerticalPassageTile": "▚",
+      "ShortcutColor": "White",
+      "NeShortcutTile": " ",
+      "NwShortcutTile": " ",
+      "SeShortcutTile": " ",
+      "SwShortcutTile": " ",
+      "HorizontalShortcutTile": " ",
+      "VerticalShortcutTile": " ",
+	  "ShortcutConditions": [],
+	  "ShortcutClue": "You have reached the ruins of an old temple buried in the mud. Doesn't seem there's any way but forward.",
+	  "ShortcutResolution": ""
+    }
+  ],
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "Buried in the mud, a slumbering titan made of rock is uncovered. As you approach the titan springs back to life and raises from the earth...",
+    "PostEventString": "As you defeat the titan, the ground rumbles. Your actions here have are changing the world."
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "You find a clearing in the swamp. A perfect place for a picnic.",
+    "PostEventString": "But now it's time to move on..."
+  },
+  "PreBossEvent": { "EventType": "REGIROCK" },
+  "PostBossEvent":
+  {
+      "EventType": "PLOT_CLUE",
+      "PreEventString": "... They were tasked to put the continents together.",
+      "PostEventString": "Little by little, they shaped the world and bound the continents with ropes."
+  },
+  "CustomShowdownRules" : ["Continuous Grassy Terrain Mod"],
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

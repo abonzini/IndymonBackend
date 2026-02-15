@@ -926,6 +926,16 @@ namespace IndymonBackendProgram
                     DrawRegiEye(-1, 1, 333);
                     DrawRegiEye(-2, 0, 333);
                     break;
+                case RoomEventType.REGIROCK: // Dramatic drawing of regirock eyes
+                    ClearRoomsCommand();
+                    DrawRegiEye(0, 0, 2000);
+                    DrawRegiEye(1, 0, 0);
+                    DrawRegiEye(-1, 0, 2000);
+                    DrawRegiEye(1, 1, 0);
+                    DrawRegiEye(1, -1, 0);
+                    DrawRegiEye(-1, 1, 0);
+                    DrawRegiEye(-1, -1, 2000);
+                    break;
                 case RoomEventType.REGICE: // Dramatic drawing of regice eyes
                     DrawRegiEye(0, 0, 1000);
                     DrawRegiEye(0, -1, 0);
