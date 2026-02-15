@@ -291,7 +291,7 @@ namespace IndymonBackendProgram
                         TrainerData bossTeam = new TrainerData() // Create the blank trainer
                         {
                             Avatar = "unknown",
-                            Name = "boss",
+                            Name = "Final Boss",
                             AutoItem = false,
                             AutoTeam = true,
                             Teamsheet = [bossPokemon], // Only mon in the teamsheet
@@ -937,6 +937,7 @@ namespace IndymonBackendProgram
                     DrawRegiEye(-1, -1, 2000);
                     break;
                 case RoomEventType.REGICE: // Dramatic drawing of regice eyes
+                    ClearRoomsCommand();
                     DrawRegiEye(0, 0, 1000);
                     DrawRegiEye(0, -1, 0);
                     DrawRegiEye(0, 1, 1000);
@@ -946,6 +947,7 @@ namespace IndymonBackendProgram
                     DrawRegiEye(-2, 0, 500);
                     break;
                 case RoomEventType.REGIELEKI: // Dramatic drawing of regigas eyes
+                    ClearRoomsCommand();
                     DrawRegiEye(0, 0, 250);
                     DrawRegiEye(1, 0, 250);
                     DrawRegiEye(-1, 0, 250);
