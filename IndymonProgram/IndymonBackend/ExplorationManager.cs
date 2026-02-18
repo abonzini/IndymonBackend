@@ -951,12 +951,10 @@ namespace IndymonBackendProgram
                     DrawRegiEye(0, 0, 250);
                     DrawRegiEye(1, 0, 250);
                     DrawRegiEye(-1, 0, 250);
-                    DrawRegiEye(2, 0, 250);
-                    DrawRegiEye(-2, 0, 250);
-                    DrawRegiEye(3, 1, 250);
-                    DrawRegiEye(3, -1, 250);
-                    DrawRegiEye(-3, -1, 250);
-                    DrawRegiEye(-3, 1, 250);
+                    DrawRegiEye(2, 1, 250);
+                    DrawRegiEye(2, -1, 250);
+                    DrawRegiEye(-2, -1, 250);
+                    DrawRegiEye(-2, 1, 250);
                     break;
                 default:
                     break;
