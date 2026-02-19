@@ -98,7 +98,7 @@ namespace GameDataContainer
             secondLine[6] = "(WR%)";
             secondLine[7] = "K";
             secondLine[8] = "D";
-            secondLine[9] = "DIFF%";
+            secondLine[9] = "Avg. Diff";
             // Then all together
             xOffset = 10;
             for (int player = 0; player < (BattleStats.PlayerStats.Count + BattleStats.NpcStats.Count); player++)
