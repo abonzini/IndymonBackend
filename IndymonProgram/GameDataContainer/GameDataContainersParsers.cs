@@ -132,8 +132,7 @@ namespace GameDataContainer
                         if (itemName != "")
                         {
                             int itemCount = int.Parse(nextLine[j + 15]);
-                            string trainerFavour = itemName.Split("'")[0].Trim(); // Got trainer who owns the favour
-                            Trainer trainer = GetTrainer(trainerFavour);
+                            Trainer trainer = GetTrainer(itemName);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.TrainerFavours, trainer, itemCount);
                         }
                         // Finally, Ballz

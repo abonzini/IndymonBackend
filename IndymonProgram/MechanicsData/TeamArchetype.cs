@@ -19,5 +19,6 @@
         SPIKES,
         TSPIKES,
         WEBS,
+        TERA, // For teams with a dedicated tera mon
     }
 }

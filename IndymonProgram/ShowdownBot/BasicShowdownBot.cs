@@ -236,7 +236,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'");; // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question
                         string status = m.Groups[2].Value.Trim(); // Hp status
                         //Console.WriteLine($"Damage debug: {monId}->{status}");
                         TrainerPokemon pokemonInTeam = _monsById[monId];
