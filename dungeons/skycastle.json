@@ -65,7 +65,7 @@
     },
 	{
       "EventType": "UNOWN",
-      "PreEventString": "You enter a set of ruins unlike all previous ones. This one contains weird glypths embedded in the walls. Suddenly, the glyphs come alive and start attacking!.",
+      "PreEventString": "You enter a set of ruins unlike all previous ones. This one contains weird glyphs embedded in the walls. Suddenly, the glyphs come alive and start attacking!.",
       "PostEventString": "Huh..."
     }
   ],

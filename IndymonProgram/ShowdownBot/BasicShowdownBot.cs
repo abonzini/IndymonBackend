@@ -66,6 +66,10 @@ namespace ShowdownBot
                 {
                     BotName = BotName[..18].Trim();
                 }
+                foreach (PokemonSet mon in _botTrainer.Teamsheet)
+                {
+                    mon.MovesChosenInBattle = []; // Reset move list in battle
+                }
                 // Ok try and connect
                 HttpClient client = new HttpClient(); // One use client to get assertion
                 string url = $"https://play.pokemonshowdown.com/~~showdown/action.php?act=getassertion&userid={BotName}&challstr={_challstr}";
@@ -371,13 +375,43 @@ namespace ShowdownBot
             else if (forcedSwitch) // Mon needs to switch no matter what
             {
                 command = $"{battle}|/choose default"; // Choose first legal option
+                currentPokemon.MovesChosenInBattle = []; // Mon will switch out, reset its moves used!
             }
             else // Then its probably a move?
             {
                 bool invalidChoice;
+                bool tryLogicMod = true; // Will try logic mod in this first iteration
                 do
                 {
-                    int moveChoice = Utilities.GetRandomNumber(0, 4); // 0 -> 3 can be the choice
+                    // Chekc if there's logic mods
+                    int moveChoice;
+                    if (tryLogicMod && currentPokemon.Item.Name.ToLower() == "dawn stone")
+                    {
+                        if (currentPokemon.MovesChosenInBattle.Contains(0)) // Do 0 unless already done, in which case do all others 
+                        {
+                            moveChoice = Utilities.GetRandomNumber(1, currentPokemon.Moves.Length);
+                        }
+                        else
+                        {
+                            moveChoice = 0;
+                        }
+                    }
+                    else if (tryLogicMod && currentPokemon.Item.Name.ToLower() == "dusk stone")
+                    {
+                        if (currentPokemon.MovesChosenInBattle.Count == currentPokemon.Moves.Length) // All options have been used, reset list
+                        {
+                            currentPokemon.MovesChosenInBattle = [];
+                        }
+                        do // Try a next unique move
+                        {
+                            moveChoice = Utilities.GetRandomNumber(0, currentPokemon.Moves.Length);
+                        } while (!currentPokemon.MovesChosenInBattle.Contains(moveChoice));
+                    }
+                    else
+                    {
+                        moveChoice = Utilities.GetRandomNumber(0, currentPokemon.Moves.Length); // 0 -> 3 can be the choice
+                    }
+                    tryLogicMod = false; // Thats it, if this fucks up, will do again without using logic mod
                     ActiveOptions playOptions = _currentGameState.Active.FirstOrDefault();
                     // Move is valid as long its in a valid slot and usable (not disabled, pp)
                     invalidChoice = moveChoice >= playOptions.Moves.Count || playOptions.Moves[moveChoice].Disabled || (playOptions.Moves[moveChoice].Pp == 0);
@@ -392,11 +426,13 @@ namespace ShowdownBot
                                 int switchedInMon = switchIns[switchChoice];
                                 command = $"{battle}|/choose switch {switchedInMon}"; // Switch to random mon
                                 invalidChoice = false; // Move valid after all
+                                currentPokemon.MovesChosenInBattle = []; // Mon will switch out, reset its moves used!
                             }
                         }
                     }
                     else // try the move then
                     {
+                        currentPokemon.MovesChosenInBattle.Add(moveChoice); // Will choose this move so I also added it to move history
                         command = $"{battle}|/choose move {moveChoice + 1}"; // Choose move (slot 1-4)
                         string possibleTera = _currentGameState.Active.First().CanTerastallize.Trim().ToLower();
                         if (possibleTera != "" && (possibleTera == currentPokemon.GetTera(_backend))) // Means the current mon can tera and it's consistent

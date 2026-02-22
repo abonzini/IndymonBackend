@@ -1025,10 +1025,10 @@ namespace IndymonBackendProgram
                 ModifyInfoValueCommand(mon.Species, (0, i));
                 ModifyInfoValueCommand($"{mon.ExplorationStatus.HealthPercentage}%", (1, i));
                 ModifyInfoValueCommand(mon.ExplorationStatus.NonVolatileStatus, (2, i));
-                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[0] == 99) ? "??" : mon.ExplorationStatus.MovePp[0].ToString(), (3, i));
-                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[1] == 99) ? "??" : mon.ExplorationStatus.MovePp[1].ToString(), (4, i));
-                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[2] == 99) ? "??" : mon.ExplorationStatus.MovePp[2].ToString(), (5, i));
-                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[3] == 99) ? "??" : mon.ExplorationStatus.MovePp[3].ToString(), (6, i));
+                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[0] >= 99) ? "??" : mon.ExplorationStatus.MovePp[0].ToString(), (3, i));
+                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[1] >= 99) ? "??" : mon.ExplorationStatus.MovePp[1].ToString(), (4, i));
+                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[2] >= 99) ? "??" : mon.ExplorationStatus.MovePp[2].ToString(), (5, i));
+                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[3] >= 99) ? "??" : mon.ExplorationStatus.MovePp[3].ToString(), (6, i));
             }
         }
         /// <summary>
@@ -1304,7 +1304,7 @@ namespace IndymonBackendProgram
             Console.ReadLine();
             BotBattle automaticBattle = new BotBattle(_backEndData); // Generate bot host
             // The challenge string may contain dungeon-specific rules (besides the mandatory ones)
-            List<string> showdownRules = ["!Team Preview", "OHKO Clause", "Evasion Moves Clause", "Moody Clause", .. _dungeonDetails.CustomShowdownRules];
+            List<string> showdownRules = ["!Team Preview", .. _dungeonDetails.CustomShowdownRules];
             string challengeString = $"gen9customgame@@@{string.Join(",", showdownRules)}"; // Assemble resulting challenge string
             (int explorerLeft, _) = automaticBattle.SimulateBotBattle(epxlorer, encounter, nMons, nMons, challengeString); // Initiate battle
             Console.SetCursorPosition(cursorX, cursorY);

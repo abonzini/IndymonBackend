@@ -65,6 +65,7 @@ namespace ParsersAndData
         public int Level { get; set; } = 100;
         public Item Item { get; set; } = null;
         public ExplorationStatus ExplorationStatus { get; set; } = null;
+        public HashSet<int> MovesChosenInBattle = []; // Still unstable in this iteration, remembers the move pressed and some mod items may cook with these
         /// <summary>
         /// How is the mon called in "normal conversation"
         /// </summary>
@@ -603,11 +604,18 @@ namespace ParsersAndData
                                     // If I just equipped an item that changes set, need to add it
                                     if (backEndData.MoveItemData.TryGetValue(itemCandidate.Name, out HashSet<string> overwrittenMoves))
                                     {
-                                        int overWrittenMoveSlot = 3; // Start with last
-                                        foreach (string newMove in overwrittenMoves)
+                                        if (itemCandidate.Name.ToLower() == "water stone")
                                         {
-                                            pokemonSet.Moves[overWrittenMoveSlot] = newMove; // Replace last with move disk's
-                                            overWrittenMoveSlot--;
+                                            pokemonSet.Moves = [.. overwrittenMoves];
+                                        }
+                                        else
+                                        {
+                                            int overWrittenMoveSlot = 3; // Start with last
+                                            foreach (string newMove in overwrittenMoves)
+                                            {
+                                                pokemonSet.Moves[overWrittenMoveSlot] = newMove; // Replace last with move disk's
+                                                overWrittenMoveSlot--;
+                                            }
                                         }
                                     }
                                 }

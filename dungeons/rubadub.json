@@ -287,7 +287,7 @@
   },
   "CampingEvent": {
     "EventType": "CAMPING",
-    "PreEventString": "This are by the pond's shore is so pleasant. A perfect place for a picnic.",
+    "PreEventString": "This area by the pond's shore is so pleasant. A perfect place for a picnic.",
     "PostEventString": "But now it's time to move on..."
   },
   "PreBossEvent": { "EventType": "REGISTEEL" },
