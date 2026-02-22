@@ -20,18 +20,22 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="trainer">Which trainer I'll do</param>
         /// <param name="smart">Smart build or not (i.e. "Thinks" of a set instead of random stuff)</param>
-        /// <param name="Archetypes">Valid archetypes for this mon set</param>
+        /// <param name="archetypes">Valid archetypes for this mon set</param>
+        /// <param name="initialWeather">Initial weathe rfor this mon set</param>
+        /// <param name="initialTerrain">Initial terrain for this mon set</param>
         /// <param name="buildConstraints">Specific constraints needed for mon</param>
         /// <param name="pokemonFaced">All the pokemon that may be faced, to calculate types and stats</param>
         /// <param name="seed">Seed if the trainer set, to ensure consistency if saved</param>
-        public static void DefineTrainerSets(Trainer trainer, bool smart, HashSet<TeamArchetype> Archetypes, Constraint buildConstraints, List<Pokemon> pokemonFaced, int seed = 0)
+        public static void DefineTrainerSets(Trainer trainer, bool smart, HashSet<TeamArchetype> archetypes, Weather initialWeather, Terrain initialTerrain, Constraint buildConstraints, List<Pokemon> pokemonFaced, int seed = 0)
         {
             // Create a build ctx to start team build
             TeamBuildContext buildCtx = new TeamBuildContext
             {
-                smartTeamBuild = smart
+                smartTeamBuild = smart,
+                CurrentWeather = initialWeather,
+                CurrentTerrain = initialTerrain,
             };
-            buildCtx.CurrentTeamArchetypes.UnionWith(Archetypes); // Add archetypes
+            buildCtx.CurrentTeamArchetypes.UnionWith(archetypes); // Add archetypes
             buildCtx.TeamBuildConstraints.Add(buildConstraints); // Add design constraints
             if (smart) // In smart build, theres a constraint where every mon needs to have an attackign move no matter what (to avoid locks)
             {
@@ -127,6 +131,8 @@ namespace AutomatedTeamBuilder
                             monCtx = ObtainPokemonSetContext(mon, buildCtx); // Obtain current Pokemon mods and score and such
                         }
                         buildCtx.CurrentTeamArchetypes.UnionWith(monCtx.AdditionalArchetypes); // New archetypes found here are added into all team's archetypes
+                        buildCtx.CurrentWeather = monCtx.CurrentWeather; // Something may have changed the current weather
+                        buildCtx.CurrentTerrain = monCtx.CurrentTerrain; // Something may have changed the current terrain
                         // Monctx contains all the ongoing constraints, need only the ones which haven't been fulfilled yet
                         List<Constraint> ongoingConstraints = new List<Constraint>();
                         foreach (Constraint constraint in monCtx.AdditionalConstraints) // filter constraint set out

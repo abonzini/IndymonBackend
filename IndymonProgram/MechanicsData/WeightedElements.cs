@@ -12,7 +12,9 @@ namespace MechanicsData
         POKEMON, /// The pokemon. Can't be affected, but affects stuff
         POKEMON_TYPE, /// The pokemon type. Can't be affected, but affects stuff
         POKEMON_HAS_EVO, /// The flag of whether the pokemon has an evo or not (only way to make eviolite happen)
-        ARCHETYPE, /// Certain archetypes such as rain, terrains, etc. Not weighted but enabled, and can weight strategies
+        ARCHETYPE, /// Certain archetypes. Not weighted but enabled, and can weight strategies
+        WEATHER, /// The ongoing weather of a team comp
+        TERRAIN, /// The ongoing terrain of a team comp
         BATTLE_ITEM, /// Affects a specific named item
         ITEM_FLAGS, /// Affects items with that flag
         MOD_ITEM, /// A mod item is affecting stuf, normally the change stats or sth

@@ -185,7 +185,7 @@ namespace IndymonBackendProgram
                     }
                 }
                 // Define sets for this trainer. Smart build, no archetypes included at beginning. Build with constraints and enemy mons in mind. Use seed.
-                TeamBuilder.DefineTrainerSets(participant, true, [], OngoingTournament.BaseConstraint, enemyMons, participantData.Item2);
+                TeamBuilder.DefineTrainerSets(participant, true, [], Weather.NONE, Terrain.NONE, OngoingTournament.BaseConstraint, enemyMons, participantData.Item2);
             }
         }
         /// <summary>

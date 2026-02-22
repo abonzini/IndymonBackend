@@ -17,6 +17,8 @@ namespace MechanicsDataContainer
                 ElementType.POKEMON_TYPE => Enum.TryParse<PokemonType>(name, true, out _),
                 ElementType.POKEMON_HAS_EVO => bool.TryParse(name, out _),
                 ElementType.ARCHETYPE => Enum.TryParse<TeamArchetype>(name, true, out _),
+                ElementType.WEATHER => Enum.TryParse<Weather>(name, true, out _),
+                ElementType.TERRAIN => Enum.TryParse<Terrain>(name, true, out _),
                 ElementType.BATTLE_ITEM => BattleItems.ContainsKey(name),
                 ElementType.ITEM_FLAGS => Enum.TryParse<ItemFlag>(name, true, out _),
                 ElementType.MOD_ITEM => ModItems.ContainsKey(name),

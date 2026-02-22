@@ -7,7 +7,7 @@ namespace AutomatedTeamBuilder
     public static partial class TeamBuilder
     {
         /// <summary>
-        /// Given a mod item, obtains all mods associated to this item, updates Ctx
+        /// Given an archetype, obtains all mods associated to it, updates Ctx
         /// </summary>
         /// <param name="archetype">Archetype</param>
         /// <param name="monCtx">Context where to add the mods</param>
@@ -15,6 +15,26 @@ namespace AutomatedTeamBuilder
         {
             // Once archetype is active, it's simple to find all the effects caused by it
             ExtractMods((ElementType.ARCHETYPE, archetype.ToString()), monCtx);
+        }
+        /// <summary>
+        /// Given a weather, obtains all mods associated to it, updates Ctx
+        /// </summary>
+        /// <param name="weather">Weather</param>
+        /// <param name="monCtx">Context where to add the mods</param>
+        static void ExtractWeatherMods(Weather weather, PokemonBuildInfo monCtx)
+        {
+            // Once weather is active, it's simple to find all the effects caused by it
+            ExtractMods((ElementType.WEATHER, weather.ToString()), monCtx);
+        }
+        /// <summary>
+        /// Given a terrain, obtains all mods associated to it, updates Ctx
+        /// </summary>
+        /// <param name="terrain">Weather</param>
+        /// <param name="monCtx">Context where to add the mods</param>
+        static void ExtractTerrainMods(Terrain terrain, PokemonBuildInfo monCtx)
+        {
+            // Once terrain is active, it's simple to find all the effects caused by it
+            ExtractMods((ElementType.TERRAIN, terrain.ToString()), monCtx);
         }
         /// <summary>
         /// Obtains all mods associated to this, updates Ctx
@@ -92,6 +112,15 @@ namespace AutomatedTeamBuilder
                 if (nextEnabled.Key.Item1 == ElementType.ARCHETYPE) // Archetypes enabled are added elsewhere
                 {
                     monCtx.AdditionalArchetypes.Add(Enum.Parse<TeamArchetype>(nextEnabled.Key.Item2)); // Add the archetype as obtained from string
+                }
+                // If it enables a new terrain/weather
+                else if (nextEnabled.Key.Item1 == ElementType.WEATHER)
+                {
+                    monCtx.CurrentWeather = Enum.Parse<Weather>(nextEnabled.Key.Item2);
+                }
+                else if (nextEnabled.Key.Item1 == ElementType.TERRAIN)
+                {
+                    monCtx.CurrentTerrain = Enum.Parse<Terrain>(nextEnabled.Key.Item2);
                 }
                 else // Just update the enablement weight
                 {

@@ -12,6 +12,8 @@ namespace AutomatedTeamBuilder
     internal class TeamBuildContext
     {
         public HashSet<TeamArchetype> CurrentTeamArchetypes = new HashSet<TeamArchetype>(); // Contains an ongoing archetype that applies for all team
+        public Weather CurrentWeather = Weather.NONE; // Ongoing weather
+        public Terrain CurrentTerrain = Terrain.NONE; // Ongoing terrain
         public List<Constraint> TeamBuildConstraints = new List<Constraint>(); // Constraints applied to this team building
         public List<(PokemonType, PokemonType)> OpponentsTypes = new List<(PokemonType, PokemonType)>(); // Contains a list of all types found in opp teams
         public double[] OpponentsStats = new double[6]; // All opp stats in average
@@ -26,6 +28,8 @@ namespace AutomatedTeamBuilder
     {
         // Things that are added on the transcourse of building a set, makes some other stuff more or less desirable
         public HashSet<TeamArchetype> AdditionalArchetypes = new HashSet<TeamArchetype>(); /// Contains archetypes created by this mon
+        public Weather CurrentWeather = Weather.NONE; // Ongoing weather
+        public Terrain CurrentTerrain = Terrain.NONE; // Ongoing terrain
         public List<Constraint> AdditionalConstraints = new List<Constraint>(); /// Teambuild constraint that are added due to required builds for example I NEED a specific move
         public Dictionary<(ElementType, string), double> EnabledOptions = new Dictionary<(ElementType, string), double>(); /// Things that normally are disabled but are now enabled, and the weight by where they were just enabled
         public HashSet<(StatModifier, string)> ModifiedTypeEffectiveness = new HashSet<(StatModifier, string)>(); /// Some modified type effectiveness for receiving damage
@@ -81,34 +85,34 @@ namespace AutomatedTeamBuilder
             result.PokemonTypes = monData.Types;// Set base type
             if (pokemon.ChosenAbility?.Name == "Forecast") // Change type on weather
             {
-                if (result.AdditionalArchetypes.Contains(TeamArchetype.SUN))
+                if (result.CurrentWeather == Weather.SUN)
                 {
                     result.PokemonTypes = (PokemonType.FIRE, PokemonType.NONE);
                 }
-                if (result.AdditionalArchetypes.Contains(TeamArchetype.RAIN))
+                if (result.CurrentWeather == Weather.RAIN)
                 {
                     result.PokemonTypes = (PokemonType.WATER, PokemonType.NONE);
                 }
-                if (result.AdditionalArchetypes.Contains(TeamArchetype.SNOW))
+                if (result.CurrentWeather == Weather.SNOW)
                 {
                     result.PokemonTypes = (PokemonType.ICE, PokemonType.NONE);
                 }
             }
             else if (pokemon.ChosenAbility?.Name == "Mimicry" || pokemon.ChosenMoveset.Any(m => m.Name == "Camouflage")) // Change type on terrain
             {
-                if (result.AdditionalArchetypes.Contains(TeamArchetype.GRASSY_TERRAIN))
+                if (result.CurrentTerrain == Terrain.GRASSY)
                 {
                     result.PokemonTypes = (PokemonType.GRASS, PokemonType.NONE);
                 }
-                if (result.AdditionalArchetypes.Contains(TeamArchetype.PSY_TERRAIN))
+                if (result.CurrentTerrain == Terrain.PSYCHIC)
                 {
                     result.PokemonTypes = (PokemonType.PSYCHIC, PokemonType.NONE);
                 }
-                if (result.AdditionalArchetypes.Contains(TeamArchetype.ELE_TERRAIN))
+                if (result.CurrentTerrain == Terrain.ELECTRIC)
                 {
                     result.PokemonTypes = (PokemonType.ELECTRIC, PokemonType.NONE);
                 }
-                if (result.AdditionalArchetypes.Contains(TeamArchetype.MISTY_TERRAIN))
+                if (result.CurrentTerrain == Terrain.MISTY)
                 {
                     result.PokemonTypes = (PokemonType.FAIRY, PokemonType.NONE);
                 }
@@ -146,6 +150,8 @@ namespace AutomatedTeamBuilder
                 }
             }
             ExtractMonMods(pokemon, result);
+            ExtractWeatherMods(result.CurrentWeather, result);
+            ExtractTerrainMods(result.CurrentTerrain, result);
             // Finally, gather all flags and apply flag mods but only once (e.g. 2 instances of same flag don't stack)
             HashSet<EffectFlag> allFlags = [];
             if (pokemon.ChosenAbility != null)
@@ -161,7 +167,7 @@ namespace AutomatedTeamBuilder
                 ExtractMods((ElementType.EFFECT_FLAGS, flag.ToString()), result);
             }
             // Weather effects modify defenses accordingly
-            if (result.AdditionalArchetypes.Contains(TeamArchetype.SNOW)) // Snow makes the mon have 1.5xdef if ice
+            if (result.CurrentWeather == Weather.SNOW) // Snow makes the mon have 1.5xdef if ice
             {
                 // Check either tera 
                 bool isValidTera = (result.TeraType == PokemonType.ICE);
@@ -171,7 +177,7 @@ namespace AutomatedTeamBuilder
                     result.StatMultipliers[2] *= 1.5;
                 }
             }
-            if (result.AdditionalArchetypes.Contains(TeamArchetype.SAND)) // Sand makes the mon have 1.5 x spdef if rock
+            if (result.CurrentWeather == Weather.SAND) // Sand makes the mon have 1.5 x spdef if rock
             {
                 // Check either tera 
                 bool isValidTera = (result.TeraType == PokemonType.ROCK);
