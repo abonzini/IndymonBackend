@@ -66,10 +66,6 @@ namespace ShowdownBot
                 {
                     BotName = BotName[..18].Trim();
                 }
-                foreach (PokemonSet mon in _botTrainer.Teamsheet)
-                {
-                    mon.MovesChosenInBattle = []; // Reset move list in battle
-                }
                 // Ok try and connect
                 HttpClient client = new HttpClient(); // One use client to get assertion
                 string url = $"https://play.pokemonshowdown.com/~~showdown/action.php?act=getassertion&userid={BotName}&challstr={_challstr}";
@@ -224,7 +220,7 @@ namespace ShowdownBot
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
                         string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question (FUCK YOU FARFETCHD)
-                        string monSpecies = m.Groups[2].Value.Trim().ToLower().Replace("’", "'"); // Species of the mon (FUCK YOU FARFETCHD)
+                        string monSpecies = m.Groups[2].Value.Split(',')[0].Trim().ToLower().Replace("’", "'"); // Species of the mon (FUCK YOU FARFETCHD)
                         string status = m.Groups[3].Value.Trim().ToLower(); // Hp status
                         //Console.WriteLine($"Switch debug: {monId}->{monSpecies}->{status}");
                         if (!_monsById.TryGetValue(monId, out PokemonSet pokemonInTeam)) // Id not known yet
@@ -236,6 +232,7 @@ namespace ShowdownBot
                             _monsById.Add(monId, pokemonInTeam);
                         }
                         pokemonInTeam.ExplorationStatus?.SetStatus(status);
+                        pokemonInTeam.MovesChosenInBattle = []; // Mon just switched in, reset move memory
                     }
                 }
                 // Mon receives direct damage or hp change
@@ -375,7 +372,6 @@ namespace ShowdownBot
             else if (forcedSwitch) // Mon needs to switch no matter what
             {
                 command = $"{battle}|/choose default"; // Choose first legal option
-                currentPokemon.MovesChosenInBattle = []; // Mon will switch out, reset its moves used!
             }
             else // Then its probably a move?
             {
@@ -385,7 +381,7 @@ namespace ShowdownBot
                 {
                     // Chekc if there's logic mods
                     int moveChoice;
-                    if (tryLogicMod && currentPokemon.Item.Name.ToLower() == "dawn stone")
+                    if (tryLogicMod && currentPokemon.Item?.Name.ToLower() == "dawn stone")
                     {
                         if (currentPokemon.MovesChosenInBattle.Contains(0)) // Do 0 unless already done, in which case do all others 
                         {
@@ -396,7 +392,7 @@ namespace ShowdownBot
                             moveChoice = 0;
                         }
                     }
-                    else if (tryLogicMod && currentPokemon.Item.Name.ToLower() == "dusk stone")
+                    else if (tryLogicMod && currentPokemon.Item?.Name.ToLower() == "dusk stone")
                     {
                         if (currentPokemon.MovesChosenInBattle.Count == currentPokemon.Moves.Length) // All options have been used, reset list
                         {
@@ -426,7 +422,6 @@ namespace ShowdownBot
                                 int switchedInMon = switchIns[switchChoice];
                                 command = $"{battle}|/choose switch {switchedInMon}"; // Switch to random mon
                                 invalidChoice = false; // Move valid after all
-                                currentPokemon.MovesChosenInBattle = []; // Mon will switch out, reset its moves used!
                             }
                         }
                     }
