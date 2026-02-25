@@ -147,7 +147,7 @@ namespace AutomatedTeamBuilder
                                 // Then, define the mon's ability (unless already defined)
                                 if (mon.ChosenAbility == null) // Mon needs an ability
                                 {
-                                    List<Ability> possibleAbilities = [.. monData.Abilities]; // All possible abilities
+                                    List<Ability> possibleAbilities = [.. monData.Abilities.Where(a => !a.Flags.Contains(EffectFlag.BANNED))]; // All (non banned) possible abilities
                                     if (trainer.AutoSetItem && mon.SetItem != null) // If I can equip other set items AND set item provides useful abilities, I'll add them too
                                     {
                                         foreach (SetItem setItem in trainer.SetItems.Keys) // Need to check which set items are available
@@ -181,18 +181,11 @@ namespace AutomatedTeamBuilder
                                     {
                                         if (buildCtx.smartTeamBuild) // If smart, abilities are weighted according to how useful they are
                                         {
-                                            abilityScores.Add(GetAbilityWeight(nextAbility, mon, monCtx, buildCtx, monIndex == 0));
+                                            abilityScores.Add(GetAbilityWeight(nextAbility, mon, monCtx, buildCtx, monIndex == 0, monIndex == (trainer.BattleTeam.Count - 1)));
                                         }
                                         else // Otherwise, 1 is added unless banned
                                         {
-                                            if (nextAbility.Flags.Contains(EffectFlag.BANNED))
-                                            {
-                                                abilityScores.Add(0);
-                                            }
-                                            else
-                                            {
-                                                abilityScores.Add(1);
-                                            }
+                                            abilityScores.Add(1);
                                         }
                                     } // Gottem scores
                                     int chosenAbilityIndex = RandomIndexOfWeights(abilityScores, monRng);
@@ -215,11 +208,11 @@ namespace AutomatedTeamBuilder
                                 const int NUMBER_OF_MOVES_PER_MON = 4; // 4 moves, classic unless like, added via crazy move disk
                                 if (mon.ChosenMoveset.Count < NUMBER_OF_MOVES_PER_MON) // Time to add a next move (or empty)
                                 {
-                                    List<Move> possibleMoves = [.. monData.Moveset]; // All possible moves
+                                    List<Move> possibleMoves = [.. monData.Moveset.Where(m => !m.Flags.Contains(EffectFlag.BANNED))]; // All possible (legal) moves
                                     if (mon.Species.ToLower().Contains("unown")) // And then again, weird mechanic because I can only allow the moves that start with the unown letter
                                     {
-                                        char letter = mon.Species.ToLower().Last();
-                                        possibleMoves = [.. possibleMoves.Where(m => m.Name.StartsWith(letter))]; // Additional move filter
+                                        char letter = (mon.Species == "Unown") ? 'a' : mon.Species.ToLower().Last(); // Basic unown is A
+                                        possibleMoves = [.. possibleMoves.Where(m => m.Name.ToLower().StartsWith(letter))]; // Additional move filter
                                     }
                                     if (trainer.AutoSetItem && mon.SetItem == null) // If I can equip other set items AND set item provides useful moves, I'll add them too
                                     {
@@ -276,18 +269,11 @@ namespace AutomatedTeamBuilder
                                         {
                                             if (buildCtx.smartTeamBuild) // If smart, abilities are weighted according to how useful they are
                                             {
-                                                moveScores.Add(GetMoveWeight(nextMove, mon, monCtx, buildCtx, monIndex == 0));
+                                                moveScores.Add(GetMoveWeight(nextMove, mon, monCtx, buildCtx, monIndex == 0, monIndex == (trainer.BattleTeam.Count - 1)));
                                             }
                                             else // Otherwise, 1 is added unless banned
                                             {
-                                                if (nextMove.Flags.Contains(EffectFlag.BANNED)) // This doesnt deal with moves that are added "banned" as a special mod but this hasn't happened still 
-                                                {
-                                                    moveScores.Add(0);
-                                                }
-                                                else
-                                                {
-                                                    moveScores.Add(1);
-                                                }
+                                                moveScores.Add(1);
                                             }
                                         } // Gottem scores
                                         int chosenMoveIndex = RandomIndexOfWeights(moveScores, monRng);

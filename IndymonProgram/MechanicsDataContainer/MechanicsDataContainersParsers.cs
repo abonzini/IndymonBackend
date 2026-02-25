@@ -205,10 +205,10 @@ namespace MechanicsDataContainer
                     if (theMove == "") break; // Finished this mon's moveset
                     Move move = Moves[theMove];
                     thePokemon.Moveset.Add(move);
-                    if (theMove == "Sketch")
+                    if (theMove == "Sketch" || thePokemon.Name.ToLower().Contains("unown"))
                     {
                         thePokemon.Moveset.Clear(); // Remove whatever was there before, i can learn all anyway
-                        thePokemon.Moveset.AddRange([.. Moves.Values]); // Just add all
+                        thePokemon.Moveset.AddRange([.. Moves.Values]); // Just add all (unown will filter later)
                         break; // Stop the rest
                     }
                 }

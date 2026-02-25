@@ -48,49 +48,65 @@ namespace GameDataContainer
                     // Then, relative rows 2->21 have all the data always in order
                     for (int remainingRows = 2; (remainingRows < TRAINER_CARD_ROWS && remainingRows + i < rows.Length); remainingRows++)
                     {
+                        // Get next line w data
                         nextLine = rows[remainingRows + i].Trim().Split(",");
-                        string pokemonName = nextLine[j + 0];
-                        if (pokemonName != "") // Valid pokemon, parse
+                        // For mons
+                        bool boxArea = (remainingRows >= (2 + Trainer.MAX_MONS_IN_TEAM)); // At some point it's only boxed mons
+                        if (boxArea)
                         {
-                            MechanicsDataContainers.GlobalMechanicsData.AssertElementExistance(ElementType.POKEMON, pokemonName); // Make sure pokemon exists, no typo
-                            TrainerPokemon newPokemon = new TrainerPokemon()
+                            for (int boxIndex = 0; boxIndex < 6; boxIndex += 3) // There's 2 col of boxed mons with 3 things (no item)
                             {
-                                Species = pokemonName,
-                                Nickname = nextLine[j + 1],
-                                IsShiny = bool.Parse(nextLine[j + 2]),
-                            };
-                            // Set item
-                            string setItemName = nextLine[j + 3];
-                            if (setItemName != "")
-                            {
-                                if (!SetItems.TryGetValue(setItemName, out SetItem item)) // Creates it if doesn't exist
+                                string pokemonName = nextLine[j + boxIndex]; // Get next mon name
+                                if (pokemonName != "") // Valid pokemon, parse
                                 {
-                                    item = SetItem.Parse(setItemName);
-                                    SetItems.Add(setItemName, item);
+                                    TrainerPokemon newPokemon = new TrainerPokemon()
+                                    {
+                                        Species = pokemonName,
+                                        Nickname = nextLine[j + boxIndex + 1],
+                                        IsShiny = bool.Parse(nextLine[j + boxIndex + 2]),
+                                    };
+                                    nextTrainer.BoxedPokemon.Add(newPokemon);
                                 }
-                                newPokemon.SetItem = item;
-                                if (!item.CanEquip(newPokemon)) throw new Exception("Pokemon has an invalid set item");
                             }
-                            // Mod item
-                            string modItemName = nextLine[j + 4];
-                            if (modItemName != "")
+                        }
+                        else // Party mon
+                        {
+                            string pokemonName = nextLine[j + 0];
+                            if (pokemonName != "") // Valid pokemon, parse
                             {
-                                newPokemon.ModItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[modItemName];
-                            }
-                            // Battle item
-                            string battleItemName = nextLine[j + 5];
-                            if (battleItemName != "")
-                            {
-                                newPokemon.BattleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[battleItemName];
-                            }
-                            // Finally, add Pokemon to team
-                            if (nextTrainer.PartyPokemon.Count < Trainer.MAX_MONS_IN_TEAM) // Add to team
-                            {
+                                MechanicsDataContainers.GlobalMechanicsData.AssertElementExistance(ElementType.POKEMON, pokemonName); // Make sure pokemon exists, no typo
+                                TrainerPokemon newPokemon = new TrainerPokemon()
+                                {
+                                    Species = pokemonName,
+                                    Nickname = nextLine[j + 1],
+                                    IsShiny = bool.Parse(nextLine[j + 2]),
+                                };
+                                // Set item
+                                string setItemName = nextLine[j + 3];
+                                if (setItemName != "")
+                                {
+                                    if (!SetItems.TryGetValue(setItemName, out SetItem item)) // Creates it if doesn't exist
+                                    {
+                                        item = SetItem.Parse(setItemName);
+                                        SetItems.Add(setItemName, item);
+                                    }
+                                    newPokemon.SetItem = item;
+                                    if (!item.CanEquip(newPokemon)) throw new Exception("Pokemon has an invalid set item");
+                                }
+                                // Mod item
+                                string modItemName = nextLine[j + 4];
+                                if (modItemName != "")
+                                {
+                                    newPokemon.ModItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[modItemName];
+                                }
+                                // Battle item
+                                string battleItemName = nextLine[j + 5];
+                                if (battleItemName != "")
+                                {
+                                    newPokemon.BattleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[battleItemName];
+                                }
+                                // Finally, add Pokemon to team
                                 nextTrainer.PartyPokemon.Add(newPokemon);
-                            }
-                            else
-                            {
-                                nextTrainer.BoxedPokemon.Add(newPokemon);
                             }
                         }
                         // Next is Set items in bag so

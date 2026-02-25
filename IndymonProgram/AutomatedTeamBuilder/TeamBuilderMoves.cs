@@ -399,23 +399,24 @@ namespace AutomatedTeamBuilder
         /// <param name="monCtx">Mon ctx whete move is evaluated</param>
         /// <param name="buildCtx">Build context where everythign is evaluated</param>
         /// <param name="isFirstMon">Whether it's the first mon evaluated or not</param>
+        /// <param name="isLastMon">Whether it's the last mon evaluated or not</param>
         /// <returns>A move score</returns>
-        static double GetMoveWeight(Move move, TrainerPokemon mon, PokemonBuildInfo monCtx, TeamBuildContext buildCtx, bool isFirstMon)
+        static double GetMoveWeight(Move move, TrainerPokemon mon, PokemonBuildInfo monCtx, TeamBuildContext buildCtx, bool isFirstMon, bool isLastMon)
         {
             // Get the move mods
             HashSet<EffectFlag> allMoveFlags = ExtractMoveFlags(move, monCtx); // Get all the flags a move has
             PokemonType moveType = GetModifiedMoveType(move, monCtx); // Get the final move type for type effectiveness
             // Beginning of scoring
             double score = 1;
-            if (allMoveFlags.Contains(EffectFlag.BANNED)) // Banned moves can never be chosen
+            if (allMoveFlags.Contains(EffectFlag.DOUBLES_ONLY)) // Doubles moves can never be chosen
             {
                 return 0;
             }
-            else if (allMoveFlags.Contains(EffectFlag.DOUBLES_ONLY)) // Doubles moves can never be chosen
+            else if (isFirstMon && !allMoveFlags.Contains(EffectFlag.GOOD_FIRST_MON)) // Moves only for first mon are not chosen!
             {
                 return 0;
             }
-            else if (isFirstMon && allMoveFlags.Contains(EffectFlag.GOOD_FIRST_MON)) // Moves only for first mon are not chosen!
+            else if (isLastMon && !allMoveFlags.Contains(EffectFlag.GOOD_LAST_MON)) // Moves only for last mon are not chosen!
             {
                 return 0;
             }
