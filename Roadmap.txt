@@ -20,6 +20,7 @@ TODO:
 - Debugging of teambuilder, have a tournament working. Phase 1 complete.
 - Trainer string builder. Pre-event (used favour), post-event (item consumption). Event string of ongoing event. Class and the tourn/expl will hold it, can be obtained. TOURN or EXPL result files
 - Then, trainer stuff consumed, arithmetic and exporting, one per trainer. File exported as TRAINER_NEW output
+- Incorporate logic mod items, more sophisticated class system, maybe a logic flag instead of referencing item by name. Merge current bot
 - Reincorporate exploration manager, redo exploration manager context to include "buffable" exploration contexts (e.g. shiny stone)
 - Revise manager, fix whats wrong, team builder based on whats in the exploration, make it build too
 - Save/load expl stuff in own folder, similarly, just store teambuild seed for trainer, all can be generated from this
