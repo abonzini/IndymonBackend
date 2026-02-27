@@ -319,8 +319,8 @@ namespace MechanicsDataContainer
         void ParseEnabledOptions(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Enablement List");
-            Enablers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
-            DisabledOptions.Clear();
+            Enablers.Clear();
+            ForcedBuilds.Clear();
             // Parse csv
             string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             const int ENABLER_TYPE_COL = 0;
@@ -340,50 +340,55 @@ namespace MechanicsDataContainer
                 // Validate if all's good
                 AssertElementExistance(enablerType, enablerName);
                 AssertElementExistance(enabledType, enabledName);
-                // Add to the corresponding matrices
+                // Add to enabler list
                 if (!Enablers.TryGetValue((enablerType, enablerName), out Dictionary<(ElementType, string), double> enableds))
                 {
                     enableds = new Dictionary<(ElementType, string), double>();
                     Enablers.Add((enablerType, enablerName), enableds);
                 }
                 enableds.Add((enabledType, enabledName), weight);
-                // Also the disableds
-                DisabledOptions.Add((enabledType, enabledName));
             }
-        }
-        /// <summary>
-        /// Parses the forced builds list. This requires all data (moves,dex,etc) to be pre-parsed
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseForcedBuilds(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Forced Build List");
-            ForcedBuilds.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int FORCER_TYPE_COL = 0;
-            const int FORCER_NAME_COL = 1;
-            const int FORCED_TYPE_COL = 2;
-            const int FORCED_NAME_COL = 3;
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
+            // Then, elements that enable stuff will imply a forced build, where the inverse needs the enabler to be present
+            // However weather, terrain, archetype have an extra layer of enablement, so I add them first
+            foreach (KeyValuePair<(ElementType, string), Dictionary<(ElementType, string), double>> kvp in Enablers)
             {
-                string[] fields = lines[i].Split(","); // Csv
-                ElementType forcerType = Enum.Parse<ElementType>(fields[FORCER_TYPE_COL].Trim());
-                string forcerName = fields[FORCER_NAME_COL].Trim();
-                ElementType forcedType = Enum.Parse<ElementType>(fields[FORCED_TYPE_COL].Trim());
-                string forcedName = fields[FORCED_NAME_COL].Trim();
-                // Validate if all's good
-                AssertElementExistance(forcerType, forcerName);
-                AssertElementExistance(forcedType, forcedName);
-                // Add to the corresponding matrices
-                if (!ForcedBuilds.TryGetValue((forcerType, forcerName), out HashSet<(ElementType, string)> forceds))
+                foreach (KeyValuePair<(ElementType, string), double> enabledKvps in kvp.Value) // Find all of the enableds
                 {
-                    forceds = new HashSet<(ElementType, string)>();
-                    ForcedBuilds.Add((forcerType, forcerName), forceds);
+                    if (enabledKvps.Key.Item1 == ElementType.WEATHER || enabledKvps.Key.Item1 == ElementType.TERRAIN || enabledKvps.Key.Item1 == ElementType.ARCHETYPE) // Get the weather, terrain, archetypes
+                    {
+                        if (!ForcedBuilds.TryGetValue(enabledKvps.Key, out HashSet<(ElementType, string)> enablers))
+                        {
+                            enablers = new HashSet<(ElementType, string)>();
+                            ForcedBuilds.Add(enabledKvps.Key, enablers);
+                        }
+                        enablers.Add(kvp.Key);
+                    }
                 }
-                forceds.Add((forcedType, forcedName));
+            }
+            // Ok good, and now the whole rest of things (... a second iteration unfortunately)
+            foreach (KeyValuePair<(ElementType, string), Dictionary<(ElementType, string), double>> kvp in Enablers)
+            {
+                foreach (KeyValuePair<(ElementType, string), double> enabledKvps in kvp.Value) // Find all of the enableds
+                {
+                    if (enabledKvps.Key.Item1 == ElementType.WEATHER || enabledKvps.Key.Item1 == ElementType.TERRAIN || enabledKvps.Key.Item1 == ElementType.ARCHETYPE) // Get the weather, terrain, archetypes
+                    {
+                        continue; // These were already done...
+                    }
+                    if (!ForcedBuilds.TryGetValue(enabledKvps.Key, out HashSet<(ElementType, string)> enablers))
+                    {
+                        enablers = new HashSet<(ElementType, string)>();
+                        ForcedBuilds.Add(enabledKvps.Key, enablers);
+                    }
+                    enablers.Add(kvp.Key);
+                    // Here, the thing that enables me may be a weather, archetype, terrain, in which case I need their direct enablers
+                    if (kvp.Key.Item1 == ElementType.WEATHER || kvp.Key.Item1 == ElementType.TERRAIN || kvp.Key.Item1 == ElementType.ARCHETYPE)
+                    {
+                        if (ForcedBuilds.ContainsKey(kvp.Key))
+                        {
+                            enablers.UnionWith(ForcedBuilds[kvp.Key]); // Add all of the "parent" enablers
+                        }
+                    }
+                }
             }
         }
         /// <summary>
@@ -477,30 +482,66 @@ namespace MechanicsDataContainer
             WeightModifiers.Clear();
             // Parse csv
             string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int MODIFIER_TYPE_COL = 0;
-            const int MODIFIER_NAME_COL = 1;
-            const int MODIFIED_TYPE_COL = 2;
-            const int MODIFIED_NAME_COL = 3;
+            const int MOD_1_TYPE_COL = 0;
+            const int MOD_1_NAME_COL = 1;
+            const int MOD_2_TYPE_COL = 2;
+            const int MOD_2_NAME_COL = 3;
             const int WEIGHT_COL = 4;
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++)
             {
                 string[] fields = lines[i].Split(","); // Csv
-                ElementType modifierType = Enum.Parse<ElementType>(fields[MODIFIER_TYPE_COL].Trim());
-                string modifierName = fields[MODIFIER_NAME_COL].Trim();
-                ElementType modifiedType = Enum.Parse<ElementType>(fields[MODIFIED_TYPE_COL].Trim());
-                string modifiedName = fields[MODIFIED_NAME_COL].Trim();
+                ElementType mod1Type = Enum.Parse<ElementType>(fields[MOD_1_TYPE_COL].Trim());
+                string mod1Name = fields[MOD_1_NAME_COL].Trim();
+                ElementType mod2Type = Enum.Parse<ElementType>(fields[MOD_2_TYPE_COL].Trim());
+                string mod2Name = fields[MOD_2_NAME_COL].Trim();
                 double weight = double.Parse(fields[WEIGHT_COL]);
                 // Validate if all's good
-                AssertElementExistance(modifierType, modifierName);
-                AssertElementExistance(modifiedType, modifiedName);
-                // Add to the corresponding matrices
-                if (!WeightModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), double> modifieds))
+                AssertElementExistance(mod1Type, mod1Name);
+                AssertElementExistance(mod2Type, mod2Name);
+                // Add to the corresponding matrices, add both ways
+                if (!WeightModifiers.TryGetValue((mod1Type, mod1Name), out Dictionary<(ElementType, string), double> modifieds1))
                 {
-                    modifieds = new Dictionary<(ElementType, string), double>();
-                    WeightModifiers.Add((modifierType, modifierName), modifieds);
+                    modifieds1 = new Dictionary<(ElementType, string), double>();
+                    WeightModifiers.Add((mod1Type, mod1Name), modifieds1);
                 }
-                modifieds.Add((modifiedType, modifiedName), weight); // This should be unique
+                if (mod2Type == ElementType.WEATHER || mod2Type == ElementType.TERRAIN || mod2Type == ElementType.ARCHETYPE) // This means that mod1 will affect all that sets this
+                {
+                    if (ForcedBuilds.ContainsKey((mod2Type, mod2Name)))
+                    {
+                        foreach ((ElementType, string) enabler in ForcedBuilds[(mod2Type, mod2Name)]) // Get all enablers
+                        {
+                            modifieds1.Add((enabler.Item1, enabler.Item2), weight); // This should be unique
+                        }
+                    }
+                }
+                else // Then just add it
+                {
+                    modifieds1.Add((mod2Type, mod2Name), weight); // This should be unique
+                }
+                // The other way too (but only if not bidirectional)
+                if (mod1Name != mod2Name || mod1Type != mod2Type) // If they're exacly the same thing, don't need to add twice
+                {
+                    if (!WeightModifiers.TryGetValue((mod2Type, mod2Name), out Dictionary<(ElementType, string), double> modifieds2))
+                    {
+                        modifieds2 = new Dictionary<(ElementType, string), double>();
+                        WeightModifiers.Add((mod2Type, mod2Name), modifieds2);
+                    }
+                    if (mod1Type == ElementType.WEATHER || mod1Type == ElementType.TERRAIN || mod1Type == ElementType.ARCHETYPE) // This means that mod1 will affect all that sets this
+                    {
+                        if (ForcedBuilds.ContainsKey((mod1Type, mod1Name)))
+                        {
+                            foreach ((ElementType, string) enabler in ForcedBuilds[(mod1Type, mod1Name)]) // Get all enablers
+                            {
+                                modifieds2.Add((enabler.Item1, enabler.Item2), weight); // This should be unique
+                            }
+                        }
+                    }
+                    else // Then just add it
+                    {
+                        modifieds2.Add((mod1Type, mod1Name), weight); // This should be unique
+                    }
+                }
             }
         }
         /// <summary>

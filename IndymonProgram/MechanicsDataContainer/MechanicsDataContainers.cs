@@ -4,7 +4,7 @@ namespace MechanicsDataContainer
 {
     public partial class MechanicsDataContainers
     {
-        public static MechanicsDataContainers GlobalMechanicsData = new MechanicsDataContainers();
+        public static MechanicsDataContainers GlobalMechanicsData { get; set; } = new MechanicsDataContainers();
         /// <summary>
         /// Initializes data
         /// </summary>
@@ -31,15 +31,13 @@ namespace MechanicsDataContainer
             ParseInitialWeights(sheetId, initialWeightsTab);
             string enablementTab = lines[9].Split(",")[0];
             ParseEnabledOptions(sheetId, enablementTab);
-            string forcedBuildsTab = lines[10].Split(",")[0];
-            ParseForcedBuilds(sheetId, forcedBuildsTab);
-            string statModsTab = lines[11].Split(",")[0];
+            string statModsTab = lines[10].Split(",")[0];
             ParseStatModifiers(sheetId, statModsTab);
-            string moveModsTab = lines[12].Split(",")[0];
+            string moveModsTab = lines[11].Split(",")[0];
             ParseMoveModifiers(sheetId, moveModsTab);
-            string weightModsTab = lines[13].Split(",")[0];
+            string weightModsTab = lines[12].Split(",")[0];
             ParseWeightModifiers(sheetId, weightModsTab);
-            string fixedModsTab = lines[14].Split(",")[0];
+            string fixedModsTab = lines[13].Split(",")[0];
             ParseFixedModifiers(sheetId, fixedModsTab);
         }
         public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
@@ -50,7 +48,6 @@ namespace MechanicsDataContainer
         public Dictionary<string, Item> BattleItems = new Dictionary<string, Item>();
         public Dictionary<(ElementType, string), double> InitialWeights = new Dictionary<(ElementType, string), double>();
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> Enablers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
-        public HashSet<(ElementType, string)> DisabledOptions = new HashSet<(ElementType, string)>();
         public Dictionary<(ElementType, string), HashSet<(ElementType, string)>> ForcedBuilds = new Dictionary<(ElementType, string), HashSet<(ElementType, string)>>();
         public Dictionary<(ElementType, string), HashSet<(StatModifier, string)>> StatModifiers = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();

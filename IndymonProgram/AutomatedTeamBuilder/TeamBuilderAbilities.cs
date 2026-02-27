@@ -103,7 +103,7 @@ namespace AutomatedTeamBuilder
             (ElementType, string) flagTag = (ElementType.EFFECT_FLAGS, ability.Name);
             double result = 1;
             // Go in order, first check if disabled/enabled, then initial, then weight mods
-            if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(flagTag)) // If tag is disabled by default,
+            if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(flagTag)) // If tag is disabled by default,
             {
                 if (!monCtx.EnabledOptions.TryGetValue(flagTag, out result)) // If not enabled, then it has no weight
                 {

@@ -431,7 +431,7 @@ namespace AutomatedTeamBuilder
                 bool moveIsDamaging = move.Category != MoveCategory.STATUS;
                 // Quick check of what is disabled. Logic: If something was disabled and not re-enabled, then move can't be selected
                 double aux;
-                if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(moveNameTag))
+                if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(moveNameTag))
                 {
                     if (monCtx.EnabledOptions.TryGetValue(moveNameTag, out aux))
                     {
@@ -439,7 +439,7 @@ namespace AutomatedTeamBuilder
                     }
                     else return 0;
                 }
-                if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(moveCatTag))
+                if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(moveCatTag))
                 {
                     if (monCtx.EnabledOptions.TryGetValue(moveCatTag, out aux))
                     {
@@ -447,7 +447,7 @@ namespace AutomatedTeamBuilder
                     }
                     else return 0;
                 }
-                if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(moveOTypeTag))
+                if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(moveOTypeTag))
                 {
                     if (monCtx.EnabledOptions.TryGetValue(moveOTypeTag, out aux))
                     {
@@ -457,7 +457,7 @@ namespace AutomatedTeamBuilder
                 }
                 if (moveIsDamaging) // Few extra checks for damaging moves
                 {
-                    if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(moveTypeTag))
+                    if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(moveTypeTag))
                     {
                         if (monCtx.EnabledOptions.TryGetValue(moveTypeTag, out aux))
                         {
@@ -465,7 +465,7 @@ namespace AutomatedTeamBuilder
                         }
                         else return 0;
                     }
-                    if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(damagingMoveFlag))
+                    if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(damagingMoveFlag))
                     {
                         if (monCtx.EnabledOptions.TryGetValue(damagingMoveFlag, out aux))
                         {
@@ -477,7 +477,7 @@ namespace AutomatedTeamBuilder
                 foreach (EffectFlag effect in allMoveFlags)
                 {
                     (ElementType, string) effectTag = (ElementType.EFFECT_FLAGS, effect.ToString());
-                    if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(effectTag))
+                    if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(effectTag))
                     {
                         if (monCtx.EnabledOptions.TryGetValue(effectTag, out aux))
                         {

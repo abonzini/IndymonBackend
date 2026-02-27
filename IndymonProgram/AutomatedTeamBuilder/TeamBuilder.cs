@@ -413,7 +413,7 @@ namespace AutomatedTeamBuilder
                                         double score = 1;
                                         double aux;
                                         (ElementType, string) battleItemNameTag = (ElementType.BATTLE_ITEM, battleItem.Name);
-                                        if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(battleItemNameTag)) // If item is disabled but not re-enabled, skip it
+                                        if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(battleItemNameTag)) // If item is disabled but not re-enabled, skip it
                                         {
                                             if (monCtx.EnabledOptions.TryGetValue(battleItemNameTag, out aux))
                                             {
@@ -427,7 +427,7 @@ namespace AutomatedTeamBuilder
                                         foreach (ItemFlag flag in battleItem.Flags)
                                         {
                                             (ElementType, string) flagTag = (ElementType.ITEM_FLAGS, flag.ToString());
-                                            if (MechanicsDataContainers.GlobalMechanicsData.DisabledOptions.Contains(flagTag)) // If item is disabled but not re-enabled, skip it
+                                            if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(flagTag)) // If item is disabled but not re-enabled, skip it
                                             {
                                                 if (monCtx.EnabledOptions.TryGetValue(flagTag, out aux))
                                                 {
