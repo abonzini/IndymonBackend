@@ -146,19 +146,5 @@ namespace Utilities
             }
             return [.. result];
         }
-        /// <summary>
-        /// Returns the average of elements of array
-        /// </summary>
-        /// <param name="array">Array that contains numbers</param>
-        /// <returns>The average value of elements in array</returns>
-        public static double ArrayAverage(List<double> array)
-        {
-            double result = 0;
-            foreach (double element in array)
-            {
-                result += element;
-            }
-            return result / array.Count;
-        }
     }
 }

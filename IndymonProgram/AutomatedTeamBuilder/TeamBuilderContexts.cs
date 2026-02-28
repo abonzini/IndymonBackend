@@ -195,21 +195,18 @@ namespace AutomatedTeamBuilder
                 List<double> movesDamage = [];
                 List<List<double>> movesTypeCoverage = [];
                 // Calculate damage of moves, if no moves yet, will do some basic stab placeholders at 80BP
-                List<Move> movesToEvaluate;
-                if (pokemon.ChosenMoveset.Count > 0) // Either use the current moves
+                List<Move> movesToEvaluate = [.. pokemon.ChosenMoveset];
+                bool hypotheticalMoves = false;
+                if (!movesToEvaluate.Any(m => m.Category != MoveCategory.STATUS)) // If mon has no damaging moves (only status) will use a placeholder set of moves to get their damaging utility atleast
                 {
-                    movesToEvaluate = [.. pokemon.ChosenMoveset];
-                }
-                else // Otherwise add some generic stabs, to be able to atleast evaluate off abilities somewhat
-                {
-                    movesToEvaluate = new List<Move>();
+                    hypotheticalMoves = true;
                     if (result.PokemonTypes.Item1 != PokemonType.NONE)
                     {
                         movesToEvaluate.Add(new Move()
                         {
                             Name = "Physical 1",
                             Type = result.PokemonTypes.Item1,
-                            Bp = 80,
+                            Bp = 70,
                             Acc = 100,
                             Category = MoveCategory.PHYSICAL,
                             Flags = []
@@ -218,7 +215,7 @@ namespace AutomatedTeamBuilder
                         {
                             Name = "Special 1",
                             Type = result.PokemonTypes.Item1,
-                            Bp = 80,
+                            Bp = 70,
                             Acc = 100,
                             Category = MoveCategory.SPECIAL,
                             Flags = []
@@ -230,7 +227,7 @@ namespace AutomatedTeamBuilder
                         {
                             Name = "Physical 2",
                             Type = result.PokemonTypes.Item2,
-                            Bp = 80,
+                            Bp = 70,
                             Acc = 100,
                             Category = MoveCategory.PHYSICAL,
                             Flags = []
@@ -239,7 +236,7 @@ namespace AutomatedTeamBuilder
                         {
                             Name = "Special 2",
                             Type = result.PokemonTypes.Item2,
-                            Bp = 80,
+                            Bp = 70,
                             Acc = 100,
                             Category = MoveCategory.SPECIAL,
                             Flags = []
@@ -263,17 +260,16 @@ namespace AutomatedTeamBuilder
                         pokemon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
                         move.Name == "Freeze Dry")); // Freeze dry is SE against water
                 }
-                if (movesDamage.Count > 0) // There will be a offensive score then
-                {
-                    // Do some magic to calculate average move damage with average type coverage
-                    List<double> bestCaseMoveCoverage = GeneralUtilities.ArrayMax(movesTypeCoverage);
-                    double averageMoveDamage = GeneralUtilities.ArrayAverage(movesDamage) * GeneralUtilities.ArrayAverage(bestCaseMoveCoverage);
-                    // Finally the offensive score will be a function of the damage I do as a fucntion of the normal distro of opp HP
-                    // This makes underkills have values of <0.5, and overkills values that ->1
-                    // Improvements will then involve moves that make the move approach overkill, but increasing overkill will have diminishing returns
-                    Normal enemyHpDistro = new Normal(oppStats[0], Math.Sqrt(oppVariance[0])); // Get the std dev ofc
-                    result.DamageScore = enemyHpDistro.CumulativeDistribution(averageMoveDamage);
-                }
+                // Do some magic to calculate average move damage with average type coverage
+                List<double> bestCaseMoveCoverage = GeneralUtilities.ArrayMax(movesTypeCoverage);
+                double avgMoveDamage = hypotheticalMoves ? movesDamage.Max() : movesDamage.Average();
+                double avgCoverage = bestCaseMoveCoverage.Average();
+                double averageMoveDamage = avgMoveDamage * avgCoverage;
+                // Finally the offensive score will be a function of the damage I do as a fucntion of the normal distro of opp HP
+                // This makes underkills have values of <0.5, and overkills values that ->1
+                // Improvements will then involve moves that make the move approach overkill, but increasing overkill will have diminishing returns
+                Normal enemyHpDistro = new Normal(oppStats[0], Math.Sqrt(oppVariance[0])); // Get the std dev ofc
+                result.DamageScore = enemyHpDistro.CumulativeDistribution(averageMoveDamage);
             }
             // Defensive value calculation
             {
@@ -288,7 +284,7 @@ namespace AutomatedTeamBuilder
                 // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly
                 (PokemonType, PokemonType) defendingPokemonType = (result.TeraType != PokemonType.NONE) ? (result.TeraType, PokemonType.NONE) : result.PokemonTypes;
                 List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(defendingPokemonType, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
-                double averageStabReceived = GeneralUtilities.ArrayAverage(moveStabsReceived);
+                double averageStabReceived = moveStabsReceived.Average();
                 averageDamage *= averageStabReceived;
                 averageDamageVariance *= averageStabReceived * averageStabReceived;
                 // Do the normal thing now. Checks how "bulky" a mon is, which increases surv rating

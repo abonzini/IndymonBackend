@@ -80,7 +80,7 @@ namespace AutomatedTeamBuilder
             }
             if (nImproveFails == nImprovChecks) score = 0; // If all checks failed, ability not good
             score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
-            if (ability.Flags.Contains(EffectFlag.HEAL)) // Healing abilities that are healer are weighted on whether the mon can actually make decent use of this
+            if (ability.Flags.Contains(EffectFlag.HEAL)) // Healing abilities (or stuff that works on bulky mon) that are healer are weighted on whether the mon can actually make decent use of this
             {
                 score *= newCtx.Survivability;
             }
