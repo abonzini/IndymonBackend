@@ -34,7 +34,7 @@ namespace GameDataContainer
                     if (name == "") continue; // No trainer here, move on
                     nextTrainer.Name = name;
                     nextTrainer.DungeonIdentifier = nextLine[j + 1];
-                    nextTrainer.IMP = int.Parse(nextLine[j + 2]);
+                    nextTrainer.IMP = int.TryParse(nextLine[j + 2], out int imp) ? imp : 0;
                     nextTrainer.AutoTeam = bool.Parse(nextLine[j + 4]);
                     nextTrainer.AutoSetItem = bool.Parse(nextLine[j + 6]);
                     nextTrainer.Avatar = nextLine[j + 7];
