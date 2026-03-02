@@ -158,7 +158,7 @@ namespace MechanicsDataContainer
                 const int ABILITY_1_FIELD = 11;
                 const int ABILITY_2_FIELD = 12;
                 const int ABILITY_3_FIELD = 13;
-                const int FIRST_EVO_FIELD = 14;
+                const int PREEVO_FIELD = 14;
                 string nextPokemonName = fields[NAME_FIELD];
                 Pokemon thePokemon = Dex[nextPokemonName];
                 thePokemon.Name = nextPokemonName;
@@ -182,14 +182,13 @@ namespace MechanicsDataContainer
                 if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
                 theAbility = fields[ABILITY_3_FIELD].Trim();
                 if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
-                // Evo and prevos
-                for (int j = FIRST_EVO_FIELD; j < fields.Length; j++)
+                // Prevos
+                string preevo = fields[PREEVO_FIELD].Trim();
+                if (preevo != "") // Mon has prevo
                 {
-                    string nextEvo = fields[j].Trim();
-                    if (nextEvo == "") break; // No more evos
-                    Pokemon evo = Dex[nextEvo];
-                    evo.Prevo = thePokemon; // Also register myself in the evolution
-                    thePokemon.Evos.Add(evo);
+                    Pokemon thePreevo = Dex[preevo];
+                    thePokemon.Prevo = thePreevo; // Add each other
+                    thePreevo.Evos.Add(thePokemon);
                 }
             }
             // Next step, process the learnset
