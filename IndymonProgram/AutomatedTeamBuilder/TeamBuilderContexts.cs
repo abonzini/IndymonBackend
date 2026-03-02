@@ -262,14 +262,25 @@ namespace AutomatedTeamBuilder
                 }
                 // Do some magic to calculate average move damage with average type coverage
                 List<double> bestCaseMoveCoverage = GeneralUtilities.ArrayMax(movesTypeCoverage);
-                double avgMoveDamage = hypotheticalMoves ? movesDamage.Max() : movesDamage.Average();
-                double avgCoverage = bestCaseMoveCoverage.Average();
-                double averageMoveDamage = avgMoveDamage * avgCoverage;
+                double avgMoveDamage;
+                if (hypotheticalMoves)
+                {
+                    avgMoveDamage = movesDamage.Max() * bestCaseMoveCoverage.Average();
+                    const double MIN_DAMAGE_PRECENT = 0.2; // Cap min damage to 20% of opp hp, assuming scald, seismic toss would be better in these cases
+                    if ((MIN_DAMAGE_PRECENT * oppStats[0]) > avgMoveDamage)
+                    {
+                        avgMoveDamage = oppStats[0] * MIN_DAMAGE_PRECENT;
+                    }
+                }
+                else
+                {
+                    avgMoveDamage = movesDamage.Average() * bestCaseMoveCoverage.Average();
+                }
                 // Finally the offensive score will be a function of the damage I do as a fucntion of the normal distro of opp HP
                 // This makes underkills have values of <0.5, and overkills values that ->1
                 // Improvements will then involve moves that make the move approach overkill, but increasing overkill will have diminishing returns
                 Normal enemyHpDistro = new Normal(oppStats[0], Math.Sqrt(oppVariance[0])); // Get the std dev ofc
-                result.DamageScore = enemyHpDistro.CumulativeDistribution(averageMoveDamage);
+                result.DamageScore = enemyHpDistro.CumulativeDistribution(avgMoveDamage);
             }
             // Defensive value calculation
             {
