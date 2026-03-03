@@ -16,7 +16,6 @@ White Monastery -> Justice -> Dawn Stone
 
 ---
 TODO:
-- Finish indymon season
 - Debugging of teambuilder, have a tournament working. Phase 1 complete.
 - Trainer string builder. Pre-event (used favour), post-event (item consumption). Event string of ongoing event. Class and the tourn/expl will hold it, can be obtained. TOURN or EXPL result files
 - Export all trainers option, quick sorting and stuff
