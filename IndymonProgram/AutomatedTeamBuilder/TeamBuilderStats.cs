@@ -17,15 +17,15 @@
             double[] baseStats = (isOpponent) ? battleContext.OpponentsStats : monCtx.MonStats;
             int[] evs = (isOpponent) ? [0, 0, 0, 0, 0, 0] : monCtx.Evs;
             double[] multipliers = (isOpponent) ? monCtx.OppStatMultipliers : monCtx.StatMultipliers;
-            int[] boosts = (isOpponent) ? monCtx.OppStatBoosts : monCtx.StatBoosts;
-            int boostsMultiplier = (isOpponent) ? monCtx.OppStatBoostsMultiplier : monCtx.StatBoostsMultiplier;
+            double[] boosts = (isOpponent) ? monCtx.OppStatBoosts : monCtx.StatBoosts;
+            double boostsMultiplier = (isOpponent) ? monCtx.OppStatBoostsMultiplier : monCtx.StatBoostsMultiplier;
             double[] variances = (isOpponent) ? battleContext.OppStatVariance : [0, 0, 0, 0, 0, 0]; // Only opp will have variance
             // Calculat stats (except boosts)
             for (int i = 0; i < 6; i++)
             {
                 // Stat formula
-                double theStat = baseStats[0] * 2;
-                double theVariance = variances[0] * 2 * 2;
+                double theStat = baseStats[i] * 2;
+                double theVariance = variances[i] * 2 * 2;
                 theStat += 31 + (evs[i] / 4); // Use 31 IV always don't go too deep here. No variance as it is a sum
                 // There would be a level/100 here but only add if really will implement lvl mods
                 theStat += (i == 0) ? 105 : 5; // Also level based. Hp gains Lvl+5. No variance gain
@@ -49,19 +49,19 @@
             for (int i = 0; i < 6; i++)
             {
                 // Check boost amount (+highest stat if any)
-                int theBoost = boosts[i];
-                if (i == highestStatIndex)
+                double theBoost = boosts[i];
+                if (!isOpponent && i == highestStatIndex) // Opp doesn't have "highest stat boost" options
                 {
-                    theBoost += boosts[7];
+                    theBoost += boosts[6];
                     theBoost *= boostsMultiplier; // Multiplier applied last to all possible boosts
                     theBoost = Math.Clamp(theBoost, -6, 6); // Clamp in case it overflows
                 }
                 // Calculate the boost itself
-                int num = 2;
-                int den = 2;
+                double num = 2;
+                double den = 2;
                 if (theBoost > 0) num += theBoost;
-                if (theBoost < 0) den += theBoost;
-                double boostMultiplier = ((double)num) / ((double)den); // Not sure how much is necessary but may be a rounding problem otherwise
+                if (theBoost < 0) den -= theBoost;
+                double boostMultiplier = num / den; // Not sure how much is necessary but may be a rounding problem otherwise
                 resultingStats[i] *= boostMultiplier;
                 resultingStatVariance[i] *= boostMultiplier * boostMultiplier;
             }

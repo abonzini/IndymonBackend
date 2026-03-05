@@ -156,7 +156,6 @@ namespace IndymonBackendProgram
             // Reset the tournament if one was already in progress
             OngoingTournament.ResetTournament();
             // Ok not bad, next step is to update participant team sheet if needed
-            List<Trainer> allParticipants = new List<Trainer>();
             foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // First, choose all trainer mons
             {
                 string participantName = participantData.Item1;
@@ -165,7 +164,6 @@ namespace IndymonBackendProgram
                 // Indymon S2 addition, confirm sets now does the smart teambuild
                 List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions); // Get all of the possible sets that would satisfy this
                 TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds); // Chooses one of the sets, prepares the mons
-                allParticipants.Add(participant);
             }
             foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // Then, build for each trainer
             {

@@ -107,265 +107,279 @@ namespace AutomatedTeamBuilder
         static void ExtractMods((ElementType, string) element, PokemonBuildInfo monCtx)
         {
             // First, what this element enables
-            foreach (KeyValuePair<(ElementType, string), double> nextEnabled in MechanicsDataContainers.GlobalMechanicsData.Enablers[element]) // One by one what this thing enables
+            if (MechanicsDataContainers.GlobalMechanicsData.Enablers.TryGetValue(element, out Dictionary<(ElementType, string), double> enabledBy))
             {
-                if (nextEnabled.Key.Item1 == ElementType.ARCHETYPE) // Archetypes enabled are added elsewhere
+                foreach (KeyValuePair<(ElementType, string), double> nextEnabled in enabledBy) // One by one what this thing enables
                 {
-                    monCtx.AdditionalArchetypes.Add(Enum.Parse<TeamArchetype>(nextEnabled.Key.Item2)); // Add the archetype as obtained from string
-                }
-                // If it enables a new terrain/weather
-                else if (nextEnabled.Key.Item1 == ElementType.WEATHER)
-                {
-                    monCtx.CurrentWeather = Enum.Parse<Weather>(nextEnabled.Key.Item2);
-                }
-                else if (nextEnabled.Key.Item1 == ElementType.TERRAIN)
-                {
-                    monCtx.CurrentTerrain = Enum.Parse<Terrain>(nextEnabled.Key.Item2);
-                }
-                else // Just update the enablement weight
-                {
-                    if (!monCtx.EnabledOptions.ContainsKey(nextEnabled.Key))
+                    if (nextEnabled.Key.Item1 == ElementType.ARCHETYPE) // Archetypes enabled are added elsewhere
                     {
-                        monCtx.EnabledOptions.Add(nextEnabled.Key, 1);
+                        monCtx.AdditionalArchetypes.Add(Enum.Parse<TeamArchetype>(nextEnabled.Key.Item2)); // Add the archetype as obtained from string
                     }
-                    monCtx.EnabledOptions[nextEnabled.Key] *= nextEnabled.Value;
+                    // If it enables a new terrain/weather
+                    else if (nextEnabled.Key.Item1 == ElementType.WEATHER)
+                    {
+                        monCtx.CurrentWeather = Enum.Parse<Weather>(nextEnabled.Key.Item2);
+                    }
+                    else if (nextEnabled.Key.Item1 == ElementType.TERRAIN)
+                    {
+                        monCtx.CurrentTerrain = Enum.Parse<Terrain>(nextEnabled.Key.Item2);
+                    }
+                    else // Just update the enablement weight
+                    {
+                        if (!monCtx.EnabledOptions.ContainsKey(nextEnabled.Key))
+                        {
+                            monCtx.EnabledOptions.Add(nextEnabled.Key, 1);
+                        }
+                        monCtx.EnabledOptions[nextEnabled.Key] *= nextEnabled.Value;
+                    }
                 }
             }
             // Then, forceds. If an item/ability/move asks for something to exist no matter what
-            Constraint moddedConstraints = new Constraint();
-            moddedConstraints.Operation = ConstraintOperation.OR;
-            foreach ((ElementType, string) nextForced in MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds[element]) // Finds what this element forces, if forces multiple things, only one needs to fulfill
+            if (element.Item1 != ElementType.WEATHER && element.Item1 != ElementType.TERRAIN) // Keep in mind a weather existing doesn't "ask" for anything because it's already ongoging, it was just enabled
             {
-                moddedConstraints.AllConstraints.Add(nextForced);
-            }
-            if (moddedConstraints.AllConstraints.Count > 0)
-            {
-                monCtx.AdditionalConstraints.Add(moddedConstraints);
+                Constraint moddedConstraints = new Constraint
+                {
+                    Operation = ConstraintOperation.OR
+                };
+                if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.TryGetValue(element, out HashSet<(ElementType, string)> forcedBy))
+                {
+                    foreach ((ElementType, string) nextForced in forcedBy) // Finds what this element forces, if forces multiple things, only one needs to fulfill
+                    {
+                        moddedConstraints.AllConstraints.Add(nextForced);
+                    }
+                    if (moddedConstraints.AllConstraints.Count > 0)
+                    {
+                        monCtx.AdditionalConstraints.Add(moddedConstraints);
+                    }
+                }
             }
             // Then, stat mods, these are funny because some mods are applied directly
-            foreach ((StatModifier, string) statMod in MechanicsDataContainers.GlobalMechanicsData.StatModifiers[element])
+            if (MechanicsDataContainers.GlobalMechanicsData.StatModifiers.TryGetValue(element, out HashSet<(StatModifier, string)> statMods))
             {
-                int auxIndex; // This may be useful as many of these mod affect stats
-                int auxInt;
-                int[] auxStatBoostArray;
-                switch (statMod.Item1)
+                foreach ((StatModifier, string) statMod in statMods)
                 {
-                    case StatModifier.WEIGHT_MULTIPLIER:
-                        monCtx.MonWeight *= double.Parse(statMod.Item2);
-                        break;
-                    case StatModifier.HP_MULTIPLIER:
-                    case StatModifier.ATTACK_MULTIPLIER:
-                    case StatModifier.DEFENSE_MULTIPLIER:
-                    case StatModifier.SPECIAL_ATTACK_MULTIPLIER:
-                    case StatModifier.SPECIAL_DEFENSE_MULTIPLIER:
-                    case StatModifier.SPEED_MULTIPLIER:
-                        auxIndex = statMod.Item1 switch
-                        {
-                            StatModifier.HP_MULTIPLIER => 0,
-                            StatModifier.ATTACK_MULTIPLIER => 1,
-                            StatModifier.DEFENSE_MULTIPLIER => 2,
-                            StatModifier.SPECIAL_ATTACK_MULTIPLIER => 3,
-                            StatModifier.SPECIAL_DEFENSE_MULTIPLIER => 4,
-                            StatModifier.SPEED_MULTIPLIER => 5,
-                            _ => throw new Exception("???")
-                        };
-                        monCtx.StatMultipliers[auxIndex] *= double.Parse(statMod.Item2);
-                        break;
-                    case StatModifier.PHYSICAL_ACCURACY_MULTIPLIER:
-                        monCtx.PhysicalAccuracyMultiplier *= double.Parse(statMod.Item2);
-                        break;
-                    case StatModifier.SPECIAL_ACCURACY_MULTIPLIER:
-                        monCtx.SpecialAccuracyMultiplier *= double.Parse(statMod.Item2);
-                        break;
-                    case StatModifier.OPP_HP_MULTIPLIER:
-                    case StatModifier.OPP_ATTACK_MULTIPLIER:
-                    case StatModifier.OPP_DEFENSE_MULTIPLIER:
-                    case StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER:
-                    case StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER:
-                    case StatModifier.OPP_SPEED_MULTIPLIER:
-                        auxIndex = statMod.Item1 switch
-                        {
-                            StatModifier.OPP_HP_MULTIPLIER => 0,
-                            StatModifier.OPP_ATTACK_MULTIPLIER => 1,
-                            StatModifier.OPP_DEFENSE_MULTIPLIER => 2,
-                            StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER => 3,
-                            StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER => 4,
-                            StatModifier.OPP_SPEED_MULTIPLIER => 5,
-                            _ => throw new Exception("???")
-                        };
-                        monCtx.OppStatMultipliers[auxIndex] *= double.Parse(statMod.Item2);
-                        break;
-                    case StatModifier.ATTACK_BOOST:
-                    case StatModifier.DEFENSE_BOOST:
-                    case StatModifier.SPECIAL_ATTACK_BOOST:
-                    case StatModifier.SPECIAL_DEFENSE_BOOST:
-                    case StatModifier.SPEED_BOOST:
-                    case StatModifier.OPP_ATTACK_BOOST:
-                    case StatModifier.OPP_DEFENSE_BOOST:
-                    case StatModifier.OPP_SPECIAL_ATTACK_BOOST:
-                    case StatModifier.OPP_SPECIAL_DEFENSE_BOOST:
-                    case StatModifier.OPP_SPEED_BOOST:
-                        switch (statMod.Item1)
-                        {
-                            case StatModifier.ATTACK_BOOST:
-                                auxIndex = 1;
-                                auxStatBoostArray = monCtx.StatBoosts;
-                                break;
-                            case StatModifier.DEFENSE_BOOST:
-                                auxIndex = 2;
-                                auxStatBoostArray = monCtx.StatBoosts;
-                                break;
-                            case StatModifier.SPECIAL_ATTACK_BOOST:
-                                auxIndex = 3;
-                                auxStatBoostArray = monCtx.StatBoosts;
-                                break;
-                            case StatModifier.SPECIAL_DEFENSE_BOOST:
-                                auxIndex = 4;
-                                auxStatBoostArray = monCtx.StatBoosts;
-                                break;
-                            case StatModifier.SPEED_BOOST:
-                                auxIndex = 5;
-                                auxStatBoostArray = monCtx.StatBoosts;
-                                break;
-                            case StatModifier.OPP_ATTACK_BOOST:
-                                auxIndex = 1;
-                                auxStatBoostArray = monCtx.OppStatBoosts;
-                                break;
-                            case StatModifier.OPP_DEFENSE_BOOST:
-                                auxIndex = 2;
-                                auxStatBoostArray = monCtx.OppStatBoosts;
-                                break;
-                            case StatModifier.OPP_SPECIAL_ATTACK_BOOST:
-                                auxIndex = 3;
-                                auxStatBoostArray = monCtx.OppStatBoosts;
-                                break;
-                            case StatModifier.OPP_SPECIAL_DEFENSE_BOOST:
-                                auxIndex = 4;
-                                auxStatBoostArray = monCtx.OppStatBoosts;
-                                break;
-                            case StatModifier.OPP_SPEED_BOOST:
-                                auxIndex = 5;
-                                auxStatBoostArray = monCtx.OppStatBoosts;
-                                break;
-                            default:
-                                throw new Exception("???");
-                        }
-                        auxInt = auxStatBoostArray[auxIndex] + int.Parse(statMod.Item2); // Add next boost to current boosts
-                        auxInt = Math.Clamp(auxInt, -6, 6); // Stat boost can't surpass 6
-                        auxStatBoostArray[auxIndex] = auxInt;
-                        break;
-                    case StatModifier.CRIT_BOOST:
-                        monCtx.CriticalStages += int.Parse(statMod.Item2);
-                        break;
-                    case StatModifier.HIGHEST_STAT_BOOST:
-                        monCtx.OppStatBoosts[6] += int.Parse(statMod.Item2); // Will be stored here and calculated later
-                        break;
-                    case StatModifier.ALL_BOOSTS:
-                        monCtx.StatBoostsMultiplier *= int.Parse(statMod.Item2);
-                        break;
-                    case StatModifier.ALL_OPP_BOOSTS:
-                        monCtx.OppStatBoostsMultiplier *= int.Parse(statMod.Item2);
-                        break;
-                    case StatModifier.HP_EV:
-                    case StatModifier.ATK_EV:
-                    case StatModifier.DEF_EV:
-                    case StatModifier.SPATK_EV:
-                    case StatModifier.SPDEF_EV:
-                    case StatModifier.SPEED_EV:
-                        auxIndex = statMod.Item1 switch
-                        {
-                            StatModifier.HP_EV => 0,
-                            StatModifier.ATK_EV => 1,
-                            StatModifier.DEF_EV => 2,
-                            StatModifier.SPATK_EV => 3,
-                            StatModifier.SPDEF_EV => 4,
-                            StatModifier.SPEED_EV => 5,
-                            _ => throw new Exception("???")
-                        };
-                        monCtx.Evs[auxIndex] += int.Parse(statMod.Item2);
-                        break;
-                    case StatModifier.NATURE:
-                        monCtx.Nature = Enum.Parse<Nature>(statMod.Item2);
-                        break;
-                    case StatModifier.TYPE_1:
-                        monCtx.PokemonTypes = (Enum.Parse<PokemonType>(statMod.Item2), monCtx.PokemonTypes.Item2);
-                        break;
-                    case StatModifier.TYPE_2:
-                        monCtx.PokemonTypes = (monCtx.PokemonTypes.Item1, Enum.Parse<PokemonType>(statMod.Item2));
-                        break;
-                    case StatModifier.TERA:
-                        monCtx.TeraType = Enum.Parse<PokemonType>(statMod.Item2);
-                        break;
-                    case StatModifier.NULLIFIES_RECV_DAMAGE_OF_TYPE: // If this happens, deal with later during the calc
-                    case StatModifier.DOUBLES_RECV_DAMAGE_OF_TYPE:
-                    case StatModifier.HALVES_RECV_DAMAGE_OF_TYPE:
-                    case StatModifier.HALVES_RECV_SE_DAMAGE_OF_TYPE:
-                    case StatModifier.ALTER_RECV_SE_DAMAGE:
-                    case StatModifier.ALTER_RECV_NON_SE_DAMAGE:
-                        monCtx.ModifiedTypeEffectiveness.Add(statMod);
-                        break;
-                    default:
-                        throw new Exception("Unhandled stat boost");
+                    int auxIndex; // This may be useful as many of these mod affect stats
+                    double auxDouble;
+                    double[] auxStatBoostArray;
+                    switch (statMod.Item1)
+                    {
+                        case StatModifier.WEIGHT_MULTIPLIER:
+                            monCtx.MonWeight *= double.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.HP_MULTIPLIER:
+                        case StatModifier.ATTACK_MULTIPLIER:
+                        case StatModifier.DEFENSE_MULTIPLIER:
+                        case StatModifier.SPECIAL_ATTACK_MULTIPLIER:
+                        case StatModifier.SPECIAL_DEFENSE_MULTIPLIER:
+                        case StatModifier.SPEED_MULTIPLIER:
+                            auxIndex = statMod.Item1 switch
+                            {
+                                StatModifier.HP_MULTIPLIER => 0,
+                                StatModifier.ATTACK_MULTIPLIER => 1,
+                                StatModifier.DEFENSE_MULTIPLIER => 2,
+                                StatModifier.SPECIAL_ATTACK_MULTIPLIER => 3,
+                                StatModifier.SPECIAL_DEFENSE_MULTIPLIER => 4,
+                                StatModifier.SPEED_MULTIPLIER => 5,
+                                _ => throw new Exception("???")
+                            };
+                            monCtx.StatMultipliers[auxIndex] *= double.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.OPP_HP_MULTIPLIER:
+                        case StatModifier.OPP_ATTACK_MULTIPLIER:
+                        case StatModifier.OPP_DEFENSE_MULTIPLIER:
+                        case StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER:
+                        case StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER:
+                        case StatModifier.OPP_SPEED_MULTIPLIER:
+                            auxIndex = statMod.Item1 switch
+                            {
+                                StatModifier.OPP_HP_MULTIPLIER => 0,
+                                StatModifier.OPP_ATTACK_MULTIPLIER => 1,
+                                StatModifier.OPP_DEFENSE_MULTIPLIER => 2,
+                                StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER => 3,
+                                StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER => 4,
+                                StatModifier.OPP_SPEED_MULTIPLIER => 5,
+                                _ => throw new Exception("???")
+                            };
+                            monCtx.OppStatMultipliers[auxIndex] *= double.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.ATTACK_BOOST:
+                        case StatModifier.DEFENSE_BOOST:
+                        case StatModifier.SPECIAL_ATTACK_BOOST:
+                        case StatModifier.SPECIAL_DEFENSE_BOOST:
+                        case StatModifier.SPEED_BOOST:
+                        case StatModifier.OPP_ATTACK_BOOST:
+                        case StatModifier.OPP_DEFENSE_BOOST:
+                        case StatModifier.OPP_SPECIAL_ATTACK_BOOST:
+                        case StatModifier.OPP_SPECIAL_DEFENSE_BOOST:
+                        case StatModifier.OPP_SPEED_BOOST:
+                            switch (statMod.Item1)
+                            {
+                                case StatModifier.ATTACK_BOOST:
+                                    auxIndex = 1;
+                                    auxStatBoostArray = monCtx.StatBoosts;
+                                    break;
+                                case StatModifier.DEFENSE_BOOST:
+                                    auxIndex = 2;
+                                    auxStatBoostArray = monCtx.StatBoosts;
+                                    break;
+                                case StatModifier.SPECIAL_ATTACK_BOOST:
+                                    auxIndex = 3;
+                                    auxStatBoostArray = monCtx.StatBoosts;
+                                    break;
+                                case StatModifier.SPECIAL_DEFENSE_BOOST:
+                                    auxIndex = 4;
+                                    auxStatBoostArray = monCtx.StatBoosts;
+                                    break;
+                                case StatModifier.SPEED_BOOST:
+                                    auxIndex = 5;
+                                    auxStatBoostArray = monCtx.StatBoosts;
+                                    break;
+                                case StatModifier.OPP_ATTACK_BOOST:
+                                    auxIndex = 1;
+                                    auxStatBoostArray = monCtx.OppStatBoosts;
+                                    break;
+                                case StatModifier.OPP_DEFENSE_BOOST:
+                                    auxIndex = 2;
+                                    auxStatBoostArray = monCtx.OppStatBoosts;
+                                    break;
+                                case StatModifier.OPP_SPECIAL_ATTACK_BOOST:
+                                    auxIndex = 3;
+                                    auxStatBoostArray = monCtx.OppStatBoosts;
+                                    break;
+                                case StatModifier.OPP_SPECIAL_DEFENSE_BOOST:
+                                    auxIndex = 4;
+                                    auxStatBoostArray = monCtx.OppStatBoosts;
+                                    break;
+                                case StatModifier.OPP_SPEED_BOOST:
+                                    auxIndex = 5;
+                                    auxStatBoostArray = monCtx.OppStatBoosts;
+                                    break;
+                                default:
+                                    throw new Exception("???");
+                            }
+                            auxDouble = auxStatBoostArray[auxIndex] + double.Parse(statMod.Item2); // Add next boost to current boosts
+                            auxDouble = Math.Clamp(auxDouble, -6, 6); // Stat boost can't surpass 6
+                            auxStatBoostArray[auxIndex] = auxDouble;
+                            break;
+                        case StatModifier.CRIT_BOOST:
+                            monCtx.CriticalStages += int.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.HIGHEST_STAT_BOOST:
+                            monCtx.OppStatBoosts[6] += int.Parse(statMod.Item2); // Will be stored here and calculated later
+                            break;
+                        case StatModifier.ALL_BOOSTS:
+                            monCtx.StatBoostsMultiplier *= int.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.ALL_OPP_BOOSTS:
+                            monCtx.OppStatBoostsMultiplier *= int.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.HP_EV:
+                        case StatModifier.ATK_EV:
+                        case StatModifier.DEF_EV:
+                        case StatModifier.SPATK_EV:
+                        case StatModifier.SPDEF_EV:
+                        case StatModifier.SPEED_EV:
+                            auxIndex = statMod.Item1 switch
+                            {
+                                StatModifier.HP_EV => 0,
+                                StatModifier.ATK_EV => 1,
+                                StatModifier.DEF_EV => 2,
+                                StatModifier.SPATK_EV => 3,
+                                StatModifier.SPDEF_EV => 4,
+                                StatModifier.SPEED_EV => 5,
+                                _ => throw new Exception("???")
+                            };
+                            monCtx.Evs[auxIndex] += int.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.NATURE:
+                            monCtx.Nature = Enum.Parse<Nature>(statMod.Item2);
+                            break;
+                        case StatModifier.TYPE_1:
+                            monCtx.PokemonTypes = (Enum.Parse<PokemonType>(statMod.Item2), monCtx.PokemonTypes.Item2);
+                            break;
+                        case StatModifier.TYPE_2:
+                            monCtx.PokemonTypes = (monCtx.PokemonTypes.Item1, Enum.Parse<PokemonType>(statMod.Item2));
+                            break;
+                        case StatModifier.TERA:
+                            monCtx.TeraType = Enum.Parse<PokemonType>(statMod.Item2);
+                            break;
+                        case StatModifier.NULLIFIES_RECV_DAMAGE_OF_TYPE: // If this happens, deal with later during the calc
+                        case StatModifier.DOUBLES_RECV_DAMAGE_OF_TYPE:
+                        case StatModifier.HALVES_RECV_DAMAGE_OF_TYPE:
+                        case StatModifier.HALVES_RECV_SE_DAMAGE_OF_TYPE:
+                        case StatModifier.ALTER_RECV_SE_DAMAGE:
+                        case StatModifier.ALTER_RECV_NON_SE_DAMAGE:
+                            monCtx.ModifiedTypeEffectiveness.Add(statMod);
+                            break;
+                        default:
+                            throw new Exception("Unhandled stat boost");
+                    }
                 }
             }
             // Then, move mods, add all move mods to queue
-            foreach (KeyValuePair<(ElementType, string), Dictionary<MoveModifier, string>> nextMoveMod in MechanicsDataContainers.GlobalMechanicsData.MoveModifiers[element]) // Modifies moves accordingly
+            if (MechanicsDataContainers.GlobalMechanicsData.MoveModifiers.TryGetValue(element, out Dictionary<(ElementType, string), Dictionary<MoveModifier, string>> moveMod))
             {
-                // Move mods are very complex so I'd rather split them into 5 parts (all the mods currently)
-                if (nextMoveMod.Value.TryGetValue(MoveModifier.MOVE_BP_MOD, out string auxValue)) // There's a BP mod
+                foreach (KeyValuePair<(ElementType, string), Dictionary<MoveModifier, string>> nextMoveMod in moveMod) // Modifies moves accordingly
                 {
-                    double modValue = double.Parse(auxValue);
-                    if (!monCtx.MoveBpMods.ContainsKey(nextMoveMod.Key))
+                    // Move mods are very complex so I'd rather split them into 5 parts (all the mods currently)
+                    if (nextMoveMod.Value.TryGetValue(MoveModifier.MOVE_BP_MOD, out string auxValue)) // There's a BP mod
                     {
-                        monCtx.MoveBpMods.Add(nextMoveMod.Key, 1);
+                        double modValue = double.Parse(auxValue);
+                        if (!monCtx.MoveBpMods.ContainsKey(nextMoveMod.Key))
+                        {
+                            monCtx.MoveBpMods.Add(nextMoveMod.Key, 1);
+                        }
+                        monCtx.MoveBpMods[nextMoveMod.Key] *= modValue;
                     }
-                    monCtx.MoveBpMods[nextMoveMod.Key] *= modValue;
-                }
-                if (nextMoveMod.Value.TryGetValue(MoveModifier.MOVE_ACC_MOD, out auxValue)) // There's an acc mod
-                {
-                    double modValue = double.Parse(auxValue);
-                    if (!monCtx.MoveAccMods.ContainsKey(nextMoveMod.Key))
+                    if (nextMoveMod.Value.TryGetValue(MoveModifier.MOVE_ACC_MOD, out auxValue)) // There's an acc mod
                     {
-                        monCtx.MoveAccMods.Add(nextMoveMod.Key, 1);
+                        double modValue = double.Parse(auxValue);
+                        if (!monCtx.MoveAccMods.ContainsKey(nextMoveMod.Key))
+                        {
+                            monCtx.MoveAccMods.Add(nextMoveMod.Key, 1);
+                        }
+                        monCtx.MoveAccMods[nextMoveMod.Key] *= modValue;
                     }
-                    monCtx.MoveAccMods[nextMoveMod.Key] *= modValue;
-                }
-                if (nextMoveMod.Value.TryGetValue(MoveModifier.MOVE_TYPE_MOD, out auxValue))
-                {
-                    PokemonType modType = Enum.Parse<PokemonType>(auxValue);
-                    monCtx.MoveTypeMods[nextMoveMod.Key] = modType; // This one is weird because if exists, ill just need to replace, shouldn't happen tho
-                }
-                if (nextMoveMod.Value.TryGetValue(MoveModifier.ADD_FLAG, out auxValue))
-                {
-                    EffectFlag flag = Enum.Parse<EffectFlag>(auxValue);
-                    if (!monCtx.AllAddedFlags.TryGetValue(nextMoveMod.Key, out HashSet<EffectFlag> value))
+                    if (nextMoveMod.Value.TryGetValue(MoveModifier.MOVE_TYPE_MOD, out auxValue))
                     {
-                        value = [];
-                        monCtx.AllAddedFlags.Add(nextMoveMod.Key, value);
+                        PokemonType modType = Enum.Parse<PokemonType>(auxValue);
+                        monCtx.MoveTypeMods[nextMoveMod.Key] = modType; // This one is weird because if exists, ill just need to replace, shouldn't happen tho
                     }
+                    if (nextMoveMod.Value.TryGetValue(MoveModifier.ADD_FLAG, out auxValue))
+                    {
+                        EffectFlag flag = Enum.Parse<EffectFlag>(auxValue);
+                        if (!monCtx.AllAddedFlags.TryGetValue(nextMoveMod.Key, out HashSet<EffectFlag> value))
+                        {
+                            value = [];
+                            monCtx.AllAddedFlags.Add(nextMoveMod.Key, value);
+                        }
 
-                    value.Add(flag);
-                }
-                if (nextMoveMod.Value.TryGetValue(MoveModifier.REMOVE_FLAG, out auxValue))
-                {
-                    EffectFlag flag = Enum.Parse<EffectFlag>(auxValue);
-                    if (!monCtx.AllRemovedFlags.TryGetValue(nextMoveMod.Key, out HashSet<EffectFlag> value))
-                    {
-                        value = [];
-                        monCtx.AllRemovedFlags.Add(nextMoveMod.Key, value);
+                        value.Add(flag);
                     }
+                    if (nextMoveMod.Value.TryGetValue(MoveModifier.REMOVE_FLAG, out auxValue))
+                    {
+                        EffectFlag flag = Enum.Parse<EffectFlag>(auxValue);
+                        if (!monCtx.AllRemovedFlags.TryGetValue(nextMoveMod.Key, out HashSet<EffectFlag> value))
+                        {
+                            value = [];
+                            monCtx.AllRemovedFlags.Add(nextMoveMod.Key, value);
+                        }
 
-                    value.Add(flag);
+                        value.Add(flag);
+                    }
                 }
             }
             // Then, weight mods, these ones are funny because they need to re-multiply if already existing
-            foreach (KeyValuePair<(ElementType, string), double> weightMod in MechanicsDataContainers.GlobalMechanicsData.WeightModifiers[element])
+            if (MechanicsDataContainers.GlobalMechanicsData.WeightModifiers.TryGetValue(element, out Dictionary<(ElementType, string), double> weigthMods))
             {
-                if (!monCtx.WeightMods.ContainsKey(weightMod.Key))
+                foreach (KeyValuePair<(ElementType, string), double> weightMod in weigthMods)
                 {
-                    monCtx.EnabledOptions.Add(weightMod.Key, 1);
+                    if (!monCtx.WeightMods.ContainsKey(weightMod.Key))
+                    {
+                        monCtx.WeightMods.Add(weightMod.Key, 1);
+                    }
+                    monCtx.WeightMods[weightMod.Key] *= weightMod.Value;
                 }
-                monCtx.EnabledOptions[weightMod.Key] *= weightMod.Value;
             }
         }
     }

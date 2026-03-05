@@ -59,3 +59,5 @@ nunit-*.xml
 # Own thing
 indy.mon
 tournament_stats.*
+tourn_stats.*
+*.json

@@ -27,7 +27,8 @@ namespace MechanicsDataContainer
                 ElementType.EFFECT_FLAGS => Enum.TryParse<EffectFlag>(name, true, out _),
                 ElementType.DAMAGING_MOVE_OF_TYPE or ElementType.ORIGINAL_TYPE_OF_MOVE => Enum.TryParse<PokemonType>(name, true, out _),
                 ElementType.MOVE_CATEGORY => Enum.TryParse<MoveCategory>(name, true, out _),
-                ElementType.ANY_DAMAGING_MOVE => true,
+                ElementType.ANY_DAMAGING_MOVE => name == "-",
+                ElementType.ANY_MOVE => name == "-",
                 _ => false,
             };
             if (!elementExists) throw new Exception($"{name} is not a valid {type}");
@@ -41,8 +42,8 @@ namespace MechanicsDataContainer
         {
             bool modExists = mod switch
             {
-                StatModifier.WEIGHT_MULTIPLIER or StatModifier.HP_MULTIPLIER or StatModifier.ATTACK_MULTIPLIER or StatModifier.DEFENSE_MULTIPLIER or StatModifier.SPECIAL_ATTACK_MULTIPLIER or StatModifier.SPECIAL_DEFENSE_MULTIPLIER or StatModifier.SPEED_MULTIPLIER or StatModifier.SPECIAL_ACCURACY_MULTIPLIER or StatModifier.PHYSICAL_ACCURACY_MULTIPLIER or StatModifier.OPP_HP_MULTIPLIER or StatModifier.OPP_ATTACK_MULTIPLIER or StatModifier.OPP_DEFENSE_MULTIPLIER or StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER or StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER or StatModifier.OPP_SPEED_MULTIPLIER or StatModifier.ALTER_RECV_NON_SE_DAMAGE or StatModifier.ALTER_RECV_SE_DAMAGE => double.TryParse(name, out _),
-                StatModifier.ATTACK_BOOST or StatModifier.DEFENSE_BOOST or StatModifier.SPECIAL_ATTACK_BOOST or StatModifier.SPECIAL_DEFENSE_BOOST or StatModifier.SPEED_BOOST or StatModifier.HIGHEST_STAT_BOOST or StatModifier.ALL_BOOSTS or StatModifier.HP_EV or StatModifier.ATK_EV or StatModifier.DEF_EV or StatModifier.SPATK_EV or StatModifier.SPDEF_EV or StatModifier.SPEED_EV or StatModifier.OPP_ATTACK_BOOST or StatModifier.OPP_DEFENSE_BOOST or StatModifier.OPP_SPECIAL_ATTACK_BOOST or StatModifier.OPP_SPECIAL_DEFENSE_BOOST or StatModifier.OPP_SPEED_BOOST or StatModifier.ALL_OPP_BOOSTS or StatModifier.CRIT_BOOST => int.TryParse(name, out _),
+                StatModifier.WEIGHT_MULTIPLIER or StatModifier.HP_MULTIPLIER or StatModifier.ATTACK_MULTIPLIER or StatModifier.DEFENSE_MULTIPLIER or StatModifier.SPECIAL_ATTACK_MULTIPLIER or StatModifier.SPECIAL_DEFENSE_MULTIPLIER or StatModifier.SPEED_MULTIPLIER or StatModifier.OPP_HP_MULTIPLIER or StatModifier.OPP_ATTACK_MULTIPLIER or StatModifier.OPP_DEFENSE_MULTIPLIER or StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER or StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER or StatModifier.OPP_SPEED_MULTIPLIER or StatModifier.ALTER_RECV_NON_SE_DAMAGE or StatModifier.ALTER_RECV_SE_DAMAGE or StatModifier.ATTACK_BOOST or StatModifier.DEFENSE_BOOST or StatModifier.SPECIAL_ATTACK_BOOST or StatModifier.SPECIAL_DEFENSE_BOOST or StatModifier.SPEED_BOOST or StatModifier.HIGHEST_STAT_BOOST or StatModifier.ALL_BOOSTS or StatModifier.OPP_ATTACK_BOOST or StatModifier.OPP_DEFENSE_BOOST or StatModifier.OPP_SPECIAL_ATTACK_BOOST or StatModifier.OPP_SPECIAL_DEFENSE_BOOST or StatModifier.OPP_SPEED_BOOST or StatModifier.ALL_OPP_BOOSTS => double.TryParse(name, out _),
+                StatModifier.HP_EV or StatModifier.ATK_EV or StatModifier.DEF_EV or StatModifier.SPATK_EV or StatModifier.SPDEF_EV or StatModifier.SPEED_EV or StatModifier.CRIT_BOOST => int.TryParse(name, out _),
                 StatModifier.NATURE => Enum.TryParse<Nature>(name, true, out _),
                 StatModifier.TERA or StatModifier.TYPE_1 or StatModifier.TYPE_2 or StatModifier.NULLIFIES_RECV_DAMAGE_OF_TYPE or StatModifier.DOUBLES_RECV_DAMAGE_OF_TYPE or StatModifier.HALVES_RECV_DAMAGE_OF_TYPE or StatModifier.HALVES_RECV_SE_DAMAGE_OF_TYPE => Enum.TryParse<PokemonType>(name, true, out _),
                 _ => false,

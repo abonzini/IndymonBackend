@@ -25,6 +25,7 @@ namespace MechanicsData
         DAMAGING_MOVE_OF_TYPE, /// Affects damaging moves of specific types (most damage related stuff!)
         MOVE_CATEGORY, /// Affects phy/spe/status (e.g. prankster, AV)
         ANY_DAMAGING_MOVE, /// Affects every single damaging move (e.g. normalize)
+        ANY_MOVE, /// Affects every single move (e.g. accuracy)
     }
     [JsonConverter(typeof(StringEnumConverter))]
     /// What stat is going to be modified and how
@@ -38,8 +39,6 @@ namespace MechanicsData
         SPECIAL_ATTACK_MULTIPLIER, /// Things that multiply special attack
         SPECIAL_DEFENSE_MULTIPLIER, /// Things that multiply special defense
         SPEED_MULTIPLIER, /// Things that multiply speed
-        PHYSICAL_ACCURACY_MULTIPLIER, /// Things that multiply physical accuracy
-        SPECIAL_ACCURACY_MULTIPLIER, /// Things that multiply special accuracy
         OPP_HP_MULTIPLIER, /// This is weird but it's basically effects that diminish opp max health (i.e hazards)
         OPP_ATTACK_MULTIPLIER,
         OPP_DEFENSE_MULTIPLIER,

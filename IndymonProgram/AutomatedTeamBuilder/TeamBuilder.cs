@@ -99,7 +99,7 @@ namespace AutomatedTeamBuilder
                 for (int monIndex = 0; monIndex < trainer.BattleTeam.Count; monIndex++)
                 {
                     // Init stuff
-                    Random monRng = new Random(seed); // Will use this for the mon, in order to be able to reuse seed
+                    Random monRng = new Random(monSeed); // Will use this for the mon, in order to be able to reuse seed
                     TrainerPokemon mon = trainer.BattleTeam[monIndex];
                     bool monHadSetItem = mon.SetItem != null;
                     bool monHadModItem = mon.ModItem != null;

@@ -45,16 +45,14 @@ namespace AutomatedTeamBuilder
         public (PokemonType, PokemonType) PokemonTypes = (PokemonType.NONE, PokemonType.NONE);
         public double[] MonStats = new double[6];
         public int[] Evs = new int[6];
-        public int[] StatBoosts = new int[7]; // Where the 7th is not a stat per se, it's the "hightest" stat, applied last in stat calc
-        public int StatBoostsMultiplier = 1;
+        public double[] StatBoosts = new double[7]; // Where the 7th is not a stat per se, it's the "hightest" stat, applied last in stat calc
+        public double StatBoostsMultiplier = 1;
         public double[] StatMultipliers = [1, 1, 1, 1, 1, 1];
-        public double PhysicalAccuracyMultiplier = 1;
-        public double SpecialAccuracyMultiplier = 1;
         public double MonWeight = 1;
         public int CriticalStages = 0;
         // Things that alter opp mon
-        public int[] OppStatBoosts = new int[6];
-        public int OppStatBoostsMultiplier = 1;
+        public double[] OppStatBoosts = new double[6];
+        public double OppStatBoostsMultiplier = 1;
         public double[] OppStatMultipliers = [1, 1, 1, 1, 1, 1];
         // Battle sim (how much damage my attacks do, how much damage mon takes from stuff, speed creep)
         public double DamageScore = 1;

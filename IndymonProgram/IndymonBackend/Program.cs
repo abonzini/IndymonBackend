@@ -35,7 +35,7 @@ namespace IndymonBackendProgram
             };
             if (Path.Exists(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE)))
             {
-                tournamentManager = JsonConvert.DeserializeObject<TournamentManager>(File.ReadAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE)));
+                tournamentManager = JsonConvert.DeserializeObject<TournamentManager>(File.ReadAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE)), jsonSettings);
             }
             // Beginning of indymon program
             string InputString;
