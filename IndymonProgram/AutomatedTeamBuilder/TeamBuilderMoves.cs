@@ -171,10 +171,10 @@ namespace AutomatedTeamBuilder
                 critStages = Math.Clamp(critStages, 0, 3); // Max is 3
                 double critChance = critStages switch // Chance of crit depending on crit stages
                 {
-                    1 => 12.5,
+                    1 => 0.125,
                     2 => 0.5,
                     3 => 1,
-                    _ => 4.17
+                    _ => 0.0417
                 };
                 double critDamage = (highCritDamage) ? 2.25 : 1.5;
                 double critMultiplier = (critChance * critDamage) + ((1 - critChance) * 1); // Crit may increase a hit damage in average
@@ -198,7 +198,7 @@ namespace AutomatedTeamBuilder
                     }
                     else // Otherwise check for normal stab
                     {
-                        if (monCtx.PokemonTypes.Item1 == monCtx.TeraType || monCtx.PokemonTypes.Item2 == monCtx.TeraType || alwaysStab)
+                        if (monCtx.PokemonTypes.Item1 == moveType || monCtx.PokemonTypes.Item2 == moveType || alwaysStab)
                         {
                             stabBonus = (extraStab) ? 2 : 1.5;
                         }
@@ -207,7 +207,7 @@ namespace AutomatedTeamBuilder
                 hitDamage *= stabBonus;
                 hitDamageVariance *= stabBonus * stabBonus;
                 // Random
-                double randomHitRoll = (100 + 85) / 100; // Hit roll
+                double randomHitRoll = (100.0 + 85.0) / (2.0 * 100.0); // Hit roll (in float...)
                 hitDamage *= randomHitRoll;
                 hitDamageVariance *= randomHitRoll * randomHitRoll;
                 // Finally, Acc application, left for last because of multihit
@@ -354,30 +354,43 @@ namespace AutomatedTeamBuilder
             HashSet<EffectFlag> moveFlags = [.. move.Flags]; // Copies moves base flags
             HashSet<EffectFlag> removedFlags = [];
             HashSet<EffectFlag> addedFlags = [];
+            HashSet<EffectFlag> auxFlags;
             // Check what has been added
-            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.MOVE, move.Name)]);
-            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.MOVE_CATEGORY, move.Category.ToString())]);
+            auxFlags = monCtx.AllAddedFlags.GetValueOrDefault((ElementType.MOVE, move.Name), []);
+            addedFlags.UnionWith(auxFlags);
+            auxFlags = monCtx.AllAddedFlags.GetValueOrDefault((ElementType.MOVE_CATEGORY, move.Category.ToString()), []);
+            addedFlags.UnionWith(auxFlags);
+            auxFlags = monCtx.AllAddedFlags.GetValueOrDefault((ElementType.ANY_MOVE, "-"), []);
+            addedFlags.UnionWith(auxFlags);
             if (move.Category != MoveCategory.STATUS)
             {
-                addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.ANY_DAMAGING_MOVE, "-")]);
+                auxFlags = monCtx.AllAddedFlags.GetValueOrDefault((ElementType.ANY_DAMAGING_MOVE, "-"), []);
+                addedFlags.UnionWith(auxFlags);
             }
-            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.ANY_MOVE, "-")]);
+            auxFlags = monCtx.AllAddedFlags.GetValueOrDefault((ElementType.ORIGINAL_TYPE_OF_MOVE, move.Type.ToString()), []);
+            addedFlags.UnionWith(auxFlags);
             // Check what has been removed
-            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.MOVE, move.Name)]);
-            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.MOVE_CATEGORY, move.Category.ToString())]);
+            auxFlags = monCtx.AllRemovedFlags.GetValueOrDefault((ElementType.MOVE, move.Name), []);
+            removedFlags.UnionWith(auxFlags);
+            auxFlags = monCtx.AllRemovedFlags.GetValueOrDefault((ElementType.MOVE_CATEGORY, move.Category.ToString()), []);
+            removedFlags.UnionWith(auxFlags);
+            auxFlags = monCtx.AllRemovedFlags.GetValueOrDefault((ElementType.ANY_MOVE, "-"), []);
+            removedFlags.UnionWith(auxFlags);
             if (move.Category != MoveCategory.STATUS)
             {
-                removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.ANY_DAMAGING_MOVE, "-")]);
+                auxFlags = monCtx.AllRemovedFlags.GetValueOrDefault((ElementType.ANY_DAMAGING_MOVE, "-"), []);
+                removedFlags.UnionWith(auxFlags);
             }
-            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.ANY_MOVE, "-")]);
-            // For type mods
-            addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.ORIGINAL_TYPE_OF_MOVE, move.Type.ToString())]);
-            removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.ORIGINAL_TYPE_OF_MOVE, move.Type.ToString())]);
+            auxFlags = monCtx.AllRemovedFlags.GetValueOrDefault((ElementType.ORIGINAL_TYPE_OF_MOVE, move.Type.ToString()), []);
+            removedFlags.UnionWith(auxFlags);
+            // For the type that has potentially been modified
             PokemonType moveType = GetModifiedMoveType(move, monCtx);
             if (move.Category != MoveCategory.STATUS)
             {
-                addedFlags.UnionWith(monCtx.AllAddedFlags[(ElementType.DAMAGING_MOVE_OF_TYPE, moveType.ToString())]);
-                removedFlags.UnionWith(monCtx.AllRemovedFlags[(ElementType.DAMAGING_MOVE_OF_TYPE, moveType.ToString())]);
+                auxFlags = monCtx.AllAddedFlags.GetValueOrDefault((ElementType.DAMAGING_MOVE_OF_TYPE, moveType.ToString()), []);
+                addedFlags.UnionWith(auxFlags);
+                auxFlags = monCtx.AllRemovedFlags.GetValueOrDefault((ElementType.DAMAGING_MOVE_OF_TYPE, moveType.ToString()), []);
+                removedFlags.UnionWith(auxFlags);
             }
             // Add then remove, better to forget some flag than have a wrong one
             moveFlags.UnionWith(addedFlags);
@@ -442,11 +455,11 @@ namespace AutomatedTeamBuilder
             {
                 return 0;
             }
-            else if (isFirstMon && !allMoveFlags.Contains(EffectFlag.GOOD_FIRST_MON)) // Moves only for first mon are not chosen!
+            else if (!isFirstMon && allMoveFlags.Contains(EffectFlag.GOOD_FIRST_MON)) // Moves only for first mon are not chosen!
             {
                 return 0;
             }
-            else if (isLastMon && !allMoveFlags.Contains(EffectFlag.GOOD_LAST_MON)) // Moves only for last mon are not chosen!
+            else if (!isLastMon && allMoveFlags.Contains(EffectFlag.GOOD_LAST_MON)) // Moves only for last mon are not chosen!
             {
                 return 0;
             }
@@ -624,8 +637,14 @@ namespace AutomatedTeamBuilder
                     nImprovChecks++;
                     if (speedImprovement < 1.1) nImproveFails++;
                 }
-                if (nImproveFails == nImprovChecks) return 0; // If all checks failed, move not good
-                score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
+                if (nImprovChecks > 0 && nImproveFails == nImprovChecks)
+                {
+                    score *= 0; // If all checks failed, move not good
+                }
+                else
+                {
+                    score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
+                }
                 if (move.Flags.Contains(EffectFlag.HEAL)) // Healing status moves are weighted on whether the mon can actually make decent use of this
                 {
                     score *= newCtx.Survivability;

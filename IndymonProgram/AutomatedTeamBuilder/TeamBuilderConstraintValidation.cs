@@ -401,5 +401,9 @@ namespace AutomatedTeamBuilder
             }
             throw new NotImplementedException("Unreachable Code");
         }
+        public override string ToString()
+        {
+            return string.Join(",", AllConstraints);
+        }
     }
 }

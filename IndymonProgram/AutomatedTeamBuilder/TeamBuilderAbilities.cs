@@ -23,11 +23,11 @@ namespace AutomatedTeamBuilder
             (ElementType, string) abilityTag = (ElementType.ABILITY, ability.Name);
             double score = 1;
             // Some scores will make the ability value 0
-            if (isFirstMon && !ability.Flags.Contains(EffectFlag.GOOD_FIRST_MON))
+            if (!isFirstMon && ability.Flags.Contains(EffectFlag.GOOD_FIRST_MON))
             {
                 score = 0;
             }
-            else if (isLastMon && !ability.Flags.Contains(EffectFlag.GOOD_LAST_MON))
+            else if (!isLastMon && ability.Flags.Contains(EffectFlag.GOOD_LAST_MON))
             {
                 score = 0;
             }
@@ -78,7 +78,7 @@ namespace AutomatedTeamBuilder
                 nImprovChecks++;
                 if (speedImprovement < 1.1) nImproveFails++;
             }
-            if (nImproveFails == nImprovChecks) score = 0; // If all checks failed, ability not good
+            if (nImprovChecks > 0 && nImproveFails == nImprovChecks) score = 0; // If all checks failed, ability not good
             score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
             if (ability.Flags.Contains(EffectFlag.HEAL)) // Healing abilities (or stuff that works on bulky mon) that are healer are weighted on whether the mon can actually make decent use of this
             {
@@ -100,21 +100,21 @@ namespace AutomatedTeamBuilder
         /// <returns>The ability weight</returns>
         static double GetAbilityMultWeight(Ability ability, PokemonBuildInfo monCtx)
         {
-            (ElementType, string) flagTag = (ElementType.EFFECT_FLAGS, ability.Name);
+            (ElementType, string) abilityTag = (ElementType.ABILITY, ability.Name);
             double result = 1;
             // Go in order, first check if disabled/enabled, then initial, then weight mods
-            if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(flagTag)) // If tag is disabled by default,
+            if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(abilityTag)) // If tag is disabled by default,
             {
-                if (!monCtx.EnabledOptions.TryGetValue(flagTag, out result)) // If not enabled, then it has no weight
+                if (!monCtx.EnabledOptions.TryGetValue(abilityTag, out result)) // If not enabled, then it has no weight
                 {
                     return 0;
                 }
             }
-            if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(flagTag, out double mult)) // Initial
+            if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(abilityTag, out double mult)) // Initial
             {
                 result *= mult;
             }
-            if (monCtx.WeightMods.TryGetValue(flagTag, out mult)) // Other weight mods...
+            if (monCtx.WeightMods.TryGetValue(abilityTag, out mult)) // Other weight mods...
             {
                 result *= mult;
             }

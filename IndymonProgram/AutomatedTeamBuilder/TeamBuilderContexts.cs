@@ -96,7 +96,7 @@ namespace AutomatedTeamBuilder
                     result.PokemonTypes = (PokemonType.ICE, PokemonType.NONE);
                 }
             }
-            else if (pokemon.ChosenAbility?.Name == "Mimicry" || pokemon.ChosenMoveset.Any(m => m.Name == "Camouflage")) // Change type on terrain
+            else if (pokemon.ChosenAbility?.Name == "Mimicry" || pokemon.ChosenMoveset.Any(m => m?.Name == "Camouflage")) // Change type on terrain
             {
                 if (result.CurrentTerrain == Terrain.GRASSY)
                 {
@@ -126,11 +126,11 @@ namespace AutomatedTeamBuilder
             }
             if (pokemon.ModItem != null)
             {
-                ExtractItemMods(pokemon.ModItem, result);
+                ExtractModItemMods(pokemon.ModItem, result);
             }
             if (pokemon.BattleItem != null)
             {
-                ExtractItemMods(pokemon.BattleItem, result);
+                ExtractBattleItemMods(pokemon.BattleItem, result);
             }
             else
             {
@@ -245,7 +245,10 @@ namespace AutomatedTeamBuilder
                 foreach (Move move in movesToEvaluate)
                 {
                     if (move == null) continue; // Nothing to calculate if hard switch
-                    if (move.Category == MoveCategory.STATUS) continue; // We don't check for status moves
+                    if (move.Category == MoveCategory.STATUS)
+                    {
+                        continue; // We don't check for status moves
+                    }
                     movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, monStatVariance, teamCtx,
                         (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
                         pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper adds to crit dmg
@@ -259,11 +262,18 @@ namespace AutomatedTeamBuilder
                         move.Name == "Freeze Dry")); // Freeze dry is SE against water
                 }
                 // Do some magic to calculate average move damage with average type coverage
-                List<double> bestCaseMoveCoverage = GeneralUtilities.ArrayMax(movesTypeCoverage);
+                List<double> bestCaseMoveCoverage;
                 double avgMoveDamage;
-                if (hypotheticalMoves)
+                if (hypotheticalMoves) // Hyp moves would be unfair for calcs so choose the best possible with the coverage it has, work from there
                 {
-                    avgMoveDamage = movesDamage.Max() * bestCaseMoveCoverage.Average();
+                    bestCaseMoveCoverage = [];
+                    for (int i = 0; i < movesDamage.Count; i++)
+                    {
+                        double avgCoverage = movesTypeCoverage[i].Average();
+                        avgCoverage *= movesDamage[i];
+                        bestCaseMoveCoverage.Add(avgCoverage);
+                    }
+                    avgMoveDamage = bestCaseMoveCoverage.Max(); // Choose the better one
                     const double MIN_DAMAGE_PRECENT = 0.2; // Cap min damage to 20% of opp hp, assuming scald, seismic toss would be better in these cases
                     if ((MIN_DAMAGE_PRECENT * oppStats[0]) > avgMoveDamage)
                     {
@@ -272,12 +282,13 @@ namespace AutomatedTeamBuilder
                 }
                 else
                 {
+                    bestCaseMoveCoverage = GeneralUtilities.ArrayMax(movesTypeCoverage);
                     avgMoveDamage = movesDamage.Average() * bestCaseMoveCoverage.Average();
                 }
                 // Finally the offensive score will be a function of the damage I do as a fucntion of the normal distro of opp HP
                 // This makes underkills have values of <0.5, and overkills values that ->1
                 // Improvements will then involve moves that make the move approach overkill, but increasing overkill will have diminishing returns
-                Normal enemyHpDistro = new Normal(oppStats[0], Math.Sqrt(oppVariance[0])); // Get the std dev ofc
+                Normal enemyHpDistro = new Normal(oppStats[0] / 2, Math.Sqrt(oppVariance[0] / 4)); // Get the std dev of half HP, so that 1 tends to OHKO ranges and win more
                 result.DamageScore = enemyHpDistro.CumulativeDistribution(avgMoveDamage);
             }
             // Defensive value calculation
@@ -291,13 +302,13 @@ namespace AutomatedTeamBuilder
                 double averageDamage = (physicalDamage + specialDamage) / 2;
                 double averageDamageVariance = (physicalVariance + specialVariance) / 4;
                 // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly
-                (PokemonType, PokemonType) defendingPokemonType = (result.TeraType != PokemonType.NONE) ? (result.TeraType, PokemonType.NONE) : result.PokemonTypes;
+                (PokemonType, PokemonType) defendingPokemonType = (result.TeraType != PokemonType.NONE && result.TeraType != PokemonType.STELLAR) ? (result.TeraType, PokemonType.NONE) : result.PokemonTypes;
                 List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(defendingPokemonType, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
                 double averageStabReceived = moveStabsReceived.Average();
                 averageDamage *= averageStabReceived;
                 averageDamageVariance *= averageStabReceived * averageStabReceived;
                 // Do the normal thing now. Checks how "bulky" a mon is, which increases surv rating
-                Normal damageReceivedDistro = new Normal(averageDamage, Math.Sqrt(averageDamageVariance)); // Get the std dev ofc
+                Normal damageReceivedDistro = new Normal(averageDamage * 2, Math.Sqrt(averageDamageVariance * 4)); // Get the std dev, of double the damage to move around one shotting range
                 result.DefenseScore = damageReceivedDistro.CumulativeDistribution(monStats[0]); // Compare my HP with this damage
                 result.Survivability = monStats[0] / (1.5 * averageDamage); // Survibaility means the mon is left with approx 33% after damage (or, 1.5 times health to damage received)
             }

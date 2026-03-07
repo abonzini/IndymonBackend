@@ -41,7 +41,21 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="item">Mod item</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractItemMods(Item item, PokemonBuildInfo monCtx)
+        static void ExtractModItemMods(Item item, PokemonBuildInfo monCtx)
+        {
+            // This one is trickier, need to add both the items and the flags
+            ExtractMods((ElementType.MOD_ITEM, item.Name), monCtx);
+            foreach (ItemFlag flag in item.Flags)
+            {
+                ExtractMods((ElementType.ITEM_FLAGS, flag.ToString()), monCtx);
+            }
+        }
+        /// <summary>
+        /// Obtains all mods associated to this, updates Ctx
+        /// </summary>
+        /// <param name="item">Mod item</param>
+        /// <param name="monCtx">Context where to add the mods</param>
+        static void ExtractBattleItemMods(Item item, PokemonBuildInfo monCtx)
         {
             // This one is trickier, need to add both the items and the flags
             ExtractMods((ElementType.BATTLE_ITEM, item.Name), monCtx);
@@ -265,7 +279,7 @@ namespace AutomatedTeamBuilder
                             monCtx.CriticalStages += int.Parse(statMod.Item2);
                             break;
                         case StatModifier.HIGHEST_STAT_BOOST:
-                            monCtx.OppStatBoosts[6] += int.Parse(statMod.Item2); // Will be stored here and calculated later
+                            monCtx.StatBoosts[6] += int.Parse(statMod.Item2); // Will be stored here and calculated later
                             break;
                         case StatModifier.ALL_BOOSTS:
                             monCtx.StatBoostsMultiplier *= int.Parse(statMod.Item2);

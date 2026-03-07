@@ -29,6 +29,7 @@ namespace MechanicsData
         PRIORITY, // Prio
         SELF_SLEEP, // Moves that need user to be sleeping
         SELF_STATUS, // Moves that benefit from user to be statused
+        CAUSES_SELF_CONFUSE, // Moves that make the user confused (e.g. thrash)
         SLEEP_INDUCING, // Moves that cause sleep
         OPP_SLEEP, // Moves that need opponent to be asleep
         PARALYSIS_INDUCING, // Moves that cause paralysis

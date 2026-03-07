@@ -38,7 +38,11 @@ namespace GameData
                     moveNames.Add(" ");
                 }
             }
-            return $"{ToString()}:{ChosenAbility.Name}:{string.Join(",", moveNames)}";
+            List<string> itemNames = [];
+            if (SetItem != null) itemNames.Add(SetItem.Name);
+            if (ModItem != null) itemNames.Add(ModItem.Name);
+            if (BattleItem != null) itemNames.Add(BattleItem.Name);
+            return $"{ToString()}:{ChosenAbility.Name}:{string.Join(",", moveNames)}:{string.Join(",", itemNames)}";
         }
         // Showdown related, importable/exportable data for the battle sim
         public int HealthPercentage = 100; // 100 percent default
@@ -72,11 +76,7 @@ namespace GameData
         {
             HealthPercentage = 100;
             NonVolatileStatus = "";
-            MovePp.Clear();
-            foreach (Move move in ChosenMoveset)
-            {
-                MovePp.Add(99); // Add default highest
-            }
+            MovePp = [.. Enumerable.Repeat(99, ChosenMoveset.Count)];
         }
         /// <summary>
         /// Gets mon set data as part of a packed string as is received by (my modified version of) showdown
@@ -103,7 +103,7 @@ namespace GameData
             packedStrings.Add(""); // No IVs I don't care
             packedStrings.Add(IsShiny ? "S" : ""); // Depending if shiny
             packedStrings.Add(Level.ToString()); // Mon level is "usually" 100
-            string lastPackedString = $",,,,,{TeraType.ToString()},{HealthPercentage.ToString()},{NonVolatileStatus}"; // Add the "remaining" useless stuff needed for tera, etc
+            string lastPackedString = $",,,,,{TeraType},{HealthPercentage},{NonVolatileStatus}"; // Add the "remaining" useless stuff needed for tera, etc
             packedStrings.Add(lastPackedString);
             return string.Join("|", packedStrings); // Join them together with |
         }
