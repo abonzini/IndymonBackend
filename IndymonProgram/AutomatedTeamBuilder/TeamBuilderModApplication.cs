@@ -149,7 +149,7 @@ namespace AutomatedTeamBuilder
                 }
             }
             // Then, forceds. If an item/ability/move asks for something to exist no matter what
-            if (element.Item1 != ElementType.WEATHER && element.Item1 != ElementType.TERRAIN) // Keep in mind a weather existing doesn't "ask" for anything because it's already ongoging, it was just enabled
+            if (element.Item1 != ElementType.WEATHER && element.Item1 != ElementType.TERRAIN && element.Item1 != ElementType.ARCHETYPE) // Keep in mind a weather existing doesn't "ask" for anything because it's already ongoging, it was just enabled
             {
                 Constraint moddedConstraints = new Constraint
                 {

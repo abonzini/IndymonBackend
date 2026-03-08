@@ -53,10 +53,10 @@
                 if (!isOpponent && i == highestStatIndex) // Opp doesn't have "highest stat boost" options
                 {
                     theBoost += boosts[6];
-                    theBoost *= boostsMultiplier; // Multiplier applied last to all possible boosts
                     theBoost = Math.Clamp(theBoost, -6, 6); // Clamp in case it overflows
                 }
                 // Calculate the boost itself
+                theBoost *= boostsMultiplier; // Multiplier applied last to all possible boosts
                 double num = 2;
                 double den = 2;
                 if (theBoost > 0) num += theBoost;

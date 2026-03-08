@@ -310,7 +310,7 @@ namespace AutomatedTeamBuilder
                                     } // Gottem scores
                                     int chosenMoveIndex = RandomIndexOfWeights(acceptableMovesScores, monRng, 2); // Experimenting with a power of 2 to filter out the lesser scored moves, movesets are usually 40+
                                     Move chosenMove = acceptableMoves[chosenMoveIndex]; // Got the move
-                                                                                        // Check if it was part of a set item or not
+                                    // Check if it was part of a set item or not
                                     if (!monData.Moveset.Contains(chosenMove)) // In this case it was caused by a set item
                                     {
                                         mon.SetItem = trainer.SetItems.Keys.First(i => i.AddedMoves.Contains(chosenMove));

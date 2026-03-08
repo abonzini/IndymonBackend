@@ -41,7 +41,7 @@ namespace AutomatedTeamBuilder
                 monAbilities = [mon.ChosenAbility];
             }
             List<Move> monMoves;
-            if (potentialConstraintVerification) // This would imply the moves plus some of the possible mon moves
+            if (potentialConstraintVerification) // This would imply the set moves plus some of the possible mon moves
             {
                 if (mon.SetItem != null && mon.SetItem.AddedMoves.Count > 0)
                 {
@@ -51,15 +51,15 @@ namespace AutomatedTeamBuilder
                 {
                     monMoves = [];
                 }
-                if (monMoves.Count > 4) // If more moves could fit, add all
+                if (monMoves.Count < 4) // If set item didn't completely fill the moveset, then other moves would be able to fit
                 {
                     monMoves.AddRange(pokemonData.Moveset);
                 }
             }
             else
             {
-                // In this case, I believe the moveset would already contain the moves
-                monMoves = mon.ChosenMoveset;
+                // In this case, I believe the moveset would already contain the moves (but remove hard switch from this)
+                monMoves = [.. mon.ChosenMoveset.Where(m => m != null)];
             }
             // Now check constraint
             foreach ((ElementType, string) elementToCheck in AllConstraints)
@@ -96,10 +96,10 @@ namespace AutomatedTeamBuilder
                         checkPassed = mon.ModItem?.Name == elementName;
                         break;
                     case ElementType.ABILITY: // Verify mon has ability in set item or would have ability
-                        checkPassed |= monAbilities.Any(a => a.Name == elementName);
+                        checkPassed |= monAbilities.Any(a => a?.Name == elementName);
                         break;
                     case ElementType.MOVE:
-                        checkPassed |= monMoves.Any(m => m.Name == elementName);
+                        checkPassed |= monMoves.Any(m => m?.Name == elementName);
                         break;
                     case ElementType.EFFECT_FLAGS:
                         checkPassed |= monMoves.Any(m => m.Flags.Contains(effectFlagToCheck)) || monAbilities.Any(a => a.Flags.Contains(effectFlagToCheck));
@@ -113,6 +113,9 @@ namespace AutomatedTeamBuilder
                         break;
                     case ElementType.ANY_DAMAGING_MOVE:
                         checkPassed |= monMoves.Any(m => m.Category != MoveCategory.STATUS);
+                        break;
+                    case ElementType.ANY_MOVE:
+                        checkPassed |= monMoves.Count > 0;
                         break;
                     case ElementType.ARCHETYPE:
                     default:
