@@ -308,7 +308,7 @@ namespace AutomatedTeamBuilder
                                             acceptableMovesScores[i] *= nextMoveScore;
                                         } // Otherwise, kept as original (usually 1)
                                     } // Gottem scores
-                                    int chosenMoveIndex = RandomIndexOfWeights(acceptableMovesScores, monRng, 2); // Experimenting with a power of 2 to filter out the lesser scored moves, movesets are usually 40+
+                                    int chosenMoveIndex = RandomIndexOfWeights(acceptableMovesScores, monRng, 3); // Experimenting with a power to filter out the lesser scored moves, movesets are usually 40+
                                     Move chosenMove = acceptableMoves[chosenMoveIndex]; // Got the move
                                     // Check if it was part of a set item or not
                                     if (!monData.Moveset.Contains(chosenMove)) // In this case it was caused by a set item
@@ -467,7 +467,7 @@ namespace AutomatedTeamBuilder
                                     mon.ModItem = modItem; // First, equip this item to mon
                                     PokemonBuildInfo newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
                                     double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
-                                    double defImprovement = newCtx.DefenseScore / monCtx.DefenseScore;
+                                    double defImprovement = Math.Ceiling(newCtx.Survivability) / Math.Ceiling(monCtx.Survivability); // If this makes you survive approx one more hit, it's worth
                                     double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
                                     // If needs an improvement, will be accepted as long as some of the improvements succeeds
                                     int nImprovChecks = 0;
@@ -492,9 +492,9 @@ namespace AutomatedTeamBuilder
                                         score *= 0;
                                     }
                                     score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
-                                    if (modItem.Flags.Contains(ItemFlag.BULKY)) // Healing items are scored on whether they can actually make sense on the mon
+                                    if (modItem.Flags.Contains(ItemFlag.BULKY))
                                     {
-                                        score *= newCtx.Survivability;
+                                        score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
                                     }
                                     mon.ModItem = null; // Remove item ofc
                                     if (score > 0)
@@ -645,7 +645,7 @@ namespace AutomatedTeamBuilder
                                     mon.BattleItem = battleItem; // First, equip this item to mon
                                     PokemonBuildInfo newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
                                     double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
-                                    double defImprovement = newCtx.DefenseScore / monCtx.DefenseScore;
+                                    double defImprovement = Math.Ceiling(newCtx.Survivability) / Math.Ceiling(monCtx.Survivability); // If this makes you survive approx one more hit, it's worth
                                     double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
                                     // If needs an improvement, will be accepted as long as some of the improvements succeeds
                                     int nImprovChecks = 0;
@@ -672,7 +672,7 @@ namespace AutomatedTeamBuilder
                                     score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
                                     if (battleItem.Flags.Contains(ItemFlag.BULKY)) // Healing items are scored on whether they can actually make sense on the mon
                                     {
-                                        score *= newCtx.Survivability;
+                                        score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
                                     }
                                     mon.BattleItem = null; // Remove item ofc
                                     if (score > 0)

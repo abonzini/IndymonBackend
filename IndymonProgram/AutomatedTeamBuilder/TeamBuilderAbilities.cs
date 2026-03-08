@@ -58,7 +58,7 @@ namespace AutomatedTeamBuilder
             theMon.ChosenAbility = ability; // First, equip this ability to mon
             PokemonBuildInfo newCtx = ObtainPokemonSetContext(theMon, buildCtx); // Check the new context
             double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
-            double defImprovement = newCtx.DefenseScore / monCtx.DefenseScore;
+            double defImprovement = Math.Ceiling(newCtx.Survivability) / Math.Ceiling(monCtx.Survivability);
             double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
             // If needs an improvement, will be accepted as long as some of the improvements succeeds
             int nImprovChecks = 0;
@@ -82,7 +82,7 @@ namespace AutomatedTeamBuilder
             score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
             if (ability.Flags.Contains(EffectFlag.HEAL)) // Healing abilities (or stuff that works on bulky mon) that are healer are weighted on whether the mon can actually make decent use of this
             {
-                score *= newCtx.Survivability;
+                score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
             }
             theMon.ChosenAbility = oldAbility; // Revert this ofc
             // Finally, we got a score, an ability needs to eb chosen so it'll always have a value, even if 0

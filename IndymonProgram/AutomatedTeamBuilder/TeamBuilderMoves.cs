@@ -14,22 +14,18 @@ namespace AutomatedTeamBuilder
         /// <param name="category">Category of move</param>
         /// <param name="attackerStats">Stats of attacker entity</param>
         /// <param name="defenderStats">Stats of defending entity</param>
-        /// <param name="attackingStatVariances">Variance of stats of attacking entity</param>
         /// <returns></returns>
-        static (double, double) CalcPlaceholderMoveDamage(double bp, MoveCategory category, double[] attackerStats, double[] defenderStats, double[] attackingStatVariances)
+        static double CalcPlaceholderMoveDamage(double bp, MoveCategory category, double[] attackerStats, double[] defenderStats)
         {
             double attackingStat = (category == MoveCategory.PHYSICAL) ? attackerStats[1] : attackerStats[3];
-            double attackingStatVariance = (category == MoveCategory.PHYSICAL) ? attackingStatVariances[1] : attackingStatVariances[3];
             double defendingStat = (category == MoveCategory.PHYSICAL) ? defenderStats[2] : defenderStats[4];
             // Actual calculation    
             double hitDamage = 42; // This depends on mon level so keep in mind
             hitDamage *= attackingStat;
-            double hitDamageVariance = attackingStatVariance * 42 * 42; // start doing variance at this point
             double remainingFactor = bp / (defendingStat * 50); // rest of the damage formula
             hitDamage *= remainingFactor;
-            hitDamageVariance *= remainingFactor * remainingFactor;
             hitDamage += 2; // This is the hit damage, no variance needed here
-            return (hitDamage, hitDamageVariance);
+            return hitDamage;
         }
         /// <summary>
         /// Calculates the damage of a (damaging!) move
@@ -44,21 +40,21 @@ namespace AutomatedTeamBuilder
         /// <param name="loadedDice">Loaded dice modifies moves like crazy</param>
         /// <param name="highCritDamage">Sniper multilies crit damage</param>
         /// <returns>The damage (in HP) the opp receives</returns>
-        static (double, double) CalcMoveDamage(Move move, PokemonBuildInfo monCtx, double[] attackerStats, double[] defenderStats, double[] attackingStatVariances, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false, bool highCritDamage = false)
+        static double CalcMoveDamage(Move move, PokemonBuildInfo monCtx, double[] attackerStats, double[] defenderStats, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false, bool skillLink = false, bool highCritDamage = false)
         {
             // First, get the ACTUAL flags of the move (because some may have been added/removed
             HashSet<EffectFlag> moveFlags = ExtractMoveFlags(move, monCtx);
             if (move.Category == MoveCategory.STATUS) // Status moves don't deal damage this should never happen tho
             {
-                return (0, 0);
+                return 0;
             }
             else if (moveFlags.Contains(EffectFlag.FIXED_DAMAGE)) // If the move is fixed damage, the modified moveDex has already some estimation of damage in it
             {
-                return (move.Bp, 0);
+                return move.Bp;
             }
             else if (move.Name == "Sky Drop" && battleContext.AverageOpponentWeight >= 200) // Sky drop fails if opp too heavy
             {
-                return (0, 0);
+                return 0;
             }
             else // Damage calc incoming...
             {
@@ -129,22 +125,18 @@ namespace AutomatedTeamBuilder
                 if (moveAccuracy == 0 || moveAccuracy > 1) moveAccuracy = 1; // 0 Acc means sure hit
                 // At this point got BP and Acc, missing stats only
                 double attackingStat;
-                double attackingStatVariance; // Will hold the variance of the attacking stat, to return the cariance of the damage
                 if (moveFlags.Contains(EffectFlag.DEFENSE_DAMAGE))
                 {
                     attackingStat = attackerStats[2]; // Defense
-                    attackingStatVariance = attackingStatVariances[2];
                 }
                 else if (moveFlags.Contains(EffectFlag.OPP_ATTACK_DAMAGE))
                 {
                     attackingStat = defenderStats[1]; // Uses the opp attack stat
-                    attackingStatVariance = attackingStatVariances[1];
                 }
                 else
                 {
                     // Otherwise phy/spe depending
                     attackingStat = (move.Category == MoveCategory.PHYSICAL) ? attackerStats[1] : attackerStats[3];
-                    attackingStatVariance = (move.Category == MoveCategory.PHYSICAL) ? attackingStatVariances[1] : attackingStatVariances[3];
                 }
                 double defendingStat;
                 if (move.Category == MoveCategory.PHYSICAL) // Get the correct defense unless move switches them
@@ -158,10 +150,8 @@ namespace AutomatedTeamBuilder
                 // Final calculation
                 double hitDamage = 42; // This depends on mon level so keep in mind
                 hitDamage *= attackingStat;
-                double hitDamageVariance = attackingStatVariance * 42 * 42; // start doing variance at this point
                 double remainingFactor = moveBp / (defendingStat * 50); // rest of the damage formula
                 hitDamage *= remainingFactor;
-                hitDamageVariance *= remainingFactor * remainingFactor;
                 hitDamage += 2; // This is the hit damage, no variance needed here
                 // Crit chance
                 int critStages = 0;
@@ -179,7 +169,6 @@ namespace AutomatedTeamBuilder
                 double critDamage = (highCritDamage) ? 2.25 : 1.5;
                 double critMultiplier = (critChance * critDamage) + ((1 - critChance) * 1); // Crit may increase a hit damage in average
                 hitDamage *= critMultiplier;
-                hitDamageVariance *= critMultiplier * critMultiplier;
                 // Stab, check if tera is involved
                 double stabBonus = 1;
                 PokemonType moveType = GetModifiedMoveType(move, monCtx);
@@ -205,42 +194,48 @@ namespace AutomatedTeamBuilder
                     }
                 }
                 hitDamage *= stabBonus;
-                hitDamageVariance *= stabBonus * stabBonus;
                 // Random
                 double randomHitRoll = (100.0 + 85.0) / (2.0 * 100.0); // Hit roll (in float...)
                 hitDamage *= randomHitRoll;
-                hitDamageVariance *= randomHitRoll * randomHitRoll;
                 // Finally, Acc application, left for last because of multihit
                 if (moveFlags.Contains(EffectFlag.MULTIHIT_2_MOVE))
                 {
                     // No data so I assume it's always 2 hits subject to the first one hitting
                     double multihitModifier = 2 * moveAccuracy;
                     hitDamage *= multihitModifier;
-                    hitDamageVariance *= multihitModifier * multihitModifier;
                 }
                 else if (moveFlags.Contains(EffectFlag.MULTIHIT_3_MOVE))
                 {
                     // No data so I assume it's always 3 hits subject to the first one hitting
                     double multihitModifier = 3 * moveAccuracy;
                     hitDamage *= multihitModifier;
-                    hitDamageVariance *= multihitModifier * multihitModifier;
                 }
                 else if (moveFlags.Contains(EffectFlag.MULTIHIT_2_TO_5_MOVE))
                 {
                     // If connects, then accuracy
-                    double hits = (loadedDice) ? 4.5 : 3.1;
+                    double hits;
+                    if (skillLink)
+                    {
+                        hits = 5;
+                    }
+                    else if (loadedDice)
+                    {
+                        hits = 4.5;
+                    }
+                    else
+                    {
+                        hits = 3.1;
+                    }
                     double multihitModifier = hits * moveAccuracy;
                     hitDamage *= multihitModifier;
-                    hitDamageVariance *= multihitModifier * multihitModifier;
                 }
                 else if (moveFlags.Contains(EffectFlag.MULTIHIT_ACC_BASED_3_HIT))
                 {
                     // This one is the hardest, each hit has a chance and stops if doesnt hit, if loaded dice however, there's 1 acc check at beginning
-                    if (loadedDice)
+                    if (skillLink || loadedDice)
                     {
-                        double multihitModifier = 6 * hitDamage * moveAccuracy; // 6 because it's 1,2,3 each hit with single accuracy check
+                        double multihitModifier = 6 * moveAccuracy; // 6 because it's 1,2,3 each hit with single accuracy check
                         hitDamage *= multihitModifier;
-                        hitDamageVariance *= multihitModifier * multihitModifier;
                     }
                     else
                     {
@@ -249,17 +244,20 @@ namespace AutomatedTeamBuilder
                             3 * moveAccuracy * moveAccuracy * (1 - moveAccuracy) +
                             moveAccuracy * (1 - moveAccuracy) * (1 - moveAccuracy);
                         hitDamage *= multihitModifier;
-                        hitDamageVariance *= multihitModifier * multihitModifier;
                     }
                 }
                 else if (moveFlags.Contains(EffectFlag.MULTIHIT_ACC_BASED_10_HIT))
                 {
                     // This one is the hardest, each hit has a chance and stops if doesnt hit, if loaded dice however, there's 1 acc check at beginning
-                    if (loadedDice)
+                    if (skillLink)
                     {
-                        double multihitModifier = 7 * hitDamage * moveAccuracy; // 7 because 4-10 with equal chance equals to 7 average and then a single acc check
+                        double multihitModifier = 10 * moveAccuracy; // 10 guaranteed times subject to one check
                         hitDamage *= multihitModifier;
-                        hitDamageVariance *= multihitModifier * multihitModifier;
+                    }
+                    else if (loadedDice)
+                    {
+                        double multihitModifier = 7 * moveAccuracy; // 7 because 4-10 with equal chance equals to 7 average and then a single acc check
+                        hitDamage *= multihitModifier;
                     }
                     else
                     {
@@ -271,16 +269,14 @@ namespace AutomatedTeamBuilder
                         }
                         multihitModifier += 10 * Math.Pow(moveAccuracy, 10); // Add the damage of 10 hits too
                         hitDamage *= multihitModifier;
-                        hitDamageVariance *= multihitModifier * multihitModifier;
                     }
                 }
                 else
                 {
                     hitDamage *= moveAccuracy; // Just good ol hit * chance of hit
-                    hitDamageVariance *= moveAccuracy * moveAccuracy;
                 }
                 // And this should be all I think
-                return (hitDamage, hitDamageVariance);
+                return hitDamage;
             }
         }
         /// <summary>
@@ -548,13 +544,14 @@ namespace AutomatedTeamBuilder
                 else // If damage, then the damage it does will be scored too, with a value of 1 corresponding to 50% of the opp average HP
                 {
                     // Check the actual stats of mon and opp
-                    (double[] monStats, double[] monStatVariance) = MonStatCalculation(monCtx); // Get mon stats (variance is 0 anyway)
+                    (double[] monStats, _) = MonStatCalculation(monCtx); // Get mon stats (variance is 0 anyway)
                     (double[] oppStats, _) = MonStatCalculation(monCtx, buildCtx, true); // Get opp stats and variance
-                    double moveDamage = CalcMoveDamage(move, monCtx, monStats, oppStats, monStatVariance, buildCtx,
+                    double moveDamage = CalcMoveDamage(move, monCtx, monStats, oppStats, buildCtx,
                         (mon.ChosenAbility?.Name == "Protean" || mon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
                         mon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper increases crit damage
                         mon.BattleItem?.Name == "Loaded Dice",
-                        mon.ChosenAbility?.Name == "Sniper").Item1;
+                        mon.ChosenAbility?.Name == "Skill Link",
+                        mon.ChosenAbility?.Name == "Sniper");
                     // Get the move coverage, making sure some specific crazy effects that modify moves
                     List<double> moveCoverage = CalculateOffensiveTypeCoverage(moveType, buildCtx.OpponentsTypes,
                         allMoveFlags.Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
@@ -617,8 +614,15 @@ namespace AutomatedTeamBuilder
                 mon.ChosenMoveset.Add(move); // First, equip this move to mon
                 PokemonBuildInfo newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
                 double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
-                double defImprovement = newCtx.DefenseScore / monCtx.DefenseScore;
                 double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
+                // Defensive score for moves is a tad different because the def is dependent on the move either being used and in some cases, used afterwards
+                // So the improvement on "how much hits do I last" will be calculated accordingly
+                double oldDamageInHp = 1 / monCtx.Survivability;
+                double newDamageInHp = 1 / newCtx.Survivability;
+                double hpAfterHit = 1 - oldDamageInHp; // Hp to calculate new survivability now (implicitly subtracting 1)
+                double newSurvivability = hpAfterHit / newDamageInHp;
+                newSurvivability += 1; // Return the prev hit to it
+                double defImprovement = Math.Ceiling(newSurvivability) / Math.Ceiling(monCtx.Survivability); // Calculated surv improvement
                 // If needs an improvement, will be accepted as long as some of the improvements succeeds
                 int nImprovChecks = 0;
                 int nImproveFails = 0;
@@ -647,7 +651,12 @@ namespace AutomatedTeamBuilder
                 }
                 if (move.Flags.Contains(EffectFlag.HEAL)) // Healing status moves are weighted on whether the mon can actually make decent use of this
                 {
-                    score *= newCtx.Survivability;
+                    // This is calculated from the prev context, assuming the move not used yet
+                    score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
+                }
+                if (move.Category == MoveCategory.STATUS && monCtx.DamageScore > 0.75)
+                {
+                    score *= 0; // Avoid status move if the mon would break most shit apart
                 }
                 mon.ChosenMoveset.RemoveAt(mon.ChosenMoveset.Count - 1); // Remove move ofc
             }

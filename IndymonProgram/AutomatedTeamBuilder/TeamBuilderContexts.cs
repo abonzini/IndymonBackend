@@ -56,9 +56,8 @@ namespace AutomatedTeamBuilder
         public double[] OppStatMultipliers = [1, 1, 1, 1, 1, 1];
         // Battle sim (how much damage my attacks do, how much damage mon takes from stuff, speed creep)
         public double DamageScore = 1;
-        public double DefenseScore = 1;
-        public double SpeedScore = 1;
         public double Survivability = 1;
+        public double SpeedScore = 1;
     }
     public static partial class TeamBuilder
     {
@@ -249,11 +248,12 @@ namespace AutomatedTeamBuilder
                     {
                         continue; // We don't check for status moves
                     }
-                    movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, monStatVariance, teamCtx,
+                    movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, teamCtx,
                         (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
                         pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper adds to crit dmg
                         pokemon.BattleItem?.Name == "Loaded Dice",
-                        pokemon.ChosenAbility?.Name == "Sniper").Item1);
+                        pokemon.ChosenAbility?.Name == "Skill Link",
+                        pokemon.ChosenAbility?.Name == "Sniper"));
                     PokemonType moveType = GetModifiedMoveType(move, result); // Get the final move type for type effectiveness
                     // Get the move coverage, making sure some specific crazy effects that modify moves
                     movesTypeCoverage.Add(CalculateOffensiveTypeCoverage(moveType, teamCtx.OpponentsTypes,
@@ -285,11 +285,10 @@ namespace AutomatedTeamBuilder
                     bestCaseMoveCoverage = GeneralUtilities.ArrayMax(movesTypeCoverage);
                     avgMoveDamage = movesDamage.Average() * bestCaseMoveCoverage.Average();
                 }
-                // Finally the offensive score will be a function of the damage I do as a fucntion of the normal distro of opp HP
-                // This makes underkills have values of <0.5, and overkills values that ->1
-                // Improvements will then involve moves that make the move approach overkill, but increasing overkill will have diminishing returns
-                Normal enemyHpDistro = new Normal(oppStats[0] / 2, Math.Sqrt(oppVariance[0] / 4)); // Get the std dev of half HP, so that 1 tends to OHKO ranges and win more
-                result.DamageScore = enemyHpDistro.CumulativeDistribution(avgMoveDamage);
+                // Now, check how the damage I can output works, assume I can deal between 0-X HP of damage (more is "overkill")
+                const double DAMAGE_OVERKILL_THRESHOLD = 2;
+                result.DamageScore = avgMoveDamage / (DAMAGE_OVERKILL_THRESHOLD * oppStats[0]);
+                result.DamageScore = Math.Clamp(result.DamageScore, 0, 1); // The score is clamped to 1 to avoid giving lots of points to overkill setup/items
             }
             // Defensive value calculation
             {
@@ -297,20 +296,24 @@ namespace AutomatedTeamBuilder
                 // This gives me the average punch in the face I get, my HP is evaluated inside this
                 // This makes underkills make my hp be close to 1 and overkills make it tend to 0
                 // Improvements will then involve moves move me in this curve but if I gain defense for nothing, or is not enough anyway, then it's ok
-                (double physicalDamage, double physicalVariance) = CalcPlaceholderMoveDamage(80, MoveCategory.PHYSICAL, oppStats, monStats, oppVariance); // Use 80 BP as indication of an OK move damage
-                (double specialDamage, double specialVariance) = CalcPlaceholderMoveDamage(80, MoveCategory.SPECIAL, oppStats, monStats, oppVariance);
+                double physicalDamage = CalcPlaceholderMoveDamage(80, MoveCategory.PHYSICAL, oppStats, monStats); // Use 80 BP as indication of an OK move damage
+                double specialDamage = CalcPlaceholderMoveDamage(80, MoveCategory.SPECIAL, oppStats, monStats);
                 double averageDamage = (physicalDamage + specialDamage) / 2;
-                double averageDamageVariance = (physicalVariance + specialVariance) / 4;
                 // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly
                 (PokemonType, PokemonType) defendingPokemonType = (result.TeraType != PokemonType.NONE && result.TeraType != PokemonType.STELLAR) ? (result.TeraType, PokemonType.NONE) : result.PokemonTypes;
                 List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(defendingPokemonType, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
                 double averageStabReceived = moveStabsReceived.Average();
                 averageDamage *= averageStabReceived;
-                averageDamageVariance *= averageStabReceived * averageStabReceived;
-                // Do the normal thing now. Checks how "bulky" a mon is, which increases surv rating
-                Normal damageReceivedDistro = new Normal(averageDamage * 2, Math.Sqrt(averageDamageVariance * 4)); // Get the std dev, of double the damage to move around one shotting range
-                result.DefenseScore = damageReceivedDistro.CumulativeDistribution(monStats[0]); // Compare my HP with this damage
-                result.Survivability = monStats[0] / (1.5 * averageDamage); // Survibaility means the mon is left with approx 33% after damage (or, 1.5 times health to damage received)
+                //  Checks how "bulky" a mon is, which increases surv rating, measured in #hits survived
+                result.Survivability = monStats[0] / averageDamage; // This tells us how many hits the pokemon can take before dying
+                if (result.Survivability < 1 && (pokemon.BattleItem?.Name == "Focus Sash" || pokemon.ChosenAbility?.Name == "Sturdy")) // If mon would be one-shotted, it's not
+                {
+                    result.Survivability += 1; // Then the mon lasts 1 more turn anyway
+                }
+                if (pokemon.BattleItem?.Name == "Focus Band")
+                {
+                    result.Survivability += 0.1; // Idk what this would do honestly
+                }
             }
             // Speed value calculation
             {
