@@ -13,6 +13,7 @@ namespace GameDataContainer
         public Dictionary<string, Trainer> FamousNpcData = new Dictionary<string, Trainer>();
         public Dictionary<string, SetItem> SetItems = new Dictionary<string, SetItem>();
         public BattleStats BattleStats = new BattleStats();
+        public MessageLogger CurrentEventMessage = new MessageLogger();
         /// <summary>
         /// <summary>
         /// Initializes dungeon data

@@ -174,7 +174,7 @@ namespace ShowdownBot
                 {
                     string[] challengeData = message.Split("|");
                     Challenger = challengeData[2]; // Obtain challenger
-                    Challenger = Challenger.Trim('~').Trim().ToLower(); // Clean challenger
+                    Challenger = Challenger.Trim('~').Trim(); // Clean challenger
                     CurrentState = BotState.BEING_CHALLENGED;
                 }
             }
@@ -236,7 +236,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().Replace("’", "'"); // Id of the mon in question
                         string status = m.Groups[2].Value.Trim(); // Hp status
                         //Console.WriteLine($"Damage debug: {monId}->{status}");
                         TrainerPokemon pokemonInTeam = _monsById[monId];
@@ -249,7 +249,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().Replace("’", "'"); // Id of the mon in question
                         string status = m.Groups[2].Value.Trim(); // Hp (status blank i guess?)
                         TrainerPokemon pokemonInTeam = _monsById[monId];
                         pokemonInTeam.ImportShowdownStatus(status);
@@ -261,7 +261,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().Replace("’", "'"); // Id of the mon in question
                         string status = m.Groups[2].Value.Trim(); // Non-volatile status
                         TrainerPokemon pokemonInTeam = _monsById[monId];
                         pokemonInTeam.NonVolatileStatus = status;
@@ -273,7 +273,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().Replace("’", "'"); // Id of the mon in question
                         string status = m.Groups[2].Value.Trim(); // Non-volatile status cured
                         TrainerPokemon pokemonInTeam = _monsById[monId];
                         if (pokemonInTeam.NonVolatileStatus == status)
@@ -288,7 +288,7 @@ namespace ShowdownBot
                 {
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
-                        string monId = m.Groups[1].Value.Split(':')[1].Trim().ToLower().Replace("’", "'"); // Id of the mon in question
+                        string monId = m.Groups[1].Value.Split(':')[1].Trim().Replace("’", "'"); // Id of the mon in question
                         TrainerPokemon pokemonInTeam = _monsById[monId];
                         //Console.WriteLine($"Faint debug: {monId}");
                         pokemonInTeam.HealthPercentage = 1;
@@ -298,9 +298,9 @@ namespace ShowdownBot
                 // If a player won game, this is relevant to end the simulation
                 if (message.Contains("|win|")) // Battle ended, no matter who won
                 {
-                    Winner = message.Split("|win|")[1].Trim().ToLower().Replace("’", "'");
+                    Winner = message.Split("|win|")[1].Trim().Replace("’", "'");
                     BotRemainingMons = _currentGameState.Side.GetAliveMons();
-                    if (BotName.ToLower() != Winner)
+                    if (BotName != Winner)
                     {
                         BotRemainingMons = 0; // Loser got 0 mon
                     }
@@ -330,7 +330,7 @@ namespace ShowdownBot
                         foreach (AvailableMove move in _currentGameState.Active[0].Moves)
                         {
                             string moveNameCleaned = move.Move.Replace("102", "").Trim();
-                            int moveIndex = currentPokemon.ChosenMoveset.FindIndex(m => m.Name == moveNameCleaned); // For some reason return is called return102
+                            int moveIndex = currentPokemon.ChosenMoveset.FindIndex(m => m?.Name == moveNameCleaned); // For some reason return is called return102
                             if (moveIndex >= 0)
                             {
                                 currentPokemon.MovePp[moveIndex] = move.Pp;

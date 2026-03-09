@@ -1,4 +1,5 @@
 ﻿using MechanicsData;
+using MechanicsDataContainer;
 
 namespace GameData
 {
@@ -7,8 +8,11 @@ namespace GameData
         public string Species = "";
         public string Nickname = "";
         public bool IsShiny = false;
+        public bool SetItemChosen = false;
         public SetItem SetItem = null;
+        public bool ModItemChosen = false;
         public Item ModItem = null;
+        public bool BattleItemChosen = false;
         public Item BattleItem = null;
         public override string ToString()
         {
@@ -103,7 +107,8 @@ namespace GameData
             packedStrings.Add(""); // No IVs I don't care
             packedStrings.Add(IsShiny ? "S" : ""); // Depending if shiny
             packedStrings.Add(Level.ToString()); // Mon level is "usually" 100
-            string lastPackedString = $",,,,,{TeraType},{HealthPercentage},{NonVolatileStatus}"; // Add the "remaining" useless stuff needed for tera, etc
+            PokemonType teraType = (TeraType == PokemonType.NONE) ? MechanicsDataContainers.GlobalMechanicsData.Dex[Species].Types.Item1 : TeraType;
+            string lastPackedString = $",,,,,{teraType},{HealthPercentage},{NonVolatileStatus}"; // Add the "remaining" useless stuff needed for tera, etc
             packedStrings.Add(lastPackedString);
             return string.Join("|", packedStrings); // Join them together with |
         }

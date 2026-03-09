@@ -17,6 +17,7 @@ namespace IndymonBackendProgram
             Console.CursorVisible = false;
             Console.WriteLine($"Folder where data is located?");
             string directoryPath = Console.ReadLine();
+            GameDataContainers.GlobalGameData.CurrentEventMessage.DirectoryPath = directoryPath;
             // Begin with the mechanics back end
             string MECHANICS_DATA_FILE = "mechanics_data.txt";
             MechanicsDataContainers.GlobalMechanicsData.InitializeData(Path.Combine(directoryPath, MECHANICS_DATA_FILE));
@@ -48,6 +49,8 @@ namespace IndymonBackendProgram
                 {
                     case "0":
                         {
+
+                            Console.WriteLine("Writing resulting files");
                             GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
                             Console.WriteLine("Serializing jsons");
                             File.WriteAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE), JsonConvert.SerializeObject(tournamentManager, jsonSettings));
@@ -59,11 +62,9 @@ namespace IndymonBackendProgram
                         break;
                     case "2":
                         tournamentManager.UpdateTournamentTeams();
-                        break;
-                    case "3":
                         tournamentManager.ExecuteTournament();
                         break;
-                    case "4":
+                    case "3":
                         tournamentManager.FinaliseTournament();
                         break;
                     case "5":
@@ -177,9 +178,8 @@ namespace IndymonBackendProgram
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("0 - Save to indy.mon\n" +
                 "1 - Generate a new tournament\n" +
-                "2 - Update tournament participant's team sheets\n" +
-                "3 - Input tournament data\n" +
-                "4 - Finalize tournament. Animation + export new tournament data\n" +
+                "2 - Update tournament participant's team sheets and input tournament data\n" +
+                "3 - Finalize tournament. Animation + export new tournament data\n" +
                 "5 - Generate exploration, choose place, player, etc\n" +
                 "6 - Simulate current exploration\n" +
                 "7 - Animate resolved exploration\n" +

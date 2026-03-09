@@ -85,6 +85,7 @@ namespace GameDataContainer
                                 string setItemName = nextLine[j + 3];
                                 if (setItemName != "")
                                 {
+                                    newPokemon.SetItemChosen = true;
                                     if (!SetItems.TryGetValue(setItemName, out SetItem item)) // Creates it if doesn't exist
                                     {
                                         item = SetItem.Parse(setItemName);
@@ -97,12 +98,14 @@ namespace GameDataContainer
                                 string modItemName = nextLine[j + 4];
                                 if (modItemName != "")
                                 {
+                                    newPokemon.ModItemChosen = true;
                                     newPokemon.ModItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[modItemName];
                                 }
                                 // Battle item
                                 string battleItemName = nextLine[j + 5];
                                 if (battleItemName != "")
                                 {
+                                    newPokemon.BattleItemChosen = true;
                                     newPokemon.BattleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[battleItemName];
                                 }
                                 // Finally, add Pokemon to team
@@ -180,7 +183,7 @@ namespace GameDataContainer
             for (int row = 2; row < rows.Length; row++)
             {
                 string[] cols = rows[row].Split(',');
-                string playerName = cols[0].Trim().ToLower(); // Contains player name
+                string playerName = cols[0].Trim(); // Contains player name
                 PlayerAndStats nextPlayer = new PlayerAndStats
                 {
                     Name = playerName,

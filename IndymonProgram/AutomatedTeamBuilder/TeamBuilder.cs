@@ -94,9 +94,6 @@ namespace AutomatedTeamBuilder
                 // Init stuff
                 Random monRng = new Random(monSeed); // Will use this for the mon, in order to be able to reuse seed
                 TrainerPokemon mon = trainer.BattleTeam[monIndex];
-                bool monHadSetItem = mon.SetItem != null;
-                bool monHadModItem = mon.ModItem != null;
-                bool monHadBattleItem = mon.ModItem != null;
                 mon.ChosenAbility = null;
                 mon.ChosenMoveset.Clear();
                 // Also get the mons ability and moveset here
@@ -705,17 +702,17 @@ namespace AutomatedTeamBuilder
                 if (monAccepted.ToLower() == "n")
                 {
                     // Ok, need to restore mon then
-                    if (mon.SetItem != null && !monHadSetItem) // If mon needs to return set item
+                    if (mon.SetItem != null && !mon.SetItemChosen) // If mon needs to return set item
                     {
                         GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, 1); // Re-adds item
                         mon.SetItem = null;
                     }
-                    if (mon.ModItem != null && !monHadModItem) // If mon needs to return mod item
+                    if (mon.ModItem != null && !mon.ModItemChosen) // If mon needs to return mod item
                     {
                         GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, mon.ModItem, 1); // Re-adds item
                         mon.ModItem = null;
                     }
-                    if (mon.BattleItem != null && !monHadBattleItem) // If mon needs to return battle item
+                    if (mon.BattleItem != null && !mon.BattleItemChosen) // If mon needs to return battle item
                     {
                         GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, mon.BattleItem, 1); // Re-adds item
                         mon.BattleItem = null;

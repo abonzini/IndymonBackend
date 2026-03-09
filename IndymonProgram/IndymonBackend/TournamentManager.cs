@@ -17,6 +17,7 @@ namespace IndymonBackendProgram
         /// <param name="backEndData"></param>
         public void GenerateNewTournament()
         {
+            GameDataContainers.GlobalGameData.CurrentEventMessage.Clear(); // This is a new event, so I will clear whatever thet was there before
             Console.WriteLine("Creation of a new tournament. Which type of tournament? [elim, king, group]");
             string inputString;
             bool validSelection = false;

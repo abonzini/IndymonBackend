@@ -16,7 +16,8 @@ White Monastery -> Justice -> Dawn Stone
 
 ---
 TODO:
-- Trainer string builder. Pre-event (used favour), post-event (item consumption). Event string of ongoing event. Class and the tourn/expl will hold it, can be obtained. TOURN or EXPL result files
+- Post event consuming + auto item notification
+- Save a basic tournament template text for the body
 - Export all trainers option, quick sorting and stuff
 - Then, trainer stuff consumed, arithmetic and exporting, one per trainer. File exported as TRAINER_NEW output
 - Incorporate logic mod items, more sophisticated class system, maybe a logic flag instead of referencing item by name. Merge current bot
@@ -28,3 +29,9 @@ TODO:
 - Option to consume favour
 - Option to consume + explore favour
 - Option to grant random pokemon
+- Spreadsheet S2 Update
+
+POSSIBLE THINGS TO LOOK FOR:
+- Debug weathers
+- Add weather setting for advantage?
+- Move charging penalties to BP so it's not calculated twice

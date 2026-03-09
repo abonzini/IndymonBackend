@@ -1,4 +1,5 @@
 ﻿using GameData;
+using GameDataContainer;
 using Utilities;
 
 namespace AutomatedTeamBuilder
@@ -212,8 +213,13 @@ namespace AutomatedTeamBuilder
                 // First, find which random favor I will cash in
                 KeyValuePair<Trainer, List<TrainerPokemon>> nextFavour = GeneralUtilities.GetRandomKvp(usedBuild.FavourPokemon);
                 int remainingFavours = trainer.TrainerFavours[nextFavour.Key] - 1;
+                // Trainer just auto-used an item, need to write it
                 GeneralUtilities.AddtemToCountDictionary(trainer.TrainerFavours, nextFavour.Key, -1, true); // Remove 1 from the remaining favors of trainer
                 TrainerPokemon borrowedMon = GeneralUtilities.GetRandomPick(nextFavour.Value);
+                GameDataContainers.GlobalGameData.CurrentEventMessage.PreEventText.AppendLine(
+                    $"- Meanwhile, <@{trainer.DiscordNumber}> asked their friend {nextFavour.Key} to lend them a Pokemon for the tournament. {nextFavour.Key} has lent them their {borrowedMon.Species}."
+                    );
+                // Pick mon now
                 if (trainer.TrainerFavours[nextFavour.Key] <= 0)// If i used the last trainer's favour
                 {
                     usedBuild.FavourPokemon.Remove(nextFavour.Key); // This trainer can't be used anymore
