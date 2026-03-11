@@ -61,6 +61,33 @@ namespace Utilities
         {
             ShuffleList(list, 0, list.Count);
         }
+        /// <summary>
+        /// Shuffle a list with F-Y but with a deterministic (i..e repeatable) rng
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list">List to shuffle</param>
+        /// <param name="offset">Where to start shuffle</param>
+        /// <param name="number">How many elements to shuffle</param>
+        /// <param name="rng">The rng</param>
+        public static void ShuffleListDeterministic<T>(List<T> list, int offset, int number, Random rng)
+        {
+            int n = number;
+            while (n > 1) // Fischer yates
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                (list[offset + k], list[offset + n]) = (list[offset + n], list[offset + k]); // Swap
+            }
+        }
+        /// <summary>
+        /// Shuffle a list with F-Y but with a deterministic (i..e repeatable) rng
+        /// </summary>
+        /// <param name="list">List to shuffle</param>
+        /// <param name="rng">The rng</param>
+        public static void ShuffleListDeterministic<T>(List<T> list, Random rng)
+        {
+            ShuffleListDeterministic(list, 0, list.Count, rng);
+        }
         // For the complex RNG
         static readonly List<int> _rngNumbers = [];
         static int _currentRngIndex = 0;

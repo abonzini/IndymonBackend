@@ -1,5 +1,6 @@
 ﻿using GameData;
 using GameDataContainer;
+using MechanicsData;
 using Utilities;
 
 namespace AutomatedTeamBuilder
@@ -132,39 +133,190 @@ namespace AutomatedTeamBuilder
         /// Assembles a trainer's team given all possible builds, randomized if there's any preference
         /// </summary>
         /// <param name="trainer">The trainer whose battle team to define</param>
-        /// <param name="teamBuild">All the possible builds for the trainers</param>
-        public static void AssembleTrainersBattleTeam(Trainer trainer, int nMons, List<PossibleTeamBuild> teamBuild)
+        /// <param name="possibleTeamBuilds">All the possible builds for the trainers</param>
+        public static void AssembleTrainersBattleTeam(Trainer trainer, int nMons, List<PossibleTeamBuild> possibleTeamBuilds, int seed = 0)
         {
-            PossibleTeamBuild usedBuild = GeneralUtilities.GetRandomPick(teamBuild); // TODO: May need to be chosen in some crazy monotypes instead of random
-            List<TrainerPokemon> finalBattleTeam = []; // This is the result
-            // Now, begin the sequence of try to add trainer mons
+            Console.WriteLine($"Assembling {trainer.Name}'s team");
+            Random rng;
+            if (seed == 0) // Add a new or existing seed
+            {
+                rng = new Random();
+            }
+            else
+            {
+                rng = new Random(seed);
+            }
+            int monsInTeam = 0;
+            List<TrainerPokemon> finalBattleTeam = [.. Enumerable.Repeat<TrainerPokemon>(null, nMons)]; // This will be the result, will contain mons in the right slots hopefully
+            // Choose which team build option will be used
+            PossibleTeamBuild usedBuild;
+            if (possibleTeamBuilds.Count > 1)
+            {
+                Console.WriteLine("There's many potential builds, which one will be chosen? 0-N or -1 for random");
+                for (int i = 0; i < possibleTeamBuilds.Count; i++)
+                {
+                    List<string> monNames = [.. possibleTeamBuilds[i].TrainerOwnPokemon.Select(m => m.Species)]; // Get all names
+                    Console.WriteLine($"{i} - {string.Join(',', monNames)}");
+                }
+                int selection = int.Parse(Console.ReadLine());
+                if (selection == -1) // If chose random option, then...
+                {
+                    selection = rng.Next(0, possibleTeamBuilds.Count);
+                }
+                usedBuild = possibleTeamBuilds[selection];
+            }
+            else
+            {
+                usedBuild = possibleTeamBuilds[0];
+            }
+            // Now, begin the sequence of try to add trainer mons, but first, need to ask if the trainer wants to cash in favours
+            void BorrowFavour(Trainer favourTrainer, TrainerPokemon favourMon) /// Function to borrow mon from trainer, trainer and build are "global" variabels here
+            {
+                // Trainer used favour, housekeeping
+                int remainingFavours = GeneralUtilities.AddtemToCountDictionary(trainer.TrainerFavours, favourTrainer, -1, true); // Remove 1 from the remaining favors of trainer
+                GameDataContainers.GlobalGameData.CurrentEventMessage.PreEventText.AppendLine(
+                    $"- Meanwhile, <@{trainer.DiscordNumber}> asked their friend {favourTrainer.Name} to lend them a Pokemon for the tournament. {favourTrainer.Name} has lent them their {favourMon.Species}."
+                    );
+                if (remainingFavours > 0)// If still have favours
+                {
+                    usedBuild.FavourPokemon[favourTrainer].Remove(favourMon);
+                }
+                else // Trainer still useful, just remove the mon i just borrowed
+                {
+                    usedBuild.FavourPokemon.Remove(favourTrainer); // This trainer can't be used anymore
+                }
+            }
+            void AddNextMonToFinalTeam(TrainerPokemon mon, int place = -1) // Adds the next mon, either in a place or to the next possible location
+            {
+                if (place != -1)
+                {
+                    finalBattleTeam[place] = mon;
+                    monsInTeam++;
+                }
+                else
+                {
+                    for (int i = 0; i < finalBattleTeam.Count; i++)
+                    {
+                        if (finalBattleTeam[i] == null)
+                        {
+                            finalBattleTeam[i] = mon;
+                            monsInTeam++;
+                            return;
+                        }
+                    }
+                    throw new Exception("Mon list already full");
+                }
+            }
+            while (monsInTeam < nMons && usedBuild.FavourPokemon.Count > 0) // While need mons and there's favour to use
+            {
+                Console.WriteLine("Will favour be used? y/N");
+                string input = Console.ReadLine();
+                if (input.ToLower() == "y") // Favour to be used
+                {
+                    // Get trainer
+                    List<string> nameList = [.. usedBuild.FavourPokemon.Keys.Select(f => f.Name)];
+                    Console.WriteLine($"Which favour to use? {string.Join(",", nameList)}");
+                    input = Console.ReadLine();
+                    // Get mon
+                    Trainer borrowedTrainer = usedBuild.FavourPokemon.Keys.Where(f => f.Name == input).First();
+                    nameList = [.. usedBuild.FavourPokemon[borrowedTrainer].Select(m => m.Species)];
+                    Console.WriteLine($"Which mon to borrow? {string.Join(",", nameList)}");
+                    input = Console.ReadLine();
+                    TrainerPokemon borrowedMon = usedBuild.FavourPokemon[borrowedTrainer].Where(m => m.Species == input).First();
+                    // Then, item building
+                    if (trainer.SetItems.Count > 0)
+                    {
+                        Console.WriteLine("Use set item? y/N");
+                        input = Console.ReadLine();
+                        if (input.ToLower() == "y")
+                        {
+                            nameList = [.. trainer.SetItems.Keys.Select(i => i.Name)];
+                            Console.WriteLine($"Which set item? {string.Join(",", nameList)}");
+                            input = Console.ReadLine();
+                            SetItem item = trainer.SetItems.Keys.Where(i => i.Name == input).First();
+                            borrowedMon.SetItem = item;
+                            borrowedMon.SetItemChosen = true;
+                        }
+                    }
+                    if (trainer.ModItems.Count > 0)
+                    {
+                        Console.WriteLine("Use mod item? y/N");
+                        input = Console.ReadLine();
+                        if (input.ToLower() == "y")
+                        {
+                            nameList = [.. trainer.ModItems.Keys.Select(i => i.Name)];
+                            Console.WriteLine($"Which mod item? {string.Join(",", nameList)}");
+                            input = Console.ReadLine();
+                            Item item = trainer.ModItems.Keys.Where(i => i.Name == input).First();
+                            borrowedMon.ModItem = item;
+                            borrowedMon.ModItemChosen = true;
+                        }
+                    }
+                    if (trainer.BattleItems.Count > 0)
+                    {
+                        Console.WriteLine("Use battle item? y/N");
+                        input = Console.ReadLine();
+                        if (input.ToLower() == "y")
+                        {
+                            nameList = [.. trainer.BattleItems.Keys.Select(i => i.Name)];
+                            Console.WriteLine($"Which battle item? {string.Join(",", nameList)}");
+                            input = Console.ReadLine();
+                            Item item = trainer.BattleItems.Keys.Where(i => i.Name == input).First();
+                            borrowedMon.BattleItem = item;
+                            borrowedMon.BattleItemChosen = true;
+                        }
+                    }
+                    // Finally, where to put the mon
+                    List<int> validSelections = [];
+                    for (int i = 0; i < finalBattleTeam.Count; i++) // Check the still valid places
+                    {
+                        if (finalBattleTeam[i] == null)
+                        {
+                            validSelections.Add(i);
+                        }
+                    }
+                    Console.WriteLine($"Where to place the mon? {string.Join(",", validSelections)}, -1 if random");
+                    int selection = int.Parse(Console.ReadLine());
+                    if (selection == -1)
+                    {
+                        selection = rng.Next(0, validSelections.Count);
+                    }
+                    BorrowFavour(borrowedTrainer, borrowedMon); // Housekeeping regarding the favour in question
+                    AddNextMonToFinalTeam(borrowedMon, selection);
+                }
+                else
+                {
+                    break;
+                }
+            }
             // If trainer defined a strict order, will add them in the order of team as stated, otherwise do mon>set item>favor
             if (trainer.AutoTeam) // If shuffling is allowed, all is shuffled then and picks prioritising item efficiency
             {
-                GeneralUtilities.ShuffleList(usedBuild.TrainerOwnPokemon);
-                for (int i = 0; i < usedBuild.TrainerOwnPokemon.Count && finalBattleTeam.Count < nMons; i++) // Fill as much as possible from here until done or ran out of mons
+                GeneralUtilities.ShuffleListDeterministic(usedBuild.TrainerOwnPokemon, rng);
+                for (int i = 0; i < usedBuild.TrainerOwnPokemon.Count && monsInTeam < nMons; i++) // Fill as much as possible from here until done or ran out of mons
                 {
-                    finalBattleTeam.Add(usedBuild.TrainerOwnPokemon[i]); // Add to final team
+                    TrainerPokemon chosenMon = usedBuild.TrainerOwnPokemon[i];
+                    AddNextMonToFinalTeam(chosenMon);
                 }
                 // Then, if still need to fill, let's go items
-                if (finalBattleTeam.Count < nMons)
+                if (monsInTeam < nMons)
                 {
                     // Add mons + battle item as long as i still have mons (and items!) and need to get more
-                    while (usedBuild.TrainerOwnPokemonUsingSetItem.Count > 0 && finalBattleTeam.Count < nMons)
+                    while (usedBuild.TrainerOwnPokemonUsingSetItem.Count > 0 && monsInTeam < nMons)
                     {
                         // Pick a random set item, a random mon from the list, decrement uses of set item
-                        SetItem chosenSetItem = GeneralUtilities.GetRandomPick(usedBuild.TrainerOwnPokemonUsingSetItem.Keys.ToList()); // Choose an item
+                        SetItem chosenSetItem = usedBuild.TrainerOwnPokemonUsingSetItem.Keys.ToList()[rng.Next(usedBuild.TrainerOwnPokemonUsingSetItem.Count)]; // Choose an item
                         List<TrainerPokemon> potentialMons = [.. usedBuild.TrainerOwnPokemonUsingSetItem[chosenSetItem].Where(p => !finalBattleTeam.Contains(p))];
                         if (potentialMons.Count > 0) // ok theres something to work with
                         {
-                            TrainerPokemon chosenMon = GeneralUtilities.GetRandomPick(potentialMons);
+                            TrainerPokemon chosenMon = potentialMons[rng.Next(potentialMons.Count)];
                             chosenMon.SetItem = chosenSetItem; // Equip the thing
                             int finalSetItemAmount = GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, chosenSetItem, -1, true);
                             if (finalSetItemAmount <= 0) // If this was the last use of this item, then remove it from options from now on
                             {
                                 usedBuild.TrainerOwnPokemonUsingSetItem.Remove(chosenSetItem); // This set item no longer valid
                             }
-                            finalBattleTeam.Add(chosenMon);
+                            AddNextMonToFinalTeam(chosenMon);
                         }
                         else
                         {
@@ -176,61 +328,50 @@ namespace AutomatedTeamBuilder
             else // Respect the strict order, mons are retrieved from their corresponding places
             {
                 // Choose mons until i ran out of need or ran out of mon, but do so in the desired order
-                for (int i = 0; i < trainer.PartyPokemon.Count && finalBattleTeam.Count < nMons; i++)
+                for (int i = 0; i < trainer.PartyPokemon.Count && monsInTeam < nMons; i++)
                 {
-                    TrainerPokemon mon = trainer.PartyPokemon[i];
-                    if (usedBuild.TrainerOwnPokemon.Contains(mon)) // This was a valid mon, just add as is!
+                    TrainerPokemon chosenMon = trainer.PartyPokemon[i];
+                    if (usedBuild.TrainerOwnPokemon.Contains(chosenMon)) // This was a valid mon, just add as is!
                     {
-                        finalBattleTeam.Add(mon);
+                        AddNextMonToFinalTeam(chosenMon);
                     }
                     else // Then, may still be able to add it with a set item
                     {
                         List<SetItem> potentialSetItems = new List<SetItem>();
                         foreach (KeyValuePair<SetItem, List<TrainerPokemon>> monsWSetItems in usedBuild.TrainerOwnPokemonUsingSetItem)
                         {
-                            if (monsWSetItems.Value.Contains(mon)) // Mon can use this
+                            if (monsWSetItems.Value.Contains(chosenMon)) // Mon can use this
                             {
                                 potentialSetItems.Add(monsWSetItems.Key);
                             }
                         }
                         if (potentialSetItems.Count > 0) // Ok this mon can have the set item...
                         {
-                            SetItem chosenSetItem = GeneralUtilities.GetRandomPick(potentialSetItems); // Choose one at random
-                            mon.SetItem = chosenSetItem; // Equip the thing
+                            SetItem chosenSetItem = potentialSetItems[rng.Next(potentialSetItems.Count)]; // Choose one at random
+                            chosenMon.SetItem = chosenSetItem; // Equip the thing
                             int finalSetItemAmount = GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, chosenSetItem, -1, true);
                             if (finalSetItemAmount <= 0) // If this was the last use of this item, then remove it from options from now on
                             {
                                 usedBuild.TrainerOwnPokemonUsingSetItem.Remove(chosenSetItem); // This set item no longer valid
                             }
-                            finalBattleTeam.Add(mon);
+                            AddNextMonToFinalTeam(chosenMon);
                         }
                     }
                 }
             }
             // Finally finally, same with favor dudes, this will be random either way
-            while (finalBattleTeam.Count < nMons)
+            while (monsInTeam < nMons)
             {
                 // First, find which random favor I will cash in
-                KeyValuePair<Trainer, List<TrainerPokemon>> nextFavour = GeneralUtilities.GetRandomKvp(usedBuild.FavourPokemon);
-                int remainingFavours = trainer.TrainerFavours[nextFavour.Key] - 1;
-                // Trainer just auto-used an item, need to write it
-                GeneralUtilities.AddtemToCountDictionary(trainer.TrainerFavours, nextFavour.Key, -1, true); // Remove 1 from the remaining favors of trainer
-                TrainerPokemon borrowedMon = GeneralUtilities.GetRandomPick(nextFavour.Value);
-                GameDataContainers.GlobalGameData.CurrentEventMessage.PreEventText.AppendLine(
-                    $"- Meanwhile, <@{trainer.DiscordNumber}> asked their friend {nextFavour.Key} to lend them a Pokemon for the tournament. {nextFavour.Key} has lent them their {borrowedMon.Species}."
-                    );
-                // Pick mon now
-                if (trainer.TrainerFavours[nextFavour.Key] <= 0)// If i used the last trainer's favour
-                {
-                    usedBuild.FavourPokemon.Remove(nextFavour.Key); // This trainer can't be used anymore
-                }
-                else // Trainer still useful, just remove the mon i just borrowed
-                {
-                    usedBuild.FavourPokemon[nextFavour.Key].Remove(borrowedMon);
-                }
-                // This will continue until infinite loop or crash or sth because if i reached here everything should work
+                Trainer nextFavourTrainer = usedBuild.FavourPokemon.Keys.ToList()[rng.Next(usedBuild.FavourPokemon.Count)]; // Get a random trainer
+                List<TrainerPokemon> possibleFavourPokemon = usedBuild.FavourPokemon[nextFavourTrainer];
+                TrainerPokemon borrowedMon = possibleFavourPokemon[rng.Next(possibleFavourPokemon.Count)]; // Get a random mon
+                BorrowFavour(nextFavourTrainer, borrowedMon);
+                AddNextMonToFinalTeam(borrowedMon); // Add mon to team
             }
-            // Should be al good here I guess
+            // Should be al good here I guess, validate (no null spaces) and reshuffle if auto team so the favour mon can be anywhere too
+            if (finalBattleTeam.Any(m => m == null)) throw new Exception("For some reason the final battle team still has null Pokemon!");
+            if (trainer.AutoTeam) GeneralUtilities.ShuffleListDeterministic(finalBattleTeam, rng); // One last shuffle to allow any mon in any position
             trainer.BattleTeam = finalBattleTeam; // Set this team for battle
         }
     }

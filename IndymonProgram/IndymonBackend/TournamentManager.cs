@@ -164,7 +164,7 @@ namespace IndymonBackendProgram
                 Trainer participant = IndymonUtilities.GetTrainerByName(participantName);
                 // Indymon S2 addition, confirm sets now does the smart teambuild
                 List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions); // Get all of the possible sets that would satisfy this
-                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds); // Chooses one of the sets, prepares the mons
+                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds, participantData.Item2); // Chooses one of the sets, prepares the mons
             }
             foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // Then, build for each trainer
             {
@@ -184,7 +184,7 @@ namespace IndymonBackendProgram
                     }
                 }
                 // Define sets for this trainer. Smart build, no archetypes included at beginning. Build with constraints and enemy mons in mind. Use seed.
-                TeamBuilder.DefineTrainerSets(participant, true, [], Weather.NONE, Terrain.NONE, OngoingTournament.BaseConstraint, enemyMons, participantData.Item2);
+                TeamBuilder.DefineTrainerSets(participant, true, [], Weather.NONE, Terrain.NONE, OngoingTournament.BaseConstraint, enemyMons, participantSeed);
             }
         }
         /// <summary>
@@ -566,7 +566,7 @@ namespace IndymonBackendProgram
                 }
             }
             // Ok now shuffle everything
-            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed, 0, ParticipantsWithRandomSeed.Count);
+            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed);
             // Seeding will involve putting the best first
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
@@ -845,7 +845,7 @@ namespace IndymonBackendProgram
         public override void ShuffleWithSeeds(List<(string, int)> Seeds)
         {
             // Shuffle everything
-            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed, 0, ParticipantsWithRandomSeed.Count);
+            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed);
             // Seeding in KOH means putting the best in the bottom
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
@@ -1032,7 +1032,7 @@ namespace IndymonBackendProgram
         public override void ShuffleWithSeeds(List<(string, int)> Seeds)
         {
             // Shuffle everything
-            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed, 0, ParticipantsWithRandomSeed.Count);
+            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed);
             // Seeding will involve putting the best first
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
