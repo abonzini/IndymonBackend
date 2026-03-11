@@ -216,7 +216,7 @@ namespace ShowdownBot
                     if (m.Groups[1].Value.Contains(_selfId)) // If this switch corresponds to one of my guys, may contain HP info too
                     {
                         string monId = m.Groups[1].Value.Split(':')[1].Trim().Replace("’", "'"); // Id of the mon in question (FUCK YOU FARFETCHD)
-                        string monSpecies = m.Groups[2].Value.Trim().Replace("’", "'"); // Species of the mon (FUCK YOU FARFETCHD)
+                        string monSpecies = m.Groups[2].Value.Split(',')[0].Trim().Replace("’", "'"); // Species of the mon (FUCK YOU FARFETCHD)
                         string status = m.Groups[3].Value.Trim(); // Hp status
                         //Console.WriteLine($"Switch debug: {monId}->{monSpecies}->{status}");
                         if (!_monsById.TryGetValue(monId, out TrainerPokemon pokemonInTeam)) // Id not known yet
