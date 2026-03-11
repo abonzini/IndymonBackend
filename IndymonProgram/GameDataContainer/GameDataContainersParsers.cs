@@ -15,6 +15,12 @@ namespace GameDataContainer
         /// <param name="trainerContainer"></param>
         void ParseTrainerCards(string sheetId, string sheetTab, Dictionary<string, Trainer> trainerContainer)
         {
+            // First of all, load universal (replacement) set items to database
+            List<SetItem> replacementSetItems = SetItem.GetReplacementSetItems();
+            foreach (SetItem replacementSetItem in replacementSetItems)
+            {
+                SetItems.TryAdd(replacementSetItem.Name, replacementSetItem);
+            }
             trainerContainer.Clear();
             // Parse csv
             const int TRAINER_CARD_ROWS = 22; // Number of lines per trainer card
@@ -34,7 +40,7 @@ namespace GameDataContainer
                     if (name == "") continue; // No trainer here, move on
                     nextTrainer.Name = name;
                     nextTrainer.DungeonIdentifier = nextLine[j + 1];
-                    nextTrainer.IMP = int.TryParse(nextLine[j + 2], out int imp) ? imp : 0;
+                    nextTrainer.Imp = int.TryParse(nextLine[j + 2], out int imp) ? imp : 0;
                     nextTrainer.AutoTeam = bool.Parse(nextLine[j + 4]);
                     nextTrainer.AutoSetItem = bool.Parse(nextLine[j + 6]);
                     nextTrainer.Avatar = nextLine[j + 7];

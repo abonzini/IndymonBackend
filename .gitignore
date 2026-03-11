@@ -61,3 +61,4 @@ indy.mon
 tournament_stats.*
 tourn_stats.*
 *.json
+*.trainer

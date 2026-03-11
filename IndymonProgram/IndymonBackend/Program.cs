@@ -1,4 +1,5 @@
-﻿using GameDataContainer;
+﻿using GameData;
+using GameDataContainer;
 using MechanicsDataContainer;
 using Newtonsoft.Json;
 
@@ -17,7 +18,6 @@ namespace IndymonBackendProgram
             Console.CursorVisible = false;
             Console.WriteLine($"Folder where data is located?");
             string directoryPath = Console.ReadLine();
-            GameDataContainers.GlobalGameData.CurrentEventMessage.DirectoryPath = directoryPath;
             // Begin with the mechanics back end
             string MECHANICS_DATA_FILE = "mechanics_data.txt";
             MechanicsDataContainers.GlobalMechanicsData.InitializeData(Path.Combine(directoryPath, MECHANICS_DATA_FILE));
@@ -48,16 +48,16 @@ namespace IndymonBackendProgram
                 switch (InputString)
                 {
                     case "0":
-                        {
-
-                            Console.WriteLine("Writing resulting files");
-                            GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
-                            Console.WriteLine("Serializing jsons");
-                            File.WriteAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE), JsonConvert.SerializeObject(tournamentManager, jsonSettings));
-                        }
+                        Console.WriteLine("Writing resulting files");
+                        GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
+                        Console.WriteLine("Serializing jsons");
+                        File.WriteAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE), JsonConvert.SerializeObject(tournamentManager, jsonSettings));
                         break;
                     case "1":
-                        tournamentManager = new TournamentManager();
+                        tournamentManager = new TournamentManager
+                        {
+                            DirectoryPath = directoryPath
+                        };
                         tournamentManager.GenerateNewTournament();
                         break;
                     case "2":
@@ -66,6 +66,14 @@ namespace IndymonBackendProgram
                         break;
                     case "3":
                         tournamentManager.FinaliseTournament();
+                        break;
+                    case "4":
+                        foreach (Trainer trainer in GameDataContainers.GlobalGameData.TrainerData.Values)
+                        {
+                            // Will quickly export all trainers csvs, useful for cleanup functions
+                            string trainerFilePath = Path.Combine(directoryPath, $"{trainer.Name.ToUpper().Replace(" ", "").Replace("?", "")}.trainer");
+                            trainer.SaveTrainerCsv(trainerFilePath);
+                        }
                         break;
                     case "5":
                         //_allData.ExplorationManager = new ExplorationManager(_allData.DataContainer);
@@ -180,6 +188,7 @@ namespace IndymonBackendProgram
                 "1 - Generate a new tournament\n" +
                 "2 - Update tournament participant's team sheets and input tournament data\n" +
                 "3 - Finalize tournament. Animation + export new tournament data\n" +
+                "4 - Export all players csv data\n" +
                 "5 - Generate exploration, choose place, player, etc\n" +
                 "6 - Simulate current exploration\n" +
                 "7 - Animate resolved exploration\n" +

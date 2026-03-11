@@ -175,7 +175,7 @@ namespace AutomatedTeamBuilder
                 // Trainer used favour, housekeeping
                 int remainingFavours = GeneralUtilities.AddtemToCountDictionary(trainer.TrainerFavours, favourTrainer, -1, true); // Remove 1 from the remaining favors of trainer
                 GameDataContainers.GlobalGameData.CurrentEventMessage.PreEventText.AppendLine(
-                    $"- Meanwhile, <@{trainer.DiscordNumber}> asked their friend {favourTrainer.Name} to lend them a Pokemon for the tournament. {favourTrainer.Name} has lent them their {favourMon.Species}."
+                    $"- <@{trainer.DiscordNumber}> asked their friend {favourTrainer.Name} to lend them a Pokemon for the tournament. {favourTrainer.Name} has lent them their {favourMon.Species}."
                     );
                 if (remainingFavours > 0)// If still have favours
                 {

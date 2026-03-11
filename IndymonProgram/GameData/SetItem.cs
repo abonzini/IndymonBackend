@@ -19,10 +19,25 @@ namespace GameData
         public List<Move> AddedMoves = [];
         public bool Expires = false;
         public string ItemReplacement = "";
+        public int ItemReplacementQuantity = 1;
         public bool AlwaysAllowedItem = true;
         public override string ToString()
         {
             return Name;
+        }
+        /// <summary>
+        /// Returns a list of all the valid replacement set items so they can be loaded at the beginning
+        /// </summary>
+        /// <returns></returns>
+        public static List<SetItem> GetReplacementSetItems()
+        {
+            List<string> setItemNames = [BLANK_DISK];
+            List<SetItem> setItems = [];
+            foreach (string name in setItemNames)
+            {
+                setItems.Add(Parse(name));
+            }
+            return setItems;
         }
         public bool CanEquip(TrainerPokemon mon)
         {
@@ -50,11 +65,18 @@ namespace GameData
             // Checks moves granted
             string[] addedMoveNames = [];
             string addedAbilityName = "";
-            if (itemName.Contains(BASIC_DISK))
+            if (itemName.Contains(BLANK_DISK))
+            {
+                resultingItem.AlwaysAllowedItem = false;
+                resultingItem.ItemReplacement = "";
+                resultingItem.Expires = true;
+            }
+            else if (itemName.Contains(BASIC_DISK))
             {
                 addedMoveNames = itemName.Split(BASIC_DISK)[0].Trim().Split(";"); // Remove the tag and then add the Move(s) separated by ;
                 resultingItem.AlwaysAllowedItem = false; // Basic disks only work if mon already had the moves
                 resultingItem.ItemReplacement = BLANK_DISK;
+                resultingItem.ItemReplacementQuantity = addedMoveNames.Length;
                 resultingItem.Expires = true;
             }
             else if (itemName.Contains(ADVANCED_DISK))

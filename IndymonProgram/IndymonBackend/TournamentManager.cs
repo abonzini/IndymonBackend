@@ -11,10 +11,10 @@ namespace IndymonBackendProgram
     public class TournamentManager
     {
         public Tournament OngoingTournament { get; set; }
+        public string DirectoryPath = "";
         /// <summary>
         /// Generates a new tournament, dialog asking for tpy, n players, n mons, and which participants
         /// </summary>
-        /// <param name="backEndData"></param>
         public void GenerateNewTournament()
         {
             GameDataContainers.GlobalGameData.CurrentEventMessage.Clear(); // This is a new event, so I will clear whatever thet was there before
@@ -124,7 +124,6 @@ namespace IndymonBackendProgram
         /// <summary>
         /// Updates the tournament teams, meaning a team randomization and updating team sheets if needed
         /// </summary>
-        /// <param name="Seeds">Potential seed list if some players are too good and need to done last (this is mostly for special tournaments)</param>
         public void UpdateTournamentTeams()
         {
             // First, shuffle the participants (use seed if needed)
@@ -208,6 +207,38 @@ namespace IndymonBackendProgram
             }
             // Also, ask the tournament to update the sheets
             OngoingTournament.UpdateLeaderboard();
+            // Also, need to update the items and sheets for participants
+            foreach (string participant in OngoingTournament.ParticipantsWithRandomSeed.Select(t => t.Item1))
+            {
+                Trainer trainer = IndymonUtilities.GetTrainerByName(participant); // Obtain trainer
+                IndymonUtilities.ConsumeTrainersItems(trainer); // Trainer does a round of consuming item
+                string trainerFilePath = Path.Combine(DirectoryPath, $"{participant.ToUpper().Replace(" ", "").Replace("?", "")}.trainer");
+                trainer.SaveTrainerCsv(trainerFilePath);
+            }
+            // Finally, the tournament string needs to be assembled with the remaining stuff
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Clear();
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
+                "<Text indicating who organised the tournament and which week>"
+            );
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
+                $"A total of {OngoingTournament.ParticipantsWithRandomSeed.Count} trainers participated on this event."
+            );
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
+                $"Video: URL"
+            );
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
+                $"- Congrats to the winner, ||WINNER||, who has won <1ST PRIZE>!"
+            );
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
+                $"- Congratulations also to the runner-up, ||2NDPLACE||, who has won <2ND PRIZE>"
+            );
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
+                $"- All other players have received <CONSOLATION> as a thanks for participating"
+            );
+            string filePath = Path.Combine(DirectoryPath, "TOURNAMENT.txt");
+            GameDataContainers.GlobalGameData.CurrentEventMessage.SaveToFile(filePath);
         }
     }
     public class TournamentMatch()
