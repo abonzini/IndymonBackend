@@ -3,6 +3,12 @@ using MechanicsDataContainer;
 
 namespace GameData
 {
+    public enum PokemonLogic
+    {
+        BASIC,
+        FIRST_ONCE,
+        DONT_REPEAT,
+    }
     public class TrainerPokemon
     {
         public string Species = "";
@@ -53,6 +59,8 @@ namespace GameData
         public string NonVolatileStatus = "";
         public List<int> MovePp = [];
         public int Level = 100; // Default is 100
+        public HashSet<int> MovesChosenInBattle = [];
+        public PokemonLogic Logic = PokemonLogic.BASIC;
         /// <summary>
         /// Imports status as seen in showdown
         /// </summary>

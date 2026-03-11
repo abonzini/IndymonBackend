@@ -228,6 +228,7 @@ namespace ShowdownBot
                             _monsById.Add(monId, pokemonInTeam);
                         }
                         pokemonInTeam.ImportShowdownStatus(status);
+                        pokemonInTeam.MovesChosenInBattle = []; // Mon just switched in, reset move memory
                     }
                 }
                 // Mon receives direct damage or hp change
@@ -363,9 +364,38 @@ namespace ShowdownBot
             else // Then its probably a move?
             {
                 bool invalidChoice;
+                bool tryLogicMod = true; // Will try logic mod in this first iteration
                 do
                 {
-                    int moveChoice = GeneralUtilities.GetRandomNumber(0, currentPokemon.ChosenMoveset.Count); // Choose one of all random moves
+                    // Check if there's logic mods
+                    int moveChoice;
+                    if (tryLogicMod && currentPokemon.Logic == PokemonLogic.FIRST_ONCE) // Does first move once and then doesn't
+                    {
+                        if (currentPokemon.MovesChosenInBattle.Contains(0)) // Do 0 unless already done, in which case do all others 
+                        {
+                            moveChoice = GeneralUtilities.GetRandomNumber(1, currentPokemon.ChosenMoveset.Count);
+                        }
+                        else
+                        {
+                            moveChoice = 0;
+                        }
+                    }
+                    else if (tryLogicMod && currentPokemon.Logic == PokemonLogic.DONT_REPEAT) // Logic here it never repeats moves in a cycle
+                    {
+                        if (currentPokemon.MovesChosenInBattle.Count == currentPokemon.ChosenMoveset.Count) // All options have been used, reset list
+                        {
+                            currentPokemon.MovesChosenInBattle = [];
+                        }
+                        do // Try a next unique move
+                        {
+                            moveChoice = GeneralUtilities.GetRandomNumber(0, currentPokemon.ChosenMoveset.Count);
+                        } while (!currentPokemon.MovesChosenInBattle.Contains(moveChoice));
+                    }
+                    else // Normal logic
+                    {
+                        moveChoice = GeneralUtilities.GetRandomNumber(0, currentPokemon.ChosenMoveset.Count); // 0 -> 3 can be the choice
+                    }
+                    tryLogicMod = false; // Thats it, if this fucks up, will do again without using logic mod
                     ActiveOptions playOptions = _currentGameState.Active.FirstOrDefault();
                     // Move is valid as long its in a valid slot and usable (not disabled, pp)
                     invalidChoice = moveChoice >= playOptions.Moves.Count || playOptions.Moves[moveChoice].Disabled || (playOptions.Moves[moveChoice].Pp == 0);
@@ -385,6 +415,7 @@ namespace ShowdownBot
                     }
                     else // try the move then
                     {
+                        currentPokemon.MovesChosenInBattle.Add(moveChoice); // Will choose this move so I also added it to move history
                         command = $"{battle}|/choose move {moveChoice + 1}"; // Choose move (slot 1-max)
                         string possibleTera = _currentGameState.Active.First().CanTerastallize.Trim();
                         if (possibleTera != "" && (possibleTera.ToUpper() == currentPokemon.TeraType.ToString().ToUpper())) // Means the current mon can tera and it's consistent

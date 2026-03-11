@@ -317,7 +317,7 @@ namespace IndymonBackendProgram
                     Trainer p2 = IndymonUtilities.GetTrainerByName(match.Player2);
                     p2.RestoreAll();
                     BotBattle automaticBattle = new BotBattle();
-                    string challengeString = "gen9customgame@@@OHKO Clause,Evasion Moves Clause,Moody Clause";
+                    string challengeString = "gen9customgame";
                     (match.Score1, match.Score2) = automaticBattle.SimulateBotBattle(p1, p2, NMons, NMons, challengeString);
                     Console.SetCursorPosition(cursorX, cursorY);
                     Console.Write($"{match.Score1}-{match.Score2} GET THE REPLAY");
