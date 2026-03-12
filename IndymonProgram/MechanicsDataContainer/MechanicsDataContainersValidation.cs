@@ -27,6 +27,7 @@ namespace MechanicsDataContainer
                 ElementType.EFFECT_FLAGS => Enum.TryParse<EffectFlag>(name, true, out _),
                 ElementType.DAMAGING_MOVE_OF_TYPE or ElementType.ORIGINAL_TYPE_OF_MOVE => Enum.TryParse<PokemonType>(name, true, out _),
                 ElementType.MOVE_CATEGORY => Enum.TryParse<MoveCategory>(name, true, out _),
+                ElementType.ALWAYS => name == "-",
                 ElementType.ANY_DAMAGING_MOVE => name == "-",
                 ElementType.ANY_MOVE => name == "-",
                 _ => false,

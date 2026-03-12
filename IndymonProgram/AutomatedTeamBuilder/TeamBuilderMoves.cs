@@ -556,7 +556,9 @@ namespace AutomatedTeamBuilder
                     List<double> moveCoverage = CalculateOffensiveTypeCoverage(moveType, buildCtx.OpponentsTypes,
                         allMoveFlags.Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
                         mon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
-                        move.Name == "Freeze Dry"); // Freeze dry is SE against water
+                        move.Name == "Freeze Dry", // Freeze dry is SE against water
+                        (mon.BattleItem?.Name == "Expert Belt") ? 1.2 : 1 // Expert belt multiplies SE damage by 1.2
+                    );
                     moveDamage *= moveCoverage.Average(); // Average damage caused by move cvg
                     // Finally, how damage affects score
                     score *= (2 * moveDamage) / oppStats[0]; // A damage of 50% opp HP would have a score of 1

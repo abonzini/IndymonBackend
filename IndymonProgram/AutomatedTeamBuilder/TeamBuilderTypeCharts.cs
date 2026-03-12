@@ -14,7 +14,7 @@ namespace AutomatedTeamBuilder
         /// <param name="doubleNotEffectiveDamage">If hits a not very effective, is the result doubled?</param>
         /// <param name="seAgainstWater">Will the move hit water for double damage instead of typechart value?</param>
         /// <returns>The maximum dmaage multiplier for this type/defender combo</returns>
-        static List<double> CalculateOffensiveTypeCoverage(PokemonType attackingType, List<(PokemonType, PokemonType)> defenderTypes, bool ignoresImmunity, bool doubleNotEffectiveDamage, bool seAgainstWater)
+        static List<double> CalculateOffensiveTypeCoverage(PokemonType attackingType, List<(PokemonType, PokemonType)> defenderTypes, bool ignoresImmunity, bool doubleNotEffectiveDamage, bool seAgainstWater, double superEffectiveMultiplier)
         {
             List<double> result = new List<double>();
             foreach ((PokemonType, PokemonType) defenderType in defenderTypes)
@@ -38,6 +38,7 @@ namespace AutomatedTeamBuilder
                 }
                 double resultingMultiplier = damageT1 * damageT2;
                 if (doubleNotEffectiveDamage && resultingMultiplier < 1) resultingMultiplier *= 2; // Tinted lens doubles not very effective dmg
+                if (resultingMultiplier > 1) resultingMultiplier *= superEffectiveMultiplier; // Super effective moves are altered by super effective multipliers such as expert belt
                 result.Add(resultingMultiplier);
             }
             return result;
@@ -58,7 +59,7 @@ namespace AutomatedTeamBuilder
                 static double DefensiveTypeCheck(PokemonType attackingType, (PokemonType, PokemonType) defendingType, HashSet<(StatModifier, string)> ModifiedTypeEffectiveness)
                 {
                     if (attackingType == PokemonType.NONE) return 1; // Typeless moves just hit
-                    double damage = CalculateOffensiveTypeCoverage(attackingType, [defendingType], false, false, false)[0]; // Reuse the attackign formula, check how much this messes me up, don''t know enemy abilities so all false
+                    double damage = CalculateOffensiveTypeCoverage(attackingType, [defendingType], false, false, false, 1)[0]; // Reuse the attackign formula, check how much this messes me up, don''t know enemy abilities so all false
                     // SE checks here before extra modifiers
                     if (damage > 1) // SE!
                     {

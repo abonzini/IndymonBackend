@@ -7,6 +7,15 @@ namespace AutomatedTeamBuilder
     public static partial class TeamBuilder
     {
         /// <summary>
+        /// Obtain the mods of "anything"
+        /// </summary>
+        /// <param name="monCtx">Context where to add the mods</param>
+        static void ExtractAlwaysMods(PokemonBuildInfo monCtx)
+        {
+            // Once archetype is active, it's simple to find all the effects caused by it
+            ExtractMods((ElementType.ALWAYS, "-"), monCtx);
+        }
+        /// <summary>
         /// Given an archetype, obtains all mods associated to it, updates Ctx
         /// </summary>
         /// <param name="archetype">Archetype</param>

@@ -120,6 +120,7 @@ namespace AutomatedTeamBuilder
                 // No mon type changes
             }
             // Then obtain, step by step, all mods applied by all the (currently known) elements of the mon's build
+            ExtractAlwaysMods(result); // Extract the mods that are present in absolutely everyhting
             foreach (TeamArchetype archetype in result.AdditionalArchetypes)
             {
                 ExtractArchetypeMods(archetype, result);
@@ -260,7 +261,9 @@ namespace AutomatedTeamBuilder
                     movesTypeCoverage.Add(CalculateOffensiveTypeCoverage(moveType, teamCtx.OpponentsTypes,
                         ExtractMoveFlags(move, result).Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
                         pokemon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
-                        move.Name == "Freeze Dry")); // Freeze dry is SE against water
+                        move.Name == "Freeze Dry", // Freeze dry is SE against water
+                        (pokemon.BattleItem?.Name == "Expert Belt") ? 1.2 : 1 // Expert belt multiplies SE damage by 1.2
+                        ));
                 }
                 // Do some magic to calculate average move damage with average type coverage
                 List<double> bestCaseMoveCoverage;

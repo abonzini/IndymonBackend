@@ -9,6 +9,7 @@ namespace MechanicsData
     [JsonConverter(typeof(StringEnumConverter))]
     public enum ElementType
     {
+        ALWAYS, /// Can't be affected, but it's there to add mods from scratch, specifically stat/battle mods
         POKEMON, /// The pokemon. Can't be affected, but affects stuff
         POKEMON_TYPE, /// The pokemon type. Can't be affected, but affects stuff
         POKEMON_HAS_EVO, /// The flag of whether the pokemon has an evo or not (only way to make eviolite happen)
