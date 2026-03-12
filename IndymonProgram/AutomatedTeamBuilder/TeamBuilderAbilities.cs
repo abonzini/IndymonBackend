@@ -110,11 +110,7 @@ namespace AutomatedTeamBuilder
                     return 0;
                 }
             }
-            if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(abilityTag, out double mult)) // Initial
-            {
-                result *= mult;
-            }
-            if (monCtx.WeightMods.TryGetValue(abilityTag, out mult)) // Other weight mods...
+            if (monCtx.WeightMods.TryGetValue(abilityTag, out double mult)) // Other weight mods...
             {
                 result *= mult;
             }

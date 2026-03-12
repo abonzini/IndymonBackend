@@ -564,22 +564,7 @@ namespace AutomatedTeamBuilder
                     score *= (2 * moveDamage) / oppStats[0]; // A damage of 50% opp HP would have a score of 1
                 }
                 // Finally, all the mults associated with a move, another headache...
-                // Initial weights first
-                score *= MechanicsDataContainers.GlobalMechanicsData.InitialWeights.GetValueOrDefault(moveNameTag, 1);
-                score *= MechanicsDataContainers.GlobalMechanicsData.InitialWeights.GetValueOrDefault(moveCatTag, 1);
-                score *= MechanicsDataContainers.GlobalMechanicsData.InitialWeights.GetValueOrDefault(moveOTypeTag, 1);
-                score *= MechanicsDataContainers.GlobalMechanicsData.InitialWeights.GetValueOrDefault(anyMoveTag, 1);
-                if (moveIsDamaging) // Few extra checks for damaging moves
-                {
-                    score *= MechanicsDataContainers.GlobalMechanicsData.InitialWeights.GetValueOrDefault(damagingMoveOfTypeTag, 1);
-                    score *= MechanicsDataContainers.GlobalMechanicsData.InitialWeights.GetValueOrDefault(damagingMoveTag, 1);
-                }
-                foreach (EffectFlag effect in allMoveFlags)
-                {
-                    (ElementType, string) effectTag = (ElementType.EFFECT_FLAGS, effect.ToString());
-                    score *= MechanicsDataContainers.GlobalMechanicsData.InitialWeights.GetValueOrDefault(effectTag, 1);
-                }
-                // Then the smart mods (weights?)
+                // Smart mods (weights?)
                 score *= monCtx.WeightMods.GetValueOrDefault(moveNameTag, 1);
                 score *= monCtx.WeightMods.GetValueOrDefault(moveCatTag, 1);
                 score *= monCtx.WeightMods.GetValueOrDefault(moveOTypeTag, 1);

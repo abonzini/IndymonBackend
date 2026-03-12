@@ -421,19 +421,6 @@ namespace AutomatedTeamBuilder
                                             }
                                         }
                                     }
-                                    // Then initial weights
-                                    if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(modItemNameTag, out aux))
-                                    {
-                                        score *= aux;
-                                    }
-                                    foreach (ItemFlag flag in modItem.Flags)
-                                    {
-                                        (ElementType, string) flagTag = (ElementType.ITEM_FLAGS, flag.ToString());
-                                        if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(flagTag, out aux))
-                                        {
-                                            score *= aux;
-                                        }
-                                    }
                                     // Then weight mods
                                     if (monCtx.WeightMods.TryGetValue(modItemNameTag, out aux))
                                     {
@@ -597,19 +584,6 @@ namespace AutomatedTeamBuilder
                                             {
                                                 continue; // This item is no good
                                             }
-                                        }
-                                    }
-                                    // Then initial weights
-                                    if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(battleItemNameTag, out aux))
-                                    {
-                                        score *= aux;
-                                    }
-                                    foreach (ItemFlag flag in battleItem.Flags)
-                                    {
-                                        (ElementType, string) flagTag = (ElementType.ITEM_FLAGS, flag.ToString());
-                                        if (MechanicsDataContainers.GlobalMechanicsData.InitialWeights.TryGetValue(flagTag, out aux))
-                                        {
-                                            score *= aux;
                                         }
                                     }
                                     // Then weight mods

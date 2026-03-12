@@ -285,32 +285,6 @@ namespace MechanicsDataContainer
             }
         }
         /// <summary>
-        /// Parses initial score weights of stuff. This requires all data (moves,dex,etc) to be pre-parsed
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseInitialWeights(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Initial Weights");
-            InitialWeights.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int ELEMENT_TYPE_COL = 0;
-            const int NAME_COL = 1;
-            const int WEIGHT_COL = 2;
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] fields = lines[i].Split(","); // Csv
-                ElementType type = Enum.Parse<ElementType>(fields[ELEMENT_TYPE_COL].Trim());
-                string name = fields[NAME_COL].Trim();
-                double weight = double.Parse(fields[WEIGHT_COL]);
-                // Validate if all's good
-                AssertElementExistance(type, name);
-                InitialWeights.Add((type, name), weight);
-            }
-        }
-        /// <summary>
         /// Parses the enablements of items/strats and assembles also the disabled list. This requires all data (moves,dex,etc) to be pre-parsed
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
@@ -382,9 +356,9 @@ namespace MechanicsDataContainer
                     // Here, the thing that enables me may be a weather, archetype, terrain, in which case I need their direct enablers
                     if (kvp.Key.Item1 == ElementType.WEATHER || kvp.Key.Item1 == ElementType.TERRAIN || kvp.Key.Item1 == ElementType.ARCHETYPE)
                     {
-                        if (ForcedBuilds.ContainsKey(kvp.Key))
+                        if (ForcedBuilds.TryGetValue(kvp.Key, out HashSet<(ElementType, string)> enabler))
                         {
-                            enablers.UnionWith(ForcedBuilds[kvp.Key]); // Add all of the "parent" enablers
+                            enablers.UnionWith(enabler); // Add all of the "parent" enablers
                         }
                     }
                 }
