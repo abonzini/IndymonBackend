@@ -733,6 +733,7 @@ namespace AutomatedTeamBuilder
                 // Copy all the relevant build (mod?) stats too
                 mon.TeraType = monCtx.TeraType;
                 mon.Nature = monCtx.Nature;
+                mon.Logic = monCtx.MonLogic;
                 for (int i = 0; i < 6; i++)
                 {
                     mon.Evs[i] = monCtx.Evs[i];

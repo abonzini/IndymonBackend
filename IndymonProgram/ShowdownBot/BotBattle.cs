@@ -12,7 +12,7 @@ namespace ShowdownBot
         /// <param name="nMons1">Number of mons in first player team</param>
         /// <param name="nMons2">Number of mons in second player team</param>
         /// <returns>The score</returns>
-        public (int, int) SimulateBotBattle(Trainer player1, Trainer player2, int nMons1, int nMons2, string gameType)
+        public static (int, int) SimulateBotBattle(Trainer player1, Trainer player2, string gameType)
         {
             BasicShowdownBot acceptBot = new BasicShowdownBot()
             {
@@ -37,12 +37,12 @@ namespace ShowdownBot
             }
             // Now I challenge
             Thread.Sleep(10);
-            challengeBot.Challenge(acceptBot.BotName, gameType, nMons1);
+            challengeBot.Challenge(acceptBot.BotName, gameType);
             while ((acceptBot.GetState() != BotState.GAME_DONE) || (challengeBot.GetState() != BotState.GAME_DONE))
             {
                 if (acceptBot.GetState() == BotState.BEING_CHALLENGED)
                 {
-                    acceptBot.AcceptChallenge(acceptBot.Challenger, nMons2);
+                    acceptBot.AcceptChallenge(acceptBot.Challenger);
                     // And that's it, they'll playe
                 }
                 Thread.Sleep(5);
@@ -56,7 +56,7 @@ namespace ShowdownBot
         /// <param name="player1">Bot player</param>
         /// <param name="nMons1">Number of mons</param>
         /// <returns>This bot score</returns>
-        public int SimulateBotBattle(Trainer player1, int nMons1)
+        public static int SimulateBotBattle(Trainer player1)
         {
             BasicShowdownBot acceptBot = new BasicShowdownBot()
             {
@@ -78,7 +78,7 @@ namespace ShowdownBot
             {
                 if (acceptBot.GetState() == BotState.BEING_CHALLENGED)
                 {
-                    acceptBot.AcceptChallenge(acceptBot.Challenger, nMons1);
+                    acceptBot.AcceptChallenge(acceptBot.Challenger);
                     // And that's it, they'll playe
                 }
                 Thread.Sleep(5);

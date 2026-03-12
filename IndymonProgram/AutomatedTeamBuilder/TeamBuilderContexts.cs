@@ -43,6 +43,7 @@ namespace AutomatedTeamBuilder
         public Nature Nature = Nature.SERIOUS;
         public PokemonType TeraType = PokemonType.NONE;
         public (PokemonType, PokemonType) PokemonTypes = (PokemonType.NONE, PokemonType.NONE);
+        public PokemonLogic MonLogic = PokemonLogic.BASIC;
         public double[] MonStats = new double[6];
         public int[] Evs = new int[6];
         public double[] StatBoosts = new double[7]; // Where the 7th is not a stat per se, it's the "hightest" stat, applied last in stat calc

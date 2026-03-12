@@ -3,12 +3,6 @@ using MechanicsDataContainer;
 
 namespace GameData
 {
-    public enum PokemonLogic
-    {
-        BASIC,
-        FIRST_ONCE,
-        DONT_REPEAT,
-    }
     public class TrainerPokemon
     {
         public string Species = "";

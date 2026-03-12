@@ -46,6 +46,7 @@ namespace MechanicsDataContainer
                 StatModifier.HP_EV or StatModifier.ATK_EV or StatModifier.DEF_EV or StatModifier.SPATK_EV or StatModifier.SPDEF_EV or StatModifier.SPEED_EV or StatModifier.CRIT_BOOST => int.TryParse(name, out _),
                 StatModifier.NATURE => Enum.TryParse<Nature>(name, true, out _),
                 StatModifier.TERA or StatModifier.TYPE_1 or StatModifier.TYPE_2 or StatModifier.NULLIFIES_RECV_DAMAGE_OF_TYPE or StatModifier.DOUBLES_RECV_DAMAGE_OF_TYPE or StatModifier.HALVES_RECV_DAMAGE_OF_TYPE or StatModifier.HALVES_RECV_SE_DAMAGE_OF_TYPE => Enum.TryParse<PokemonType>(name, true, out _),
+                StatModifier.LOGIC => Enum.TryParse<PokemonLogic>(name, true, out _),
                 _ => false,
             };
             if (!modExists) throw new Exception($"{name} is not a valid {mod}");

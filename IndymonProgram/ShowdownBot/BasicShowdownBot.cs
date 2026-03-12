@@ -1,4 +1,5 @@
 ﻿using GameData;
+using MechanicsData;
 using Newtonsoft.Json;
 using System.Net.WebSockets;
 using System.Text;
@@ -84,7 +85,7 @@ namespace ShowdownBot
         /// <param name="opponentName">Who</param>
         /// <param name="packedTeamData">Team</param>
         /// <param name="format">What format</param>
-        public void Challenge(string opponentName, string format, int nMons)
+        public void Challenge(string opponentName, string format)
         {
             if (CurrentState == BotState.PROFILE_INITIALISED) // Can only start challenge from idle
             {
@@ -103,7 +104,7 @@ namespace ShowdownBot
         /// </summary>
         /// <param name="opponentName">From who</param>
         /// <param name="packedTeamData">TeamData</param>
-        public void AcceptChallenge(string opponentName, int nMons)
+        public void AcceptChallenge(string opponentName)
         {
             if (CurrentState == BotState.BEING_CHALLENGED) // Can only accept challenge from here
             {

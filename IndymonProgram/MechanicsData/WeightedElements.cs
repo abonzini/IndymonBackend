@@ -72,6 +72,7 @@ namespace MechanicsData
         TYPE_1, /// Changes first type
         TYPE_2, /// Changes second type
         TERA, /// Changes tera
+        LOGIC, /// Changes mon logic
         NULLIFIES_RECV_DAMAGE_OF_TYPE, // For nullify/absorb abilities
         DOUBLES_RECV_DAMAGE_OF_TYPE, // For abilities that fuck me up
         HALVES_RECV_DAMAGE_OF_TYPE, // For chilan berry
@@ -89,5 +90,14 @@ namespace MechanicsData
         MOVE_TYPE_MOD, /// A specific's move type is affected
         ADD_FLAG, /// Move gains a flag (e.g. poison touch makes contact moves poison inducing). Flags can't add flags, only everything else to avoid weird loops
         REMOVE_FLAG, /// Move loses a flag (e.g. long reach removes contact). Flags can't remove flags, only everything else to avoid weird loops
+    }
+    /// <summary>
+    /// Pokemon logic
+    /// </summary>
+    public enum PokemonLogic
+    {
+        BASIC,
+        FIRST_ONCE,
+        DONT_REPEAT,
     }
 }

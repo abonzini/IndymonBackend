@@ -294,9 +294,8 @@ namespace IndymonBackendProgram
         /// Resolves a match, including the possibility of creating a bot battle, or manual score input. This sometimes writes into console current cursor.
         /// </summary>
         /// <param name="match">Match to evaluate</param>
-        /// <param name="backendData">Backend used to find players, etc</param>
         /// <returns>True if match succesfully concluded, false otherwise</returns>
-        public bool ResolveMatch(TournamentMatch match)
+        public static bool ResolveMatch(TournamentMatch match)
         {
             if (match.IsBye)
             {
@@ -318,7 +317,7 @@ namespace IndymonBackendProgram
                     p2.RestoreAll();
                     BotBattle automaticBattle = new BotBattle();
                     string challengeString = "gen9customgame";
-                    (match.Score1, match.Score2) = automaticBattle.SimulateBotBattle(p1, p2, NMons, NMons, challengeString);
+                    (match.Score1, match.Score2) = BotBattle.SimulateBotBattle(p1, p2, challengeString);
                     Console.SetCursorPosition(cursorX, cursorY);
                     Console.Write($"{match.Score1}-{match.Score2} GET THE REPLAY");
                 }
