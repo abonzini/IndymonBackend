@@ -73,6 +73,7 @@ namespace MechanicsData
         SWITCH_OPPONENT, // Switches opponent out
         USES_STRONGEST_STAT, // Uses strongest stat for damage calculation
         BYPASSES_IMMUNITY, // Move bypasses immunities thay would've made it do 0 damage
+        GOOD_FIRST_MOVE, // Unused logic, moves that are best to be used first and then never, this only works for some dawn stone scenarios and is niche
         GOOD_FIRST_MON, // Moves that are only really interesting on the first mon of the team (i.e. hazard setting)
         GOOD_LAST_MON, // Moves that are only really interesting on the last mon of the team (i.e. last respects)
     }

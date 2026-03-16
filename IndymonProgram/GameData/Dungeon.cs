@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using MechanicsData;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace ParsersAndData
@@ -34,6 +35,16 @@ namespace ParsersAndData
         REGIROCK, // Draws regirock face
         REGICE, // Draws regice face
         REGIELEKI, // Draws regieleki face
+    }
+    public class ItemReward
+    {
+        public string Name { get; set; }
+        public int Min { get; set; }
+        public int Max { get; set; }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
     public class RoomEvent
     {
@@ -106,9 +117,9 @@ namespace ParsersAndData
         public bool GoesDownwards;
         public List<RoomEvent> Events;
         public List<List<string>> PokemonEachFloor;
-        public List<string> CommonItems;
-        public List<string> RareItems;
-        public string BossItem;
+        public List<ItemReward> CommonItems;
+        public List<ItemReward> RareItems;
+        public ItemReward BossItem;
         public List<DungeonFloor> Floors;
         public RoomEvent BossEvent;
         public RoomEvent CampingEvent;
@@ -117,6 +128,9 @@ namespace ParsersAndData
         public string NextDungeon;
         public string NextDungeonShortcut;
         public List<string> CustomShowdownRules;
+        public HashSet<TeamArchetype> DungeonArchetypes;
+        public Weather DungeonWeather;
+        public Terrain DungeonTerrain;
         public override string ToString()
         {
             return Name;

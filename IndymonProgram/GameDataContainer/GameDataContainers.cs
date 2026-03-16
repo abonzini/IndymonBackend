@@ -22,7 +22,7 @@ namespace GameDataContainer
         public void InitializeDungeonData(string directoryPath)
         {
             if (!Directory.Exists(directoryPath)) throw new Exception($"Directory {directoryPath} does not exist");
-            Console.WriteLine("Loading dungeon data");
+            Console.WriteLine("Loading Dungeon Data");
             foreach (string file in Directory.EnumerateFiles(directoryPath))
             {
                 Dungeon nextDungeon = JsonConvert.DeserializeObject<Dungeon>(File.ReadAllText(file));

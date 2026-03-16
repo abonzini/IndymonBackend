@@ -98,14 +98,7 @@ namespace AutomatedTeamBuilder
                 mon.ChosenMoveset.Clear();
                 // Also get the mons ability and moveset here
                 Pokemon monData;
-                if (mon.Species.ToLower().Contains("unown")) // Weird case because the species is always unown even if many aesthetic formes that are not in the dex
-                {
-                    monData = MechanicsDataContainers.GlobalMechanicsData.Dex["Unown"];
-                }
-                else
-                {
-                    monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
-                }
+                monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
                 // First thing is to check if mon has set item equipped, if so, add the move/ability already
                 if (mon.SetItem != null)
                 {
@@ -141,6 +134,13 @@ namespace AutomatedTeamBuilder
                             if (mon.ChosenAbility == null) // Mon needs an ability
                             {
                                 List<Ability> possibleAbilities = [.. monData.Abilities.Where(a => !a.Flags.Contains(EffectFlag.BANNED))]; // All (non banned) possible abilities
+
+                                if (mon.Species.ToLower().Contains("unown")) // And then again, weird mechanic. Unown will actualtl be able to use all abilities starting with the letter
+                                {
+                                    char letter = (mon.Species == "Unown") ? 'a' : mon.Species.ToLower().Last(); // Basic unown is A
+                                    List<Ability> unownAbilities = [.. MechanicsDataContainers.GlobalMechanicsData.Abilities.Values.Where(a => a.Name.ToLower().StartsWith(letter))]; // Get all abilities
+                                    if (unownAbilities.Any()) possibleAbilities = unownAbilities; // If no abilities (X/Y), then use standard (levitate)
+                                }
                                 List<double> abilityScores = [.. Enumerable.Repeat<double>(1, possibleAbilities.Count)]; // All of their values is init to 1
                                 if (trainer.AutoSetItem && mon.SetItem != null) // If I can equip other set items AND set item provides useful abilities, I'll add them too
                                 {
@@ -217,7 +217,7 @@ namespace AutomatedTeamBuilder
                                     possibleMoves = [.. possibleMoves.Where(m => m.Name.ToLower().StartsWith(letter))]; // Additional move filter
                                 }
                                 List<double> moveScores = [.. Enumerable.Repeat<double>(1, possibleMoves.Count)]; // All of their values is init to 1
-                                                                                                                  // Continue, check if add set item?
+                                // Continue, check if add set item?
                                 if (trainer.AutoSetItem && mon.SetItem == null) // If I can equip other set items AND set item provides useful moves, I'll add them too
                                 {
                                     int setItemCount = trainer.SetItems.Values.Sum(); // How many items does the trainer have total?
@@ -704,6 +704,26 @@ namespace AutomatedTeamBuilder
             foreach (TrainerPokemon mon in trainer.BattleTeam)
             {
                 PokemonBuildInfo monCtx = new PokemonBuildInfo(); // Get all the mons context data
+                // In here, a bit of logic. What if the trainer chose a mod item that improves logic (e.g. dawn stone) but has not chosen a set?
+                // Then everything is randomized, and this means the mod item si just luck based, so I'll try to atleast use a first-slot move that makes sense
+                // This will reorder moves a bunch and notify
+                if (monCtx.MonLogic == PokemonLogic.FIRST_ONCE && (mon.SetItem == null || !mon.SetItemChosen)) // Ensure logic item is there without a conscious set item choice
+                {
+                    // Need to find best move candidate for swap
+                    List<Move> goodFirstMoves = [.. mon.ChosenMoveset.Where(m => ExtractMoveFlags(m, monCtx).Contains(EffectFlag.GOOD_FIRST_MOVE))]; // Obtain moves that are good first move candidate
+                    if (goodFirstMoves.Count > 0) // One of these will be chosen first, at random I guess
+                    {
+                        Console.WriteLine($"The following moves [{string.Join(',', goodFirstMoves.Select(m => m.Name))}] are all good candidates as a first move for the FIRST_ONCE logic");
+                        Move firstMove = goodFirstMoves[GeneralUtilities.GetRandomNumber(goodFirstMoves.Count)]; // Doesn't use the seeded RNG but whatever, this just reorders and doesn't technically use the set
+                        int firstMoveIndex = mon.ChosenMoveset.IndexOf(firstMove);
+                        (mon.ChosenMoveset[0], mon.ChosenMoveset[firstMoveIndex]) = (mon.ChosenMoveset[firstMoveIndex], mon.ChosenMoveset[0]); // Swap
+                        Console.WriteLine($"The first move for this set has been chosen as {firstMove} at random.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No move from [{string.Join(',', mon.ChosenMoveset.Select(m => m.Name))}] is a good candidate for first move for the FIRST_ONCE logic");
+                    }
+                }
                 // Copy all the relevant build (mod?) stats too
                 mon.TeraType = monCtx.TeraType;
                 mon.Nature = monCtx.Nature;

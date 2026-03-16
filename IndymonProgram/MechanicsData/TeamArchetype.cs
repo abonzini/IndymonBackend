@@ -1,5 +1,9 @@
-﻿namespace MechanicsData
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace MechanicsData
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum TeamArchetype
     {
         NONE,
@@ -13,6 +17,7 @@
         WEBS,
         TERA, // For teams with a dedicated tera mon
     }
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum Weather
     {
         NONE,
@@ -23,6 +28,7 @@
         DESOLATE_LAND,
         PRIMORDIAL_SEA
     }
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum Terrain
     {
         NONE,

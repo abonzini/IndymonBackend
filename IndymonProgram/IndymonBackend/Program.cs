@@ -11,6 +11,7 @@ namespace IndymonBackendProgram
         {
             // Things
             TournamentManager tournamentManager = new TournamentManager();
+            ExplorationManager explorationManager = new ExplorationManager();
             // Parsing
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.ForegroundColor = ConsoleColor.White;
@@ -29,6 +30,7 @@ namespace IndymonBackendProgram
             GameDataContainers.GlobalGameData.InitializeTrainerData(Path.Combine(directoryPath, GAME_DATA_FILE));
             // Finally, proper data of possible ongoing sims
             string TOURNAMENT_JSON_FILE = "current_tournament.json";
+            string EXPLORATION_JSON_FILE = "current_exploration.json";
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
@@ -37,6 +39,10 @@ namespace IndymonBackendProgram
             if (Path.Exists(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE)))
             {
                 tournamentManager = JsonConvert.DeserializeObject<TournamentManager>(File.ReadAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE)), jsonSettings);
+            }
+            if (Path.Exists(Path.Combine(directoryPath, EXPLORATION_JSON_FILE)))
+            {
+                explorationManager = JsonConvert.DeserializeObject<ExplorationManager>(File.ReadAllText(Path.Combine(directoryPath, EXPLORATION_JSON_FILE)), jsonSettings);
             }
             // Beginning of indymon program
             string InputString;
@@ -76,26 +82,17 @@ namespace IndymonBackendProgram
                         }
                         break;
                     case "5":
-                        //_allData.ExplorationManager = new ExplorationManager(_allData.DataContainer);
-                        //_allData.ExplorationManager.InitializeExploration();
+                        explorationManager = new ExplorationManager
+                        {
+                            DirectoryPath = directoryPath
+                        };
+                        explorationManager.InitializeExploration();
                         break;
                     case "6":
-                        //_allData.ExplorationManager.ExecuteExploration();
+                        explorationManager.ExecuteExploration();
                         break;
                     case "7":
-                        //_allData.ExplorationManager.AnimateExploration();
-                        break;
-                    case "8":
-                        //if (_allData.ExplorationManager.NextDungeon != "")
-                        //{
-                        //    _allData.ExplorationManager.InitializeNextDungeon();
-                        //}
-                        //else
-                        //{
-                        //    Console.ForegroundColor = ConsoleColor.Red;
-                        //    Console.WriteLine("ERROR. Can't do next dungeon because there isn't any!");
-                        //    Console.ForegroundColor = ConsoleColor.White;
-                        //}
+                        explorationManager.AnimateExploration();
                         break;
                     case "9":
                         //{
@@ -192,7 +189,7 @@ namespace IndymonBackendProgram
                 "5 - Generate exploration, choose place, player, etc\n" +
                 "6 - Simulate current exploration\n" +
                 "7 - Animate resolved exploration\n" +
-                "8 - Resolve finished exploration (if needed, e.g. move to next dungeon)\n" +
+                // Final frontier for now
                 "9 - Random Pokemon from trainer (Favor resolution)\n" +
                 "10 - Random exploration rewards (tiered favor resolutions)\n"
             );

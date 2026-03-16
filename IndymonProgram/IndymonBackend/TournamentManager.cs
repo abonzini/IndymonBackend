@@ -11,13 +11,12 @@ namespace IndymonBackendProgram
     public class TournamentManager
     {
         public Tournament OngoingTournament { get; set; }
-        public string DirectoryPath = "";
+        public string DirectoryPath { get; set; } = "";
         /// <summary>
         /// Generates a new tournament, dialog asking for tpy, n players, n mons, and which participants
         /// </summary>
         public void GenerateNewTournament()
         {
-            GameDataContainers.GlobalGameData.CurrentEventMessage.Clear(); // This is a new event, so I will clear whatever thet was there before
             Console.WriteLine("Creation of a new tournament. Which type of tournament? [elim, king, group]");
             string inputString;
             bool validSelection = false;
@@ -49,9 +48,9 @@ namespace IndymonBackendProgram
             OngoingTournament.NMons = int.Parse(Console.ReadLine());
             OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
             // Finally, player selection, pre-filter traines whether they can participate in this event
-            List<Trainer> trainers = [.. GameDataContainers.GlobalGameData.TrainerData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions).Count > 0)];
-            List<Trainer> npcs = [.. GameDataContainers.GlobalGameData.NpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions).Count > 0)];
-            List<Trainer> namedNpcs = [.. GameDataContainers.GlobalGameData.FamousNpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions).Count > 0)];
+            List<Trainer> trainers = [.. GameDataContainers.GlobalGameData.TrainerData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
+            List<Trainer> npcs = [.. GameDataContainers.GlobalGameData.NpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
+            List<Trainer> namedNpcs = [.. GameDataContainers.GlobalGameData.FamousNpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
             List<Trainer> currentChosenTrainers = null;
             int remainingPlayersNeeded = OngoingTournament.NPlayers;
             bool randomizeFill = false;
@@ -126,6 +125,7 @@ namespace IndymonBackendProgram
         /// </summary>
         public void UpdateTournamentTeams()
         {
+            GameDataContainers.GlobalGameData.CurrentEventMessage.Clear(); // This is a new event, so I will clear whatever thet was there before
             // First, shuffle the participants (use seed if needed)
             List<(string, int)> Seeds = new List<(string, int)>();
             Console.WriteLine("Want to add specific seeding? y/N");
@@ -162,8 +162,8 @@ namespace IndymonBackendProgram
                 // Try to find the participant in the place where located
                 Trainer participant = IndymonUtilities.GetTrainerByName(participantName);
                 // Indymon S2 addition, confirm sets now does the smart teambuild
-                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions); // Get all of the possible sets that would satisfy this
-                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds, participantData.Item2); // Chooses one of the sets, prepares the mons
+                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false); // Get all of the possible sets that would satisfy this
+                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds, false, participantData.Item2); // Chooses one of the sets, prepares the mons
             }
             foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // Then, build for each trainer
             {
@@ -315,7 +315,6 @@ namespace IndymonBackendProgram
                     p1.RestoreAll();
                     Trainer p2 = IndymonUtilities.GetTrainerByName(match.Player2);
                     p2.RestoreAll();
-                    BotBattle automaticBattle = new BotBattle();
                     string challengeString = "gen9customgame";
                     (match.Score1, match.Score2) = BotBattle.SimulateBotBattle(p1, p2, challengeString);
                     Console.SetCursorPosition(cursorX, cursorY);

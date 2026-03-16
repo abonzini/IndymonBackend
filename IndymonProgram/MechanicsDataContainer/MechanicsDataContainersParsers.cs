@@ -544,5 +544,23 @@ namespace MechanicsDataContainer
                 FlatIncreaseModifiers.Add((modifierType, modifierName), weight); // This should be unique
             }
         }
+        /// <summary>
+        /// Parses the unown lookup from symbol code to reward
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
+        void ParseUnownLookup(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Parsing Unown Lookup");
+            UnownLookup.Clear();
+            // Parse csv
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string[] lines = csv.Split("\n");
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string[] fields = lines[i].Split(","); // Csv
+                UnownLookup.Add(fields[0], fields[1]); // This should be unique
+            }
+        }
     }
 }

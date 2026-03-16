@@ -66,7 +66,7 @@
 	{
       "EventType": "UNOWN",
       "PreEventString": "You enter a set of ruins unlike all previous ones. This one contains weird glyphs embedded in the walls. Suddenly, the glyphs come alive and start attacking!.",
-      "PostEventString": "Huh..."
+      "PostEventString": "After being defeated, the symbols sine. A $1 materializes in front of you."
     }
   ],
   "PokemonEachFloor": [
@@ -139,43 +139,36 @@
 	]
   ],
   "CommonItems": [
-		"Health Feather",
-		"Muscle Feather",
-		"Resist Feather",
-		"Genius Feather",
-		"Clever Feather",
-		"Swift Feather",
-		"Scout Feather",
-		"Wall Feather",
-		"Scholar Feather",
-		"Force-Field Feather",
-		"Athlete Feather",
-		"Bruiser Feather",
-		"Danger Feather",
-		"Zen Feather",
-		"Assassin Feather",
-		"Phantom Feather",
-		"Tank Feather",
-		"Guardian Feather",
-		"Amnesia Feather",
-		"Sniper Feather",
-		"Mystic Feather",
-		"Haban Berry",
-		"Colbur Berry",
-		"Yache Berry"
+		{ "Name": "Health Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Genius Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Clever Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Swift Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Scholar Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Force-Field Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Athlete Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Danger Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Zen Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Phantom Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Tank Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Amnesia Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Sniper Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Mystic Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Haban Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Colbur Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Yache Berry", "Min": 1, "Max": 2 }
   ],
   "RareItems": [
-		"Rainbow Feather",
-		"Metronome",
-		"Dragon Fang",
-		"Twisted Spoon",
-		"Clear Amulet",
-		"Odd Incense",
-		"Sharp Beak",
-		"Assault Vest",
-		"Big Nugget"
+		{ "Name": "Rainbow Feather", "Min": 2, "Max": 4 },
+		{ "Name": "Metronome", "Min": 2, "Max": 4 },
+		{ "Name": "Dragon Fang", "Min": 2, "Max": 4 },
+		{ "Name": "Twisted Spoon", "Min": 2, "Max": 4 },
+		{ "Name": "Clear Amulet", "Min": 2, "Max": 4 },
+		{ "Name": "Odd Incense", "Min": 2, "Max": 4 },
+		{ "Name": "Sharp Beak", "Min": 2, "Max": 4 },
+		{ "Name": "Assault Vest", "Min": 2, "Max": 4 },
+		{ "Name": "Big Nugget", "Min": 2, "Max": 4 }
   ],
-  "BossItem": "Ice Stone",
+  "BossItem": { "Name": "Ice Stone", "Min": 3, "Max": 3 },
   "Floors": [
     {
       "RoomColor": "White",
@@ -304,6 +297,9 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Hail Mod"],
+  "DungeonArchetypes": ["BACKGROUND_WEATHER"],
+  "DungeonWeather": "SNOW",
+  "DungeonTerrain": "NONE",
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

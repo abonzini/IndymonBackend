@@ -131,42 +131,26 @@
 	]
   ],
   "CommonItems": [
-		"Steel Gem",
-		"Dark Gem",
-		"Flying Gem",
-		"Rock Gem",
-		"Fighting Gem",
-		"Dragon Gem",
-		"Ghost Gem",
-		"Fire Gem",
-		"Psychic Gem",
-		"Water Gem",
-		"Grass Gem",
-		"Fairy Gem",
-		"Ground Gem",
-		"Bug Gem",
-		"Ice Gem",
-		"Electric Gem",
-		"Poison Gem",
-		"Normal Gem",
-    "Payapa Bery",
-    "Coba Bery",
-    "Wacan Bery"
+    { "Name": "APRICORN PLACEHOLDER", "Min": 0, "Max": 0 },
+    { "Name": "Payapa Bery", "Min": 1, "Max": 2 },
+    { "Name": "Coba Bery", "Min": 1, "Max": 2 },
+    { "Name": "Wacan Bery", "Min": 1, "Max": 2 },
+    { "Name": "Absorb Bulb", "Min": 1, "Max": 2 },
+    { "Name": "Electric Seed", "Min": 1, "Max": 2 },
+    { "Name": "Psychic Seed", "Min": 1, "Max": 2 },
+    { "Name": "Misty Seed", "Min": 1, "Max": 2 },
+    { "Name": "Grassy Seed", "Min": 1, "Max": 2 },
+    { "Name": "Luminous Moss", "Min": 1, "Max": 2 }
   ],
   "RareItems": [
-		"Absorb Bulb",
-		"Big Root",
-		"Electric Seed",
-		"Psychic Seed",
-		"Misty Seed",
-		"Grassy Seed",
-		"Toxic Orb",
-		"Luminous Moss",
-		"Poison Barb",
-		"Leaf Stone",
-		"Black Sludge"
+		{ "Name": "Leaf Stone", "Min": 1, "Max": 1 },
+		{ "Name": "Dusk Stone", "Min": 1, "Max": 1 },
+		{ "Name": "Big Root", "Min": 2, "Max": 4 },
+		{ "Name": "Toxic Orb", "Min": 2, "Max": 4 },
+		{ "Name": "Poison Barb", "Min": 2, "Max": 4 },
+		{ "Name": "Black Sludge", "Min": 2, "Max": 4 }
   ],
-  "BossItem": "Titan Plate 2",
+  "BossItem": { "Name": "Titan Plate 2", "Min": 1, "Max": 1 },
   "Floors": [
     {
       "RoomColor": "Magenta",
@@ -288,6 +272,9 @@
       "PostEventString": "Little by little, they shaped the world and bound the continents with ropes."
   },
   "CustomShowdownRules" : ["Continuous Grassy Terrain Mod"],
+  "DungeonArchetypes": ["BACKGROUND_TERRAIN"],
+  "DungeonWeather": "NONE",
+  "DungeonTerrain": "GRASSY",
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

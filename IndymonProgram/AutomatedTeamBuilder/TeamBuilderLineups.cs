@@ -31,8 +31,9 @@ namespace AutomatedTeamBuilder
         /// <param name="trainer">Which trainer</param>
         /// <param name="nMons">Number of mons desired in the team</param>
         /// <param name="constraintSets">All the different valid constraints that apply separately, only one needs to succeed</param>
+        /// <param name="acceptLessMons">Whether to accept less pokemon if not enough</param>
         /// <returns></returns>
-        public static List<PossibleTeamBuild> GetTrainersPossibleBuilds(Trainer trainer, int nMons, List<Constraint> constraintSets)
+        public static List<PossibleTeamBuild> GetTrainersPossibleBuilds(Trainer trainer, int nMons, List<Constraint> constraintSets, bool acceptLessMons)
         {
             List<PossibleTeamBuild> resultingBuilds = new List<PossibleTeamBuild>();
             int mostOwnMonsUsed = 0; // Will try to only use the options that use the most own mons to not overuse set items or favors if don't need
@@ -53,7 +54,7 @@ namespace AutomatedTeamBuilder
                     int numberOfFavors = trainer.TrainerFavours[favorOption.Key];
                     usableMons += Math.Min(favorOption.Value.Count, numberOfFavors); // Can borrow only the valid mon but also limited by number of fav available
                 }
-                if (usableMons >= nMons) // Need to check now if I have enough options to build a team with these constraints
+                if (usableMons >= nMons || acceptLessMons) // Need to check now if I have enough options to build a team with these constraints
                 {
                     resultingBuilds.Add(thisTeamBuild);
                     mostOwnMonsUsed = Math.Max(mostOwnMonsUsed, thisTeamBuild.TrainerOwnPokemon.Count); // Also keep this in mind, by the end I'll choose between the options that need the least amount of items
@@ -134,7 +135,9 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="trainer">The trainer whose battle team to define</param>
         /// <param name="possibleTeamBuilds">All the possible builds for the trainers</param>
-        public static void AssembleTrainersBattleTeam(Trainer trainer, int nMons, List<PossibleTeamBuild> possibleTeamBuilds, int seed = 0)
+        /// <param name="acceptLessMons">If we accept less mons than the exace value of nMons</param>
+        /// <param name="seed">Seed used to select trainer mons</param>
+        public static void AssembleTrainersBattleTeam(Trainer trainer, int nMons, List<PossibleTeamBuild> possibleTeamBuilds, bool acceptLessMons, int seed = 0)
         {
             Console.WriteLine($"Assembling {trainer.Name}'s team");
             Random rng;
@@ -190,6 +193,7 @@ namespace AutomatedTeamBuilder
             {
                 if (place != -1)
                 {
+                    if (finalBattleTeam[place] != null) throw new Exception("There's a Pokemon in this slot already");
                     finalBattleTeam[place] = mon;
                     monsInTeam++;
                 }
@@ -360,7 +364,7 @@ namespace AutomatedTeamBuilder
                 }
             }
             // Finally finally, same with favor dudes, this will be random either way
-            while (monsInTeam < nMons)
+            while (monsInTeam < nMons && !acceptLessMons) // Will only cash in favors if I absolutely need to
             {
                 // First, find which random favor I will cash in
                 Trainer nextFavourTrainer = usedBuild.FavourPokemon.Keys.ToList()[rng.Next(usedBuild.FavourPokemon.Count)]; // Get a random trainer
@@ -369,8 +373,9 @@ namespace AutomatedTeamBuilder
                 BorrowFavour(nextFavourTrainer, borrowedMon);
                 AddNextMonToFinalTeam(borrowedMon); // Add mon to team
             }
-            // Should be al good here I guess, validate (no null spaces) and reshuffle if auto team so the favour mon can be anywhere too
-            if (finalBattleTeam.Any(m => m == null)) throw new Exception("For some reason the final battle team still has null Pokemon!");
+            // Should be al good here I guess, validate (no null spaces and allowed mon number) and reshuffle if auto team so the favour mon can be anywhere too
+            finalBattleTeam = [.. finalBattleTeam.Where(m => m != null)];
+            if (!acceptLessMons && finalBattleTeam.Count < nMons) throw new Exception("For some reason the final battle team didn't have enough mons!");
             if (trainer.AutoTeam) GeneralUtilities.ShuffleListDeterministic(finalBattleTeam, rng); // One last shuffle to allow any mon in any position
             trainer.BattleTeam = finalBattleTeam; // Set this team for battle
         }

@@ -66,7 +66,7 @@
 	{
       "EventType": "UNOWN",
       "PreEventString": "You enter a set of ruins unlike all previous ones. This one contains weird glypths embedded in the walls. Suddenly, the glyphs come alive and start attacking!.",
-      "PostEventString": "Huh..."
+      "PostEventString": "After being defeated, the symbols sine. A $1 materializes in front of you."
     }
   ],
   "PokemonEachFloor": [
@@ -143,41 +143,31 @@
 	]
   ],
   "CommonItems": [
-		"Lonely Mint",
-    "Adamant Mint",
-    "Naughty Mint",
-    "Brave Mint",
-    "Bold Mint",
-    "Impish Mint",
-    "Lax Mint",
-    "Relaxed Mint",
-    "Modest Mint",
-    "Mild Mint",
-    "Rash Mint",
-    "Quiet Mint",
-    "Calm Mint",
-    "Gentle Mint",
-    "Careful Mint",
-    "Sassy Mint",
-    "Timid Mint",
-    "Hasty Mint",
-    "Jolly Mint",
-    "Naive Mint",
-		"Yache Berry",
-    "Rindo Berry",
-    "Sitrus Berry"
+    { "Name": "Lonely Mint", "Min": 1, "Max": 2 },
+    { "Name": "Adamant Mint", "Min": 1, "Max": 2 },
+    { "Name": "Naughty Mint", "Min": 1, "Max": 2 },
+    { "Name": "Brave Mint", "Min": 1, "Max": 2 },
+    { "Name": "Modest Mint", "Min": 1, "Max": 2 },
+    { "Name": "Mild Mint", "Min": 1, "Max": 2 },
+    { "Name": "Rash Mint", "Min": 1, "Max": 2 },
+    { "Name": "Quiet Mint", "Min": 1, "Max": 2 },
+    { "Name": "Hasty Mint", "Min": 1, "Max": 2 },
+    { "Name": "Naive Mint", "Min": 1, "Max": 2 },
+		{ "Name": "Yache Berry", "Min": 1, "Max": 2 },
+    { "Name": "Rindo Berry", "Min": 1, "Max": 2 },
+    { "Name": "Sitrus Berry", "Min": 1, "Max": 2 }
   ],
   "RareItems": [
-    "Clear Amulet",
-    "Focus Band",
-    "Focus Sash",
-    "Grip Claw",
-    "Loaded Dice",
-    "Safety Goggles",
-    "Soft Sand",
-    "Utility Umbrella"
+    { "Name": "Clear Amulet", "Min": 2, "Max": 4 },
+    { "Name": "Focus Band", "Min": 2, "Max": 4 },
+    { "Name": "Focus Sash", "Min": 2, "Max": 4 },
+    { "Name": "Grip Claw", "Min": 2, "Max": 4 },
+    { "Name": "Loaded Dice", "Min": 2, "Max": 4 },
+    { "Name": "Safety Goggles", "Min": 2, "Max": 4 },
+    { "Name": "Soft Sand", "Min": 2, "Max": 4 },
+    { "Name": "Utility Umbrella", "Min": 2, "Max": 4 }
   ],
-  "BossItem": "Sun Stone",
+  "BossItem": { "Name": "Sun Stone", "Min": 3, "Max": 3 },
   "Floors": [
     {
       "RoomColor": "DarkYellow",
@@ -290,6 +280,9 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Sand Mod"],
+  "DungeonArchetypes": ["BACKGROUND_WEATHER"],
+  "DungeonWeather": "SAND",
+  "DungeonTerrain": "NONE",
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

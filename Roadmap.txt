@@ -16,12 +16,6 @@ White Monastery -> Justice -> Dawn Stone
 
 ---
 TODO:
-- Reincorporate exploration manager, redo exploration manager context to include "buffable" exploration contexts (e.g. shiny stone)
-- Revise manager, fix whats wrong, team builder based on whats in the exploration, make it build too
-- Save/load expl stuff in own folder, similarly, just store teambuild seed for trainer, all can be generated from this
-- Use dungeon modifiers, add modifier (archetype) to dungeon. Add better chance-based system of items, to get variable numbers. May just remove the chances and yolo (Shiny Stone)
-- At this point indymon should be working? Test for a while
-- Option to consume favour
 - Option to consume + explore favour
 - Option to grant random pokemon
 - Spreadsheet S2 Update
@@ -29,4 +23,4 @@ TODO:
 POSSIBLE THINGS TO LOOK FOR:
 - Debug weathers
 - Add weather setting for advantage?
-- Move charging penalties to BP so it's not calculated twice
+- Whimsy Island with esscence mechanics and Moon/Shiny stones

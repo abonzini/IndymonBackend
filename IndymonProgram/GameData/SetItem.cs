@@ -8,9 +8,9 @@ namespace GameData
         // Consts
         const string BLANK_DISK = "Blank Disk";
         const string BASIC_DISK = "Basic Disk";
-        const string ADVANCED_DISK = "Advanced Disk";
-        const string ABILITY_CHARM = "Ability Charm";
-        const string ABILITY_CAPSULE = "Ability Capsule";
+        public const string ADVANCED_DISK = "Advanced Disk";
+        const string ABILITY_CHARM = "Charm";
+        const string ABILITY_CAPSULE = "Capsule";
         const string WATER_STONE = "Water Stone";
         const string ICE_STONE = "Ice Stone";
         // Data
