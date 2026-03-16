@@ -1,7 +1,9 @@
 ﻿using GameData;
 using GameDataContainer;
+using MechanicsData;
 using MechanicsDataContainer;
 using Newtonsoft.Json;
+using Utilities;
 
 namespace IndymonBackendProgram
 {
@@ -94,79 +96,117 @@ namespace IndymonBackendProgram
                     case "7":
                         explorationManager.AnimateExploration();
                         break;
+                    case "8":
+                        {
+                            Console.WriteLine($"Drawing random favour, please select the category (ortherwise random): [{string.Join(',', [.. Enum.GetValues(typeof(TrainerRank))])}]");
+                            string obtainedTrainer;
+                            if (Enum.TryParse(Console.ReadLine().ToUpper(), out TrainerRank rank))
+                            {
+                                List<string> possibleTrainers = [.. MechanicsDataContainers.GlobalMechanicsData.TrainerLookup.Where(i => i.Value == rank).Select(i => i.Key)]; // Get keys of trainers filter'd by rank
+                                obtainedTrainer = GeneralUtilities.GetRandomPick(possibleTrainers);
+                            }
+                            else
+                            {
+                                obtainedTrainer = GeneralUtilities.GetRandomKvp(MechanicsDataContainers.GlobalMechanicsData.TrainerLookup).Key;
+                            }
+                            Console.WriteLine(obtainedTrainer);
+                        }
+                        break;
                     case "9":
-                        //{
-                        //    TrainerData chosenTrainer = Utilities.ChooseOneTrainerDialog(TeambuildSettings.NONE, _allData.DataContainer);
-                        //    string obtainedMon = chosenTrainer.Teamsheet[RandomNumberGenerator.GetInt32(chosenTrainer.Teamsheet.Count)].Species;
-                        //    Console.WriteLine($"Obtained child version of {obtainedMon}");
-                        //}
+                        {
+                            Console.WriteLine("Which trainer to pull from?");
+                            string trainerName = Console.ReadLine();
+                            if (GameDataContainers.GlobalGameData.FamousNpcData.TryGetValue(trainerName, out Trainer trainer)) { }
+                            else if (GameDataContainers.GlobalGameData.NpcData.TryGetValue(trainerName, out trainer)) { }
+                            else throw new Exception("Trainer didn't exist");
+                            TrainerPokemon chosenMon = GeneralUtilities.GetRandomPick(trainer.PartyPokemon);
+                            Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[chosenMon.Species];
+                            while (monData.Prevo != null) // Go deep into beginning of line
+                            {
+                                monData = monData.Prevo;
+                            }
+                            Console.WriteLine($"Obtained {monData.Name}");
+                        }
                         break;
                     case "10":
-                        //{
-                        //    List<string> options = [.. _allData.DataContainer.Dungeons.Keys];
-                        //    Console.WriteLine("Which dungeon?");
-                        //    for (int i = 0; i < options.Count; i++)
-                        //    {
-                        //        Console.Write($"{i + 1}: {options[i]}, ");
-                        //    }
-                        //    Console.WriteLine("");
-                        //    string dungeon = options[int.Parse(Console.ReadLine()) - 1];
-                        //    Dungeon theDungeon = _allData.DataContainer.Dungeons[dungeon];
-                        //    Console.WriteLine("Which type of reward?\n" +
-                        //        "\t1 - Trainer: 2 commons, 1 disk/plate\n" +
-                        //        "\t2 - Gym Leader: 2 commons, 1 disk/plate, 1 rare\n" +
-                        //        "\t3 - Elite 4: 4 commons, 1 disk/plate, 1 rare\n" +
-                        //        "\t4 - Champion: 4 commons, 1 disk/plate, 2 rares");
-                        //    string choice = Console.ReadLine();
-                        //    int nCommons = 0, nRares = 0;
-                        //    bool isDisk = (RandomNumberGenerator.GetInt32(100000) % 2 == 0); // Random even/odd
-                        //    switch (choice)
-                        //    {
-                        //        case "1":
-                        //            nCommons = 2;
-                        //            nRares = 0;
-                        //            break;
-                        //        case "2":
-                        //            nCommons = 2;
-                        //            nRares = 1;
-                        //            break;
-                        //        case "3":
-                        //            nCommons = 4;
-                        //            nRares = 1;
-                        //            break;
-                        //        case "4":
-                        //            nCommons = 4;
-                        //            nRares = 2;
-                        //            break;
-                        //        default:
-                        //            break;
-                        //    }
-                        //    List<string> commons = new List<string>();
-                        //    for (int i = 0; i < nCommons; i++)
-                        //    {
-                        //        string item = theDungeon.CommonItems[RandomNumberGenerator.GetInt32(theDungeon.CommonItems.Count)];
-                        //        commons.Add(item);
-                        //    }
-                        //    if (isDisk)
-                        //    {
-                        //        string obtainedDisk = _allData.DataContainer.MoveItemData.Keys.ToList()[RandomNumberGenerator.GetInt32(_allData.DataContainer.MoveItemData.Count)]; // Get random move disk
-                        //        commons.Add(obtainedDisk);
-                        //    }
-                        //    else
-                        //    {
-                        //        List<string> platesList = [.. _allData.DataContainer.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
-                        //        string chosenPlate = platesList[RandomNumberGenerator.GetInt32(platesList.Count)];
-                        //        commons.Add(chosenPlate);
-                        //    }
-                        //    List<string> rares = new List<string>();
-                        //    for (int i = 0; i < nRares; i++)
-                        //    {
-                        //        string item = theDungeon.RareItems[RandomNumberGenerator.GetInt32(theDungeon.RareItems.Count)];
-                        //        rares.Add(item);
-                        //    }
-                        //    Console.WriteLine($"Commmon items: {string.Join(",", commons)}");
-                        //    Console.WriteLine($"Rare items: {string.Join(",", rares)}");
-                        //}
+                        {
+                            ExplorationPrizes newPrizes = new ExplorationPrizes();
+                            Console.WriteLine($"Which trainer? [{string.Join(", ", [.. GameDataContainers.GlobalGameData.TrainerData.Values.Where(t => t.Favours.Count > 0).Select(t => t.Name)])}");
+                            Trainer trainer = GameDataContainers.GlobalGameData.TrainerData[Console.ReadLine()];
+                            Console.WriteLine($"And which favour? [{string.Join(", ", [.. trainer.Favours.Keys.Select(t => t.Name)])}]");
+                            Trainer favourTrainer = trainer.Favours.Where(t => t.Key.Name == Console.ReadLine()).First().Key;
+                            Console.WriteLine($"Which dungeon? {string.Join(", ", [.. GameDataContainers.GlobalGameData.Dungeons.Keys])}");
+                            string dungeon = Console.ReadLine();
+                            Dungeon theDungeon = GameDataContainers.GlobalGameData.Dungeons[dungeon];
+                            string choice = Console.ReadLine();
+                            int nCommons = 0, nRares = 0;
+                            List<int> rewardOptions = []; // 0,1,2 depending on what the dungeon can give you, disk plate or IMP
+                            if (theDungeon.Events.Any(e => e.EventType == RoomEventType.PARADOX)) rewardOptions.Add(0);
+                            if (theDungeon.Events.Any(e => e.EventType == RoomEventType.RESEARCHER)) rewardOptions.Add(1);
+                            if (theDungeon.Events.Any(e => e.EventType == RoomEventType.IMP_GAIN)) rewardOptions.Add(2);
+                            int diskPlateOrImp = GeneralUtilities.GetRandomPick(rewardOptions);
+                            switch (favourTrainer.TrainerRank)
+                            {
+                                case TrainerRank.GYM:
+                                    nCommons = 2;
+                                    nRares = 1;
+                                    break;
+                                case TrainerRank.ELITE4:
+                                    nCommons = 4;
+                                    nRares = 1;
+                                    break;
+                                case TrainerRank.CHAMPION:
+                                    nCommons = 4;
+                                    nRares = 2;
+                                    break;
+                                case TrainerRank.UNRANKED:
+                                default:
+                                    nCommons = 2;
+                                    nRares = 0;
+                                    break;
+                            }
+                            for (int i = 0; i < nCommons; i++)
+                            {
+                                ItemReward item = GeneralUtilities.GetRandomPick(theDungeon.CommonItems);
+                                int count = GeneralUtilities.GetRandomNumber(item.Min, item.Max + 1);
+                                newPrizes.AddReward(item.Name, count);
+                                Console.WriteLine($"Obtained {item.Name} x{count}");
+                            }
+                            switch (diskPlateOrImp)
+                            {
+                                case 0: // Disk
+                                    string chosenMove = GeneralUtilities.GetRandomPick(MechanicsDataContainers.GlobalMechanicsData.Moves.Keys.ToList());
+                                    string diskName = $"{chosenMove} {SetItem.ADVANCED_DISK}"; // Create the advanced disk
+                                    newPrizes.AddReward(diskName, 1);
+                                    Console.WriteLine($"Obtained {diskName}");
+                                    break;
+                                case 1: // Plate
+                                    List<string> platesList = [.. MechanicsDataContainers.GlobalMechanicsData.BattleItems.Keys.Where(i => i.ToLower().Contains("plate"))];
+                                    string chosenPlate = GeneralUtilities.GetRandomPick(platesList);
+                                    newPrizes.AddReward(chosenPlate, 1);
+                                    Console.WriteLine($"Obtained {chosenPlate}");
+                                    break;
+                                case 2: // IMP
+                                    int impGain = GeneralUtilities.GetRandomNumber(2, 4); // 2-3 IMP
+                                    newPrizes.AddImp(impGain);
+                                    Console.WriteLine($"Obtained {impGain} IMP");
+                                    break;
+                                default:
+                                    throw new Exception("Unreachabale code");
+                            }
+                            for (int i = 0; i < nRares; i++)
+                            {
+                                ItemReward item = GeneralUtilities.GetRandomPick(theDungeon.RareItems);
+                                int count = GeneralUtilities.GetRandomNumber(item.Min, item.Max + 1);
+                                newPrizes.AddReward(item.Name, count);
+                                Console.WriteLine($"Obtained {item.Name} x{count}");
+                            }
+                            GeneralUtilities.AddtemToCountDictionary(trainer.Favours, favourTrainer, -1, true);
+                            newPrizes.TransferToTrainer(trainer);
+                            IndymonUtilities.WarnTrainer(trainer);//Warn trainer of the exceeded items
+                            string trainerFilePath = Path.Combine(directoryPath, $"{trainer.Name.ToUpper().Replace(" ", "").Replace("?", "")}.trainer");
+                            trainer.SaveTrainerCsv(trainerFilePath);
+                        }
                         break;
                     default:
                         break;
@@ -189,8 +229,8 @@ namespace IndymonBackendProgram
                 "5 - Generate exploration, choose place, player, etc\n" +
                 "6 - Simulate current exploration\n" +
                 "7 - Animate resolved exploration\n" +
-                // Final frontier for now
-                "9 - Random Pokemon from trainer (Favor resolution)\n" +
+                "8 - Draw Random Favour\n" +
+                "9 - Random 'Baby' Pokemon from trainer (Favor resolution)\n" +
                 "10 - Random exploration rewards (tiered favor resolutions)\n"
             );
         }

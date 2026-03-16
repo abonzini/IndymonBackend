@@ -158,7 +158,7 @@ namespace GameDataContainer
                         {
                             int itemCount = int.Parse(nextLine[j + 15]);
                             Trainer trainer = GetTrainer(itemName);
-                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.TrainerFavours, trainer, itemCount);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.Favours, trainer, itemCount);
                         }
                         // Finally, Ballz
                         itemName = nextLine[j + 16];

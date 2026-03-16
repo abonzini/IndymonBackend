@@ -51,7 +51,7 @@ namespace AutomatedTeamBuilder
                 }
                 foreach (KeyValuePair<Trainer, List<TrainerPokemon>> favorOption in thisTeamBuild.FavourPokemon) // Then, see how much I can borrow from each trainer
                 {
-                    int numberOfFavors = trainer.TrainerFavours[favorOption.Key];
+                    int numberOfFavors = trainer.Favours[favorOption.Key];
                     usableMons += Math.Min(favorOption.Value.Count, numberOfFavors); // Can borrow only the valid mon but also limited by number of fav available
                 }
                 if (usableMons >= nMons || acceptLessMons) // Need to check now if I have enough options to build a team with these constraints
@@ -112,7 +112,7 @@ namespace AutomatedTeamBuilder
             // Then, check trainer's favours and add the mons that satisfy, similarly
             if (trainer.AutoFavour)
             {
-                foreach (Trainer friendlyTrainer in trainer.TrainerFavours.Keys)
+                foreach (Trainer friendlyTrainer in trainer.Favours.Keys)
                 {
                     foreach (TrainerPokemon mon in friendlyTrainer.PartyPokemon)
                     {
@@ -176,7 +176,7 @@ namespace AutomatedTeamBuilder
             void BorrowFavour(Trainer favourTrainer, TrainerPokemon favourMon) /// Function to borrow mon from trainer, trainer and build are "global" variabels here
             {
                 // Trainer used favour, housekeeping
-                int remainingFavours = GeneralUtilities.AddtemToCountDictionary(trainer.TrainerFavours, favourTrainer, -1, true); // Remove 1 from the remaining favors of trainer
+                int remainingFavours = GeneralUtilities.AddtemToCountDictionary(trainer.Favours, favourTrainer, -1, true); // Remove 1 from the remaining favors of trainer
                 GameDataContainers.GlobalGameData.CurrentEventMessage.PreEventText.AppendLine(
                     $"- <@{trainer.DiscordNumber}> asked their friend {favourTrainer.Name} to lend them a Pokemon for the tournament. {favourTrainer.Name} has lent them their {favourMon.Species}."
                     );

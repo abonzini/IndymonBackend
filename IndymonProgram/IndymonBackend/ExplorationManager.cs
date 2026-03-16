@@ -3,7 +3,6 @@ using GameData;
 using GameDataContainer;
 using MechanicsData;
 using MechanicsDataContainer;
-using ParsersAndData;
 using ShowdownBot;
 using Utilities;
 
@@ -121,6 +120,18 @@ namespace IndymonBackendProgram
         public void AddMons(List<TrainerPokemon> mons, int floor)
         {
             foreach (TrainerPokemon mon in mons) AddMon(mon, floor);
+        }
+        /// <summary>
+        /// Transfers everything to trainer
+        /// </summary>
+        /// <param name="trainer">Which trainer</param>
+        public void TransferToTrainer(Trainer trainer)
+        {
+            foreach (KeyValuePair<SetItem, int> kvp in SetItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, kvp.Key, kvp.Value);
+            foreach (KeyValuePair<Item, int> kvp in ModItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, kvp.Key, kvp.Value);
+            foreach (KeyValuePair<Item, int> kvp in BattleItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, kvp.Key, kvp.Value);
+            foreach (KeyValuePair<string, int> kvp in KeyItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.KeyItems, kvp.Key, kvp.Value);
+            foreach (KeyValuePair<Trainer, int> kvp in FavoursFound) GeneralUtilities.AddtemToCountDictionary(trainer.Favours, kvp.Key, kvp.Value);
         }
     }
     public class ExplorationContext
@@ -307,16 +318,14 @@ namespace IndymonBackendProgram
             Console.CursorVisible = false;
             Console.WriteLine("Exploration end.");
             // Add items from prizes -> inventory
-            foreach (KeyValuePair<SetItem, int> kvp in _prizes.SetItemsFound) GeneralUtilities.AddtemToCountDictionary(_explorer.SetItems, kvp.Key, kvp.Value);
-            foreach (KeyValuePair<Item, int> kvp in _prizes.ModItemsFound) GeneralUtilities.AddtemToCountDictionary(_explorer.ModItems, kvp.Key, kvp.Value);
-            foreach (KeyValuePair<Item, int> kvp in _prizes.BattleItemsFound) GeneralUtilities.AddtemToCountDictionary(_explorer.BattleItems, kvp.Key, kvp.Value);
-            foreach (KeyValuePair<string, int> kvp in _prizes.KeyItemsFound) GeneralUtilities.AddtemToCountDictionary(_explorer.KeyItems, kvp.Key, kvp.Value);
-            foreach (KeyValuePair<Trainer, int> kvp in _prizes.FavoursFound) GeneralUtilities.AddtemToCountDictionary(_explorer.TrainerFavours, kvp.Key, kvp.Value);
+            _prizes.TransferToTrainer(_explorer);
             // Consume items
             IndymonUtilities.ConsumeTrainersItems(_explorer);
             // Save the copiable exploration file
             IndymonUtilities.WarnTrainer(_explorer);//Warn trainer of the exceeded items
             SaveExplorationOutcome(); // Replace with message stuff
+            string trainerFilePath = Path.Combine(DirectoryPath, $"{_explorer.Name.ToUpper().Replace(" ", "").Replace("?", "")}.trainer");
+            _explorer.SaveTrainerCsv(trainerFilePath);
         }
         /// <summary>
         /// Executes an event of the many possible in dungeon

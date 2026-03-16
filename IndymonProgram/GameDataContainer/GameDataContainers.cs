@@ -1,6 +1,5 @@
 ﻿using GameData;
 using Newtonsoft.Json;
-using ParsersAndData;
 
 namespace GameDataContainer
 {

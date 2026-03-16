@@ -562,5 +562,18 @@ namespace MechanicsDataContainer
                 UnownLookup.Add(fields[0], fields[1]); // This should be unique
             }
         }
+        void ParseTrainerNamesLookup(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Parsing Trainer Names Lookup");
+            TrainerLookup.Clear();
+            // Parse csv
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string[] lines = csv.Split("\n");
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string[] fields = lines[i].Split(","); // Csv
+                TrainerLookup.Add(fields[0], Enum.Parse<TrainerRank>(fields[1]));
+            }
+        }
     }
 }

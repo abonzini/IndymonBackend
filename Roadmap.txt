@@ -11,13 +11,11 @@ Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone
 	Underwater -> Tapu Fini/Volcanion -> Water Stone
 	Faraway Island -> Regidrago (Food Ingredients)
 White Monastery -> Justice -> Dawn Stone
-	Sky Tower -> Enamorus(both)/Articuno/ArticunoGalar -> Ice Stone
+	Sky Castle -> Enamorus(both)/Articuno/ArticunoGalar -> Ice Stone
 	Glacier -> Regice
 
 ---
 TODO:
-- Option to consume + explore favour
-- Option to grant random pokemon
 - Spreadsheet S2 Update
 
 POSSIBLE THINGS TO LOOK FOR:

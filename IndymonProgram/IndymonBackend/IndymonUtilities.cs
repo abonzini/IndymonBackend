@@ -186,7 +186,7 @@ namespace IndymonBackendProgram
             WarnIf(trainer.SetItems.Count, MAX_ITEMS, "Set Items");
             WarnIf(trainer.ModItems.Count, MAX_ITEMS, "Mod Items");
             WarnIf(trainer.BattleItems.Count, MAX_ITEMS, "Battle Items");
-            WarnIf(trainer.TrainerFavours.Count, MAX_ITEMS, "Favours");
+            WarnIf(trainer.Favours.Count, MAX_ITEMS, "Favours");
             WarnIf(trainer.KeyItems.Count, MAX_ITEMS, "Key Items");
             WarnIf(trainer.BoxedPokemon.Count, MAX_BOX, "Boxed Pokemon");
         }

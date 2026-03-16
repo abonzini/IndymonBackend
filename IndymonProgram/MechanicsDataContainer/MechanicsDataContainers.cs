@@ -39,6 +39,8 @@ namespace MechanicsDataContainer
             ParseFixedModifiers(sheetId, fixedModsTab);
             string unownTab = lines[13].Split(",")[0];
             ParseUnownLookup(sheetId, unownTab);
+            string trainersTab = lines[14].Split(",")[0];
+            ParseTrainerNamesLookup(sheetId, trainersTab);
         }
         public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
         public Dictionary<string, Move> Moves = new Dictionary<string, Move>();
@@ -53,5 +55,6 @@ namespace MechanicsDataContainer
         public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> WeightModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
         public Dictionary<(ElementType, string), double> FlatIncreaseModifiers = new Dictionary<(ElementType, string), double>();
         public Dictionary<string, string> UnownLookup = new Dictionary<string, string>();
+        public Dictionary<string, TrainerRank> TrainerLookup = new Dictionary<string, TrainerRank>();
     }
 }

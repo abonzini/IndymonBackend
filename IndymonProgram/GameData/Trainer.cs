@@ -3,13 +3,6 @@ using System.Text;
 
 namespace GameData
 {
-    public enum TrainerRank
-    {
-        UNRANKED,
-        GYM,
-        ELITE4,
-        CHAMPION
-    }
     public class Trainer
     {
         public const int MAX_MONS_IN_TEAM = 12; /// How many mons top can the team have (rest goes to box)
@@ -31,7 +24,7 @@ namespace GameData
         public Dictionary<Item, int> ModItems = new Dictionary<Item, int>();
         public Dictionary<Item, int> BattleItems = new Dictionary<Item, int>();
         public Dictionary<string, int> KeyItems = new Dictionary<string, int>();
-        public Dictionary<Trainer, int> TrainerFavours = new Dictionary<Trainer, int>();
+        public Dictionary<Trainer, int> Favours = new Dictionary<Trainer, int>();
         public Dictionary<string, int> PokeBalls = new Dictionary<string, int>();
         public override string ToString()
         {
@@ -83,7 +76,7 @@ namespace GameData
             foreach (KeyValuePair<string, int> keyItemData in KeyItems) keyItemList.Add((keyItemData.Key, keyItemData.Value));
             keyItemList = [.. keyItemList.OrderBy(s => s.Item1)];
             List<(string, int)> favourList = [];
-            foreach (KeyValuePair<Trainer, int> favourData in TrainerFavours) favourList.Add((favourData.Key.Name, favourData.Value));
+            foreach (KeyValuePair<Trainer, int> favourData in Favours) favourList.Add((favourData.Key.Name, favourData.Value));
             favourList = [.. favourList.OrderBy(s => s.Item1)];
             List<(string, int)> ballList = [];
             foreach (KeyValuePair<string, int> pokeBallData in PokeBalls) ballList.Add((pokeBallData.Key, pokeBallData.Value));
