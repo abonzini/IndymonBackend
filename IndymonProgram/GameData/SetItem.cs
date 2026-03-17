@@ -76,15 +76,15 @@ namespace GameData
                 addedMoveNames = itemName.Split(BASIC_DISK)[0].Trim().Split(";"); // Remove the tag and then add the Move(s) separated by ;
                 resultingItem.AlwaysAllowedItem = false; // Basic disks only work if mon already had the moves
                 resultingItem.ItemReplacement = BLANK_DISK;
-                resultingItem.ItemReplacementQuantity = addedMoveNames.Length;
-                resultingItem.Expires = true;
+                resultingItem.ItemReplacementQuantity = addedMoveNames.Length - 1;
+                resultingItem.Expires = resultingItem.ItemReplacementQuantity > 0; // Only expires if it requires Blank Disks
             }
             else if (itemName.Contains(ADVANCED_DISK))
             {
                 addedMoveNames = itemName.Split(ADVANCED_DISK)[0].Trim().Split(";"); // Remove the tag and then add the Move(s) separated by ;
                 resultingItem.AlwaysAllowedItem = true;
-                resultingItem.ItemReplacement = BLANK_DISK;
-                resultingItem.Expires = true;
+                resultingItem.ItemReplacementQuantity = addedMoveNames.Length;
+                resultingItem.Expires = resultingItem.ItemReplacementQuantity > 0; // Only expires if it requires Blank Disks
             }
             else if (itemName.Contains(ABILITY_CHARM))
             {

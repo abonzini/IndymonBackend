@@ -17,9 +17,6 @@ White Monastery -> Justice -> Dawn Stone
 	Glacier -> Regice
 
 ---
-TODO:
-- Spreadsheet S2 Update
-
 POSSIBLE THINGS TO LOOK FOR:
 - Debug weathers
 - Add weather setting for advantage?

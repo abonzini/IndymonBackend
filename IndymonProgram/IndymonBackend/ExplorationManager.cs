@@ -1072,7 +1072,8 @@ namespace IndymonBackendProgram
                         case ShortcutConditionType.MOVE:
                             foreach (TrainerPokemon pokemon in _explorer.BattleTeam) // If a mon has move, all good
                             {
-                                if (pokemon.ChosenMoveset.Any(m => m?.Name == eachOne)) // move found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right set item
+                                if (pokemon.ChosenMoveset.Any(m => m?.Name == eachOne) && pokemon.SetItemChosen && pokemon.SetItem.AddedMoves.Any(m => m?.Name == eachOne)) // move found
                                 {
                                     message = $"{pokemon.GetInformalName()}'s {eachOne}";
                                     canTakeShortcut = true;
@@ -1083,7 +1084,8 @@ namespace IndymonBackendProgram
                         case ShortcutConditionType.ABILITY:
                             foreach (TrainerPokemon pokemon in _explorer.BattleTeam) // If a mon has ability, all good
                             {
-                                if (pokemon.ChosenAbility.Name == eachOne) // ability found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right set item
+                                if (pokemon.ChosenAbility.Name == eachOne && pokemon.SetItemChosen && pokemon.SetItem.AddedAbility.Name == eachOne) // ability found
                                 {
                                     message = $"{pokemon.GetInformalName()}'s {eachOne}";
                                     canTakeShortcut = true;
@@ -1094,7 +1096,8 @@ namespace IndymonBackendProgram
                         case ShortcutConditionType.POKEMON:
                             foreach (TrainerPokemon pokemon in _explorer.BattleTeam) // If a mon is there, all good
                             {
-                                if (pokemon.Species == eachOne) // species found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered consciously
+                                if (pokemon.Species == eachOne && !_explorer.AutoTeam) // species found
                                 {
                                     message = $"{pokemon.GetInformalName()}";
                                     canTakeShortcut = true;
@@ -1106,7 +1109,8 @@ namespace IndymonBackendProgram
                             foreach (TrainerPokemon pokemon in _explorer.BattleTeam) // If a mon has type, all good
                             {
                                 Pokemon monSpecies = MechanicsDataContainers.GlobalMechanicsData.Dex[pokemon.Species];
-                                if (monSpecies.Types.Item1.ToString().ToUpper() == eachOne.ToUpper() || monSpecies.Types.Item2.ToString().ToUpper() == eachOne.ToUpper()) // type of pokemon found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered consciously
+                                if (!_explorer.AutoTeam && (monSpecies.Types.Item1.ToString().ToUpper() == eachOne.ToUpper() || monSpecies.Types.Item2.ToString().ToUpper() == eachOne.ToUpper())) // type of pokemon found
                                 {
                                     message = $"{pokemon.GetInformalName()}'s {eachOne} type";
                                     canTakeShortcut = true;
@@ -1117,7 +1121,8 @@ namespace IndymonBackendProgram
                         case ShortcutConditionType.ITEM: // This is outdated but refers to the battle item I THINK ?!?!
                             foreach (TrainerPokemon pokemon in _explorer.BattleTeam) // If a mon has item, all good
                             {
-                                if (pokemon.BattleItem?.Name == eachOne) // item found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right item
+                                if (pokemon.BattleItem?.Name == eachOne && pokemon.BattleItemChosen) // item found
                                 {
                                     message = $"{pokemon.GetInformalName()}'s {eachOne}";
                                     canTakeShortcut = true;
@@ -1128,7 +1133,8 @@ namespace IndymonBackendProgram
                         case ShortcutConditionType.MOVE_DISK: // This is an insane guess but I think it refers to set item containin "move disk"
                             foreach (TrainerPokemon pokemon in _explorer.BattleTeam)
                             {
-                                if (pokemon.SetItem != null && pokemon.SetItem.Name.Contains("Disk")) // disk found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right set item
+                                if (pokemon.SetItem != null && pokemon.SetItemChosen && pokemon.SetItem.Name.Contains("Disk")) // disk found
                                 {
                                     message = $"{pokemon.GetInformalName()}'s {pokemon.SetItem.Name}";
                                     canTakeShortcut = true;
