@@ -1,3 +1,5 @@
+^.*Name":\s+"([\w \-']+)".*
+
 Mini Meadows -> Raikou/Entei/Thundurus(both)-> Thunder Stone
 	Desert -> Ruin -> Sun Stone
 	Power Plant -> Regieleki
