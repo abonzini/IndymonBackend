@@ -1,20 +1,15 @@
 ^.*Name":\s+"([\w \-']+)".*
 
-Mini Meadows -> Raikou/Entei/Thundurus(both)-> Thunder Stone
-	Desert -> Ruin -> Sun Stone
-	Power Plant -> Regieleki
-Gem Cave -> Lake Spirits -> Moon Stone
-	Magma -> Moltres/Heatran -> Fire Stone
-	Apricorn Forest -> Regirock (Apricorns)
-Berry Forest -> Shaymin/Celebi -> Leaf Stone
-	Haunted Mansion -> Marshadow/Spectrier -> Shiny Stone
-	Pond -> Registeel
+Mechanics to implement:
+- Pokeball crafting (aprixorns -> pokeball)
+- Sanwich (herba mystica -> sandwich -> picnic)
+- Esscences (esscence->complete overhaul/addition)
+
 Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone 
 	Underwater -> Tapu Fini/Volcanion -> Water Stone
-	Faraway Island -> Regidrago (Food Ingredients)
-White Monastery -> Justice -> Dawn Stone
-	Sky Castle -> Enamorus(both)/Articuno/ArticunoGalar -> Ice Stone
-	Glacier -> Regice
+	Faraway Island -> Regidrago (Esscence)
+	"PreEventString": "One day they will awaken once more.",
+    "PostEventString": "The Earth will shake, in two, will break ..."
 
 ---
 POSSIBLE THINGS TO LOOK FOR:
