@@ -120,6 +120,7 @@ namespace AutomatedTeamBuilder
                 ExtractMods((ElementType.POKEMON_TYPE, monCtx.PokemonTypes.Item2.ToString()), monCtx);
             }
             // Finally the eviolite thing, advertise whether has evo or not
+            ExtractMods((ElementType.POKEMON_HAS_PREVO, (monData.Prevo != null).ToString().ToUpper()), monCtx);
             ExtractMods((ElementType.POKEMON_HAS_EVO, (monData.Evos.Count > 0).ToString().ToUpper()), monCtx);
         }
         /// <summary>

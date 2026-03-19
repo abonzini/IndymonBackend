@@ -224,9 +224,17 @@ namespace AutomatedTeamBuilder
                     // Get mon
                     Trainer borrowedTrainer = usedBuild.FavourPokemon.Keys.Where(f => f.Name == input).First();
                     nameList = [.. usedBuild.FavourPokemon[borrowedTrainer].Select(m => m.Species)];
-                    Console.WriteLine($"Which mon to borrow? {string.Join(",", nameList)}");
+                    Console.WriteLine($"Which mon to borrow? 0 if random. {string.Join(",", nameList)}");
                     input = Console.ReadLine();
-                    TrainerPokemon borrowedMon = usedBuild.FavourPokemon[borrowedTrainer].Where(m => m.Species == input).First();
+                    TrainerPokemon borrowedMon;
+                    if (input == "0")
+                    {
+                        borrowedMon = GeneralUtilities.GetRandomPick(usedBuild.FavourPokemon[borrowedTrainer]);
+                    }
+                    else
+                    {
+                        borrowedMon = usedBuild.FavourPokemon[borrowedTrainer].Where(m => m.Species == input).First();
+                    }
                     // Then, item building
                     if (trainer.SetItems.Count > 0)
                     {

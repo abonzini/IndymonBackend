@@ -15,7 +15,8 @@
 	{
       "EventType": "PLOT_CLUE",
       "PreEventString": "An old man is standing in front of you with a blank stare. He smells like coffee. He says 'You don't know how to catch a Pokémon? I suppose I had better show you then!'.",
-      "PostEventString": "He throws a Pokeball at the middle of the room, but there wasn't anything in there. Then, the old man stays in place, not doing anything. YOU FEEL A SENSE OF UNEASINESS, AS SOMETHING IN THE WORLD HAD TEMPORARILY BROKEN."
+      "PostEventString": "He throws a Pokeball at the middle of the room, but there wasn't anything in there. Then, the old man stays in place, not doing anything. You pick the Poke Ball in the ground, and immediately feel uneasy.",
+      "SpecialParams": "Corrupted Poke Ball"
     },
 	{
       "EventType": "ALPHA",
@@ -61,7 +62,7 @@
       "EventType": "STATUS_TRAP",
       "PreEventString": "A Banette appears out of nowhere and gives you a gift-wrapped box.",
       "PostEventString": "You open the box, which releases a large amount of sleeping gas. $1 is now asleep.",
-	  "SpecialParams": "slp"
+	    "SpecialParams": "slp"
     },
 	{
       "EventType": "IMP_GAIN",

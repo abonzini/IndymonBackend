@@ -52,7 +52,7 @@ namespace GameData
         public RoomEventType EventType;
         public string PreEventString;
         public string PostEventString;
-        public string SpecialParams;
+        public string SpecialParams = "";
         public override string ToString()
         {
             return EventType.ToString();

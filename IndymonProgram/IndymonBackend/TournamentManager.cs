@@ -47,7 +47,7 @@ namespace IndymonBackendProgram
             Console.WriteLine("How many pokemon each team?");
             OngoingTournament.NMons = int.Parse(Console.ReadLine());
             OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
-            // Finally, player selection, pre-filter traines whether they can participate in this event
+            // Finally, player selection, pre-filter trainers whether they can participate in this event
             List<Trainer> trainers = [.. GameDataContainers.GlobalGameData.TrainerData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
             List<Trainer> npcs = [.. GameDataContainers.GlobalGameData.NpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
             List<Trainer> namedNpcs = [.. GameDataContainers.GlobalGameData.FamousNpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
@@ -56,10 +56,10 @@ namespace IndymonBackendProgram
             bool randomizeFill = false;
             while (remainingPlayersNeeded > 0) // Will do addition loop until all players are selected
             {
-                Trainer nextTrainer = null;
+                List<Trainer> nextTrainers = []; // Next trainers to add
                 if (currentChosenTrainers == null)
                 {
-                    Console.WriteLine("Which group of trainers to load? 1-Players, 2-NPCs, 3-Named NPCs. 4-Fill with random NPCs");
+                    Console.WriteLine("Which group of trainers to load? 1-Players, 2-NPCs, 3-Named NPCs. 4-Fill with random NPCs 5-Fill with random Famous NPCs");
                     inputString = Console.ReadLine().ToLower();
                     switch (inputString)
                     {
@@ -76,6 +76,10 @@ namespace IndymonBackendProgram
                             currentChosenTrainers = npcs;
                             randomizeFill = true;
                             break;
+                        case "5":
+                            currentChosenTrainers = namedNpcs;
+                            randomizeFill = true;
+                            break;
                         default:
                             break;
                     }
@@ -84,7 +88,7 @@ namespace IndymonBackendProgram
                 {
                     if (currentChosenTrainers.Count > 0)
                     {
-                        nextTrainer = GeneralUtilities.GetRandomPick(currentChosenTrainers); // Will pick one of them
+                        nextTrainers = [GeneralUtilities.GetRandomPick(currentChosenTrainers)]; // Will pick one of them
                     }
                     else
                     {
@@ -94,29 +98,31 @@ namespace IndymonBackendProgram
                 }
                 else
                 {
-                    Console.WriteLine("Choose next trainer to add. 0 to go back");
-                    for (int idx = 1; idx <= currentChosenTrainers.Count; idx++)
-                    {
-                        Console.Write($"{idx}-{currentChosenTrainers[idx - 1].Name} ");
-                    }
-                    Console.WriteLine("");
-                    int trainerIdx = int.Parse(Console.ReadLine());
-                    if (trainerIdx > 0 && trainerIdx <= currentChosenTrainers.Count)
+                    Console.WriteLine($"Choose next trainer(s) to add. Or nothing to go back {string.Join(", ", [.. currentChosenTrainers.Select(t => t.Name)])}");
+                    string trainerChoice = Console.ReadLine();
+                    if (trainerChoice != "")
                     {
                         // A valid trainer was chosen
-                        nextTrainer = currentChosenTrainers[trainerIdx - 1];
+                        string[] choices = trainerChoice.Split(',');
+                        foreach (string choice in choices)
+                        {
+                            nextTrainers.Add(currentChosenTrainers.Where(t => t.Name.ToLower() == choice.Trim().ToLower()).First());
+                        }
                     }
                     else
                     {
                         currentChosenTrainers = null;
                     }
                 }
-                if (nextTrainer != null)
+                if (nextTrainers.Count > 0)
                 {
-                    currentChosenTrainers.Remove(nextTrainer);
-                    remainingPlayersNeeded--;
-                    OngoingTournament.ParticipantsWithRandomSeed.Add((nextTrainer.Name, GeneralUtilities.GetRandomNumber()));
-                    Console.WriteLine($"{nextTrainer.Name} added");
+                    currentChosenTrainers.RemoveAll(t => nextTrainers.Contains(t));
+                    remainingPlayersNeeded -= nextTrainers.Count;
+                    foreach (Trainer nextTrainer in nextTrainers)
+                    {
+                        OngoingTournament.ParticipantsWithRandomSeed.Add((nextTrainer.Name, GeneralUtilities.GetRandomNumber()));
+                        Console.WriteLine($"{nextTrainer.Name} added");
+                    }
                 }
             }
         }
@@ -161,9 +167,17 @@ namespace IndymonBackendProgram
                 string participantName = participantData.Item1;
                 // Try to find the participant in the place where located
                 Trainer participant = IndymonUtilities.GetTrainerByName(participantName);
+                if (OngoingTournament.CommonFavourTrainer != null) // If trainers will borrow mons from a pool too...
+                {
+                    GeneralUtilities.AddtemToCountDictionary(participant.Favours, OngoingTournament.CommonFavourTrainer, 99); // Add 99 of these favours
+                }
                 // Indymon S2 addition, confirm sets now does the smart teambuild
                 List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false); // Get all of the possible sets that would satisfy this
                 TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds, false, participantData.Item2); // Chooses one of the sets, prepares the mons
+                if (OngoingTournament.CommonFavourTrainer != null) // If trainers will borrow mons from a pool too...
+                {
+                    GeneralUtilities.AddtemToCountDictionary(participant.Favours, OngoingTournament.CommonFavourTrainer, -99, true); // Remove the given favours
+                }
             }
             foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // Then, build for each trainer
             {
@@ -205,12 +219,15 @@ namespace IndymonBackendProgram
             {
                 OngoingTournament.FinaliseTournament();
             }
+
             // Also, ask the tournament to update the sheets
             OngoingTournament.UpdateLeaderboard();
             // Also, need to update the items and sheets for participants
+            const int SALARY = 2; // Trainers now get paid for playing
             foreach (string participant in OngoingTournament.ParticipantsWithRandomSeed.Select(t => t.Item1))
             {
                 Trainer trainer = IndymonUtilities.GetTrainerByName(participant); // Obtain trainer
+                trainer.Imp += SALARY;
                 IndymonUtilities.ConsumeTrainersItems(trainer); // Trainer does a round of consuming item
                 string trainerFilePath = Path.Combine(DirectoryPath, $"{participant.ToUpper().Replace(" ", "").Replace("?", "")}.trainer");
                 trainer.SaveTrainerCsv(trainerFilePath);
@@ -262,6 +279,7 @@ namespace IndymonBackendProgram
         public bool FirstInstallment { get; set; } = true;
         public Constraint BaseConstraint { get; set; } = new Constraint();
         public List<Constraint> TeamBuildConstrainOptions { get; set; } = new List<Constraint>();
+        public Trainer CommonFavourTrainer { get; set; } = null;
         public int NPlayers { get; set; } = 0;
         public int NMons { get; set; } = 3;
         public List<(string, int)> ParticipantsWithRandomSeed { get; set; } = new List<(string, int)>(); // Participants and teambuild seed
@@ -513,13 +531,27 @@ namespace IndymonBackendProgram
         protected void AskSpecialRulesets()
         {
             // Ones that add to the build constraints
-            Console.WriteLine("Choose special rules [monotype, dancer]");
+            Console.WriteLine("Choose special rules [monotype, dancer, ultra, bullet, lc]");
             string response = Console.ReadLine();
             if (response.Trim().ToLower() == "dancer")
             {
                 // Either a dance move or dancer ability
                 BaseConstraint.AllConstraints = [(ElementType.EFFECT_FLAGS, "DANCE"), (ElementType.ABILITY, "Dancer")];
                 BaseConstraint.Operation = ConstraintOperation.OR;
+                TeamBuildConstrainOptions = [BaseConstraint];
+            }
+            else if (response.Trim().ToLower() == "bullet")
+            {
+                // Either a ball move or bulletproof
+                BaseConstraint.AllConstraints = [(ElementType.EFFECT_FLAGS, "BALL"), (ElementType.ABILITY, "Bulletproof")];
+                BaseConstraint.Operation = ConstraintOperation.OR;
+                TeamBuildConstrainOptions = [BaseConstraint];
+            }
+            else if (response.Trim().ToLower() == "lc")
+            {
+                // Ensure mon has evo and hasnt evolved
+                BaseConstraint.AllConstraints = [(ElementType.POKEMON_HAS_PREVO, "FALSE"), (ElementType.POKEMON_HAS_EVO, "TRUE")];
+                BaseConstraint.Operation = ConstraintOperation.AND;
                 TeamBuildConstrainOptions = [BaseConstraint];
             }
             else if (response.Trim().ToLower() == "monotype")
@@ -534,6 +566,27 @@ namespace IndymonBackendProgram
                     };
                     TeamBuildConstrainOptions.Add(nextTypeConstraint);
                     BaseConstraint = new Constraint(); // No additional base constraints here
+                }
+            }
+            else if (response.Trim().ToLower() == "ultra")
+            {
+                CommonFavourTrainer = new Trainer()
+                {
+                    Name = "UltraParadox"
+                };
+                List<string> pokemonList = ["Nihilego", "Buzzwole", "Pheromosa", "Xurkitree", "Celesteela", "Kartana", "Guzzlord", "Naganadel", "Stakataka", "Blacephalon",
+                    "Great Tusk", "Scream Tail", "Brute Bonnet", "Flutter Mane", "Slither Wing", "Sandy Shocks", "Roaring Moon", "Walking Wake", "Gouging Fire", "Raging Bolt",
+                    "Iron Treads", "Iron Bundle", "Iron Hands", "Iron Jugulis", "Iron Moth", "Iron Thorns", "Iron Valiant", "Iron Leaves", "Iron Boulder", "Iron Crown"
+                ]; // List of Pokemon borrowed here
+                for (int i = 0; i < pokemonList.Count; i++)
+                {
+                    bool isShiny = (GeneralUtilities.GetRandomNumber(50) == 0); // Will be shiny if i get a 0 dice roll
+                    TrainerPokemon nextPokemonInTeam = new TrainerPokemon()
+                    {
+                        Species = pokemonList[i],
+                        IsShiny = isShiny
+                    };
+                    CommonFavourTrainer.PartyPokemon.Add(nextPokemonInTeam); // Add mon
                 }
             }
             else // Normal tournament, empty constraint

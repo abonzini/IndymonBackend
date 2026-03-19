@@ -860,6 +860,10 @@ namespace IndymonBackendProgram
                     {
                         PlotMessageCommand(roomEvent.PreEventString);
                         PlotMessageCommand(roomEvent.PostEventString);
+                        if (roomEvent.SpecialParams != "")
+                        {
+                            _prizes.AddReward(roomEvent.SpecialParams, 1); // Add item if plot event has it
+                        }
                     }
                     break;
                 case RoomEventType.JOINER:

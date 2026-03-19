@@ -15,6 +15,7 @@ namespace MechanicsDataContainer
             {
                 ElementType.POKEMON => Dex.ContainsKey(name),
                 ElementType.POKEMON_TYPE => Enum.TryParse<PokemonType>(name, true, out _),
+                ElementType.POKEMON_HAS_PREVO => bool.TryParse(name, out _),
                 ElementType.POKEMON_HAS_EVO => bool.TryParse(name, out _),
                 ElementType.ARCHETYPE => Enum.TryParse<TeamArchetype>(name, true, out _),
                 ElementType.WEATHER => Enum.TryParse<Weather>(name, true, out _),

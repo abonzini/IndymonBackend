@@ -12,7 +12,8 @@ namespace MechanicsData
         ALWAYS, /// Can't be affected, but it's there to add mods from scratch, specifically stat/battle mods
         POKEMON, /// The pokemon. Can't be affected, but affects stuff
         POKEMON_TYPE, /// The pokemon type. Can't be affected, but affects stuff
-        POKEMON_HAS_EVO, /// The flag of whether the pokemon has an evo or not (only way to make eviolite happen)
+        POKEMON_HAS_PREVO, /// The flag of whether the pokemon has an prevo or not
+        POKEMON_HAS_EVO, /// The flag of whether the pokemon has an evo or not
         ARCHETYPE, /// Certain archetypes. Not weighted but enabled, and can weight strategies
         WEATHER, /// The ongoing weather of a team comp
         TERRAIN, /// The ongoing terrain of a team comp

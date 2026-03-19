@@ -68,10 +68,11 @@ namespace AutomatedTeamBuilder
                 string elementName = elementToCheck.Item2;
                 bool checkPassed = false; // Will need to see if this check passes
                 // Elements that may be of use when checking stuff
-                Enum.TryParse(elementName, true, out PokemonType typeToCheck);
-                Enum.TryParse(elementName, true, out ItemFlag itemFlagToCheck);
-                Enum.TryParse(elementName, true, out EffectFlag effectFlagToCheck);
-                Enum.TryParse(elementName, true, out MoveCategory moveCategoryToCheck);
+                _ = Enum.TryParse(elementName, true, out PokemonType typeToCheck);
+                _ = Enum.TryParse(elementName, true, out ItemFlag itemFlagToCheck);
+                _ = Enum.TryParse(elementName, true, out EffectFlag effectFlagToCheck);
+                _ = Enum.TryParse(elementName, true, out MoveCategory moveCategoryToCheck);
+                _ = bool.TryParse(elementName.ToLower(), out bool boolToCheck);
                 switch (elementType)
                 {
                     case ElementType.POKEMON:
@@ -80,8 +81,11 @@ namespace AutomatedTeamBuilder
                     case ElementType.POKEMON_TYPE:
                         checkPassed = (pokemonData.Types.Item1 == typeToCheck || pokemonData.Types.Item2 == typeToCheck);
                         break;
+                    case ElementType.POKEMON_HAS_PREVO:
+                        checkPassed = (boolToCheck == (pokemonData.Prevo != null));
+                        break;
                     case ElementType.POKEMON_HAS_EVO:
-                        checkPassed = pokemonData.Evos.Count > 0;
+                        checkPassed = (boolToCheck == (pokemonData.Evos.Count > 0));
                         break;
                     case ElementType.BATTLE_ITEM:
                         checkPassed = mon.BattleItem?.Name == elementName;
@@ -184,6 +188,7 @@ namespace AutomatedTeamBuilder
                         break;
                     case ElementType.POKEMON:
                     case ElementType.POKEMON_TYPE:
+                    case ElementType.POKEMON_HAS_PREVO:
                     case ElementType.POKEMON_HAS_EVO:
                     case ElementType.BATTLE_ITEM:
                     case ElementType.ITEM_FLAGS:
@@ -225,36 +230,15 @@ namespace AutomatedTeamBuilder
             {
                 ElementType elementType = elementToCheck.Item1;
                 string elementName = elementToCheck.Item2;
-                bool checkPassed = false; // Will need to see if this check passes
                 // Elements that may be of use when checking stuff
                 Enum.TryParse(elementName, true, out ItemFlag itemFlagToCheck);
-                switch (elementType)
+                bool checkPassed = elementType switch
                 {
-                    case ElementType.BATTLE_ITEM:
-                        checkPassed = MechanicsDataContainers.GlobalMechanicsData.BattleItems.ContainsKey(item.Name) && item.Name == elementName;
-                        break;
-                    case ElementType.ITEM_FLAGS:
-                        HashSet<ItemFlag> itemFlags = new HashSet<ItemFlag>();
-                        checkPassed = item.Flags.Contains(itemFlagToCheck);
-                        break;
-                    case ElementType.MOD_ITEM:
-                        checkPassed = MechanicsDataContainers.GlobalMechanicsData.ModItems.ContainsKey(item.Name) && item.Name == elementName;
-                        break;
-                    case ElementType.ABILITY:
-                    case ElementType.MOVE:
-                    case ElementType.EFFECT_FLAGS:
-                    case ElementType.ORIGINAL_TYPE_OF_MOVE:
-                    case ElementType.DAMAGING_MOVE_OF_TYPE:
-                    case ElementType.MOVE_CATEGORY:
-                    case ElementType.ANY_DAMAGING_MOVE:
-                    case ElementType.ARCHETYPE:
-                    case ElementType.POKEMON:
-                    case ElementType.POKEMON_TYPE:
-                    case ElementType.POKEMON_HAS_EVO:
-                    default:
-                        checkPassed = false; // No pass
-                        break;
-                }
+                    ElementType.BATTLE_ITEM => MechanicsDataContainers.GlobalMechanicsData.BattleItems.ContainsKey(item.Name) && item.Name == elementName,
+                    ElementType.ITEM_FLAGS => item.Flags.Contains(itemFlagToCheck),
+                    ElementType.MOD_ITEM => MechanicsDataContainers.GlobalMechanicsData.ModItems.ContainsKey(item.Name) && item.Name == elementName,
+                    _ => false,// No pass
+                };
                 if (Operation == ConstraintOperation.OR && checkPassed)
                 {
                     return true; // A single check passing will be fine
@@ -307,6 +291,7 @@ namespace AutomatedTeamBuilder
                     case ElementType.MOVE:
                     case ElementType.POKEMON:
                     case ElementType.POKEMON_TYPE:
+                    case ElementType.POKEMON_HAS_PREVO:
                     case ElementType.POKEMON_HAS_EVO:
                     case ElementType.BATTLE_ITEM:
                     case ElementType.ITEM_FLAGS:
@@ -376,6 +361,7 @@ namespace AutomatedTeamBuilder
                     case ElementType.ABILITY: // Verify mon has ability in set item or would have ability
                     case ElementType.POKEMON:
                     case ElementType.POKEMON_TYPE:
+                    case ElementType.POKEMON_HAS_PREVO:
                     case ElementType.POKEMON_HAS_EVO:
                     case ElementType.BATTLE_ITEM:
                     case ElementType.ITEM_FLAGS:
