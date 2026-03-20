@@ -9,7 +9,7 @@
         /// <param name="battleContext">Context of battle, basically to get opp data</param>
         /// <param name="isOpponent">If the stat to calculate is the opponent's</param>
         /// <returns>The total stat, after multipliers and all and its variance</returns>
-        static (double[], double[]) MonStatCalculation(PokemonBuildInfo monCtx, TeamBuildContext battleContext = null, bool isOpponent = false)
+        static (double[], double[]) MonStatCalculation(PokemonBuildContext monCtx, TeamBuildContext battleContext = null, bool isOpponent = false)
         {
             double[] resultingStats = [0, 0, 0, 0, 0, 0];
             double[] resultingStatVariance = [0, 0, 0, 0, 0, 0];
