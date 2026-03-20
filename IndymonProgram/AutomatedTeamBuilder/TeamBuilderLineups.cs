@@ -386,6 +386,7 @@ namespace AutomatedTeamBuilder
             if (!acceptLessMons && finalBattleTeam.Count < nMons) throw new Exception("For some reason the final battle team didn't have enough mons!");
             if (trainer.AutoTeam) GeneralUtilities.ShuffleListDeterministic(finalBattleTeam, rng); // One last shuffle to allow any mon in any position
             trainer.BattleTeam = finalBattleTeam; // Set this team for battle
+            Console.WriteLine();//Empty line break
         }
     }
 }

@@ -110,14 +110,11 @@ namespace AutomatedTeamBuilder
                 MonBuildState state = MonBuildState.CHOOSING_ABILITY; // Begin with ability
                 while (state != MonBuildState.DONE)
                 {
-                    PokemonBuildInfo monCtx = new PokemonBuildInfo();
+                    PokemonBuildContext monCtx = new PokemonBuildContext();
                     if (buildCtx.smartTeamBuild) // Build info needs to do scoring stuff if in a smart build
                     {
                         monCtx = ObtainPokemonSetContext(mon, buildCtx); // Obtain current Pokemon mods and score and such
                     }
-                    buildCtx.CurrentTeamArchetypes.UnionWith(monCtx.AdditionalArchetypes); // New archetypes found here are added into all team's archetypes
-                    buildCtx.CurrentWeather = monCtx.CurrentWeather; // Something may have changed the current weather
-                    buildCtx.CurrentTerrain = monCtx.CurrentTerrain; // Something may have changed the current terrain
                     // Monctx contains all the ongoing constraints, need only the ones which haven't been fulfilled yet
                     List<Constraint> ongoingConstraints = new List<Constraint>();
                     foreach (Constraint constraint in monCtx.AdditionalConstraints) // filter constraint set out
@@ -147,7 +144,8 @@ namespace AutomatedTeamBuilder
                                     int setItemCount = trainer.SetItems.Values.Sum(); // How many items does the trainer have total?
                                     double initialItemScore = WEIGHT_PER_ITEM * setItemCount;
                                     initialItemScore = Math.Clamp(initialItemScore, WEIGHT_PER_ITEM, 1);
-                                    foreach (SetItem setItem in trainer.SetItems.Keys) // Need to check which set items are available
+                                    List<SetItem> possibleSetItems = [.. trainer.SetItems.Keys.OrderBy(s => s.Name)];
+                                    foreach (SetItem setItem in possibleSetItems) // Need to check which set items are available
                                     {
                                         if (setItem.CanEquip(mon))
                                         {
@@ -223,7 +221,8 @@ namespace AutomatedTeamBuilder
                                     int setItemCount = trainer.SetItems.Values.Sum(); // How many items does the trainer have total?
                                     double initialItemScore = WEIGHT_PER_ITEM * setItemCount;
                                     initialItemScore = Math.Clamp(initialItemScore, WEIGHT_PER_ITEM, 1);
-                                    foreach (SetItem setItem in trainer.SetItems.Keys) // Need to check which set items are available
+                                    List<SetItem> possibleSetItems = [.. trainer.SetItems.Keys.OrderBy(s => s.Name)];
+                                    foreach (SetItem setItem in possibleSetItems) // Need to check which set items are available
                                     {
                                         if (setItem.CanEquip(mon))
                                         {
@@ -349,8 +348,8 @@ namespace AutomatedTeamBuilder
                                 initialItemScore = Math.Clamp(initialItemScore, WEIGHT_PER_ITEM, 1);
                                 // If there's a constraint that requires specific mod items, need to filter list further
                                 bool modItemMandatory = false;
-                                List<Item> possibleModItems = [.. trainer.ModItems.Keys];
-                                List<double> possibleModItemsScores = [.. Enumerable.Repeat<double>(initialItemScore, possibleModItems.Count)];
+                                List<Item> possibleModItems = [.. trainer.ModItems.Keys.OrderBy(m => m.Name)];
+                                List<double> possibleModItemsScores = [.. Enumerable.Repeat(initialItemScore, possibleModItems.Count)];
                                 List<Item> acceptableModItems = new List<Item>();
                                 List<double> acceptableModItemsScores = new List<double>();
                                 foreach (Constraint constraint in ongoingConstraints) // Quick check of which constraints an ability could solve
@@ -455,7 +454,7 @@ namespace AutomatedTeamBuilder
                                     }
                                     // Now the improvement based things
                                     mon.ModItem = modItem; // First, equip this item to mon
-                                    PokemonBuildInfo newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
+                                    PokemonBuildContext newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
                                     double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
                                     double defImprovement = Math.Ceiling(newCtx.Survivability) / Math.Ceiling(monCtx.Survivability); // If this makes you survive approx one more hit, it's worth
                                     double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
@@ -514,8 +513,8 @@ namespace AutomatedTeamBuilder
                                 initialItemScore = Math.Clamp(initialItemScore, WEIGHT_PER_ITEM, 1);
                                 // If there's a constraint that requires specific mod items, need to filter list further
                                 bool battleItemMandatory = false;
-                                List<Item> possibleBattleItems = [.. trainer.BattleItems.Keys];
-                                List<double> possibleBattleItemsScores = [.. Enumerable.Repeat<double>(initialItemScore, possibleBattleItems.Count)];
+                                List<Item> possibleBattleItems = [.. trainer.BattleItems.Keys.OrderBy(b => b.Name)];
+                                List<double> possibleBattleItemsScores = [.. Enumerable.Repeat(initialItemScore, possibleBattleItems.Count)];
                                 List<Item> acceptableBattleItems = new List<Item>();
                                 List<double> acceptableBattleItemsScores = new List<double>();
                                 foreach (Constraint constraint in ongoingConstraints) // Quick check of which constraints an ability could solve
@@ -620,7 +619,7 @@ namespace AutomatedTeamBuilder
                                     }
                                     // Now the improvement based things
                                     mon.BattleItem = battleItem; // First, equip this item to mon
-                                    PokemonBuildInfo newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
+                                    PokemonBuildContext newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
                                     double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
                                     double defImprovement = Math.Ceiling(newCtx.Survivability) / Math.Ceiling(monCtx.Survivability); // If this makes you survive approx one more hit, it's worth
                                     double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
@@ -704,12 +703,17 @@ namespace AutomatedTeamBuilder
                 {
                     // All good, do next seed then
                     monSeed = teamRng.Next();
+                    // Also, this mon may modify the team context
+                    PokemonBuildContext monCtx = ObtainPokemonSetContext(mon, buildCtx); // Obtain current Pokemon mods and score and such
+                    buildCtx.CurrentTeamArchetypes.UnionWith(monCtx.AdditionalArchetypes); // New archetypes found here are added into all team's archetypes
+                    buildCtx.CurrentWeather = monCtx.CurrentWeather; // Something may have changed the current weather
+                    buildCtx.CurrentTerrain = monCtx.CurrentTerrain; // Something may have changed the current terrain
                 }
             }
             // If team accepted, then get all mons ctx one last time, and apply the necessary things to them
             foreach (TrainerPokemon mon in trainer.BattleTeam)
             {
-                PokemonBuildInfo monCtx = new PokemonBuildInfo(); // Get all the mons context data
+                PokemonBuildContext monCtx = new PokemonBuildContext(); // Get all the mons context data
                 // In here, a bit of logic. What if the trainer chose a mod item that improves logic (e.g. dawn stone) but has not chosen a set?
                 // Then everything is randomized, and this means the mod item si just luck based, so I'll try to atleast use a first-slot move that makes sense
                 // This will reorder moves a bunch and notify

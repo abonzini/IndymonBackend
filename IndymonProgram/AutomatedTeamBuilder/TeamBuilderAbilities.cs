@@ -16,7 +16,7 @@ namespace AutomatedTeamBuilder
         /// <param name="isFirstMon">Whether the mon is the first one</param>
         /// <param name="isFirstMon">Whether the mon is the last one</param>
         /// <returns></returns>
-        static double GetAbilityWeight(Ability ability, TrainerPokemon theMon, PokemonBuildInfo monCtx, TeamBuildContext buildCtx, bool isFirstMon, bool isLastMon)
+        static double GetAbilityWeight(Ability ability, TrainerPokemon theMon, PokemonBuildContext monCtx, TeamBuildContext buildCtx, bool isFirstMon, bool isLastMon)
         {
             const double MIN_ABILITY_SCORE = 0.0001; // Abilities can't have a score of 0 because there's too few and in some cases a single one, so I make the score very small but not 0 so it can technically be chosen
             Ability oldAbility = theMon.ChosenAbility; // Save this, because it needs to be put back
@@ -56,7 +56,7 @@ namespace AutomatedTeamBuilder
             }
             // Then, we need to do the hypotetical, does this ability add to defensive, offensive or speed utilities?
             theMon.ChosenAbility = ability; // First, equip this ability to mon
-            PokemonBuildInfo newCtx = ObtainPokemonSetContext(theMon, buildCtx); // Check the new context
+            PokemonBuildContext newCtx = ObtainPokemonSetContext(theMon, buildCtx); // Check the new context
             double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
             double defImprovement = Math.Ceiling(newCtx.Survivability) / Math.Ceiling(monCtx.Survivability);
             double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
@@ -98,7 +98,7 @@ namespace AutomatedTeamBuilder
         /// <param name="ability">Which ability to evaluate</param>
         /// <param name="monCtx">The context to obtain score from</param>
         /// <returns>The ability weight</returns>
-        static double GetAbilityMultWeight(Ability ability, PokemonBuildInfo monCtx)
+        static double GetAbilityMultWeight(Ability ability, PokemonBuildContext monCtx)
         {
             (ElementType, string) abilityTag = (ElementType.ABILITY, ability.Name);
             double result = 1;

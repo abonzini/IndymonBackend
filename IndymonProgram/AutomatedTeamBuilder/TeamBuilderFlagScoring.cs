@@ -11,7 +11,7 @@ namespace AutomatedTeamBuilder
         /// <param name="flag">Which flag to check</param>
         /// <param name="monCtx">The context where the flag is scored</param>
         /// <returns>The score of this flag</returns>
-        static double GetEffectFlagMultWeight(EffectFlag flag, PokemonBuildInfo monCtx)
+        static double GetEffectFlagMultWeight(EffectFlag flag, PokemonBuildContext monCtx)
         {
             if (flag == EffectFlag.BANNED) return 0; // This should've been checked before but just in case
             if (flag == EffectFlag.DOUBLES_ONLY) return 0; // Doubles flags make the move/ability quite pointless

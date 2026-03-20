@@ -24,7 +24,7 @@ namespace AutomatedTeamBuilder
     /// <summary>
     /// The context of a currently building mon. Also used to store data about current mods and stuff
     /// </summary>
-    internal class PokemonBuildInfo
+    internal class PokemonBuildContext
     {
         // Things that are added on the transcourse of building a set, makes some other stuff more or less desirable
         public HashSet<TeamArchetype> AdditionalArchetypes = new HashSet<TeamArchetype>(); /// Contains archetypes created by this mon
@@ -68,9 +68,9 @@ namespace AutomatedTeamBuilder
         /// <param name="pokemon">The Pokemon with its current set</param>
         /// <param name="teamCtx">Extra context of the fight, null if skips the context checks</param>
         /// <returns>The Pokemon build details</returns>
-        static PokemonBuildInfo ObtainPokemonSetContext(TrainerPokemon pokemon, TeamBuildContext teamCtx)
+        static PokemonBuildContext ObtainPokemonSetContext(TrainerPokemon pokemon, TeamBuildContext teamCtx)
         {
-            PokemonBuildInfo result = new PokemonBuildInfo();
+            PokemonBuildContext result = new PokemonBuildContext();
             // First, need to load mon base stuff
             Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[pokemon.Species];
             // And other stuff
@@ -83,44 +83,6 @@ namespace AutomatedTeamBuilder
             result.CurrentWeather = teamCtx.CurrentWeather;
             // Then, a calculation of mon's current type that may involve some hardcoded shenanigans
             result.PokemonTypes = monData.Types;// Set base type
-            if (pokemon.ChosenAbility?.Name == "Forecast") // Change type on weather
-            {
-                if (result.CurrentWeather == Weather.SUN)
-                {
-                    result.PokemonTypes = (PokemonType.FIRE, PokemonType.NONE);
-                }
-                if (result.CurrentWeather == Weather.RAIN)
-                {
-                    result.PokemonTypes = (PokemonType.WATER, PokemonType.NONE);
-                }
-                if (result.CurrentWeather == Weather.SNOW)
-                {
-                    result.PokemonTypes = (PokemonType.ICE, PokemonType.NONE);
-                }
-            }
-            else if (pokemon.ChosenAbility?.Name == "Mimicry" || pokemon.ChosenMoveset.Any(m => m?.Name == "Camouflage")) // Change type on terrain
-            {
-                if (result.CurrentTerrain == Terrain.GRASSY)
-                {
-                    result.PokemonTypes = (PokemonType.GRASS, PokemonType.NONE);
-                }
-                if (result.CurrentTerrain == Terrain.PSYCHIC)
-                {
-                    result.PokemonTypes = (PokemonType.PSYCHIC, PokemonType.NONE);
-                }
-                if (result.CurrentTerrain == Terrain.ELECTRIC)
-                {
-                    result.PokemonTypes = (PokemonType.ELECTRIC, PokemonType.NONE);
-                }
-                if (result.CurrentTerrain == Terrain.MISTY)
-                {
-                    result.PokemonTypes = (PokemonType.FAIRY, PokemonType.NONE);
-                }
-            }
-            else
-            {
-                // No mon type changes
-            }
             // Then obtain, step by step, all mods applied by all the (currently known) elements of the mon's build
             ExtractAlwaysMods(result); // Extract the mods that are present in absolutely everyhting
             foreach (TeamArchetype archetype in result.AdditionalArchetypes)
@@ -167,7 +129,45 @@ namespace AutomatedTeamBuilder
             {
                 ExtractMods((ElementType.EFFECT_FLAGS, flag.ToString()), result);
             }
-            // Weather effects modify defenses accordingly
+            // Weather and specific weather/terrain-dependant effects
+            if (pokemon.ChosenAbility?.Name == "Forecast") // Change type on weather
+            {
+                if (result.CurrentWeather == Weather.SUN)
+                {
+                    result.PokemonTypes = (PokemonType.FIRE, PokemonType.NONE);
+                }
+                if (result.CurrentWeather == Weather.RAIN)
+                {
+                    result.PokemonTypes = (PokemonType.WATER, PokemonType.NONE);
+                }
+                if (result.CurrentWeather == Weather.SNOW)
+                {
+                    result.PokemonTypes = (PokemonType.ICE, PokemonType.NONE);
+                }
+            }
+            else if (pokemon.ChosenAbility?.Name == "Mimicry" || pokemon.ChosenMoveset.Any(m => m?.Name == "Camouflage")) // Change type on terrain
+            {
+                if (result.CurrentTerrain == Terrain.GRASSY)
+                {
+                    result.PokemonTypes = (PokemonType.GRASS, PokemonType.NONE);
+                }
+                if (result.CurrentTerrain == Terrain.PSYCHIC)
+                {
+                    result.PokemonTypes = (PokemonType.PSYCHIC, PokemonType.NONE);
+                }
+                if (result.CurrentTerrain == Terrain.ELECTRIC)
+                {
+                    result.PokemonTypes = (PokemonType.ELECTRIC, PokemonType.NONE);
+                }
+                if (result.CurrentTerrain == Terrain.MISTY)
+                {
+                    result.PokemonTypes = (PokemonType.FAIRY, PokemonType.NONE);
+                }
+            }
+            else
+            {
+                // No mon type changes
+            }
             if (result.CurrentWeather == Weather.SNOW) // Snow makes the mon have 1.5xdef if ice
             {
                 // Check either tera 

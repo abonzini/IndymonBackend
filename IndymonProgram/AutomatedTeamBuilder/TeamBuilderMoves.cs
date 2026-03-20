@@ -40,7 +40,7 @@ namespace AutomatedTeamBuilder
         /// <param name="loadedDice">Loaded dice modifies moves like crazy</param>
         /// <param name="highCritDamage">Sniper multilies crit damage</param>
         /// <returns>The damage (in HP) the opp receives</returns>
-        static double CalcMoveDamage(Move move, PokemonBuildInfo monCtx, double[] attackerStats, double[] defenderStats, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false, bool skillLink = false, bool highCritDamage = false)
+        static double CalcMoveDamage(Move move, PokemonBuildContext monCtx, double[] attackerStats, double[] defenderStats, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false, bool skillLink = false, bool highCritDamage = false)
         {
             // First, get the ACTUAL flags of the move (because some may have been added/removed
             HashSet<EffectFlag> moveFlags = ExtractMoveFlags(move, monCtx);
@@ -285,7 +285,7 @@ namespace AutomatedTeamBuilder
         /// <param name="move">Which move</param>
         /// <param name="monCtx">Ctx that contains the mods</param>
         /// <returns>The move Bp multiplier</returns>
-        static double GetMoveBpMods(Move move, PokemonBuildInfo monCtx)
+        static double GetMoveBpMods(Move move, PokemonBuildContext monCtx)
         {
             double result = 1;
             PokemonType moveType = GetModifiedMoveType(move, monCtx);
@@ -313,7 +313,7 @@ namespace AutomatedTeamBuilder
         /// <param name="move">Which move</param>
         /// <param name="monCtx">Ctx that contains the mods</param>
         /// <returns>The move Accuracy multiplier</returns>
-        static double GetMoveAccMods(Move move, PokemonBuildInfo monCtx)
+        static double GetMoveAccMods(Move move, PokemonBuildContext monCtx)
         {
             double result = 1;
             PokemonType moveType = GetModifiedMoveType(move, monCtx);
@@ -344,7 +344,7 @@ namespace AutomatedTeamBuilder
         /// <param name="move">Move</param>
         /// <param name="monCtx">Context to see which flags are added/removed from move</param>
         /// <returns>All flags in this move</returns>
-        static HashSet<EffectFlag> ExtractMoveFlags(Move move, PokemonBuildInfo monCtx)
+        static HashSet<EffectFlag> ExtractMoveFlags(Move move, PokemonBuildContext monCtx)
         {
             if (move == null) return [EffectFlag.PIVOT]; // Null move (switch) is basically a pivot
             HashSet<EffectFlag> moveFlags = [.. move.Flags]; // Copies moves base flags
@@ -399,7 +399,7 @@ namespace AutomatedTeamBuilder
         /// <param name="move">Move to check</param>
         /// <param name="monCtx">Mon ctx to get mods</param>
         /// <returns></returns>
-        static PokemonType GetModifiedMoveType(Move move, PokemonBuildInfo monCtx)
+        static PokemonType GetModifiedMoveType(Move move, PokemonBuildContext monCtx)
         {
             PokemonType moveType = move.Type;
             if (move.Name == "Revelation Dance") // Revelation dance overrides everything so I don't get cool mods
@@ -408,9 +408,10 @@ namespace AutomatedTeamBuilder
             }
             else
             {
-                bool typeChanged = false;
+                bool typeChanged;
                 do
                 {
+                    typeChanged = false;
                     PokemonType newType = moveType;
                     // Checks the move type mod everywhere (including own flagsbut not the added flags)
                     if (monCtx.MoveTypeMods.TryGetValue((ElementType.MOVE, move.Name), out PokemonType typeMod)) newType = typeMod;
@@ -423,6 +424,7 @@ namespace AutomatedTeamBuilder
                     if (monCtx.MoveTypeMods.TryGetValue((ElementType.ANY_MOVE, "-"), out typeMod)) newType = typeMod;
                     if (newType != moveType)
                     {
+                        moveType = newType;
                         typeChanged = true;
                     }
                 } while (typeChanged);
@@ -440,7 +442,7 @@ namespace AutomatedTeamBuilder
         /// <param name="isFirstMon">Whether it's the first mon evaluated or not</param>
         /// <param name="isLastMon">Whether it's the last mon evaluated or not</param>
         /// <returns>A move score</returns>
-        static double GetMoveWeight(Move move, TrainerPokemon mon, PokemonBuildInfo monCtx, TeamBuildContext buildCtx, bool isFirstMon, bool isLastMon)
+        static double GetMoveWeight(Move move, TrainerPokemon mon, PokemonBuildContext monCtx, TeamBuildContext buildCtx, bool isFirstMon, bool isLastMon)
         {
             // Get the move mods
             HashSet<EffectFlag> allMoveFlags = ExtractMoveFlags(move, monCtx); // Get all the flags a move has
@@ -599,7 +601,7 @@ namespace AutomatedTeamBuilder
                 }
                 // Finally, we need to do the hypotetical, does this move add to defensive, offensive or speed utilities?
                 mon.ChosenMoveset.Add(move); // First, equip this move to mon
-                PokemonBuildInfo newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
+                PokemonBuildContext newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
                 double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
                 double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
                 // Defensive score for moves is a tad different because the def is dependent on the move either being used and in some cases, used afterwards

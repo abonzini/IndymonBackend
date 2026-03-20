@@ -10,7 +10,7 @@ namespace AutomatedTeamBuilder
         /// Obtain the mods of "anything"
         /// </summary>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractAlwaysMods(PokemonBuildInfo monCtx)
+        static void ExtractAlwaysMods(PokemonBuildContext monCtx)
         {
             // Once archetype is active, it's simple to find all the effects caused by it
             ExtractMods((ElementType.ALWAYS, "-"), monCtx);
@@ -20,7 +20,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="archetype">Archetype</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractArchetypeMods(TeamArchetype archetype, PokemonBuildInfo monCtx)
+        static void ExtractArchetypeMods(TeamArchetype archetype, PokemonBuildContext monCtx)
         {
             // Once archetype is active, it's simple to find all the effects caused by it
             ExtractMods((ElementType.ARCHETYPE, archetype.ToString()), monCtx);
@@ -30,7 +30,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="weather">Weather</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractWeatherMods(Weather weather, PokemonBuildInfo monCtx)
+        static void ExtractWeatherMods(Weather weather, PokemonBuildContext monCtx)
         {
             // Once weather is active, it's simple to find all the effects caused by it
             ExtractMods((ElementType.WEATHER, weather.ToString()), monCtx);
@@ -40,7 +40,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="terrain">Weather</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractTerrainMods(Terrain terrain, PokemonBuildInfo monCtx)
+        static void ExtractTerrainMods(Terrain terrain, PokemonBuildContext monCtx)
         {
             // Once terrain is active, it's simple to find all the effects caused by it
             ExtractMods((ElementType.TERRAIN, terrain.ToString()), monCtx);
@@ -50,7 +50,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="item">Mod item</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractModItemMods(Item item, PokemonBuildInfo monCtx)
+        static void ExtractModItemMods(Item item, PokemonBuildContext monCtx)
         {
             // This one is trickier, need to add both the items and the flags
             ExtractMods((ElementType.MOD_ITEM, item.Name), monCtx);
@@ -64,7 +64,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="item">Mod item</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractBattleItemMods(Item item, PokemonBuildInfo monCtx)
+        static void ExtractBattleItemMods(Item item, PokemonBuildContext monCtx)
         {
             // This one is trickier, need to add both the items and the flags
             ExtractMods((ElementType.BATTLE_ITEM, item.Name), monCtx);
@@ -78,7 +78,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="ability">Ability</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractAbilityMods(Ability ability, PokemonBuildInfo monCtx)
+        static void ExtractAbilityMods(Ability ability, PokemonBuildContext monCtx)
         {
             // This one is trickier, need to add both the ability and the flag
             ExtractMods((ElementType.ABILITY, ability.Name), monCtx);
@@ -88,7 +88,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="move">Move</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractMoveMods(Move move, PokemonBuildInfo monCtx)
+        static void ExtractMoveMods(Move move, PokemonBuildContext monCtx)
         {
             if (move == null) return; // Null (pivot) doesn't have any of these
             // Moves are the most complex ones
@@ -105,7 +105,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="mon">The pokemon in question</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractMonMods(TrainerPokemon mon, PokemonBuildInfo monCtx)
+        static void ExtractMonMods(TrainerPokemon mon, PokemonBuildContext monCtx)
         {
             Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species]; // Obtain species of mon
             ExtractMods((ElementType.POKEMON, mon.Species), monCtx); // Mon activates stuff
@@ -128,7 +128,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="element">Element that causes the mod (type+key)</param>
         /// <param name="monCtx">Mon ctx where to add mods</param>
-        static void ExtractMods((ElementType, string) element, PokemonBuildInfo monCtx)
+        static void ExtractMods((ElementType, string) element, PokemonBuildContext monCtx)
         {
             // First, what this element enables
             if (MechanicsDataContainers.GlobalMechanicsData.Enablers.TryGetValue(element, out Dictionary<(ElementType, string), double> enabledBy))
