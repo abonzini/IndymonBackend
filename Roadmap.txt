@@ -13,6 +13,4 @@ Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone
 
 ---
 POSSIBLE THINGS TO LOOK FOR:
-- Debug weathers
-- Add weather setting for advantage?
 - Whimsy Island with esscence mechanics and Moon/Shiny stones

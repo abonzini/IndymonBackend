@@ -79,6 +79,8 @@ namespace AutomatedTeamBuilder
             // Dump all the team-based data into here
             result.AdditionalArchetypes.UnionWith(teamCtx.CurrentTeamArchetypes); // Add all archetypes present overall in the team
             result.AdditionalConstraints.AddRange(teamCtx.TeamBuildConstraints);
+            result.CurrentTerrain = teamCtx.CurrentTerrain;
+            result.CurrentWeather = teamCtx.CurrentWeather;
             // Then, a calculation of mon's current type that may involve some hardcoded shenanigans
             result.PokemonTypes = monData.Types;// Set base type
             if (pokemon.ChosenAbility?.Name == "Forecast") // Change type on weather
