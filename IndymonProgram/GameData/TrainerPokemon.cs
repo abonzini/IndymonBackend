@@ -8,6 +8,7 @@ namespace GameData
         public string Species = "";
         public string Nickname = "";
         public bool IsShiny = false;
+        public string PokeBall = "Poke Ball";
         public bool SetItemChosen = false;
         public SetItem SetItem = null;
         public bool ModItemChosen = false;

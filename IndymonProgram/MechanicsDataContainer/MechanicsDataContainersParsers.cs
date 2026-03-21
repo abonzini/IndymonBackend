@@ -562,6 +562,11 @@ namespace MechanicsDataContainer
                 UnownLookup.Add(fields[0], fields[1]); // This should be unique
             }
         }
+        /// <summary>
+        /// Gets the list of trainers and their rank
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
         void ParseTrainerNamesLookup(string sheetId, string sheetTab)
         {
             Console.WriteLine("Parsing Trainer Names Lookup");
@@ -573,6 +578,23 @@ namespace MechanicsDataContainer
             {
                 string[] fields = lines[i].Split(","); // Csv
                 TrainerLookup.Add(fields[0], Enum.Parse<TrainerRank>(fields[1]));
+            }
+        }
+        /// <summary>
+        /// Gets the list of Pokeballs
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
+        void ParsePokeballs(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Parsing Pokeballs");
+            PokeBalls.Clear();
+            // Parse csv
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string[] lines = csv.Split("\n");
+            for (int i = 0; i < lines.Length; i++)
+            {
+                PokeBalls.Add(lines[i].Trim());
             }
         }
     }

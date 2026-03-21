@@ -24,7 +24,7 @@ namespace GameDataContainer
             trainerContainer.Clear();
             // Parse csv
             const int TRAINER_CARD_ROWS = 22; // Number of lines per trainer card
-            const int TRAINER_CARD_COLS = 18; // Number of columns per trainer card
+            const int TRAINER_CARD_COLS = 21; // Number of columns per trainer card
             string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] rows = csv.Split("\n");
             string[] cols = rows[0].Trim().Split(',');
@@ -41,15 +41,15 @@ namespace GameDataContainer
                     nextTrainer.Name = name;
                     nextTrainer.DungeonIdentifier = nextLine[j + 1];
                     nextTrainer.Imp = int.TryParse(nextLine[j + 2], out int imp) ? imp : 0;
-                    nextTrainer.AutoTeam = bool.Parse(nextLine[j + 4]);
-                    nextTrainer.AutoSetItem = bool.Parse(nextLine[j + 6]);
-                    nextTrainer.Avatar = nextLine[j + 7];
-                    nextTrainer.AvatarUrl = nextLine[j + 8];
-                    nextTrainer.AutoModItem = bool.Parse(nextLine[j + 10]);
-                    nextTrainer.AutoBattleItem = bool.Parse(nextLine[j + 12]);
-                    nextTrainer.AutoFavour = bool.Parse(nextLine[j + 14]);
-                    nextTrainer.DiscordNumber = nextLine[j + 15].Trim();
-                    nextTrainer.TrainerRank = Enum.Parse<TrainerRank>(nextLine[j + 16]);
+                    nextTrainer.AutoTeam = bool.Parse(nextLine[j + 5]);
+                    nextTrainer.AutoSetItem = bool.Parse(nextLine[j + 7]);
+                    nextTrainer.Avatar = nextLine[j + 8];
+                    nextTrainer.AvatarUrl = nextLine[j + 9];
+                    nextTrainer.AutoModItem = bool.Parse(nextLine[j + 11]);
+                    nextTrainer.AutoBattleItem = bool.Parse(nextLine[j + 13]);
+                    nextTrainer.AutoFavour = bool.Parse(nextLine[j + 15]);
+                    nextTrainer.DiscordNumber = nextLine[j + 16].Trim();
+                    nextTrainer.TrainerRank = Enum.Parse<TrainerRank>(nextLine[j + 17]);
                     // Second line is skipped, just headers for me to manually access
                     // Then, relative rows 2->21 have all the data always in order
                     for (int remainingRows = 2; (remainingRows < TRAINER_CARD_ROWS && remainingRows + i < rows.Length); remainingRows++)
@@ -60,15 +60,17 @@ namespace GameDataContainer
                         bool boxArea = (remainingRows >= (2 + Trainer.MAX_MONS_IN_TEAM)); // At some point it's only boxed mons
                         if (boxArea)
                         {
-                            for (int boxIndex = 0; boxIndex < 6; boxIndex += 3) // There's 2 col of boxed mons with 3 things (no item)
+                            for (int boxIndex = 0; boxIndex < 7; boxIndex += 4) // There's 2 col of boxed mons with 3 things (no item), but they do have an empty field inside after the pokeball update
                             {
                                 string pokemonName = nextLine[j + boxIndex]; // Get next mon name
                                 if (pokemonName != "") // Valid pokemon, parse
                                 {
+                                    string pokeBall = nextLine[j + boxIndex + 1];
+                                    MechanicsDataContainers.GlobalMechanicsData.AssertElementExistance(ElementType.POKEBALL, pokeBall);
                                     TrainerPokemon newPokemon = new TrainerPokemon()
                                     {
                                         Species = pokemonName,
-                                        Nickname = nextLine[j + boxIndex + 1],
+                                        PokeBall = pokeBall,
                                         IsShiny = bool.Parse(nextLine[j + boxIndex + 2]),
                                     };
                                     nextTrainer.BoxedPokemon.Add(newPokemon);
@@ -87,8 +89,11 @@ namespace GameDataContainer
                                     Nickname = nextLine[j + 1],
                                     IsShiny = bool.Parse(nextLine[j + 2]),
                                 };
+                                // Pokeball
+                                string pokeBall = nextLine[j + 3];
+                                MechanicsDataContainers.GlobalMechanicsData.AssertElementExistance(ElementType.POKEBALL, pokeBall);
                                 // Set item
-                                string setItemName = nextLine[j + 3];
+                                string setItemName = nextLine[j + 4];
                                 if (setItemName != "")
                                 {
                                     newPokemon.SetItemChosen = true;
@@ -101,14 +106,14 @@ namespace GameDataContainer
                                     if (!item.CanEquip(newPokemon)) throw new Exception("Pokemon has an invalid set item");
                                 }
                                 // Mod item
-                                string modItemName = nextLine[j + 4];
+                                string modItemName = nextLine[j + 5];
                                 if (modItemName != "")
                                 {
                                     newPokemon.ModItemChosen = true;
                                     newPokemon.ModItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[modItemName];
                                 }
                                 // Battle item
-                                string battleItemName = nextLine[j + 5];
+                                string battleItemName = nextLine[j + 6];
                                 if (battleItemName != "")
                                 {
                                     newPokemon.BattleItemChosen = true;
@@ -119,7 +124,7 @@ namespace GameDataContainer
                             }
                         }
                         // Next is Set items in bag so
-                        string itemName = nextLine[j + 6];
+                        string itemName = nextLine[j + 7];
                         if (itemName != "") // A set item here
                         {
                             if (!SetItems.TryGetValue(itemName, out SetItem item)) // Creates it if doesn't exist
@@ -127,46 +132,49 @@ namespace GameDataContainer
                                 item = SetItem.Parse(itemName);
                                 SetItems.Add(itemName, item);
                             }
-                            int itemCount = int.Parse(nextLine[j + 7]);
+                            int itemCount = int.Parse(nextLine[j + 8]);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.SetItems, item, itemCount);
                         }
                         // Next, mod items
-                        itemName = nextLine[j + 8];
+                        itemName = nextLine[j + 9];
                         if (itemName != "") // A set item here
                         {
                             Item modItem = MechanicsDataContainers.GlobalMechanicsData.ModItems[itemName];
-                            int itemCount = int.Parse(nextLine[j + 9]);
+                            int itemCount = int.Parse(nextLine[j + 10]);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.ModItems, modItem, itemCount);
                         }
                         // Next, battle items
-                        itemName = nextLine[j + 10];
+                        itemName = nextLine[j + 11];
                         if (itemName != "") // A set item here
                         {
                             Item battleItem = MechanicsDataContainers.GlobalMechanicsData.BattleItems[itemName];
-                            int itemCount = int.Parse(nextLine[j + 11]);
+                            int itemCount = int.Parse(nextLine[j + 12]);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.BattleItems, battleItem, itemCount);
                         }
                         // Then, Key Items
-                        itemName = nextLine[j + 12];
+                        itemName = nextLine[j + 13];
                         if (itemName != "")
                         {
-                            int itemCount = int.Parse(nextLine[j + 13]);
+                            int itemCount = int.Parse(nextLine[j + 14]);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.KeyItems, itemName, itemCount);
                         }
-                        itemName = nextLine[j + 14];
+                        // Favours
+                        itemName = nextLine[j + 15];
                         if (itemName != "")
                         {
-                            int itemCount = int.Parse(nextLine[j + 15]);
+                            int itemCount = int.Parse(nextLine[j + 16]);
                             Trainer trainer = GetTrainer(itemName);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.Favours, trainer, itemCount);
                         }
                         // Finally, Ballz
-                        itemName = nextLine[j + 16];
+                        itemName = nextLine[j + 17];
                         if (itemName != "")
                         {
-                            int itemCount = int.Parse(nextLine[j + 17]);
+                            MechanicsDataContainers.GlobalMechanicsData.AssertElementExistance(ElementType.POKEBALL, itemName);
+                            int itemCount = int.Parse(nextLine[j + 18]);
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.PokeBalls, itemName, itemCount);
                         }
+                        // Sandwiches tbc
                     }
                     trainerContainer.Add(nextTrainer.Name, nextTrainer);
                 }

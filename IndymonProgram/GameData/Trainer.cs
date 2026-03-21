@@ -86,24 +86,25 @@ namespace GameData
             StringBuilder fileBuilder = new StringBuilder();
             StringBuilder lineBuilder = new StringBuilder();
             // Line 1, just pure trainer data
-            lineBuilder.Append($"{Name},{DungeonIdentifier},{Imp},");
+            lineBuilder.Append($"{Name},{DungeonIdentifier},{Imp},,");
             lineBuilder.Append($"Shuffle:,{AutoTeam.ToString().ToUpper()},");
             lineBuilder.Append($"Auto Set Item:,{AutoSetItem.ToString().ToUpper()},");
             lineBuilder.Append($"{Avatar},{AvatarUrl},");
             lineBuilder.Append($"Auto Mod Item:,{AutoModItem.ToString().ToUpper()},");
-            lineBuilder.Append($"Auto Battle Item:,{AutoBattleItem.ToString().ToUpper()},");
+            lineBuilder.Append($"Auto Held Item:,{AutoBattleItem.ToString().ToUpper()},");
             lineBuilder.Append($"Auto Favour:,{AutoFavour.ToString().ToUpper()},");
             lineBuilder.Append($"{DiscordNumber},{TrainerRank.ToString()},");
             fileBuilder.AppendLine(lineBuilder.ToString());
             // Line 2 is purely text but does contain actual assembled string
             lineBuilder.Clear();
-            lineBuilder.Append($"Mons,,{String.Join("; ", BoxedPokemon.Select(m => m.IsShiny ? $"{m.Species}" : $"{m.Species}✦"))},Set,Mod,Battle,");
+            lineBuilder.Append($"Mons,,{String.Join("; ", BoxedPokemon.Select(m => m.IsShiny ? $"{m.Species}" : $"{m.Species}✦"))},,Set,Mod,Battle,");
             lineBuilder.Append($"Set Items:,{String.Join("; ", setItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
             lineBuilder.Append($"Mod Items:,{String.Join("; ", modItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
-            lineBuilder.Append($"Battle Items:,{String.Join("; ", battleItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
+            lineBuilder.Append($"Held Items:,{String.Join("; ", battleItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
             lineBuilder.Append($"Key Items:,{String.Join("; ", keyItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
             lineBuilder.Append($"Favours:,{String.Join("; ", favourList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
-            lineBuilder.Append($"PokeBalls:,{String.Join("; ", ballList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))}");
+            lineBuilder.Append($"PokeBalls:,{String.Join("; ", ballList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
+            lineBuilder.Append($"Sandwiches:,");
             fileBuilder.AppendLine(lineBuilder.ToString());
             // Finally, remaining lines are listing stuff in order
             for (int i = 0; i < TRAINER_CARD_ROWS - 2; i++) // Starting from line 2 until end of trainer card
@@ -117,13 +118,14 @@ namespace GameData
                         lineBuilder.Append($"{nextMon.Species},");
                         lineBuilder.Append((nextMon.Nickname != "") ? $"{nextMon.Nickname}," : ",");
                         lineBuilder.Append($"{nextMon.IsShiny.ToString().ToUpper()},");
+                        lineBuilder.Append($"{nextMon.PokeBall},");
                         lineBuilder.Append((nextMon.SetItem != null) ? $"{nextMon.SetItem.Name}," : ",");
                         lineBuilder.Append((nextMon.ModItem != null) ? $"{nextMon.ModItem.Name}," : ",");
                         lineBuilder.Append((nextMon.BattleItem != null) ? $"{nextMon.BattleItem.Name}," : ",");
                     }
                     else
                     {
-                        lineBuilder.Append(",,,,,,"); // No mon here
+                        lineBuilder.Append(",,,,,,,"); // No mon here
                     }
                 }
                 else // Otherwise I look for boxed mons
@@ -133,19 +135,20 @@ namespace GameData
                     {
                         TrainerPokemon nextMon = PartyPokemon[2 * i];
                         lineBuilder.Append($"{nextMon.Species},");
-                        lineBuilder.Append((nextMon.Nickname != "") ? $"{nextMon.Nickname}," : ",");
+                        lineBuilder.Append($"{nextMon.PokeBall}");
                         lineBuilder.Append($"{nextMon.IsShiny.ToString().ToUpper()},");
                     }
                     else
                     {
                         lineBuilder.Append(",,,"); // No mon here
                     }
+                    lineBuilder.Append(','); // The space between boxed stuff
                     // Right boxed mon
                     if (BoxedPokemon.Count > ((2 * i) + 1))
                     {
                         TrainerPokemon nextMon = PartyPokemon[(2 * i) + 1];
                         lineBuilder.Append($"{nextMon.Species},");
-                        lineBuilder.Append((nextMon.Nickname != "") ? $"{nextMon.Nickname}," : ",");
+                        lineBuilder.Append($"{nextMon.PokeBall}");
                         lineBuilder.Append($"{nextMon.IsShiny.ToString().ToUpper()},");
                     }
                     else
@@ -201,12 +204,15 @@ namespace GameData
                 // Balls
                 if (ballList.Count > i)
                 {
-                    lineBuilder.Append($"{ballList[i].Item1},{ballList[i].Item2}");
+                    lineBuilder.Append($"{ballList[i].Item1},{ballList[i].Item2},");
                 }
                 else
                 {
-                    lineBuilder.Append(',');
+                    lineBuilder.Append(",,");
                 }
+                // Sandwiches (tbd)
+                lineBuilder.Append(',');
+                // Finished row
                 fileBuilder.AppendLine(lineBuilder.ToString());
             }
             // File complete, save

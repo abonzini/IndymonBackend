@@ -1029,7 +1029,7 @@ namespace IndymonBackendProgram
             // Now print
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Set Items: **||{setItemString}||");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Mod Items: **||{modItemString}||");
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Battle Items: **||{battleItemString}||");
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Held Items: **||{battleItemString}||");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Favours: **||{favourString}||");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Key Items: **||{keyString}||");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();

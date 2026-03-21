@@ -31,6 +31,7 @@ namespace MechanicsDataContainer
                 ElementType.ALWAYS => name == "-",
                 ElementType.ANY_DAMAGING_MOVE => name == "-",
                 ElementType.ANY_MOVE => name == "-",
+                ElementType.POKEBALL => PokeBalls.Contains(name),
                 _ => false,
             };
             if (!elementExists) throw new Exception($"{name} is not a valid {type}");

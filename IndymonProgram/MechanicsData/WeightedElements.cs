@@ -28,6 +28,7 @@ namespace MechanicsData
         MOVE_CATEGORY, /// Affects phy/spe/status (e.g. prankster, AV)
         ANY_DAMAGING_MOVE, /// Affects every single damaging move (e.g. normalize)
         ANY_MOVE, /// Affects every single move (e.g. accuracy)
+        POKEBALL, /// Pokeballs
     }
     [JsonConverter(typeof(StringEnumConverter))]
     /// What stat is going to be modified and how
