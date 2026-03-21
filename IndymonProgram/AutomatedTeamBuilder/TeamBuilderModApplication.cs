@@ -16,6 +16,15 @@ namespace AutomatedTeamBuilder
             ExtractMods((ElementType.ALWAYS, "-"), monCtx);
         }
         /// <summary>
+        /// Obtain the mods of a mon's pokeballs
+        /// </summary>
+        /// <param name="pokeball">Which pokeball is used</param>
+        /// <param name="monCtx">Context where to add the mods</param>
+        static void ExtractPokeballMods(string pokeball, PokemonBuildContext monCtx)
+        {
+            ExtractMods((ElementType.POKEBALL, pokeball), monCtx);
+        }
+        /// <summary>
         /// Given an archetype, obtains all mods associated to it, updates Ctx
         /// </summary>
         /// <param name="archetype">Archetype</param>
