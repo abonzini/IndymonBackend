@@ -27,6 +27,8 @@ namespace MechanicsDataContainer
             ParseModItems(sheetId, modItemsTab);
             string battleItemsTab = lines[6].Split(",")[0];
             ParseBattleItems(sheetId, battleItemsTab);
+            string ballsTab = lines[15].Split(",")[0];
+            ParsePokeballs(sheetId, ballsTab);
             string enablementTab = lines[8].Split(",")[0];
             ParseEnabledOptions(sheetId, enablementTab);
             string statModsTab = lines[9].Split(",")[0];
@@ -41,8 +43,6 @@ namespace MechanicsDataContainer
             ParseUnownLookup(sheetId, unownTab);
             string trainersTab = lines[14].Split(",")[0];
             ParseTrainerNamesLookup(sheetId, trainersTab);
-            string ballsTab = lines[15].Split(",")[0];
-            ParsePokeballs(sheetId, ballsTab);
         }
         public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
         public Dictionary<string, Move> Moves = new Dictionary<string, Move>();

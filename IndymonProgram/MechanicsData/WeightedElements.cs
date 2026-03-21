@@ -76,6 +76,9 @@ namespace MechanicsData
         TYPE_2, /// Changes second type
         TERA, /// Changes tera
         LOGIC, /// Changes mon logic
+        SHINY_OVERRIDE, /// Sets the shiny override (shiny stone...)
+        LEVEL, /// Level multiplier based on 100
+        DEFAULT_STATUS, /// The status the mon would normally have
         NULLIFIES_RECV_DAMAGE_OF_TYPE, // For nullify/absorb abilities
         DOUBLES_RECV_DAMAGE_OF_TYPE, // For abilities that fuck me up
         HALVES_RECV_DAMAGE_OF_TYPE, // For chilan berry

@@ -20,6 +20,7 @@
             double[] boosts = (isOpponent) ? monCtx.OppStatBoosts : monCtx.StatBoosts;
             double boostsMultiplier = (isOpponent) ? monCtx.OppStatBoostsMultiplier : monCtx.StatBoostsMultiplier;
             double[] variances = (isOpponent) ? battleContext.OppStatVariance : [0, 0, 0, 0, 0, 0]; // Only opp will have variance
+            double level = (isOpponent) ? 100 : monCtx.LevelMultiplier * 100; // User may have its level modified
             // Calculat stats (except boosts)
             for (int i = 0; i < 6; i++)
             {
@@ -27,8 +28,9 @@
                 double theStat = baseStats[i] * 2;
                 double theVariance = variances[i] * 2 * 2;
                 theStat += 31 + (evs[i] / 4); // Use 31 IV always don't go too deep here. No variance as it is a sum
-                // There would be a level/100 here but only add if really will implement lvl mods
-                theStat += (i == 0) ? 110 : 5; // Also level based. Hp gains Lvl+5. No variance gain
+                theStat *= level / 100;
+                theVariance *= (level / 100) * (level / 100);
+                theStat += (i == 0) ? (level + 10) : 5; // No variance gain
                 theStat *= multipliers[i];
                 theVariance *= multipliers[i] * multipliers[i];
                 resultingStats[i] = theStat;

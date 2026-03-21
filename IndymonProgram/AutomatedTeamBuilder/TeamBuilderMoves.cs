@@ -20,7 +20,7 @@ namespace AutomatedTeamBuilder
             double attackingStat = (category == MoveCategory.PHYSICAL) ? attackerStats[1] : attackerStats[3];
             double defendingStat = (category == MoveCategory.PHYSICAL) ? defenderStats[2] : defenderStats[4];
             // Actual calculation    
-            double hitDamage = 42; // This depends on mon level so keep in mind
+            double hitDamage = 42; // This depends on mon level so keep in mind. Assume opp always lvl 100 whatever
             hitDamage *= attackingStat;
             double remainingFactor = bp / (defendingStat * 50); // rest of the damage formula
             hitDamage *= remainingFactor;
@@ -32,6 +32,7 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="move">The move itself</param>
         /// <param name="monCtx">Context of the mon using the move</param>
+        /// <param name="attackerLevel">Level of attacker</param>
         /// <param name="attackerStats">Stats of mon using move</param>
         /// <param name="defenderStats">Stats of mon receiving the attack</param>
         /// <param name="battleContext">Additional context</param>
@@ -40,7 +41,7 @@ namespace AutomatedTeamBuilder
         /// <param name="loadedDice">Loaded dice modifies moves like crazy</param>
         /// <param name="highCritDamage">Sniper multilies crit damage</param>
         /// <returns>The damage (in HP) the opp receives</returns>
-        static double CalcMoveDamage(Move move, PokemonBuildContext monCtx, double[] attackerStats, double[] defenderStats, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false, bool skillLink = false, bool highCritDamage = false)
+        static double CalcMoveDamage(Move move, PokemonBuildContext monCtx, double attackerLevel, double[] attackerStats, double[] defenderStats, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false, bool skillLink = false, bool highCritDamage = false)
         {
             // First, get the ACTUAL flags of the move (because some may have been added/removed
             HashSet<EffectFlag> moveFlags = ExtractMoveFlags(move, monCtx);
@@ -50,7 +51,14 @@ namespace AutomatedTeamBuilder
             }
             else if (moveFlags.Contains(EffectFlag.FIXED_DAMAGE)) // If the move is fixed damage, the modified moveDex has already some estimation of damage in it
             {
-                return move.Bp;
+                if (moveFlags.Contains(EffectFlag.FIXED_DAMAGE_LVL_BASED))
+                {
+                    return attackerLevel; // Returns the lvl
+                }
+                else // Otherwise just find it in the move BP
+                {
+                    return move.Bp;
+                }
             }
             else if (move.Name == "Sky Drop" && battleContext.AverageOpponentWeight >= 200) // Sky drop fails if opp too heavy
             {
@@ -148,7 +156,7 @@ namespace AutomatedTeamBuilder
                     defendingStat = (moveFlags.Contains(EffectFlag.OTHER_DEFENSE_STAT)) ? defenderStats[2] : defenderStats[4];
                 }
                 // Final calculation
-                double hitDamage = 42; // This depends on mon level so keep in mind
+                double hitDamage = 2 + (2 * attackerLevel / 5); // Multiplier based on user level (multiplier affects level relative to 100)
                 hitDamage *= attackingStat;
                 double remainingFactor = moveBp / (defendingStat * 50); // rest of the damage formula
                 hitDamage *= remainingFactor;
@@ -548,7 +556,7 @@ namespace AutomatedTeamBuilder
                     // Check the actual stats of mon and opp
                     (double[] monStats, _) = MonStatCalculation(monCtx); // Get mon stats (variance is 0 anyway)
                     (double[] oppStats, _) = MonStatCalculation(monCtx, buildCtx, true); // Get opp stats and variance
-                    double moveDamage = CalcMoveDamage(move, monCtx, monStats, oppStats, buildCtx,
+                    double moveDamage = CalcMoveDamage(move, monCtx, 100 * monCtx.LevelMultiplier, monStats, oppStats, buildCtx,
                         (mon.ChosenAbility?.Name == "Protean" || mon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
                         mon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper increases crit damage
                         mon.BattleItem?.Name == "Loaded Dice",

@@ -339,6 +339,15 @@ namespace AutomatedTeamBuilder
                         case StatModifier.LOGIC:
                             monCtx.MonLogic = Enum.Parse<PokemonLogic>(statMod.Item2);
                             break;
+                        case StatModifier.LEVEL:
+                            monCtx.LevelMultiplier = double.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.SHINY_OVERRIDE:
+                            monCtx.ShinyOverride = bool.Parse(statMod.Item2.Trim().ToLower());
+                            break;
+                        case StatModifier.DEFAULT_STATUS:
+                            monCtx.DefaultStatus = statMod.Item2.Trim().ToLower(); // Nothing much to do unfortunately
+                            break;
                         case StatModifier.NULLIFIES_RECV_DAMAGE_OF_TYPE: // If this happens, deal with later during the calc
                         case StatModifier.DOUBLES_RECV_DAMAGE_OF_TYPE:
                         case StatModifier.HALVES_RECV_DAMAGE_OF_TYPE:

@@ -51,6 +51,7 @@ namespace MechanicsData
         DAMAGE_PROP_SPEED_DIFFERENCE, // Damage proportional with speed (e.g. electro ball)
         DAMAGE_INV_SPEED_DIFFERENCE, // Damage inverse with speed (e.g. gyro ball)
         FIXED_DAMAGE, // Seismic toss, dragon rage
+        FIXED_DAMAGE_LVL_BASED, // Seismic toss, nigh shade, psywave
         TRAPPING, // Trapping moves
         HIGH_CRIT, // Like sure crit but not sure
         SUB_60, // Moves under 60 damage will be increased by technician

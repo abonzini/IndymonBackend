@@ -131,12 +131,11 @@ namespace AutomatedTeamBuilder
                             if (mon.ChosenAbility == null) // Mon needs an ability
                             {
                                 List<Ability> possibleAbilities = [.. monData.Abilities.Where(a => !a.Flags.Contains(EffectFlag.BANNED))]; // All (non banned) possible abilities
-
-                                if (mon.Species.ToLower().Contains("unown")) // And then again, weird mechanic. Unown will actualtl be able to use all abilities starting with the letter
+                                if (mon.Species.ToLower().Contains("unown")) // And then again, weird mechanic. Unown will actually be able to use all abilities starting with the letter
                                 {
                                     char letter = (mon.Species == "Unown") ? 'a' : mon.Species.ToLower().Last(); // Basic unown is A
-                                    List<Ability> unownAbilities = [.. MechanicsDataContainers.GlobalMechanicsData.Abilities.Values.Where(a => a.Name.ToLower().StartsWith(letter))]; // Get all abilities
-                                    if (unownAbilities.Any()) possibleAbilities = unownAbilities; // If no abilities (X/Y), then use standard (levitate)
+                                    List<Ability> unownAbilities = [.. MechanicsDataContainers.GlobalMechanicsData.Abilities.Values.Where(a => a.Name.ToLower().StartsWith(letter) && !a.Flags.Contains(EffectFlag.BANNED))]; // Get all abilities
+                                    if (unownAbilities.Count > 0) possibleAbilities = unownAbilities; // If no abilities (X/Y), then use standard (levitate)
                                 }
                                 List<double> abilityScores = [.. Enumerable.Repeat<double>(1, possibleAbilities.Count)]; // All of their values is init to 1
                                 if (trainer.AutoSetItem && mon.SetItem != null) // If I can equip other set items AND set item provides useful abilities, I'll add them too
@@ -742,6 +741,9 @@ namespace AutomatedTeamBuilder
                 {
                     mon.Evs[i] = monCtx.Evs[i];
                 }
+                mon.ShinyOverride = monCtx.ShinyOverride;
+                mon.Level = (int)(monCtx.LevelMultiplier * 100); // Resulting lvl, check really closely if it rounds down but it shouldn't
+                mon.DefaultStatus = monCtx.DefaultStatus; // Sets the status the pokemon will have in normal conditions
             }
         }
         /// <summary>

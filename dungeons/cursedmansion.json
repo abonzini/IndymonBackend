@@ -167,7 +167,7 @@
 		{ "Name": "Destiny Knot", "Min": 2, "Max": 4 },
 		{ "Name": "Spell Tag", "Min": 2, "Max": 4 }
   ],
-  "BossItem": { "Name": "Shiny Stone", "Min": 3, "Max": 3 },
+  "BossItem": { "Name": "Shiny Stone", "Min": 1, "Max": 1 },
   "Floors": [
     {
       "RoomColor": "White",

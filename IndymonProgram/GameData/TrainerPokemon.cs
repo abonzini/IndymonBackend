@@ -51,11 +51,13 @@ namespace GameData
         }
         // Showdown related, importable/exportable data for the battle sim
         public int HealthPercentage = 100; // 100 percent default
+        public string DefaultStatus = "";
         public string NonVolatileStatus = "";
         public List<int> MovePp = [];
         public int Level = 100; // Default is 100
         public HashSet<int> MovesChosenInBattle = [];
         public PokemonLogic Logic = PokemonLogic.BASIC;
+        public bool ShinyOverride = false;
         /// <summary>
         /// Imports status as seen in showdown
         /// </summary>
@@ -108,9 +110,10 @@ namespace GameData
             packedStrings.Add(string.Join(",", Evs));
             packedStrings.Add("");
             packedStrings.Add(""); // No IVs I don't care
-            packedStrings.Add(IsShiny ? "S" : ""); // Depending if shiny
+            packedStrings.Add((IsShiny || ShinyOverride) ? "S" : ""); // Depending if shiny
             packedStrings.Add(Level.ToString()); // Mon level is "usually" 100
             PokemonType teraType = (TeraType == PokemonType.NONE) ? MechanicsDataContainers.GlobalMechanicsData.Dex[Species].Types.Item1 : TeraType;
+            string status = (DefaultStatus == "") ? NonVolatileStatus : DefaultStatus; // Default status always trumps if there's anything
             string lastPackedString = $",,,,,{teraType},{HealthPercentage},{NonVolatileStatus}"; // Add the "remaining" useless stuff needed for tera, etc
             packedStrings.Add(lastPackedString);
             return string.Join("|", packedStrings); // Join them together with |

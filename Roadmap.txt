@@ -13,11 +13,11 @@ Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone
 
 ---
 TODO:
-- STAT MODS
-	- Shiny override (Shiny stone)
-	- Status Override (dream ball)
-	- Lvl override (level ball), level in damage calcs
 - Dungeon Mods (shiny for now), sandwiches eventually
 
 POSSIBLE THINGS TO LOOK FOR:
+- Quick debug that I didn't break damage calc
+- Debug level multiplier (when it happens)
+- Debug shiny stone (when it happens)
+- Add pokeballs (when they happen), slp ball needs to add status + rest flag. level ball adjusts level.
 - Whimsy Island with esscence mechanics and Moon/Shiny stones

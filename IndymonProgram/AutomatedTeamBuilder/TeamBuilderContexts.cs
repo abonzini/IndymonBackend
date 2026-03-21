@@ -51,6 +51,9 @@ namespace AutomatedTeamBuilder
         public double[] StatMultipliers = [1, 1, 1, 1, 1, 1];
         public double MonWeight = 1;
         public int CriticalStages = 0;
+        public bool ShinyOverride = false;
+        public double LevelMultiplier = 1;
+        public string DefaultStatus = "";
         // Things that alter opp mon
         public double[] OppStatBoosts = new double[6];
         public double OppStatBoostsMultiplier = 1;
@@ -253,7 +256,7 @@ namespace AutomatedTeamBuilder
                     {
                         continue; // We don't check for status moves
                     }
-                    movesDamage.Add(CalcMoveDamage(move, result, monStats, oppStats, teamCtx,
+                    movesDamage.Add(CalcMoveDamage(move, result, 100 * result.LevelMultiplier, monStats, oppStats, teamCtx,
                         (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
                         pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper adds to crit dmg
                         pokemon.BattleItem?.Name == "Loaded Dice",
