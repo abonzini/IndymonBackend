@@ -48,14 +48,7 @@ namespace IndymonBackendProgram
     }
     public class ExplorationPrizes
     {
-        public Dictionary<string, int>[] MonsFound =
-        // 4 levels of mon, from 1-4, associated with floor and a pokeball type
-        [
-            new Dictionary<string, int>(),
-            new Dictionary<string, int>(),
-            new Dictionary<string, int>(),
-            new Dictionary<string, int>()
-        ];
+        public Dictionary<int, Dictionary<string, int>> MonsFound = []; // Mons divided by rank
         public Dictionary<SetItem, int> SetItemsFound = new Dictionary<SetItem, int>();
         public Dictionary<Item, int> ModItemsFound = new Dictionary<Item, int>();
         public Dictionary<Item, int> BattleItemsFound = new Dictionary<Item, int>();
@@ -106,20 +99,25 @@ namespace IndymonBackendProgram
         /// </summary>
         /// <param name="mon">Mon to add</param>
         /// <param name="floor">Floor to add to</param>
-        public void AddMon(TrainerPokemon mon, int floor)
+        public void AddMon(TrainerPokemon mon, int rank)
         {
+            if (!MonsFound.TryGetValue(rank, out Dictionary<string, int> rankMons))
+            {
+                rankMons = new Dictionary<string, int>();
+                MonsFound.Add(rank, rankMons);
+            }
             string monName = mon.Species;
             if (mon.IsShiny) monName += "✦"; // Add shiny tag too
-            GeneralUtilities.AddtemToCountDictionary(MonsFound[floor], monName, 1);
+            GeneralUtilities.AddtemToCountDictionary(rankMons, monName, 1);
         }
         /// <summary>
         /// Adds pokemon to prizes
         /// </summary>
         /// <param name="mons">Mons to add</param>
         /// <param name="floor">Floor to add to</param>
-        public void AddMons(List<TrainerPokemon> mons, int floor)
+        public void AddMons(List<TrainerPokemon> mons, int rank)
         {
-            foreach (TrainerPokemon mon in mons) AddMon(mon, floor);
+            foreach (TrainerPokemon mon in mons) AddMon(mon, rank);
         }
         /// <summary>
         /// Transfers everything to trainer
@@ -379,7 +377,7 @@ namespace IndymonBackendProgram
                             bossString = roomEvent.PostEventString.Replace("$1", _dungeonData.BossItem.Name);
                             GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
                             _prizes.AddReward(_dungeonData.BossItem.Name, itemCount);
-                            _prizes.AddMons(bossTrainer.BattleTeam, enemyFloor);
+                            _prizes.AddMons(bossTrainer.BattleTeam, enemyFloor + 1); // Rank 4
                         }
                     }
                     break;
@@ -406,7 +404,7 @@ namespace IndymonBackendProgram
                             alphaString = roomEvent.PostEventString.Replace("$1", item.Name);
                             GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
                             _prizes.AddReward(item.Name, itemAmount);
-                            _prizes.AddMons(alphaTrainer.BattleTeam, enemyFloor);
+                            _prizes.AddMons(alphaTrainer.BattleTeam, enemyFloor + 1);
                         }
                     }
                     break;
@@ -667,7 +665,7 @@ namespace IndymonBackendProgram
                             }
                             foreach (TrainerPokemon pokemonSpecies in wildMonsTrainer.BattleTeam)
                             {
-                                _prizes.AddMon(pokemonSpecies, floor);
+                                _prizes.AddMon(pokemonSpecies, floor + 1);
                             }
                         }
                     }
@@ -741,7 +739,7 @@ namespace IndymonBackendProgram
                             GenericMessageCommand(postMessage);
                             foreach (TrainerPokemon pokemonSpecies in unownTrainer.BattleTeam)
                             {
-                                _prizes.AddMon(pokemonSpecies, 0);
+                                _prizes.AddMon(pokemonSpecies, 1); // Rank 1
                             }
                             _prizes.AddReward(unownChosen.Value, 1); // Add the unown reward
                         }
@@ -772,7 +770,7 @@ namespace IndymonBackendProgram
                             string postMessage = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
                             GenericMessageCommand(postMessage);
                             _prizes.AddReward(itemPrize.Name, rewardQuantity);
-                            _prizes.AddMons(bossTrainer.BattleTeam, 3); // Add the mon (masterball tho)
+                            _prizes.AddMons(bossTrainer.BattleTeam, 4); // Add the mon (masterball tho)
                         }
                     }
                     break;
@@ -801,7 +799,7 @@ namespace IndymonBackendProgram
                             string postMessage = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
                             GenericMessageCommand(postMessage);
                             _prizes.AddReward(itemPrize.Name, rewardQuantity);
-                            _prizes.AddMons(giantMon.BattleTeam, floor); // Add the mon (masterball tho)
+                            _prizes.AddMons(giantMon.BattleTeam, floor + 1);
                         }
                     }
                     break;
@@ -886,7 +884,7 @@ namespace IndymonBackendProgram
                         Console.Write("Added to team");
                         _explorer.BattleTeam.Add(joiner);
                         GenericMessageCommand(roomEvent.PostEventString);
-                        _prizes.AddMon(joiner, 0); // Add mon to lowest floor
+                        _prizes.AddMon(joiner, 0); // Add mon to lowest floor (free basically)
                         UpdateTrainerDataInfo(); // Updates numbers in chart
                     }
                     break;
@@ -1008,24 +1006,11 @@ namespace IndymonBackendProgram
             // Key
             string keyString = GetPrizesStrings(_prizes.KeyItemsFound);
             maxCount = Math.Max(maxCount, keyString.Length);
-            // Mons
-            string f1Mons = GetPrizesStrings(_prizes.MonsFound[0]);
-            maxCount = Math.Max(maxCount, f1Mons.Length);
-            string f2Mons = GetPrizesStrings(_prizes.MonsFound[1]);
-            maxCount = Math.Max(maxCount, f2Mons.Length);
-            string f3Mons = GetPrizesStrings(_prizes.MonsFound[2]);
-            maxCount = Math.Max(maxCount, f3Mons.Length);
-            string f4Mons = GetPrizesStrings(_prizes.MonsFound[3]);
-            maxCount = Math.Max(maxCount, f4Mons.Length);
             if (setItemString.Length == 0) setItemString = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
             if (modItemString.Length == 0) modItemString = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
             if (battleItemString.Length == 0) battleItemString = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
             if (favourString.Length == 0) favourString = new string('M', GeneralUtilities.GetRandomNumber(3 * maxCount / 10, 4 * maxCount / 10)); // +- 10%
             if (keyString.Length == 0) keyString = new string('M', GeneralUtilities.GetRandomNumber(3 * maxCount / 10, 4 * maxCount / 10)); // +- 10%
-            if (f1Mons.Length == 0) f1Mons = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
-            if (f2Mons.Length == 0) f2Mons = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
-            if (f3Mons.Length == 0) f3Mons = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
-            if (f4Mons.Length == 0) f4Mons = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
             // Now print
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Set Items: **||{setItemString}||");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Mod Items: **||{modItemString}||");
@@ -1033,12 +1018,17 @@ namespace IndymonBackendProgram
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Favours: **||{favourString}||");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Key Items: **||{keyString}||");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"__Catchable Pokemon (As many as you want as long as you have the corresponding poke-ball):__");
+            // The mon printing is weird
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"__Catchable Pokemon (As many as you want as long as you have the corresponding Poke Ball for the Pokemon rank):__");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Poke Ball or Better: **||{f1Mons}||");
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Great Ball or Better: **||{f2Mons}||");
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Utra Ball or Better: **||{f3Mons}||");
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Master Ball: **||{f4Mons}||");
+            List<int> ranks = [.. _prizes.MonsFound.Keys.Order()];
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Append($"||"); // Beginning of rank Spoilered text
+            foreach (int rank in ranks)
+            {
+                string monsOfRank = GetPrizesStrings(_prizes.MonsFound[rank]);
+                GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Append($"**RANK {rank}:** {monsOfRank}. ");
+            }
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"||"); // Close rank-spoilered text
             // Save
             string filePath = Path.Combine(DirectoryPath, explFile);
             GameDataContainers.GlobalGameData.CurrentEventMessage.SaveToFile(filePath);
