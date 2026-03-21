@@ -85,6 +85,7 @@ namespace AutomatedTeamBuilder
             result.PokemonTypes = monData.Types;// Set base type
             // Then obtain, step by step, all mods applied by all the (currently known) elements of the mon's build
             ExtractAlwaysMods(result); // Extract the mods that are present in absolutely everyhting
+            ExtractPokeballMods(pokemon.PokeBall, result); // Pokeball can't change so extract its mods now
             foreach (TeamArchetype archetype in result.AdditionalArchetypes)
             {
                 ExtractArchetypeMods(archetype, result);
