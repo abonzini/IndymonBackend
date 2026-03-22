@@ -16,7 +16,9 @@ TODO:
 - Dungeon Mods (shiny for now), sandwiches eventually
 
 POSSIBLE THINGS TO LOOK FOR:
+- Quick debug items are still working
 - Quick debug that I didn't break damage calc
+- Debug stuff like storm drain giving the correct def increase (maybe doesn't even need it tbh)
 - Debug level multiplier (when it happens)
 - Debug shiny stone (when it happens)
 - Add pokeballs (when they happen), slp ball needs to add status + rest flag. level ball adjusts level.

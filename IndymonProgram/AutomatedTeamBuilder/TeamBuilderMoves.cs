@@ -563,11 +563,14 @@ namespace AutomatedTeamBuilder
                         mon.ChosenAbility?.Name == "Skill Link",
                         mon.ChosenAbility?.Name == "Sniper");
                     // Get the move coverage, making sure some specific crazy effects that modify moves
+                    double seMultiplier = 1;
+                    if (mon.BattleItem?.Name == "Expert Belt") seMultiplier *= 1.2;
+                    if (mon.ChosenAbility?.Name == "Neuroforce") seMultiplier *= 1.25;
                     List<double> moveCoverage = CalculateOffensiveTypeCoverage(moveType, buildCtx.OpponentsTypes,
                         allMoveFlags.Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
                         mon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
                         move.Name == "Freeze Dry", // Freeze dry is SE against water
-                        (mon.BattleItem?.Name == "Expert Belt") ? 1.2 : 1 // Expert belt multiplies SE damage by 1.2
+                        seMultiplier
                     );
                     moveDamage *= moveCoverage.Average(); // Average damage caused by move cvg
                     // Finally, how damage affects score
@@ -650,10 +653,6 @@ namespace AutomatedTeamBuilder
                 {
                     // This is calculated from the prev context, assuming the move not used yet
                     score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
-                }
-                if (move.Category == MoveCategory.STATUS && monCtx.DamageScore > 0.75)
-                {
-                    score *= 0; // Avoid status move if the mon would break most shit apart
                 }
                 mon.ChosenMoveset.RemoveAt(mon.ChosenMoveset.Count - 1); // Remove move ofc
             }

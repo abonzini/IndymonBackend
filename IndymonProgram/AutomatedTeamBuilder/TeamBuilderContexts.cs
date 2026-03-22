@@ -264,11 +264,14 @@ namespace AutomatedTeamBuilder
                         pokemon.ChosenAbility?.Name == "Sniper"));
                     PokemonType moveType = GetModifiedMoveType(move, result); // Get the final move type for type effectiveness
                     // Get the move coverage, making sure some specific crazy effects that modify moves
+                    double seMultiplier = 1;
+                    if (pokemon.BattleItem?.Name == "Expert Belt") seMultiplier *= 1.2;
+                    if (pokemon.ChosenAbility?.Name == "Neuroforce") seMultiplier *= 1.25;
                     movesTypeCoverage.Add(CalculateOffensiveTypeCoverage(moveType, teamCtx.OpponentsTypes,
                         ExtractMoveFlags(move, result).Contains(EffectFlag.BYPASSES_IMMUNITY), // Whether the move will bypass immunities
                         pokemon.ChosenAbility?.Name == "Tinted Lens", // Tinted lense x2 resisted moves
                         move.Name == "Freeze Dry", // Freeze dry is SE against water
-                        (pokemon.BattleItem?.Name == "Expert Belt") ? 1.2 : 1 // Expert belt multiplies SE damage by 1.2
+                        seMultiplier
                         ));
                 }
                 // Do some magic to calculate average move damage with average type coverage

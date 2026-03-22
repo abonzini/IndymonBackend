@@ -388,110 +388,16 @@ namespace AutomatedTeamBuilder
                                 {
                                     // Score battle item according to context. First, check if disableds
                                     Item modItem = acceptableModItems[i];
-                                    double score = acceptableModItemsScores[i];
-                                    double aux;
-                                    (ElementType, string) modItemNameTag = (ElementType.MOD_ITEM, modItem.Name);
-                                    if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(modItemNameTag)) // If item is disabled but not re-enabled, skip it
-                                    {
-                                        if (monCtx.EnabledOptions.TryGetValue(modItemNameTag, out aux))
-                                        {
-                                            score *= aux;
-                                        }
-                                        else if (modItemMandatory) // If bad but need it (?!?), just give it a low score
-                                        {
-                                            score *= 0.01;
-                                        }
-                                        else
-                                        {
-                                            continue; // This item is no good
-                                        }
-                                    }
-                                    foreach (ItemFlag flag in modItem.Flags)
-                                    {
-                                        (ElementType, string) flagTag = (ElementType.ITEM_FLAGS, flag.ToString());
-                                        if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(flagTag)) // If item is disabled but not re-enabled, skip it
-                                        {
-                                            if (monCtx.EnabledOptions.TryGetValue(flagTag, out aux))
-                                            {
-                                                score *= aux;
-                                            }
-                                            else if (modItemMandatory)
-                                            {
-                                                score *= 0.01; // If bad but need it (?!?), just give it a low score
-                                            }
-                                            else
-                                            {
-                                                continue; // This item is no good
-                                            }
-                                        }
-                                    }
-                                    // Then weight mods
-                                    if (monCtx.WeightMods.TryGetValue(modItemNameTag, out aux))
-                                    {
-                                        score *= aux;
-                                    }
-                                    foreach (ItemFlag flag in modItem.Flags)
-                                    {
-                                        (ElementType, string) flagTag = (ElementType.ITEM_FLAGS, flag.ToString());
-                                        if (monCtx.WeightMods.TryGetValue(flagTag, out aux))
-                                        {
-                                            score *= aux;
-                                        }
-                                    }
-                                    // And then additives
-                                    if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(modItemNameTag, out aux))
-                                    {
-                                        score += aux;
-                                    }
-                                    foreach (ItemFlag flag in modItem.Flags)
-                                    {
-                                        (ElementType, string) flagTag = (ElementType.ITEM_FLAGS, flag.ToString());
-                                        if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(flagTag, out aux))
-                                        {
-                                            score += aux;
-                                        }
-                                    }
-                                    // Now the improvement based things
-                                    mon.ModItem = modItem; // First, equip this item to mon
-                                    PokemonBuildContext newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
-                                    double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
-                                    double defImprovement = Math.Ceiling(newCtx.Survivability) / Math.Ceiling(monCtx.Survivability); // If this makes you survive approx one more hit, it's worth
-                                    double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
-                                    // If needs an improvement, will be accepted as long as some of the improvements succeeds
-                                    int nImprovChecks = 0;
-                                    int nImproveFails = 0;
-                                    if (modItem.Flags.Contains(ItemFlag.REQUIRES_OFF_INCREASE))
-                                    {
-                                        nImprovChecks++;
-                                        if (dmgImprovement < 1.1) nImproveFails++;
-                                    }
-                                    if (modItem.Flags.Contains(ItemFlag.REQUIRES_DEF_INCREASE))
-                                    {
-                                        nImprovChecks++;
-                                        if (dmgImprovement < 1.1) nImproveFails++;
-                                    }
-                                    if (modItem.Flags.Contains(ItemFlag.REQUIRES_SPEED_INCREASE))
-                                    {
-                                        nImprovChecks++;
-                                        if (dmgImprovement < 1.1) nImproveFails++;
-                                    }
-                                    if (!modItemMandatory && nImprovChecks > 0 && nImproveFails == nImprovChecks)
-                                    {
-                                        score *= 0;
-                                    }
-                                    score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
-                                    if (modItem.Flags.Contains(ItemFlag.BULKY))
-                                    {
-                                        score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
-                                    }
-                                    mon.ModItem = null; // Remove item ofc
+                                    double score = GetItemWeight(modItem, ElementType.MOD_ITEM, mon, monCtx, buildCtx);
+                                    if (modItemMandatory) score = Math.Clamp(score, 0.01, double.PositiveInfinity); // If bad but need it (?!?), just give it a low score
+                                    score *= acceptableModItemsScores[i];
                                     if (score > 0)
                                     {
                                         modItemScores.Add(score);
                                         validModItems.Add(modItem);
                                     }
                                 }
-                                if (validModItems.Count > 0) // Choose between reasonable battle items
+                                if (validModItems.Count > 0) // Choose between reasonable items
                                 {
                                     int chosenItemIndex = RandomIndexOfWeights(modItemScores, monRng, 1.2); // Use power of 1.2 nudge toward good
                                     Item chosenModItem = validModItems[chosenItemIndex]; // Got the item
@@ -553,103 +459,9 @@ namespace AutomatedTeamBuilder
                                 {
                                     // Score battle item according to context. First, check if disableds
                                     Item battleItem = acceptableBattleItems[i];
-                                    double score = acceptableBattleItemsScores[i];
-                                    double aux;
-                                    (ElementType, string) battleItemNameTag = (ElementType.BATTLE_ITEM, battleItem.Name);
-                                    if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(battleItemNameTag)) // If item is disabled but not re-enabled, skip it
-                                    {
-                                        if (monCtx.EnabledOptions.TryGetValue(battleItemNameTag, out aux))
-                                        {
-                                            score *= aux;
-                                        }
-                                        else if (battleItemMandatory) // If bad but need it (?!?), just give it a low score
-                                        {
-                                            score *= 0.01;
-                                        }
-                                        else
-                                        {
-                                            continue; // This item is no good
-                                        }
-                                    }
-                                    foreach (ItemFlag flag in battleItem.Flags)
-                                    {
-                                        (ElementType, string) flagTag = (ElementType.ITEM_FLAGS, flag.ToString());
-                                        if (MechanicsDataContainers.GlobalMechanicsData.ForcedBuilds.ContainsKey(flagTag)) // If item is disabled but not re-enabled, skip it
-                                        {
-                                            if (monCtx.EnabledOptions.TryGetValue(flagTag, out aux))
-                                            {
-                                                score *= aux;
-                                            }
-                                            else if (battleItemMandatory)
-                                            {
-                                                score *= 0.01; // If bad but need it (?!?), just give it a low score
-                                            }
-                                            else
-                                            {
-                                                continue; // This item is no good
-                                            }
-                                        }
-                                    }
-                                    // Then weight mods
-                                    if (monCtx.WeightMods.TryGetValue(battleItemNameTag, out aux))
-                                    {
-                                        score *= aux;
-                                    }
-                                    foreach (ItemFlag flag in battleItem.Flags)
-                                    {
-                                        (ElementType, string) flagTag = (ElementType.ITEM_FLAGS, flag.ToString());
-                                        if (monCtx.WeightMods.TryGetValue(flagTag, out aux))
-                                        {
-                                            score *= aux;
-                                        }
-                                    }
-                                    // And then additives
-                                    if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(battleItemNameTag, out aux))
-                                    {
-                                        score += aux;
-                                    }
-                                    foreach (ItemFlag flag in battleItem.Flags)
-                                    {
-                                        (ElementType, string) flagTag = (ElementType.ITEM_FLAGS, flag.ToString());
-                                        if (MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.TryGetValue(flagTag, out aux))
-                                        {
-                                            score += aux;
-                                        }
-                                    }
-                                    // Now the improvement based things
-                                    mon.BattleItem = battleItem; // First, equip this item to mon
-                                    PokemonBuildContext newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
-                                    double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
-                                    double defImprovement = Math.Ceiling(newCtx.Survivability) / Math.Ceiling(monCtx.Survivability); // If this makes you survive approx one more hit, it's worth
-                                    double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
-                                    // If needs an improvement, will be accepted as long as some of the improvements succeeds
-                                    int nImprovChecks = 0;
-                                    int nImproveFails = 0;
-                                    if (battleItem.Flags.Contains(ItemFlag.REQUIRES_OFF_INCREASE))
-                                    {
-                                        nImprovChecks++;
-                                        if (dmgImprovement < 1.1) nImproveFails++;
-                                    }
-                                    if (battleItem.Flags.Contains(ItemFlag.REQUIRES_DEF_INCREASE))
-                                    {
-                                        nImprovChecks++;
-                                        if (dmgImprovement < 1.1) nImproveFails++;
-                                    }
-                                    if (battleItem.Flags.Contains(ItemFlag.REQUIRES_SPEED_INCREASE))
-                                    {
-                                        nImprovChecks++;
-                                        if (dmgImprovement < 1.1) nImproveFails++;
-                                    }
-                                    if (!battleItemMandatory && nImprovChecks > 0 && nImproveFails == nImprovChecks)
-                                    {
-                                        continue;
-                                    }
-                                    score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
-                                    if (battleItem.Flags.Contains(ItemFlag.BULKY)) // Healing items are scored on whether they can actually make sense on the mon
-                                    {
-                                        score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
-                                    }
-                                    mon.BattleItem = null; // Remove item ofc
+                                    double score = GetItemWeight(battleItem, ElementType.BATTLE_ITEM, mon, monCtx, buildCtx);
+                                    if (battleItemMandatory) score = Math.Clamp(score, 0.01, double.PositiveInfinity); // If bad but need it (?!?), just give it a low score
+                                    score *= acceptableBattleItemsScores[i];
                                     if (score > 0)
                                     {
                                         battleItemScores.Add(score);
