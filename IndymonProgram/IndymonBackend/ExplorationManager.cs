@@ -179,7 +179,7 @@ namespace IndymonBackendProgram
             int choice = int.Parse(Console.ReadLine());
             TrainerAndSeed = (validTrainers[choice - 1], GeneralUtilities.GetRandomNumber());
         }
-        const int MIN_MESSAGE_PAUSE = 5000; // Show text for this amount of time min
+        const int MIN_MESSAGE_PAUSE = 2000; // Show text for this amount of time min
         const int MESSAGE_PAUSE_PER_WORD = 300; // 0.3s per word looks reasonable
         const int DRAW_ROOM_PAUSE = 1000; // Show text for this amount of time
         const int DUNGEON_NUMBER_OF_FLOORS = 3; // Hardcoded for now unless we need to make it flexible later on
@@ -522,10 +522,13 @@ namespace IndymonBackendProgram
                     {
                         string chosenMove = GeneralUtilities.GetRandomPick(MechanicsDataContainers.GlobalMechanicsData.Moves.Keys.ToList());
                         string diskName = $"{chosenMove} {SetItem.ADVANCED_DISK}"; // Create the advanced disk
-                        string messageString = roomEvent.PreEventString.Replace("$1", diskName);
+                        int blankDiskCount = GeneralUtilities.GetRandomNumber(2, 5); // 2 to 4 blank disks
+                        string giftString = $"{diskName} and {blankDiskCount} Blank Disks";
+                        string messageString = roomEvent.PreEventString.Replace("$1", giftString);
                         GenericMessageCommand(messageString);
                         _prizes.AddReward(diskName, 1);
-                        messageString = roomEvent.PostEventString.Replace("$1", diskName);
+                        _prizes.AddReward("Blank Disk", blankDiskCount);
+                        messageString = roomEvent.PostEventString.Replace("$1", giftString);
                         GenericMessageCommand(messageString);
                     }
                     break;
@@ -1408,6 +1411,7 @@ namespace IndymonBackendProgram
         /// <returns>How many mons P1 has left (0 means defeat)</returns>
         int ResolveEncounter(Trainer explorer, Trainer encounter)
         {
+            GenericMessageCommand($""); // Marker for video sync
             (int cursorX, int cursorY) = Console.GetCursorPosition(); // Just in case I need to write in same place
             Console.Write("About to simulate bots...");
             Console.ReadLine();

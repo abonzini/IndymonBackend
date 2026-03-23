@@ -37,12 +37,10 @@ namespace AutomatedTeamBuilder
             };
             buildCtx.CurrentTeamArchetypes.UnionWith(archetypes); // Add archetypes
             buildCtx.TeamBuildConstraints.Add(buildConstraints); // Add design constraints
-            if (smart) // In smart build, theres a constraint where every mon needs to have an attackign move no matter what (to avoid locks)
-            {
-                Constraint damagingMoveConstraint = new Constraint();
-                damagingMoveConstraint.AllConstraints.Add((ElementType.ANY_DAMAGING_MOVE, "-"));
-                buildCtx.TeamBuildConstraints.Add(damagingMoveConstraint);
-            }
+            // Mons need to have atleast a damaging move to avoid lockup
+            Constraint damagingMoveConstraint = new Constraint();
+            damagingMoveConstraint.AllConstraints.Add((ElementType.ANY_DAMAGING_MOVE, "-"));
+            buildCtx.TeamBuildConstraints.Add(damagingMoveConstraint);
             // Finally, if building against other pokemon, need to fetch the stats and other things
             if (pokemonFaced.Count > 0)
             {
@@ -340,7 +338,7 @@ namespace AutomatedTeamBuilder
                             break;
                         // Item cases are slightly different because no item is valid option either if no item good or no other better ones
                         case MonBuildState.CHOOSING_MOD_ITEM:
-                            if (mon.ModItem == null && trainer.AutoModItem) // If mon already has battle item or trainer doesnt allow the auto item, then finished
+                            if (buildCtx.smartTeamBuild && mon.ModItem == null && trainer.AutoModItem) // If mon already has battle item or trainer doesnt allow the auto item, then finished
                             {
                                 int modItemCount = trainer.ModItems.Values.Sum(); // How many items does the trainer have total?
                                 double initialItemScore = WEIGHT_PER_ITEM * modItemCount;
@@ -411,7 +409,7 @@ namespace AutomatedTeamBuilder
                             state = MonBuildState.CHOOSING_BATTLE_ITEM; // Regardless I'm done
                             break;
                         case MonBuildState.CHOOSING_BATTLE_ITEM:
-                            if (mon.BattleItem == null && trainer.AutoBattleItem) // If mon already has battle item or trainer doesnt allow the auto item, then finished
+                            if (buildCtx.smartTeamBuild && mon.BattleItem == null && trainer.AutoBattleItem) // If mon already has battle item or trainer doesnt allow the auto item, then finished
                             {
                                 int battleItemCount = trainer.BattleItems.Values.Sum(); // How many items does the trainer have total?
                                 double initialItemScore = WEIGHT_PER_ITEM * battleItemCount;
