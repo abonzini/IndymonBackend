@@ -16,10 +16,12 @@ TODO:
 - Dungeon Mods (shiny for now), sandwiches eventually
 
 POSSIBLE THINGS TO LOOK FOR:
-- Quick debug items are still working
-- Quick debug that I didn't break damage calc
+Extra debug needed in initial steps:
+- Auto team builder still works, with the "all possible" options
+- Mod/Held item teabluider algo has changed a bit so do consider debugging
+- Level override and other things, may need to debug damage calc a bit
 - Debug stuff like storm drain giving the correct def increase (maybe doesn't even need it tbh)
 - Debug level multiplier (when it happens)
 - Debug shiny stone (when it happens)
-- Add pokeballs (when they happen), slp ball needs to add status + rest flag. level ball adjusts level.
+- Add pokeballs to dbase (when they happen), slp ball needs to add status + rest flag. level ball adjusts level.
 - Whimsy Island with esscence mechanics and Moon/Shiny stones

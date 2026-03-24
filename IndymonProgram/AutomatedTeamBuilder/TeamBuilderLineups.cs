@@ -36,7 +36,6 @@ namespace AutomatedTeamBuilder
         public static List<PossibleTeamBuild> GetTrainersPossibleBuilds(Trainer trainer, int nMons, List<Constraint> constraintSets, bool acceptLessMons)
         {
             List<PossibleTeamBuild> resultingBuilds = new List<PossibleTeamBuild>();
-            int mostOwnMonsUsed = 0; // Will try to only use the options that use the most own mons to not overuse set items or favors if don't need
             foreach (Constraint constraint in constraintSets)
             {
                 // Get the possible lineup for this constraint
@@ -57,11 +56,8 @@ namespace AutomatedTeamBuilder
                 if (usableMons >= nMons || acceptLessMons) // Need to check now if I have enough options to build a team with these constraints
                 {
                     resultingBuilds.Add(thisTeamBuild);
-                    mostOwnMonsUsed = Math.Max(mostOwnMonsUsed, thisTeamBuild.TrainerOwnPokemon.Count); // Also keep this in mind, by the end I'll choose between the options that need the least amount of items
                 }
             }
-            // Finally, crop to only propose the ones where I use mostly my mons as much as possible
-            resultingBuilds = [.. resultingBuilds.Where(b => b.TrainerOwnPokemon.Count == mostOwnMonsUsed)];
             return resultingBuilds;
         }
         /// <summary>
@@ -87,44 +83,38 @@ namespace AutomatedTeamBuilder
                 }
             }
             // Then, need to check if mon could satisfy by just having a set item equipped
-            if (trainer.AutoSetItem)
+            foreach (SetItem setItem in trainer.SetItems.Keys)
             {
-                foreach (SetItem setItem in trainer.SetItems.Keys)
+                // If set item satisfies, then check which mons can use it and add them to result
+                if (constraint.SatisfiedBySetItem(setItem))
                 {
-                    // If set item satisfies, then check which mons can use it and add them to result
-                    if (constraint.SatisfiedBySetItem(setItem))
+                    List<TrainerPokemon> validMons = new List<TrainerPokemon>();
+                    foreach (TrainerPokemon mon in invalidPokemon)
                     {
-                        List<TrainerPokemon> validMons = new List<TrainerPokemon>();
-                        foreach (TrainerPokemon mon in invalidPokemon)
+                        if (setItem.CanEquip(mon))
                         {
-                            if (setItem.CanEquip(mon))
-                            {
-                                validMons.Add(mon);
-                            }
+                            validMons.Add(mon);
                         }
-                        if (validMons.Count > 0)
-                        {
-                            resultingBuild.TrainerOwnPokemonUsingSetItem.Add(setItem, validMons);
-                        }
+                    }
+                    if (validMons.Count > 0)
+                    {
+                        resultingBuild.TrainerOwnPokemonUsingSetItem.Add(setItem, validMons);
                     }
                 }
             }
             // Then, check trainer's favours and add the mons that satisfy, similarly
-            if (trainer.AutoFavour)
+            foreach (Trainer friendlyTrainer in trainer.Favours.Keys)
             {
-                foreach (Trainer friendlyTrainer in trainer.Favours.Keys)
+                foreach (TrainerPokemon mon in friendlyTrainer.PartyPokemon)
                 {
-                    foreach (TrainerPokemon mon in friendlyTrainer.PartyPokemon)
+                    if (constraint.SatisfiedByMon(mon, true)) // If mon could potentially fit
                     {
-                        if (constraint.SatisfiedByMon(mon, true)) // If mon could potentially fit
+                        if (!resultingBuild.FavourPokemon.TryGetValue(friendlyTrainer, out List<TrainerPokemon> value))
                         {
-                            if (!resultingBuild.FavourPokemon.TryGetValue(friendlyTrainer, out List<TrainerPokemon> value))
-                            {
-                                value = new List<TrainerPokemon>();
-                                resultingBuild.FavourPokemon.Add(friendlyTrainer, value);
-                            }
-                            value.Add(mon);
+                            value = new List<TrainerPokemon>();
+                            resultingBuild.FavourPokemon.Add(friendlyTrainer, value);
                         }
+                        value.Add(mon);
                     }
                 }
             }
@@ -311,7 +301,7 @@ namespace AutomatedTeamBuilder
                     AddNextMonToFinalTeam(chosenMon);
                 }
                 // Then, if still need to fill, let's go items
-                if (monsInTeam < nMons)
+                if (monsInTeam < nMons && trainer.AutoSetItem)
                 {
                     // Add mons + battle item as long as i still have mons (and items!) and need to get more
                     while (usedBuild.TrainerOwnPokemonUsingSetItem.Count > 0 && monsInTeam < nMons)
@@ -357,7 +347,7 @@ namespace AutomatedTeamBuilder
                                 potentialSetItems.Add(monsWSetItems.Key);
                             }
                         }
-                        if (potentialSetItems.Count > 0) // Ok this mon can have the set item...
+                        if (potentialSetItems.Count > 0 && trainer.AutoSetItem) // Ok this mon can have the set item...
                         {
                             SetItem chosenSetItem = potentialSetItems[rng.Next(potentialSetItems.Count)]; // Choose one at random
                             chosenMon.SetItem = chosenSetItem; // Equip the thing
@@ -372,7 +362,7 @@ namespace AutomatedTeamBuilder
                 }
             }
             // Finally finally, same with favor dudes, this will be random either way
-            while (monsInTeam < nMons && !acceptLessMons) // Will only cash in favors if I absolutely need to
+            while (monsInTeam < nMons && !acceptLessMons && trainer.AutoFavour) // Will only cash in favors if I absolutely need to (and can!)
             {
                 // First, find which random favor I will cash in
                 Trainer nextFavourTrainer = usedBuild.FavourPokemon.Keys.ToList()[rng.Next(usedBuild.FavourPokemon.Count)]; // Get a random trainer
