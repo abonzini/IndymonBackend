@@ -175,6 +175,17 @@ namespace GameDataContainer
                             GeneralUtilities.AddtemToCountDictionary(nextTrainer.PokeBalls, itemName, itemCount);
                         }
                         // Sandwiches tbc
+                        itemName = nextLine[j + 19];
+                        if (itemName != "")
+                        {
+                            if (!Sandwiches.TryGetValue(itemName, out Sandwich sandwich)) // Creates it if doesn't exist
+                            {
+                                sandwich = Sandwich.Parse(itemName);
+                                Sandwiches.Add(itemName, sandwich);
+                            }
+                            int sandwichCount = int.Parse(nextLine[j + 20]);
+                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.Sandwiches, sandwich, sandwichCount);
+                        }
                     }
                     trainerContainer.Add(nextTrainer.Name, nextTrainer);
                 }

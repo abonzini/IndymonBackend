@@ -26,6 +26,7 @@ namespace GameData
         public Dictionary<string, int> KeyItems = new Dictionary<string, int>();
         public Dictionary<Trainer, int> Favours = new Dictionary<Trainer, int>();
         public Dictionary<string, int> PokeBalls = new Dictionary<string, int>();
+        public Dictionary<Sandwich, int> Sandwiches = new Dictionary<Sandwich, int>();
         public override string ToString()
         {
             return Name;
@@ -81,6 +82,9 @@ namespace GameData
             List<(string, int)> ballList = [];
             foreach (KeyValuePair<string, int> pokeBallData in PokeBalls) ballList.Add((pokeBallData.Key, pokeBallData.Value));
             ballList = [.. ballList.OrderBy(s => s.Item1)];
+            List<(string, int)> sandwichList = [];
+            foreach (KeyValuePair<Sandwich, int> sandwichData in Sandwiches) sandwichList.Add((sandwichData.Key.Name, sandwichData.Value));
+            sandwichList = [.. sandwichList.OrderBy(s => s.Item1)];
             BoxedPokemon = [.. BoxedPokemon.OrderBy(p => p.Species)]; // Also sort the boxed mons in place whatever
             // Ok now ready to go
             StringBuilder fileBuilder = new StringBuilder();
@@ -104,7 +108,7 @@ namespace GameData
             lineBuilder.Append($"Key Items:,{String.Join("; ", keyItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
             lineBuilder.Append($"Favours:,{String.Join("; ", favourList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
             lineBuilder.Append($"PokeBalls:,{String.Join("; ", ballList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
-            lineBuilder.Append($"Sandwiches:,");
+            lineBuilder.Append($"Sandwiches:,{String.Join("; ", sandwichList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))}");
             fileBuilder.AppendLine(lineBuilder.ToString());
             // Finally, remaining lines are listing stuff in order
             for (int i = 0; i < TRAINER_CARD_ROWS - 2; i++) // Starting from line 2 until end of trainer card
@@ -210,8 +214,15 @@ namespace GameData
                 {
                     lineBuilder.Append(",,");
                 }
-                // Sandwiches (tbd)
-                lineBuilder.Append(',');
+                // Sandwiches
+                if (sandwichList.Count > i)
+                {
+                    lineBuilder.Append($"{sandwichList[i].Item1},{sandwichList[i].Item2}");
+                }
+                else
+                {
+                    lineBuilder.Append(',');
+                }
                 // Finished row
                 fileBuilder.AppendLine(lineBuilder.ToString());
             }

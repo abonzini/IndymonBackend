@@ -55,6 +55,7 @@ namespace GameData
         public string NonVolatileStatus = "";
         public List<int> MovePp = [];
         public int Level = 100; // Default is 100
+        public int LevelMod = 0;
         public HashSet<int> MovesChosenInBattle = [];
         public PokemonLogic Logic = PokemonLogic.BASIC;
         public bool ShinyOverride = false;
@@ -111,10 +112,10 @@ namespace GameData
             packedStrings.Add("");
             packedStrings.Add(""); // No IVs I don't care
             packedStrings.Add((IsShiny || ShinyOverride) ? "S" : ""); // Depending if shiny
-            packedStrings.Add(Level.ToString()); // Mon level is "usually" 100
+            packedStrings.Add((Level + LevelMod).ToString()); // Mon level is "usually" 100 but can be modded in real time
             PokemonType teraType = (TeraType == PokemonType.NONE) ? MechanicsDataContainers.GlobalMechanicsData.Dex[Species].Types.Item1 : TeraType;
             string status = (DefaultStatus == "") ? NonVolatileStatus : DefaultStatus; // Default status always trumps if there's anything
-            string lastPackedString = $",,,,,{teraType},{HealthPercentage},{NonVolatileStatus}"; // Add the "remaining" useless stuff needed for tera, etc
+            string lastPackedString = $",,,,,{teraType},{HealthPercentage},{status}"; // Add the "remaining" useless stuff needed for tera, etc
             packedStrings.Add(lastPackedString);
             return string.Join("|", packedStrings); // Join them together with |
         }
