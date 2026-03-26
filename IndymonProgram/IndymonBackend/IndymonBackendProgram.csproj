@@ -8,11 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.5-beta1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ParsersAndData\ParsersAndData.csproj" />
+    <ProjectReference Include="..\AutomatedTeamBuilder\AutomatedTeamBuilder.csproj" />
+    <ProjectReference Include="..\GameDataContainer\GameDataContainer.csproj" />
+    <ProjectReference Include="..\GameData\GameData.csproj" />
+    <ProjectReference Include="..\MechanicsDataContainer\MechanicsDataContainer.csproj" />
+    <ProjectReference Include="..\MechanicsData\MechanicsData.csproj" />
     <ProjectReference Include="..\ShowdownBot\ShowdownBot.csproj" />
   </ItemGroup>
 

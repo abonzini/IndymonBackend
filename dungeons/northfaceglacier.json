@@ -117,44 +117,29 @@
 	]
   ],
   "CommonItems": [
-		"Health Feather",
-		"Muscle Feather",
-		"Resist Feather",
-		"Genius Feather",
-		"Clever Feather",
-		"Swift Feather",
-		"Scout Feather",
-		"Wall Feather",
-		"Scholar Feather",
-		"Force-Field Feather",
-		"Athlete Feather",
-		"Bruiser Feather",
-		"Danger Feather",
-		"Zen Feather",
-		"Assassin Feather",
-		"Phantom Feather",
-		"Tank Feather",
-		"Guardian Feather",
-		"Amnesia Feather",
-		"Sniper Feather",
-		"Mystic Feather",
-		"Occa Berry",
-		"Charti Berry",
-		"Chople Berry",
-    "Babiri Berry"
+		{ "Name": "Sweet Herba Mystica", "Min": 1, "Max": 1 },
+		{ "Name": "Sour Herba Mystica", "Min": 1, "Max": 1 },
+		{ "Name": "Salty Herba Mystica", "Min": 1, "Max": 1 },
+		{ "Name": "Bitter Herba Mystica", "Min": 1, "Max": 1 },
+		{ "Name": "Occa Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Charti Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Chople Berry", "Min": 1, "Max": 2 },
+    { "Name": "Babiri Berry", "Min": 1, "Max": 2 },
+    { "Name": "Snowball", "Min": 1, "Max": 2 },
+    { "Name": "Never-Melt Ice", "Min": 2, "Max": 4 }
   ],
   "RareItems": [
-		"Rainbow Feather",
-    "Snowball",
-    "Never-Melt Ice",
-		"Fairy Feather",
-    "Binding Band",
-    "Ice Stone",
-    "Eject Pack",
-    "Grip Claw",
-    "Icy Rock"
+    { "Name": "Spicy Herba Mystica", "Min": 1, "Max": 1 },
+    { "Name": "Dawn Stone", "Min": 1, "Max": 1 },
+    { "Name": "Ice Stone", "Min": 1, "Max": 1 },
+		{ "Name": "Rainbow Feather", "Min": 2, "Max": 4 },
+    { "Name": "Snowball", "Min": 2, "Max": 4 },
+    { "Name": "Binding Band", "Min": 2, "Max": 4 },
+    { "Name": "Eject Pack", "Min": 2, "Max": 4 },
+    { "Name": "Grip Claw", "Min": 2, "Max": 4 },
+    { "Name": "Icy Rock", "Min": 2, "Max": 4 }
   ],
-  "BossItem": "Titan Plate 5",
+  "BossItem": { "Name": "Titan Plate 5", "Min": 1, "Max": 1 },
   "Floors": [
     {
       "RoomColor": "White",
@@ -276,10 +261,13 @@
   "PostBossEvent":
   {
       "EventType": "PLOT_CLUE",
-      "PreEventString": "... then the balance of power will change forever in the world.",
-      "PostEventString": "The mythical beasts of creation will roam the lands once again."
+      "PreEventString": "... and the balance of power will change forever in the world.",
+      "PostEventString": "The my///cal bea... of cre../t... ..ll roam the lands once again."
   },
   "CustomShowdownRules" : ["Continuous Snow Mod"],
+  "DungeonArchetypes": ["BACKGROUND_WEATHER"],
+  "DungeonWeather": "SNOW",
+  "DungeonTerrain": "NONE",
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

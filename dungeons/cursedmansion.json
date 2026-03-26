@@ -10,12 +10,13 @@
 	{
       "EventType": "MIRROR_MATCH",
       "PreEventString": "A mysterious figure starts materializing in front of you. The figure is a perfect clone of you, as if looking into a mirror. Suddenly, it attacks!.",
-      "PostEventString": "The figure vanishes without a trace. Better keep going before it appears again."
+      "PostEventString": "After its defeat, the figure transforms into mist. Your Pokemon inhale the mist. They begin acting weird, but they feel more energized than ever before."
     },
 	{
       "EventType": "PLOT_CLUE",
       "PreEventString": "An old man is standing in front of you with a blank stare. He smells like coffee. He says 'You don't know how to catch a Pokémon? I suppose I had better show you then!'.",
-      "PostEventString": "He throws a Pokeball at the middle of the room, but there wasn't anything in there. Then, the old man stays in place, not doing anything. YOU FEEL A SENSE OF UNEASINESS, AS SOMETHING IN THE WORLD HAD TEMPORARILY BROKEN."
+      "PostEventString": "He throws a Pokeball at the middle of the room, but there wasn't anything in there. Then, the old man stays in place, not doing anything. You pick the Poke Ball in the ground, and immediately feel uneasy.",
+      "SpecialParams": "Corrupted Poke Ball"
     },
 	{
       "EventType": "ALPHA",
@@ -61,7 +62,7 @@
       "EventType": "STATUS_TRAP",
       "PreEventString": "A Banette appears out of nowhere and gives you a gift-wrapped box.",
       "PostEventString": "You open the box, which releases a large amount of sleeping gas. $1 is now asleep.",
-	  "SpecialParams": "slp"
+	    "SpecialParams": "slp"
     },
 	{
       "EventType": "IMP_GAIN",
@@ -138,51 +139,35 @@
 	]
   ],
   "CommonItems": [
-		"Aguav Berry",
-		"Apicot Berry",
-		"Aspear Berry",
-		"Cheri Berry",
-		"Chesto Berry",
-		"Chilan Berry",
-		"Custap Berry",
-		"Enigma Berry",
-		"Figy Berry",
-		"Ganlon Berry",
-		"Iapapa Berry",
-		"Jaboca Berry",
-		"Kee Berry",
-		"Lansat Berry",
-		"Leppa Berry",
-		"Liechi Berry",
-		"Lum Berry",
-		"Mago Berry",
-		"Maranga Berry",
-		"Micle Berry",
-		"Oran Berry",
-		"Pecha Berry",
-		"Persim Berry",
-		"Petaya Berry",
-		"Rawst Berry",
-		"Rowap Berry",
-		"Salac Berry",
-		"Sitrus Berry",
-		"Starf Berry",
-		"Wiki Berry",
-		"Colbur Berry",
-		"Kasib Berry"
+		{ "Name": "Apicot Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Chilan Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Custap Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Ganlon Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Jaboca Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Kee Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Lansat Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Liechi Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Maranga Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Micle Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Petaya Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Rowap Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Salac Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Starf Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Colbur Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Kasib Berry", "Min": 1, "Max": 2 }
   ],
   "RareItems": [
-		"Ability Shield",
-		"Adrenaline Orb",
-		"Blunder Policy",
-		"Black Glasses",
-		"Weakness Policy",
-		"Clear Amulet",
-		"Covert Cloak",
-		"Destiny Knot",
-		"Spell Tag"
+		{ "Name": "Ability Shield", "Min": 2, "Max": 4 },
+		{ "Name": "Adrenaline Orb", "Min": 2, "Max": 4 },
+		{ "Name": "Blunder Policy", "Min": 2, "Max": 4 },
+		{ "Name": "Black Glasses", "Min": 2, "Max": 4 },
+		{ "Name": "Weakness Policy", "Min": 2, "Max": 4 },
+		{ "Name": "Clear Amulet", "Min": 2, "Max": 4 },
+		{ "Name": "Covert Cloak", "Min": 2, "Max": 4 },
+		{ "Name": "Destiny Knot", "Min": 2, "Max": 4 },
+		{ "Name": "Spell Tag", "Min": 2, "Max": 4 }
   ],
-  "BossItem": "Shiny Stone",
+  "BossItem": { "Name": "Shiny Stone", "Min": 1, "Max": 1 },
   "Floors": [
     {
       "RoomColor": "White",
@@ -299,6 +284,9 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Trick Room Mod"],
+  "DungeonArchetypes": ["TRICK_ROOM"],
+  "DungeonWeather": "NONE",
+  "DungeonTerrain": "NONE",
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

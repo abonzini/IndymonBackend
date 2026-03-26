@@ -66,7 +66,7 @@
 	{
       "EventType": "UNOWN",
       "PreEventString": "You find a set of undersea ruins. These ones have weird glyphs on the wall. Suddenly, they start shining and moving!",
-      "PostEventString": "What secrets do these symbols contain?"
+      "PostEventString": "After being defeated, the symbols sine. A $1 materializes in front of you."
     }
   ],
   "PokemonEachFloor": [
@@ -128,42 +128,31 @@
 	]
   ],
   "CommonItems": [
-		"Steel Tera Shard",
-		"Dark Tera Shard",
-		"Flying Tera Shard",
-		"Rock Tera Shard",
-		"Fighting Tera Shard",
-		"Dragon Tera Shard",
-		"Ghost Tera Shard",
-		"Fire Tera Shard",
-		"Psychic Tera Shard",
-		"Water Tera Shard",
-		"Grass Tera Shard",
-		"Fairy Tera Shard",
-		"Ground Tera Shard",
-		"Bug Tera Shard",
-		"Ice Tera Shard",
-		"Electric Tera Shard",
-		"Poison Tera Shard",
-		"Normal Tera Shard",
-		"Stellar Tera Shard",
-		"Rindo Berry",
-		"Wacan Berry"
+		{ "Name": "Dark Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Dragon Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Fire Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Psychic Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Water Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Grass Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Fairy Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Ice Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Electric Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Stellar Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Rindo Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Wacan Berry", "Min": 1, "Max": 2 }
   ],
   "RareItems": [
-		"Eviolite",
-		"Flame Orb",
-		"Toxic Orb",
-		"Life Orb",
-		"Mystic Water",
-		"Shell Bell",
-		"Sea Incense",
-		"Wave Incense",
-		"Adrenaline Orb",
-		"Deep Sea Scale",
-		"Deep Sea Tooth"
+		{ "Name": "Eviolite", "Min": 2, "Max": 4 },
+		{ "Name": "Flame Orb", "Min": 2, "Max": 4 },
+		{ "Name": "Toxic Orb", "Min": 2, "Max": 4 },
+		{ "Name": "Life Orb", "Min": 2, "Max": 4 },
+		{ "Name": "Mystic Water", "Min": 2, "Max": 4 },
+		{ "Name": "Shell Bell", "Min": 2, "Max": 4 },
+		{ "Name": "Sea Incense", "Min": 2, "Max": 4 },
+		{ "Name": "Wave Incense", "Min": 2, "Max": 4 },
+		{ "Name": "Adrenaline Orb", "Min": 2, "Max": 4 }
   ],
-  "BossItem": "Water Stone",
+  "BossItem": { "Name": "Water Stone", "Min": 3, "Max": 3 },
   "Floors": [
     {
       "RoomColor": "Gray",
@@ -289,6 +278,9 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Primordial Sea Mod"],
+  "DungeonArchetypes": ["BACKGROUND_WEATHER"],
+  "DungeonWeather": "PRIMORDIAL_SEA",
+  "DungeonTerrain": "NONE",
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

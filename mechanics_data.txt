@@ -1,0 +1,16 @@
+1LvNWfekCtfRoW4G1eusY6rSOFcyM5oiA8kA3IohK2Tw, backend doc
+2042749132, pokedex
+1593134854, typechart
+2048986506, moves
+597315854, learnset
+2086622175, mod items
+105334850, battle items
+1710842129, abilities
+451590364, Enabler strats
+608096215, Stat Mods
+1699142678, Move mods
+1436778897, Weight Mods
+815762176, Fixed Mods
+2125038035, Unown Dictionary
+1645648787, Favour Trainers
+1487763812, PokeBalls

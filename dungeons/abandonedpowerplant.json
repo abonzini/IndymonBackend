@@ -116,42 +116,27 @@
 	]
   ],
   "CommonItems": [
-		"Lonely Mint",
-    "Adamant Mint",
-    "Naughty Mint",
-    "Brave Mint",
-    "Bold Mint",
-    "Impish Mint",
-    "Lax Mint",
-    "Relaxed Mint",
-    "Modest Mint",
-    "Mild Mint",
-    "Rash Mint",
-    "Quiet Mint",
-    "Calm Mint",
-    "Gentle Mint",
-    "Careful Mint",
-    "Sassy Mint",
-    "Timid Mint",
-    "Hasty Mint",
-    "Jolly Mint",
-    "Naive Mint",
-		"Shuca Berry"
+		{ "Name": "Shuca Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Blank Disk", "Min": 3, "Max": 5 },
+		{ "Name": "Blank Disk", "Min": 3, "Max": 5 },
+    { "Name": "Magnet", "Min": 1, "Max": 2 },
+    { "Name": "Power Herb", "Min": 1, "Max": 2 },
+    { "Name": "Electric Seed", "Min": 1, "Max": 2 },
+    { "Name": "Terrain Extender", "Min": 1, "Max": 2 },
+    { "Name": "Electirizer", "Min": 1, "Max": 2 },
+    { "Name": "Cell Battery", "Min": 1, "Max": 2 }
   ],
   "RareItems": [
-		"Thunder Stone",
-    "Electirizer",
-    "Magnet",
-		"Cell Battery",
-    "Wide Lens",
-    "Zoom Lens",
-    "Power Herb",
-    "Terrain Extender",
-    "Electric Seed",
-    "Eject Button",
-    "Eject Pack"
+		{ "Name": "Thunder Stone", "Min": 1, "Max": 1 },
+		{ "Name": "Fire Stone", "Min": 1, "Max": 1 },
+    { "Name": "Electirizer", "Min": 2, "Max": 4 },
+		{ "Name": "Cell Battery", "Min": 2, "Max": 4 },
+    { "Name": "Wide Lens", "Min": 2, "Max": 4 },
+    { "Name": "Zoom Lens", "Min": 2, "Max": 4 },
+    { "Name": "Eject Button", "Min": 2, "Max": 4 },
+    { "Name": "Eject Pack", "Min": 2, "Max": 4 }
   ],
-  "BossItem": "Titan Plate 1",
+  "BossItem": { "Name": "Titan Plate 1", "Min": 1, "Max": 1 },
   "Floors": [
     {
       "RoomColor": "White",
@@ -277,6 +262,9 @@
       "PostEventString": "From the moment they were born, a great task fell in their hands..."
   },
   "CustomShowdownRules" : ["Continuous Electric Terrain Mod"],
+  "DungeonArchetypes": ["BACKGROUND_TERRAIN"],
+  "DungeonWeather": "NONE",
+  "DungeonTerrain": "ELECTRIC",
   "NextDungeon": "",
   "NextDungeonShortcut": ""
 }

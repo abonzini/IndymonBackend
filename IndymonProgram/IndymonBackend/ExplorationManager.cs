@@ -1,12 +1,17 @@
-﻿using ParsersAndData;
+﻿using AutomatedTeamBuilder;
+using GameData;
+using GameDataContainer;
+using MechanicsData;
+using MechanicsDataContainer;
 using ShowdownBot;
-using System.Text;
+using Utilities;
 
 namespace IndymonBackendProgram
 {
     public enum ExplorationStepType
     {
         NOP, // No operation, just a pause
+        DEFINE_DUNGEON,
         PRINT_STRING,
         PRINT_CLUE,
         PRINT_PLOT,
@@ -19,7 +24,7 @@ namespace IndymonBackendProgram
         ADD_INFO_COLUMN,
         ADD_INFO_VALUE,
         CLEAR_ROOMS,
-        DRAW_REGI_EYE,
+        DRAW_REGI_EYE
     }
     public enum CardinalDirections
     {
@@ -43,80 +48,274 @@ namespace IndymonBackendProgram
     }
     public class ExplorationPrizes
     {
-        public Dictionary<string, int>[] MonsFound { get; set; } =
-        // 4 levels of mon, from 1-4, associated with floor and a pokeball type
-        [
-            new Dictionary<string, int>(),
-                new Dictionary<string, int>(),
-                new Dictionary<string, int>(),
-                new Dictionary<string, int>()
-        ];
-        public Dictionary<string, int> CommonItems { get; set; } = new Dictionary<string, int>();
-        public Dictionary<string, int> RareItems { get; set; } = new Dictionary<string, int>();
+        public Dictionary<int, Dictionary<string, int>> MonsFound = []; // Mons divided by rank
+        public Dictionary<SetItem, int> SetItemsFound = new Dictionary<SetItem, int>();
+        public Dictionary<Item, int> ModItemsFound = new Dictionary<Item, int>();
+        public Dictionary<Item, int> BattleItemsFound = new Dictionary<Item, int>();
+        public Dictionary<Trainer, int> FavoursFound = new Dictionary<Trainer, int>();
+        public int ImpFound = 0;
+        public Dictionary<string, int> KeyItemsFound = new Dictionary<string, int>();
+        /// <summary>
+        /// Adds a specific number of a specific item. Can also deal with rewards but not ideal, but necessary for when the reward is a random string
+        /// </summary>
+        /// <param name="rewardName">Item name</param>
+        /// <param name="count">How many to add</param>
+        public void AddReward(string rewardName, int count)
+        {
+            switch (IndymonUtilities.GetRewardType(rewardName))
+            {
+                case IndymonUtilities.RewardType.SET:
+                    SetItem theSetItem = IndymonUtilities.GetOrCreateSetItem(rewardName);
+                    GeneralUtilities.AddtemToCountDictionary(SetItemsFound, theSetItem, count);
+                    break;
+                case IndymonUtilities.RewardType.MOD:
+                    GeneralUtilities.AddtemToCountDictionary(ModItemsFound, MechanicsDataContainers.GlobalMechanicsData.ModItems[rewardName], count);
+                    break;
+                case IndymonUtilities.RewardType.BATTLE:
+                    GeneralUtilities.AddtemToCountDictionary(BattleItemsFound, MechanicsDataContainers.GlobalMechanicsData.BattleItems[rewardName], count);
+                    break;
+                case IndymonUtilities.RewardType.FAVOUR:
+                    GeneralUtilities.AddtemToCountDictionary(FavoursFound, IndymonUtilities.GetTrainerByName(rewardName), count);
+                    break;
+                case IndymonUtilities.RewardType.IMP:
+                    AddImp(int.Parse(rewardName.ToLower().Replace("imp", ""))); // Imp without IMP
+                    break;
+                case IndymonUtilities.RewardType.POKEMON: // Pokemon are added as key items to be added immediately to party
+                default:
+                    GeneralUtilities.AddtemToCountDictionary(KeyItemsFound, rewardName, count);
+                    break;
+            }
+        }
+        /// <summary>
+        /// Adds imp to the prizes
+        /// </summary>
+        /// <param name="imp">How much</param>
+        public void AddImp(int imp)
+        {
+            ImpFound += imp;
+        }
+        /// <summary>
+        /// Adds pokemon to prizes
+        /// </summary>
+        /// <param name="mon">Mon to add</param>
+        /// <param name="floor">Floor to add to</param>
+        public void AddMon(TrainerPokemon mon, int rank)
+        {
+            if (!MonsFound.TryGetValue(rank, out Dictionary<string, int> rankMons))
+            {
+                rankMons = new Dictionary<string, int>();
+                MonsFound.Add(rank, rankMons);
+            }
+            string monName = mon.Species;
+            if (mon.IsShiny) monName += "✦"; // Add shiny tag too
+            GeneralUtilities.AddtemToCountDictionary(rankMons, monName, 1);
+        }
+        /// <summary>
+        /// Adds pokemon to prizes
+        /// </summary>
+        /// <param name="mons">Mons to add</param>
+        /// <param name="floor">Floor to add to</param>
+        public void AddMons(List<TrainerPokemon> mons, int rank)
+        {
+            foreach (TrainerPokemon mon in mons) AddMon(mon, rank);
+        }
+        /// <summary>
+        /// Transfers everything to trainer
+        /// </summary>
+        /// <param name="trainer">Which trainer</param>
+        public void TransferToTrainer(Trainer trainer)
+        {
+            foreach (KeyValuePair<SetItem, int> kvp in SetItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, kvp.Key, kvp.Value);
+            foreach (KeyValuePair<Item, int> kvp in ModItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, kvp.Key, kvp.Value);
+            foreach (KeyValuePair<Item, int> kvp in BattleItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, kvp.Key, kvp.Value);
+            foreach (KeyValuePair<string, int> kvp in KeyItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.KeyItems, kvp.Key, kvp.Value);
+            foreach (KeyValuePair<Trainer, int> kvp in FavoursFound) GeneralUtilities.AddtemToCountDictionary(trainer.Favours, kvp.Key, kvp.Value);
+        }
+    }
+    public class ExplorationContext
+    {
+        int _baseShinyChance = 500; // Chance for a shiny (1 in 500 is the base one)
+        List<(Sandwich, int)> _sandwichEffects = [];
+        const int RNG_FLOAT_RESOLUTION = 1000000;
+        /// <summary>
+        /// Modifies the base shiny chance
+        /// </summary>
+        /// <param name="mult">How much to modify for</param>
+        public void ModifyBaseShinyChance(double mult)
+        {
+            _baseShinyChance = (int)(_baseShinyChance * mult);
+        }
+        /// <summary>
+        /// Adds a sandwich effect to the current context
+        /// </summary>
+        /// <param name="sandwich"></param>
+        public void AddSandwichEffect(Sandwich sandwich)
+        {
+            _sandwichEffects.Add((sandwich, sandwich.Duration));
+        }
+        /// <summary>
+        /// Does a random pull with the current game effects to try and get an extra pokemon
+        /// </summary>
+        /// <returns>How many extra pokemon are found in this encounter</returns>
+        public int GetExtraPokemon()
+        {
+            double extraMonCount = 0; // Will be double to stack many double effects
+            List<Sandwich> validSandwichEffects = [.. _sandwichEffects.Where(s => s.Item1.Effect == SandwichEffectType.ENEMY_NUMBER).Select(s => s.Item1)]; // Get the valid sandwiches
+            foreach (Sandwich sando in validSandwichEffects)
+            {
+                double min = sando.Level * (1 - (sando.Duration - 1) / 3);
+                double max = (2 * sando.Level) - min;
+                double randomFloat = min + ((max - min) * GeneralUtilities.GetRandomNumber(RNG_FLOAT_RESOLUTION) / RNG_FLOAT_RESOLUTION);
+                extraMonCount += randomFloat;
+            }
+            return (int)(extraMonCount + 0.5); // Always round up
+        }
+        /// <summary>
+        /// Does a random pull with how much will be the item multiplier
+        /// </summary>
+        /// <returns>Item multiplier</returns>
+        public double GetItemMult()
+        {
+            double itemMult = 1; // Base item multiplier
+            List<Sandwich> validSandwichEffects = [.. _sandwichEffects.Where(s => s.Item1.Effect == SandwichEffectType.ITEM_DROP).Select(s => s.Item1)]; // Get the valid sandwiches
+            foreach (Sandwich sando in validSandwichEffects)
+            {
+                double min = sando.Level * (1 - (sando.Duration - 1) / 3);
+                double max = (2 * sando.Level) - min;
+                min *= 0.5; max *= 0.5; // Item multilpier make it so that it has a theoretical max of *10 if no delta at lvl 20
+                double randomFloat = min + ((max - min) * GeneralUtilities.GetRandomNumber(RNG_FLOAT_RESOLUTION) / RNG_FLOAT_RESOLUTION);
+                itemMult += randomFloat;
+            }
+            return itemMult;
+        }
+        /// <summary>
+        /// Does a random pull with how much will be the extra healing in int percentage
+        /// </summary>
+        /// <returns>Percentage healing</returns>
+        public int GetExtraHealing()
+        {
+            double totalHealingPercentage = 0; // Will be double to stack many double effects
+            List<Sandwich> validSandwichEffects = [.. _sandwichEffects.Where(s => s.Item1.Effect == SandwichEffectType.POST_HEALING).Select(s => s.Item1)]; // Get the valid sandwiches
+            foreach (Sandwich sando in validSandwichEffects)
+            {
+                double min = sando.Level * (1 - (sando.Duration - 1) / 3);
+                double max = (2 * sando.Level) - min;
+                min *= 2.5; max *= 2.5; // Each lvl of sandwich heals 2.5%
+                double randomFloat = min + ((max - min) * GeneralUtilities.GetRandomNumber(RNG_FLOAT_RESOLUTION) / RNG_FLOAT_RESOLUTION);
+                totalHealingPercentage += randomFloat;
+            }
+            return (int)(totalHealingPercentage + 0.5); // Always round up
+        }
+        /// <summary>
+        /// Does a random pull with how much will be the shiny chance for a fight
+        /// </summary>
+        /// <returns>Shiny chance</returns>
+        public int GetShinyChance()
+        {
+            double shinyChanceMultiplier = 0; // Base shiny chance
+            List<Sandwich> validSandwichEffects = [.. _sandwichEffects.Where(s => s.Item1.Effect == SandwichEffectType.SHINY_CHANCE).Select(s => s.Item1)]; // Get the valid sandwiches
+            foreach (Sandwich sando in validSandwichEffects)
+            {
+                double shinyMean = (21.0 - sando.Level) / 21; // This is the mean of the whole thing
+                double delta = (sando.Duration - 1.0) * (1 - shinyMean) / 4; // Will be a delta of this
+                double min = shinyMean - delta;
+                double max = shinyMean + delta;
+                min *= 0.5; max *= 0.5; // Item multilpier make it so that it has a theoretical max of *10 if no delta at lvl 20
+                double randomFloat = min + ((max - min) * GeneralUtilities.GetRandomNumber(RNG_FLOAT_RESOLUTION) / RNG_FLOAT_RESOLUTION);
+                shinyChanceMultiplier += randomFloat;
+            }
+            shinyChanceMultiplier /= validSandwichEffects.Count; // Its the average shiny chance because I didn't find a better way to do it
+            int resultingChance = (int)((_baseShinyChance * shinyChanceMultiplier) + 0.5); // Get the chance 1/500
+            if (resultingChance < 0) resultingChance = 0; // Chance needs to keep positive
+            return resultingChance;
+        }
+        /// <summary>
+        /// Does a random pull of extra level gain
+        /// </summary>
+        /// <returns>The lvl gain for a mon</returns>
+        public int GetExtraLevel()
+        {
+            double totalLevelGain = 0; // Will be double to stack many double effects
+            List<Sandwich> validSandwichEffects = [.. _sandwichEffects.Where(s => s.Item1.Effect == SandwichEffectType.LEVEL).Select(s => s.Item1)]; // Get the valid sandwiches
+            foreach (Sandwich sando in validSandwichEffects)
+            {
+                double min = sando.Level * (1 - (sando.Duration - 1) / 3);
+                double max = (2 * sando.Level) - min;
+                double randomFloat = min + ((max - min) * GeneralUtilities.GetRandomNumber(RNG_FLOAT_RESOLUTION) / RNG_FLOAT_RESOLUTION);
+                totalLevelGain += randomFloat;
+            }
+            return (int)(totalLevelGain + 0.5); // Always round up
+        }
+        /// <summary>
+        /// Uses the effect of a sandwich type
+        /// </summary>
+        /// <param name="effect">The effect that will be used</param>
+        /// <param name="logger">Where to print expiration message</param>
+        /// <returns>A list of messages of the sandwiches that have been consumed</returns>
+        public void UseSandwichEffect(SandwichEffectType effect, Action<string> logger)
+        {
+            List<(Sandwich, int)> expiredSandwiches = [.. _sandwichEffects.Where(s => s.Item1.Effect == effect && s.Item2 == 1)]; // Get the valid sandwiches that will be exausted here
+            foreach (string sando in expiredSandwiches.Select(s => s.Item1.Name)) // print the expired ones
+            {
+                logger($"The {sando} effect has worn off");
+            }
+            _sandwichEffects = [.. _sandwichEffects.Except(expiredSandwiches)]; // Remove expired
+            for (int i = 0; i < _sandwichEffects.Count; i++)
+            {
+                (Sandwich, int) item = _sandwichEffects[i];
+                if (item.Item1.Effect == effect)
+                {
+                    item.Item2--;
+                    _sandwichEffects[i] = item; // Reduce duration by 1
+                }
+            }
+        }
     }
     public class ExplorationManager
     {
-        DataContainers _backEndData = null;
+        // Private data
+        Dungeon _dungeonData = null;
+        readonly ExplorationPrizes _prizes = new ExplorationPrizes();
+        readonly ExplorationContext _context = new ExplorationContext();
+        Trainer _trainer;
+        // Public data (saved)
         public string Dungeon { get; set; }
-        public string Trainer { get; set; }
-        public string NextDungeon { get; set; }
-        public bool ExplorationFinished { get; set; } = false;
-        public List<ExplorationStep> ExplorationSteps { get; set; }
-        public ExplorationPrizes Prizes { get; set; } = new ExplorationPrizes();
-        Dungeon _dungeonDetails = null;
-        int _shinyChance = 500; // Chance for a shiny (1 in 500)
-        public ExplorationManager(DataContainers backEndData)
-        {
-            _backEndData = backEndData;
-        }
-        public ExplorationManager()
-        {
-
-        }
-        public void SetBackEndData(DataContainers backEndData)
-        {
-            _backEndData = backEndData;
-        }
+        public (string, int) TrainerAndSeed { get; set; }
+        public List<ExplorationStep> ExplorationSteps { get; set; } = new List<ExplorationStep>();
+        public string DirectoryPath { get; set; } = "";
         public void InitializeExploration()
         {
-            ExplorationSteps = new List<ExplorationStep>(); // Start from scratch!
             // First ask organizer to choose dungeon
-            List<string> options = [.. _backEndData.Dungeons.Keys];
+            List<string> dungeonOptions = [.. GameDataContainers.GlobalGameData.Dungeons.Keys];
             Console.WriteLine("Creating a brand new exploration, which dungeon? (0 for random)");
-            for (int i = 0; i < options.Count; i++)
+            for (int i = 0; i < dungeonOptions.Count; i++)
             {
-                Console.Write($"{i + 1}: {options[i]}, ");
+                Console.Write($"{i + 1}: {dungeonOptions[i]}, ");
             }
             Console.WriteLine("");
             int selection = int.Parse(Console.ReadLine());
             if (selection == 0)
             {
-                selection = Utilities.GetRandomNumber(options.Count);
+                selection = GeneralUtilities.GetRandomNumber(dungeonOptions.Count);
             }
             else
             {
                 selection--; // Make it array-indexable
             }
-            Dungeon = options[selection];
+            Dungeon = dungeonOptions[selection];
             Console.WriteLine(Dungeon);
             // Then which player
-            TrainerData trainerData = Utilities.ChooseOneTrainerDialog(TeambuildSettings.EXPLORATION | TeambuildSettings.SMART, _backEndData);
-            Trainer = trainerData.Name;
-            trainerData.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.EXPLORATION | TeambuildSettings.SMART); // Gets the team for everyone, this time it has no mon limit, and mons initialised in exploration mode (with HP and status), if need to randomize, smart
-            // At this point I can check the dungeon "mods", for now just the shiny chance
-            if (trainerData.Teamsheet.Any(p => p.Item?.Name == "Shiny Stone")) // A shiny stone equipped makes the chances 1 in 5 (100 times more likely)
+            List<string> validTrainers = [.. GameDataContainers.GlobalGameData.TrainerData.Keys];
+            Console.WriteLine("Which trainer will explore?");
+            for (int idx = 1; idx <= validTrainers.Count; idx++)
             {
-                _shinyChance /= 100;
+                Console.Write($"{idx}-{validTrainers[idx - 1]} ");
             }
+            int choice = int.Parse(Console.ReadLine());
+            TrainerAndSeed = (validTrainers[choice - 1], GeneralUtilities.GetRandomNumber());
         }
-        public void InitializeNextDungeon()
-        {
-            if (NextDungeon == "") throw new Exception("NO NEXT DUNGEON!");
-            ExplorationSteps = new List<ExplorationStep>();
-            Dungeon = NextDungeon;
-            // Keep trainer as is
-        }
-        const int STANDARD_MESSAGE_PAUSE = 5000; // Show text for this amount of time
+        const int MIN_MESSAGE_PAUSE = 2000; // Show text for this amount of time min
+        const int MESSAGE_PAUSE_PER_WORD = 300; // 0.3s per word looks reasonable
         const int DRAW_ROOM_PAUSE = 1000; // Show text for this amount of time
         const int DUNGEON_NUMBER_OF_FLOORS = 3; // Hardcoded for now unless we need to make it flexible later on
         const int DUNGEON_ROOMS_PER_FLOOR = 5;
@@ -126,274 +325,343 @@ namespace IndymonBackendProgram
         /// </summary>
         public void ExecuteExploration()
         {
+            GameDataContainers.GlobalGameData.CurrentEventMessage.Clear(); // This is a new event, so I will clear whatever thet was there before
             // Just to help debug
             Console.Clear();
             Console.CursorVisible = true;
-            // Set up exploration
-            _dungeonDetails = _backEndData.Dungeons[Dungeon]; // Obtain dungeon back end data
-            TrainerData trainerData = _backEndData.TrainerData[Trainer]; // Obtain trainer's data
-            List<RoomEvent> possibleEvents = [.. _dungeonDetails.Events]; // These are the possible events for this dungeon
+            // Initialize from beginning
+            _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
+            _trainer = IndymonUtilities.GetTrainerByName(TrainerAndSeed.Item1); // Find the trainer data
+            const int MAX_N_MONS = 6;
+            List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(_trainer, MAX_N_MONS, [new Constraint()], true); // Since there's no constraint, will get a build consisting of all my mons (max 6)
+            TeamBuilder.AssembleTrainersBattleTeam(_trainer, MAX_N_MONS, possibleBuilds, true, TrainerAndSeed.Item2); // Chooses one of the sets, prepares the mons
+            // Now, make the trainer choose it's team sets!
+            HashSet<Pokemon> enemyMons = new HashSet<Pokemon>();
+            enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[0].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]); // Add all mons from all floors
+            enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[1].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
+            enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[2].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
+            enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[3].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
+            TeamBuilder.DefineTrainerSets(_trainer, true, _dungeonData.DungeonArchetypes, _dungeonData.DungeonWeather, _dungeonData.DungeonTerrain, new Constraint(), [.. enemyMons], TrainerAndSeed.Item2); // Team build but with the dungeon's weather and such 
+            List<RoomEvent> possibleEvents = [.. _dungeonData.Events]; // These are the possible events for this dungeon
             // Beginning of expl and event queue
-            (int, int) prevCoord = (-1, 0); // Starts from outside i guess
-            bool usedShortcut = false; // If a shortcut was used to the new room
-            // Print initial string
-            string auxString = $"Beginning of {trainerData.Name}'s exploration in {Dungeon}";
-            Console.WriteLine(auxString);
-            GenericMessageCommand(auxString); // Begin of exploration string
-            // Adds status table. Pokemon have a max of 18 characters, health and status max 3. Fill the info too
+            if (_trainer.BattleTeam.Any(m => m.ModItem.Name == "Shiny Stone")) // Shiny stone is a special item that will modify the base shiny chance to 1 in 25
+            {
+                _context.ModifyBaseShinyChance(1 / 20); // 20 times more likely
+            }
             AddInfoColumnCommand("Pokemon", 18);
             AddInfoColumnCommand("Health", 6);
             AddInfoColumnCommand("Status", 6);
-            AddInfoColumnCommand("PP1", 3);
-            AddInfoColumnCommand("PP2", 3);
-            AddInfoColumnCommand("PP3", 3);
-            AddInfoColumnCommand("PP4", 3);
-            UpdateTrainerDataInfo(trainerData);
-            for (int floor = 0; floor < DUNGEON_NUMBER_OF_FLOORS; floor++) // Begin the iteration of all floors
+            bool explorationFinished = true;
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventTitle = $"<@{_trainer.DiscordNumber}> Meanwhile, {_trainer.Name} went on to explore the {Dungeon}.";
+            do
             {
-                for (int room = 0; room < DUNGEON_ROOMS_PER_FLOOR; room++) // Begin the iteration of all rooms
+                SetDungeonCommand(Dungeon);
+                ClearRoomsCommand(); // Just in case, just clear the current screen (if coming from another exploration)
+                ClearConsoleCommand(); // Clears mini console to leave space for new event's message
+                string auxString = $"Beginning of {_trainer.Name}'s exploration in {Dungeon}";
+                Console.WriteLine(auxString);
+                GenericMessageCommand(auxString); // Begin of exploration string
+                (int, int) prevCoord = (-1, 0); // Starts from outside i guess
+                bool usedShortcut = false; // If a shortcut was used to the new room
+                // Adds status table. Pokemon have a max of 18 characters, health and status max 3. Fill the info too
+                UpdateTrainerDataInfo();
+                for (int floor = 0; floor < DUNGEON_NUMBER_OF_FLOORS; floor++) // Begin the iteration of all floors
                 {
-                    ClearConsoleCommand(); // Clears mini console to leave space for new event's message
-                    DrawRoomCommand(floor, room); // Will draw the room
-                    DrawConnectRoomCommand(prevCoord.Item1, prevCoord.Item2, floor, room, usedShortcut); // Draws previous connection too
-                    DrawMoveCharacterCommand(prevCoord.Item1, prevCoord.Item2, floor, room); // Put character there
-                    NopWithWaitCommand(DRAW_ROOM_PAUSE);
-                    prevCoord = (floor, room); // For drawing
-                    usedShortcut = false; // Reset shortcut
-                    bool roomSuccess;
-                    if (room == 0) // Room 0 is always the beginning of floor, camping event followed by shortcut check
+                    for (int room = 0; room < DUNGEON_ROOMS_PER_FLOOR; room++) // Begin the iteration of all rooms
                     {
-                        // Check shortcut first
-                        ClueMessageCommand(_dungeonDetails.Floors[floor].ShortcutClue);
-                        if (VerifyShortcutConditions(_dungeonDetails.Floors[floor].ShortcutConditions, trainerData, out string message)) // If shortcut activated
+                        ClearConsoleCommand(); // Clears mini console to leave space for new event's message
+                        DrawRoomCommand(floor, room); // Will draw the room
+                        DrawConnectRoomCommand(prevCoord.Item1, prevCoord.Item2, floor, room, usedShortcut); // Draws previous connection too
+                        DrawMoveCharacterCommand(prevCoord.Item1, prevCoord.Item2, floor, room); // Put character there
+                        NopWithWaitCommand(DRAW_ROOM_PAUSE);
+                        prevCoord = (floor, room); // For drawing
+                        usedShortcut = false; // Reset shortcut
+                        bool roomSuccess;
+                        if (room == 0) // Room 0 is always the beginning of floor, camping event followed by shortcut check
                         {
-                            // After, need to also check shortcut
-                            string shortcutString = _dungeonDetails.Floors[floor].ShortcutResolution.Replace("$1", message);
-                            GenericMessageCommand(shortcutString);
-                            if (floor == DUNGEON_NUMBER_OF_FLOORS - 1) // If dungeon was done in last floor, then the dungeon is over...
+                            // Check shortcut first
+                            ClueMessageCommand(_dungeonData.Floors[floor].ShortcutClue);
+                            if (VerifyShortcutConditions(_dungeonData.Floors[floor].ShortcutConditions, out string message)) // If shortcut activated
                             {
-                                DrawConnectRoomCommand(floor, room, floor + 1, room, true); // Connects to invisible next dungeon, shortcut
+                                // After, need to also check shortcut
+                                string shortcutString = _dungeonData.Floors[floor].ShortcutResolution.Replace("$1", message);
+                                GenericMessageCommand(shortcutString);
+                                if (floor == DUNGEON_NUMBER_OF_FLOORS - 1) // If dungeon was done in last floor, then the dungeon is over...
+                                {
+                                    DrawConnectRoomCommand(floor, room, floor + 1, room, true); // Connects to invisible next dungeon, shortcut
+                                    DrawMoveCharacterCommand(floor, room, floor + 1, room); // Character dissapears
+                                    auxString = $"You move onward...";
+                                    Console.WriteLine(auxString);
+                                    GenericMessageCommand(auxString);
+                                    // Also the trypical backend stuff
+                                    explorationFinished = false; // Will repeat exploration loop now
+                                    Dungeon = _dungeonData.NextDungeonShortcut; // Go to the dungeon indicated by shortcut
+                                    _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
+                                    goto ExplorationEnd; // Just break these loops
+                                }
+                                else
+                                {
+                                    usedShortcut = true;
+                                    break; // Floor is done, can skip all the rooms
+                                }
+                            }
+                            // If no shortcut taken, can do a camping event at this stage
+                            roomSuccess = ExecuteEvent(_dungeonData.CampingEvent, floor);
+                        }
+                        else if (room == 1) // And first room always a wild pokemon encounter
+                        {
+                            RoomEvent pokemonEvent = new RoomEvent()
+                            {
+                                EventType = RoomEventType.POKEMON_BATTLE,
+                                PreEventString = "Suddenly, wild pokemon attack!",
+                                PostEventString = $"You won the battle and obtained multiple items that the wild Pokemon were holding ($1)."
+                            }; // Wild pokemon encounter event
+                            roomSuccess = ExecuteEvent(pokemonEvent, floor);
+                        }
+                        else if ((room == DUNGEON_ROOMS_PER_FLOOR - 1) && (floor == DUNGEON_NUMBER_OF_FLOORS - 1)) // Last room is always boss event
+                        {
+                            ExecuteEvent(_dungeonData.PreBossEvent, floor); // Pre boss event
+                            roomSuccess = ExecuteEvent(_dungeonData.BossEvent, floor); // BOSS
+                            if (roomSuccess) // If has been beaten, then dungeon is also over
+                            {
+                                ExecuteEvent(_dungeonData.PostBossEvent, floor); // Post boss event
+                                DrawConnectRoomCommand(floor, room, floor + 1, room, false); // Connects to invisible next dungeon, no shortcut
                                 DrawMoveCharacterCommand(floor, room, floor + 1, room); // Character dissapears
                                 auxString = $"You move onward...";
                                 Console.WriteLine(auxString);
                                 GenericMessageCommand(auxString);
-                                // Also the trypical backend stuff
-                                ExplorationFinished = true;
-                                NextDungeon = _dungeonDetails.NextDungeonShortcut; // Go to the dungeon indicated by shortcut
-                                goto ExplorationEnd; // Just go directly to end
-                            }
-                            else
-                            {
-                                usedShortcut = true;
-                                break; // Floor is done, can skip all the rooms
+                                // Also the typical backend stuff
+                                explorationFinished = false; // Will repeat exploration loop now
+                                Dungeon = _dungeonData.NextDungeon; // Go to the next dungeon
+                                _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
+                                goto ExplorationEnd;
                             }
                         }
-                        // If no shortcut taken, can do a camping event at this stage
-                        roomSuccess = ExecuteEvent(_dungeonDetails.CampingEvent, floor, trainerData);
-                    }
-                    else if (room == 1) // And first room always a wild pokemon encounter
-                    {
-                        RoomEvent pokemonEvent = new RoomEvent()
+                        else // Normal room implies a normal event from the possibility list
                         {
-                            EventType = RoomEventType.POKEMON_BATTLE,
-                            PreEventString = "Suddenly, wild pokemon attack!",
-                            PostEventString = $"You won the battle and obtained multiple items that the wild Pokemon were holding ($1)."
-                        }; // Wild pokemon encounter event
-                        roomSuccess = ExecuteEvent(pokemonEvent, floor, trainerData);
-                    }
-                    else if ((room == DUNGEON_ROOMS_PER_FLOOR - 1) && (floor == DUNGEON_NUMBER_OF_FLOORS - 1)) // Last room is always boss event
-                    {
-                        ExecuteEvent(_dungeonDetails.PreBossEvent, floor, trainerData); // Pre boss event
-                        roomSuccess = ExecuteEvent(_dungeonDetails.BossEvent, floor, trainerData); // BOSS
-                        if (roomSuccess) // If has been beaten, then dungeon is also over
-                        {
-                            ExecuteEvent(_dungeonDetails.PostBossEvent, floor, trainerData); // Post boss event
-                            DrawConnectRoomCommand(floor, room, floor + 1, room, false); // Connects to invisible next dungeon, no shortcut
-                            DrawMoveCharacterCommand(floor, room, floor + 1, room); // Character dissapears
-                            auxString = $"You move onward...";
-                            Console.WriteLine(auxString);
-                            GenericMessageCommand(auxString);
-                            // Also the trypical backend stuff
-                            ExplorationFinished = true;
-                            NextDungeon = _dungeonDetails.NextDungeon;
-                            goto ExplorationEnd;
+                            RoomEvent nextEvent = GeneralUtilities.GetRandomPick(possibleEvents); // Get a random event
+                            Console.WriteLine($"Event: {nextEvent}");
+                            roomSuccess = ExecuteEvent(nextEvent, floor);
+                            possibleEvents.Remove(nextEvent); // Remove from event pool
                         }
-                    }
-                    else // Normal room implies a normal event from the possibility list
-                    {
-                        RoomEvent nextEvent = possibleEvents[Utilities.GetRandomNumber(possibleEvents.Count)]; // Get a random event
-                        Console.WriteLine($"Event: {nextEvent}");
-                        roomSuccess = ExecuteEvent(nextEvent, floor, trainerData);
-                        possibleEvents.Remove(nextEvent); // Remove from event pool
-                    }
-                    if (!roomSuccess) // Player lost during exploration
-                    {
-                        ExplorationFinished = true;
-                        NextDungeon = "";
-                        goto ExplorationEnd; // Just go directly to end
+                        if (!roomSuccess) // Player lost during exploration
+                            goto ExplorationEnd; // Just go directly to end
                     }
                 }
-            }
-        ExplorationEnd:
+            ExplorationEnd: // Best way to break from a 2 damn nested loops I think
+                ;
+            } while (!explorationFinished); // Will do once unless need to continue with another dungeon
             // Return to normal
             Console.CursorVisible = false;
             Console.WriteLine("Exploration end.");
-            SaveExplorationOutcome(Prizes);
-            // Finally, need to examine and tell if trainer used/ran out of items
-            trainerData.ListConsumedItems(int.MaxValue); // No mon limit for explorations...
+            // Add items from prizes -> inventory
+            _prizes.TransferToTrainer(_trainer);
+            // Consume items
+            IndymonUtilities.ConsumeTrainersItems(_trainer);
+            // Save the copiable exploration file
+            IndymonUtilities.WarnTrainer(_trainer);//Warn trainer of the exceeded items
+            SaveExplorationOutcome(); // Replace with message stuff
+            string trainerFilePath = Path.Combine(DirectoryPath, $"{_trainer.Name.ToUpper().Replace(" ", "").Replace("?", "")}.trainer");
+            _trainer.SaveTrainerCsv(trainerFilePath);
         }
         /// <summary>
-        /// Executes an event of the many possible in room
+        /// Executes an event of the many possible in dungeon
         /// </summary>
         /// <param name="roomEvent">Event to simulate</param>
         /// <param name="floor">Floor where event happens</param>
-        /// <param name="prizes">Place where to store the things won in this room (mons, items, etc)</param>
-        /// <param name="trainerData">Data about the trainer</param>
         /// <returns></returns>
-        bool ExecuteEvent(RoomEvent roomEvent, int floor, TrainerData trainerData)
+        bool ExecuteEvent(RoomEvent roomEvent, int floor)
         {
             bool roomCleared = true;
+            Console.WriteLine(roomEvent.ToString());
             switch (roomEvent.EventType)
             {
                 case RoomEventType.CAMPING:
                     Console.WriteLine("Camping tile, nothing yet");
                     GenericMessageCommand(roomEvent.PreEventString);
-                    // Camping logic would go here?
+                    // Camping logic: eat a random sandwich
+                    if (_trainer.Sandwiches.Count > 0)
+                    {
+                        Sandwich sando = GeneralUtilities.GetRandomKvp(_trainer.Sandwiches).Key;
+                        _context.AddSandwichEffect(sando);
+                        GenericMessageCommand($"Your team has eaten {sando.Name}");
+                        GeneralUtilities.AddtemToCountDictionary(_trainer.Sandwiches, sando, -1, true); // Consume sandwich
+                    }
                     GenericMessageCommand(roomEvent.PostEventString);
                     break;
                 case RoomEventType.TREASURE: // Find an item in the floor, free rare item
                     {
-                        string itemFound = _dungeonDetails.RareItems[Utilities.GetRandomNumber(_dungeonDetails.RareItems.Count)]; // Find a random rare item
-                        Console.WriteLine($"Finds {itemFound}");
-                        string itemString = roomEvent.PreEventString.Replace("$1", itemFound);
+                        ItemReward itemFound = GeneralUtilities.GetRandomPick(_dungeonData.RareItems); // Find a random rare item
+                        int amount = GeneralUtilities.GetRandomNumber(itemFound.Min, itemFound.Max + 1); // How many were found
+                        amount += (int)((amount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                        if (amount < 1) amount = 1;
+                        Console.WriteLine($"Finds {itemFound.Name}");
+                        string itemString = roomEvent.PreEventString.Replace("$1", $"{itemFound.Name} (x{amount})");
                         GenericMessageCommand(itemString); // Prints the message but we know it could have a $1
-                        itemString = roomEvent.PostEventString.Replace("$1", itemFound);
+                        itemString = roomEvent.PostEventString.Replace("$1", $"{itemFound.Name} (x{amount})");
                         GenericMessageCommand(itemString);
-                        AddRareItemPrize(itemFound, Prizes);
+                        _prizes.AddReward(itemFound.Name, amount);
+                        _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, GenericMessageCommand);
                     }
                     break;
                 case RoomEventType.BOSS: // Boss fight
                     {
-                        string item = (_dungeonDetails.BossItem != "") ? _dungeonDetails.BossItem : "";
                         int enemyFloor = 3; // Last floor is where bosses are
-                        List<string> possiblePokemon = _dungeonDetails.PokemonEachFloor[enemyFloor]; // Find the possible mons next floor
-                        string enemySpecies = possiblePokemon[Utilities.GetRandomNumber(possiblePokemon.Count)].Trim().ToLower(); // Get a random one of these
-                        Console.WriteLine($"Boss {enemySpecies} holding {item}");
+                        int itemCount = GeneralUtilities.GetRandomNumber(_dungeonData.BossItem.Min, _dungeonData.BossItem.Max + 1); // How much of an item I gained
+                        itemCount += (int)((itemCount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                        if (itemCount < 1) itemCount = 1;
+                        string enemySpecies = GeneralUtilities.GetRandomPick(_dungeonData.PokemonEachFloor[enemyFloor]); // Boss will be a random one
+                        Trainer bossTrainer = GenerateEnemyTrainer("Boss", [enemySpecies], [_dungeonData.BossItem.Name], 100, 100, true);
+                        DefineEnemySet(bossTrainer, int.MaxValue, true); // Defines the enemy set (smart for a final boss challenge!)
                         string bossString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0); // Will be shiny if i get a 0 dice roll
-                        PokemonSet bossPokemon = new PokemonSet()
-                        {
-                            Species = enemySpecies,
-                            Shiny = isShiny,
-                            Item = (item.ToLower().Contains("titan plate")) ? null : new Item() { Name = item, Uses = 1 } // Ensure battle item is really there
-                        };
-                        TrainerData bossTeam = new TrainerData() // Create the blank trainer
-                        {
-                            Avatar = "unknown",
-                            Name = "Final Boss",
-                            AutoItem = false,
-                            AutoTeam = true,
-                            Teamsheet = [bossPokemon], // Only mon in the teamsheet
-                        };
-                        bossTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.SMART); // Randomize enemy team (movesets, etc), boss/alpha is a bit smarter than normal dungeon mon
-                        Console.Write("Encounter resolution: ");
-                        int remainingMons = ResolveEncounter(trainerData, bossTeam);
+                        // Fight and conclusion
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, bossTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
-                            Console.WriteLine("Player lost");
                             roomCleared = false; // Failure at clearing room
                             GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
-                            Console.WriteLine("Player won");
-                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            bossString = roomEvent.PostEventString.Replace("$1", item);
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                            bossString = roomEvent.PostEventString.Replace("$1", _dungeonData.BossItem.Name);
                             GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
-                            AddRareItemPrize(item, Prizes); // Add item to Prizes
-                            AddPokemonPrize(enemySpecies, enemyFloor, isShiny, Prizes); // Add boss mon too
+                            _prizes.AddReward(_dungeonData.BossItem.Name, itemCount);
+                            _prizes.AddMons(bossTrainer.BattleTeam, enemyFloor + 1); // Rank 4
+                            _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, GenericMessageCommand);
+                            _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
+                            PostFightTrainerMods();
                         }
                     }
                     break;
-                case RoomEventType.ALPHA: // Find a frenzied mon from a floor above, boss will have a rare item if defeated
+                case RoomEventType.ALPHA: // Find a smart and frenzied mon from a floor above, boss will have a rare item if defeated
                     {
-                        string item = _dungeonDetails.RareItems[Utilities.GetRandomNumber(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
+                        ItemReward item = GeneralUtilities.GetRandomPick(_dungeonData.RareItems); // Get a random rare item
+                        int itemAmount = GeneralUtilities.GetRandomNumber(item.Min, item.Max + 1);
+                        itemAmount += (int)((itemAmount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                        if (itemAmount < 1) itemAmount = 1;
                         int enemyFloor = (floor + 1 >= DUNGEON_NUMBER_OF_FLOORS) ? floor : floor + 1; // Find enemy of next floor if possible
-                        List<string> possiblePokemon = _dungeonDetails.PokemonEachFloor[enemyFloor]; // Find the possible mons next floor
-                        string enemySpecies = possiblePokemon[Utilities.GetRandomNumber(possiblePokemon.Count)].Trim().ToLower(); // Get a random one of these
-                        Console.WriteLine($"Strong {enemySpecies} holding {item}");
+                        string enemySpecies = GeneralUtilities.GetRandomPick(_dungeonData.PokemonEachFloor[enemyFloor]); // Get a random one of these
                         string alphaString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0); // Will be shiny if i get a 0 dice roll
-                        PokemonSet alphaPokemon = new PokemonSet()
-                        {
-                            Species = enemySpecies,
-                            Shiny = isShiny,
-                            Item = new Item() { Name = item, Uses = 1 }
-                        };
-                        TrainerData alphaTeam = new TrainerData() // Create the blank trainer
-                        {
-                            Avatar = "unknown",
-                            Name = "alpha mon",
-                            AutoItem = false,
-                            AutoTeam = true,
-                            Teamsheet = [alphaPokemon], // Only mon in the teamsheet
-                        };
-                        alphaTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.SMART); // Randomize enemy team (movesets, etc), boss/alpha is a bit smarter than normal dungeon mon
+                        Trainer alphaTrainer = GenerateEnemyTrainer("Alpha", [enemySpecies], [item.Name], 100, 100, true);
+                        DefineEnemySet(alphaTrainer, int.MaxValue, true); // Defines the enemy set (smart for an alpha challenge)
                         Console.Write("Encounter resolution: ");
-                        int remainingMons = ResolveEncounter(trainerData, alphaTeam);
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, alphaTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
-                            Console.WriteLine("Player lost");
                             roomCleared = false; // Failure at clearing room
                             GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
-                            Console.WriteLine("Player won");
-                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            alphaString = roomEvent.PostEventString.Replace("$1", item);
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                            alphaString = roomEvent.PostEventString.Replace("$1", item.Name);
                             GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                            AddRareItemPrize(item, Prizes); // Add item to Prizes
-                            AddPokemonPrize(enemySpecies, enemyFloor, isShiny, Prizes); // Add alpha mon too
+                            _prizes.AddReward(item.Name, itemAmount);
+                            _prizes.AddMons(alphaTrainer.BattleTeam, enemyFloor + 1);
+                            _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, GenericMessageCommand);
+                            _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
+                            PostFightTrainerMods();
                         }
                     }
                     break;
                 case RoomEventType.EVO:
                     {
                         EvolutionMessageCommand(roomEvent.PreEventString);
-                        foreach (PokemonSet mon in trainerData.Teamsheet)
+                        foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
-                            Pokemon baseMon = _backEndData.Dex[mon.Species];
+                            Pokemon baseMon = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
                             if (baseMon.Evos.Count > 0) // Mon has evos, ask for each
                             {
-                                Console.WriteLine($"Evolve {mon} ? y/N");
+                                Console.WriteLine($"Evolve {mon} ? y/N. Consider:");
+                                Console.WriteLine($"Mon Items: (0) Set: {mon.SetItem}, (1) Mod: {mon.ModItem}, (2) Battle: {mon.BattleItem}");
+                                Console.WriteLine($"(3) Set Items In Bag: {string.Join(", ", _trainer.SetItems.Keys.Select(i => i.Name))}");
+                                Console.WriteLine($"(4) Mod Items In Bag: {string.Join(", ", _trainer.ModItems.Keys.Select(i => i.Name))}");
+                                Console.WriteLine($"(5) Battle Items In Bag: {string.Join(", ", _trainer.BattleItems.Keys.Select(i => i.Name))}");
+                                Console.WriteLine($"(6) Set Items In Prizes: {string.Join(", ", _prizes.SetItemsFound.Keys.Select(i => i.Name))}");
+                                Console.WriteLine($"(7) Mod Items In Prizes: {string.Join(", ", _prizes.ModItemsFound.Keys.Select(i => i.Name))}");
+                                Console.WriteLine($"(8) Battle Items In Prizes: {string.Join(", ", _prizes.BattleItemsFound.Keys.Select(i => i.Name))}");
                                 if (Console.ReadLine().Trim().ToLower() == "y")
                                 {
-                                    List<string> possibleEvos = [.. baseMon.Evos];
+                                    // Check mon
+                                    List<Pokemon> possibleEvos = [.. baseMon.Evos];
                                     Console.Write($"0 RANDOM,");
                                     for (int i = 0; i < possibleEvos.Count; i++)
                                     {
                                         Console.Write($"{i + 1} {possibleEvos[i]},");
                                     }
                                     int choice = int.Parse(Console.ReadLine());
-                                    string chosenMon;
+                                    Pokemon chosenMon;
                                     if (choice == 0) // Random evo
                                     {
-                                        chosenMon = possibleEvos[Utilities.GetRandomNumber(possibleEvos.Count)];
+                                        chosenMon = possibleEvos[GeneralUtilities.GetRandomNumber(possibleEvos.Count)];
                                     }
                                     else
                                     {
                                         chosenMon = possibleEvos[choice - 1];
                                     }
+                                    // Check consumed item
+                                    Console.WriteLine("Which index of place to remove item?");
+                                    choice = int.Parse(Console.ReadLine());
+                                    string itemConsumedString;
+                                    if (choice == 0)
+                                    {
+                                        itemConsumedString = $"its equipped {mon.SetItem.Name}";
+                                        mon.SetItem = null;
+                                    }
+                                    else if (choice == 1)
+                                    {
+                                        itemConsumedString = $"its equipped {mon.ModItem.Name}";
+                                        mon.ModItem = null;
+                                    }
+                                    else if (choice == 2)
+                                    {
+                                        itemConsumedString = $"its equipped {mon.BattleItem.Name}";
+                                        mon.BattleItem = null;
+                                    }
+                                    else if (choice == 3 || choice == 6) // Set items...
+                                    {
+                                        Dictionary<SetItem, int> collectionDict;
+                                        if (choice == 3) collectionDict = _trainer.SetItems;
+                                        else if (choice == 6) collectionDict = _prizes.SetItemsFound;
+                                        else throw new Exception("Invalid place to retrieve evo item from!"); // ????
+                                        // Now list them and choose
+                                        List<SetItem> itemList = [.. collectionDict.Keys];
+                                        Console.WriteLine($"Which item to use?");
+                                        for (int i = 0; i < itemList.Count; i++) Console.Write($"{i} {itemList[i].Name}, ");
+                                        int idx = int.Parse(Console.ReadLine());
+                                        GeneralUtilities.AddtemToCountDictionary(collectionDict, itemList[idx], -1, true);
+                                        itemConsumedString = $"the {itemList[idx].Name} located in the bag";
+                                    }
+                                    else
+                                    {
+                                        Dictionary<Item, int> collectionDict;
+                                        itemConsumedString = $"in the bag";
+                                        if (choice == 4) collectionDict = _trainer.ModItems;
+                                        else if (choice == 5) collectionDict = _trainer.BattleItems;
+                                        else if (choice == 7) collectionDict = _prizes.ModItemsFound;
+                                        else if (choice == 8) collectionDict = _prizes.BattleItemsFound;
+                                        else throw new Exception("Invalid place to retrieve evo item from!");
+                                        // Now list them and choose
+                                        List<Item> itemList = [.. collectionDict.Keys];
+                                        Console.WriteLine($"Which item to use?");
+                                        for (int i = 0; i < itemList.Count; i++) Console.Write($"{i} {itemList[i].Name}, ");
+                                        int idx = int.Parse(Console.ReadLine());
+                                        GeneralUtilities.AddtemToCountDictionary(collectionDict, itemList[idx], -1, true);
+                                        itemConsumedString = $"the {itemList[idx].Name} located in the bag";
+                                    }
                                     // Notify all
-                                    string message = mon.NickName != "" ? $"{mon.NickName} ({mon.Species})" : mon.Species;
-                                    message += $" has evolved into {chosenMon}!";
+                                    string message = mon.ToString();
+                                    message += $" has evolved into {chosenMon} by using " + itemConsumedString + "!";
                                     GenericMessageCommand(message);
                                     // Finally, actually do the deed
-                                    mon.Species = chosenMon.Trim().ToLower();
-                                    UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                                    mon.Species = chosenMon.Name;
+                                    if (!chosenMon.Abilities.Contains(mon.ChosenAbility)) mon.ChosenAbility = GeneralUtilities.GetRandomPick(chosenMon.Abilities); // Get a random ability if now invalid
+                                    UpdateTrainerDataInfo(); // Updates numbers in chart
                                 }
                             }
                         }
@@ -402,32 +670,35 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.RESEARCHER:
                     {
-                        List<string> platesList = [.. _backEndData.OffensiveItemData.Keys.Where(i => i.Contains("plate"))];
-                        string chosenPlate = platesList[Utilities.GetRandomNumber(platesList.Count)];
+                        List<string> platesList = [.. MechanicsDataContainers.GlobalMechanicsData.BattleItems.Keys.Where(i => i.ToLower().Contains("plate"))];
+                        string chosenPlate = GeneralUtilities.GetRandomPick(platesList);
                         string messageString = roomEvent.PreEventString.Replace("$1", chosenPlate);
                         GenericMessageCommand(messageString);
-                        AddCommonItemPrize(chosenPlate, Prizes);
+                        _prizes.AddReward(chosenPlate, 1);
                         messageString = roomEvent.PostEventString.Replace("$1", chosenPlate);
                         GenericMessageCommand(messageString);
                     }
                     break;
                 case RoomEventType.PARADOX:
                     {
-                        Console.WriteLine("Event tile, consists of only text and resolves. MAY INVOLVE A FEW EXTRA ITEMS");
-                        string obtainedDisk = _backEndData.MoveItemData.Keys.ToList()[Utilities.GetRandomNumber(_backEndData.MoveItemData.Count)]; // Get random move disk
-                        string messageString = roomEvent.PreEventString.Replace("$1", obtainedDisk);
+                        string chosenMove = GeneralUtilities.GetRandomPick(MechanicsDataContainers.GlobalMechanicsData.Moves.Keys.ToList());
+                        string diskName = $"{chosenMove} {SetItem.ADVANCED_DISK}"; // Create the advanced disk
+                        int blankDiskCount = GeneralUtilities.GetRandomNumber(2, 5); // 2 to 4 blank disks
+                        string giftString = $"{diskName} and {blankDiskCount} Blank Disks";
+                        string messageString = roomEvent.PreEventString.Replace("$1", giftString);
                         GenericMessageCommand(messageString);
-                        AddCommonItemPrize(obtainedDisk, Prizes);
-                        messageString = roomEvent.PostEventString.Replace("$1", obtainedDisk);
+                        _prizes.AddReward(diskName, 1);
+                        _prizes.AddReward("Blank Disk", blankDiskCount);
+                        messageString = roomEvent.PostEventString.Replace("$1", giftString);
                         GenericMessageCommand(messageString);
                     }
                     break;
                 case RoomEventType.IMP_GAIN:
                     {
-                        int impGain = Utilities.GetRandomNumber(2, 4); // 2-3 IMP
+                        int impGain = GeneralUtilities.GetRandomNumber(2, 4); // 2-3 IMP
                         string messageString = roomEvent.PreEventString.Replace("$1", $"{impGain} IMP");
                         GenericMessageCommand(messageString);
-                        AddCommonItemPrize($"{impGain} IMP", Prizes);
+                        _prizes.AddImp(impGain);
                         messageString = roomEvent.PostEventString.Replace("$1", $"{impGain} IMP");
                         GenericMessageCommand(messageString);
                     }
@@ -436,15 +707,12 @@ namespace IndymonBackendProgram
                     {
                         Console.WriteLine("A heal of 33% of all mons");
                         GenericMessageCommand(roomEvent.PreEventString);
-                        foreach (PokemonSet mon in trainerData.Teamsheet)
+                        foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
-                            mon.ExplorationStatus.HealthPercentage += 33;
-                            if (mon.ExplorationStatus.HealthPercentage > 100)
-                            {
-                                mon.ExplorationStatus.HealthPercentage = 100;
-                            }
+                            mon.HealthPercentage += 33;
+                            if (mon.HealthPercentage > 100) mon.HealthPercentage = 100;
                         }
-                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                        UpdateTrainerDataInfo(); // Updates numbers in chart
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
@@ -452,15 +720,12 @@ namespace IndymonBackendProgram
                     {
                         Console.WriteLine("A damage trap of 25% to all mons");
                         GenericMessageCommand(roomEvent.PreEventString);
-                        foreach (PokemonSet mon in trainerData.Teamsheet)
+                        foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
-                            mon.ExplorationStatus.HealthPercentage -= 25;
-                            if (mon.ExplorationStatus.HealthPercentage <= 0)
-                            {
-                                mon.ExplorationStatus.HealthPercentage = 1;
-                            }
+                            mon.HealthPercentage -= 25;
+                            if (mon.HealthPercentage <= 0) mon.HealthPercentage = 1;
                         }
-                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                        UpdateTrainerDataInfo(); // Updates numbers in chart
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
@@ -468,22 +733,22 @@ namespace IndymonBackendProgram
                     {
                         Console.WriteLine("Cures all mons status");
                         GenericMessageCommand(roomEvent.PreEventString);
-                        foreach (PokemonSet mon in trainerData.Teamsheet)
+                        foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
-                            mon.ExplorationStatus.NonVolatileStatus = "";
+                            mon.NonVolatileStatus = "";
                         }
-                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                        UpdateTrainerDataInfo(); // Updates numbers in chart
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
                 case RoomEventType.BIG_HEAL:
                     {
                         Console.WriteLine("Single big heal to a mon");
-                        PokemonSet mon = trainerData.Teamsheet.OrderBy(p => p.ExplorationStatus.HealthPercentage).FirstOrDefault();
-                        mon.ExplorationStatus.HealthPercentage = 100;
+                        TrainerPokemon mon = _trainer.BattleTeam.OrderBy(p => p.HealthPercentage).FirstOrDefault();
+                        mon.HealthPercentage = 100;
                         string message = roomEvent.PreEventString.Replace("$1", mon.GetInformalName());
                         GenericMessageCommand(roomEvent.PreEventString);
-                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                        UpdateTrainerDataInfo(); // Updates numbers in chart
                         message = roomEvent.PostEventString.Replace("$1", mon.GetInformalName());
                         GenericMessageCommand(message);
                     }
@@ -492,14 +757,14 @@ namespace IndymonBackendProgram
                     {
                         Console.WriteLine("Cures all mons PP");
                         GenericMessageCommand(roomEvent.PreEventString);
-                        foreach (PokemonSet mon in trainerData.Teamsheet)
+                        foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
-                            for (int i = 0; i < mon.ExplorationStatus.MovePp.Length; i++) // Restores 3 pp to each move
+                            for (int i = 0; i < mon.MovePp.Count; i++) // Restores 3 pp to each move
                             {
-                                mon.ExplorationStatus.MovePp[i] += 3;
+                                mon.MovePp[i] += 3;
                             }
                         }
-                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                        UpdateTrainerDataInfo(); // Updates numbers in chart
                         GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
@@ -507,81 +772,46 @@ namespace IndymonBackendProgram
                     {
                         Console.WriteLine("A trap that will status one mon");
                         string status = roomEvent.SpecialParams;
-                        List<PokemonSet> possibleMons = new List<PokemonSet>();
+                        List<TrainerPokemon> possibleMons = [.. _trainer.BattleTeam.Where(m => m.NonVolatileStatus == "")]; // Get mons without status
                         GenericMessageCommand(roomEvent.PreEventString);
-                        foreach (PokemonSet mon in trainerData.Teamsheet)
-                        {
-                            if (mon.ExplorationStatus.NonVolatileStatus == "")
-                            {
-                                possibleMons.Add(mon);
-                            }
-                        }
-                        // Choose a mon without status as priority otherwise any mon will have it overriden
-                        PokemonSet statusedMon;
                         if (possibleMons.Count > 0)
                         {
-                            statusedMon = possibleMons[Utilities.GetRandomNumber(possibleMons.Count - 1)];
+                            TrainerPokemon mon = GeneralUtilities.GetRandomPick(possibleMons);
+                            mon.NonVolatileStatus = status;
+                            string postMessage = roomEvent.PostEventString.Replace("$1", mon.GetInformalName());
+                            GenericMessageCommand(postMessage);
                         }
-                        else
-                        {
-                            statusedMon = trainerData.Teamsheet[Utilities.GetRandomNumber(trainerData.Teamsheet.Count)];
-                        }
-                        statusedMon.ExplorationStatus.NonVolatileStatus = status;
-                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                        string postMessage = roomEvent.PostEventString.Replace("$1", statusedMon.GetInformalName());
-                        GenericMessageCommand(postMessage);
+                        UpdateTrainerDataInfo(); // Updates numbers in chart
                     }
                     break;
                 case RoomEventType.POKEMON_BATTLE:
                     // Similar to aplha but there's 3 enemy mons
                     {
-                        const int NUMBER_OF_WILD_POKEMON = 3; // Time to balance-hardcode this
-                        const int ITEMS_PER_WILD_POKEMON = 1;
-                        Console.WriteLine("Pokemon battle");
+                        int numberOfMons = 3;
+                        numberOfMons += _context.GetExtraPokemon(); // How many extra mons this fight will have
+                        numberOfMons = Math.Clamp(numberOfMons, 1, 24); // Absolute showdown limits
                         // Items obtained during the fight (commons)
-                        int itemCount = NUMBER_OF_WILD_POKEMON * ITEMS_PER_WILD_POKEMON;
-                        List<string> items = new List<string>();
-                        for (int i = 0; i < itemCount; i++)
+                        int uniqueItems = numberOfMons;
+                        List<ItemReward> items = new List<ItemReward>();
+                        for (int i = 0; i < uniqueItems; i++)
                         {
                             // Prize pool will contain common items
-                            string item = _dungeonDetails.CommonItems[Utilities.GetRandomNumber(_dungeonDetails.CommonItems.Count)].Trim().ToLower();
-                            Console.WriteLine($"Item: {item}");
-                            items.Add(item);
+                            ItemReward nextItem = GeneralUtilities.GetRandomPick(_dungeonData.CommonItems);
+                            items.Add(nextItem);
                         }
                         // Add Pokemon, they will have items
-                        List<string> pokemonThisFloor = _dungeonDetails.PokemonEachFloor[floor]; // Find the possible mons this floor
-                        List<PokemonSet> encounterPokemon = new List<PokemonSet>();
-                        for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
+                        List<string> pokemonThisFloor = [];
+                        for (int i = 0; i < numberOfMons; i++) // Generate party of random mons
                         {
-                            string pokemonSpecies = pokemonThisFloor[Utilities.GetRandomNumber(pokemonThisFloor.Count)].Trim().ToLower();
-                            bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0);
-                            PokemonSet pokemon = new PokemonSet()
-                            {
-                                Species = pokemonSpecies,
-                                Shiny = isShiny,
-                                Item = (i < itemCount) ? new Item() { Name = items[i], Uses = 1 } : null // If still have items available, give one to mon
-                            };
-                            Console.WriteLine($"Mon: {pokemonSpecies}");
-                            encounterPokemon.Add(pokemon); // Add mon to the set
+                            string nextPokemon = GeneralUtilities.GetRandomPick(_dungeonData.PokemonEachFloor[floor]);
+                            pokemonThisFloor.Add(nextPokemon); // Add mon to the set
                         }
-                        if (itemCount < NUMBER_OF_WILD_POKEMON)
-                        {
-                            // If not all Pokemon have items, shuffle the mons so the items are not clumped only at the beginning
-                            Utilities.ShuffleList(encounterPokemon, 0, encounterPokemon.Count);
-                        }
-                        // Ok now begin event
                         GenericMessageCommand(roomEvent.PreEventString);
-                        TrainerData wildMonTeam = new TrainerData() // Create the blank trainer
-                        {
-                            Avatar = "unknown",
-                            Name = "wild mons",
-                            AutoItem = false,
-                            AutoTeam = true,
-                            Teamsheet = encounterPokemon,
-                        };
-                        wildMonTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        Trainer wildMonsTrainer = GenerateEnemyTrainer("WildMons", pokemonThisFloor, [.. items.Select(i => i.Name)], 100, 100, true);
+                        DefineEnemySet(wildMonsTrainer, int.MaxValue, false); // Defines the enemy set (dumb mons tho)
                         Console.Write("Encounter resolution: ");
-                        int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, wildMonsTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
                             Console.WriteLine("Player lost");
@@ -591,55 +821,44 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
-                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            string postMessage = roomEvent.PostEventString.Replace("$1", string.Join(',', items));
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                            string postMessage = roomEvent.PostEventString.Replace("$1", string.Join(',', [.. items.Select(i => i.Name)]));
                             GenericMessageCommand(postMessage);
-                            foreach (string item in items) // Add all items to Prizes
+                            foreach (ItemReward item in items) // Add all items to Prizes
                             {
-                                AddCommonItemPrize(item, Prizes);
+                                int amount = GeneralUtilities.GetRandomNumber(item.Min, item.Max + 1);
+                                amount += (int)((amount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                                if (amount < 1) amount = 1;
+                                _prizes.AddReward(item.Name, amount);
                             }
-                            foreach (PokemonSet pokemonSpecies in encounterPokemon)
+                            foreach (TrainerPokemon pokemonSpecies in wildMonsTrainer.BattleTeam)
                             {
-                                AddPokemonPrize(pokemonSpecies.Species, floor, pokemonSpecies.Shiny, Prizes); // Add all mons
+                                _prizes.AddMon(pokemonSpecies, floor + 1);
                             }
+                            _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, GenericMessageCommand);
+                            _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
+                            PostFightTrainerMods();
                         }
                     }
                     break;
                 case RoomEventType.SWARM:
                     // Similar to aplha but there's 6 enemy mons
                     {
-                        const int NUMBER_OF_WILD_POKEMON = 6; // Time to balance-hardcode this
-                        Console.WriteLine("Swarm battle");
-                        // Items obtained during the fight (commons)
-                        List<string> pokemonThisFloor = _dungeonDetails.PokemonEachFloor[0]; // Always from first floor
-                        List<PokemonSet> encounterPokemon = new List<PokemonSet>();
-                        for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
+                        int numberOfMons = 6;
+                        numberOfMons += _context.GetExtraPokemon(); // How many extra mons this fight will have
+                        numberOfMons = Math.Clamp(numberOfMons, 1, 24); // Absolute showdown limits
+                        List<string> pokemonThisFloor = [];
+                        for (int i = 0; i < numberOfMons; i++) // Generate party of random mons always from 0
                         {
-                            string pokemonSpecies = pokemonThisFloor[Utilities.GetRandomNumber(pokemonThisFloor.Count)].Trim().ToLower();
-                            bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0);
-                            int level = Utilities.GetRandomNumber(60, 76); // Lvl between 60-75
-                            PokemonSet pokemon = new PokemonSet()
-                            {
-                                Species = pokemonSpecies,
-                                Shiny = isShiny,
-                                Level = level,
-                            };
-                            Console.WriteLine($"Mon: {pokemonSpecies} lvl {level}");
-                            encounterPokemon.Add(pokemon); // Add mon to the set
+                            string nextPokemon = GeneralUtilities.GetRandomPick(_dungeonData.PokemonEachFloor[0]);
+                            pokemonThisFloor.Add(nextPokemon); // Add mon to the set
                         }
-                        // Ok now begin event
                         GenericMessageCommand(roomEvent.PreEventString);
-                        TrainerData wildMonTeam = new TrainerData() // Create the blank trainer
-                        {
-                            Avatar = "unknown",
-                            Name = "wild babies",
-                            AutoItem = false,
-                            AutoTeam = true,
-                            Teamsheet = encounterPokemon,
-                        };
-                        wildMonTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        Trainer swarmTrainer = GenerateEnemyTrainer("Swarm", pokemonThisFloor, [], 60, 75, true); // Lvl between 60-75
+                        DefineEnemySet(swarmTrainer, int.MaxValue, false); // Defines the enemy set (dumb mons tho)
                         Console.Write("Encounter resolution: ");
-                        int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, swarmTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
                             Console.WriteLine("Player lost");
@@ -649,55 +868,40 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
-                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
                             GenericMessageCommand(roomEvent.PostEventString);
-                            foreach (PokemonSet pokemonSpecies in encounterPokemon)
+                            foreach (TrainerPokemon pokemonSpecies in swarmTrainer.BattleTeam)
                             {
-                                AddPokemonPrize(pokemonSpecies.Species, 0, pokemonSpecies.Shiny, Prizes); // Add all mons (they're floor 0)
+                                _prizes.AddMon(pokemonSpecies, 0);
                             }
+                            _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
+                            PostFightTrainerMods();
                         }
                     }
                     break;
                 case RoomEventType.UNOWN:
                     // Weird one, select 6 unowns, give them random moves
                     {
-                        const int NUMBER_OF_WILD_POKEMON = 6; // Time to balance-hardcode this
-                        Console.WriteLine("Unown battle");
-                        // Items obtained during the fight (commons)
-                        List<PokemonSet> encounterPokemon = new List<PokemonSet>();
-                        HashSet<char> usedLetters = [];
-                        for (int i = 0; i < NUMBER_OF_WILD_POKEMON; i++) // Generate party of random mons
+                        KeyValuePair<string, string> unownChosen = GeneralUtilities.GetRandomKvp(MechanicsDataContainers.GlobalMechanicsData.UnownLookup);
+                        Console.WriteLine($"Unown battle, will form word {unownChosen.Key} with reward {unownChosen.Value}");
+                        List<string> pokemonThisFloor = [];
+                        List<string> itemsThisFloor = [];
+                        for (int i = 0; i < unownChosen.Key.Length; i++) // Generate party of random unowns
                         {
-                            char letter;
-                            do
-                            {
-                                letter = (char)Utilities.GetRandomNumber('A', 'Z' + 1); // Shoudl give me a random letter lol
-                            } while (usedLetters.Contains(letter)); // Get unique letters please
-                            usedLetters.Add(letter);
-                            string pokemonSpecies = (letter == 'A') ? $"Unown" : $"Unown-{letter}"; // Unown or Unown-*
-                            bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0);
-                            PokemonSet pokemon = new PokemonSet()
-                            {
-                                Species = pokemonSpecies,
-                                NickName = letter.ToString().ToUpper(),
-                                Shiny = isShiny,
-                            };
-                            Console.WriteLine($"Mon: {pokemonSpecies}");
-                            encounterPokemon.Add(pokemon); // Add mon to the set
+                            char letter = unownChosen.Key[i]; // Obtain next unown
+                            string nextPokemon = (letter == 'A') ? "Unown" : $"Unown-{letter}"; // Get the correct unown
+                            pokemonThisFloor.Add(nextPokemon); // Add mon to the set
+                            // Check if mon can have an item (any, idk)
+                            List<string> itemCandidates = [.. MechanicsDataContainers.GlobalMechanicsData.BattleItems.Keys.Where(i => i.First() == letter)];
+                            if (itemCandidates.Count > 0) { itemsThisFloor.Add(GeneralUtilities.GetRandomPick(itemCandidates)); }
+                            else itemsThisFloor.Add(""); // Add no item, leave the space so the list doesn't mismatch
                         }
-                        // Ok now begin event
                         GenericMessageCommand(roomEvent.PreEventString);
-                        TrainerData wildMonTeam = new TrainerData() // Create the blank trainer
-                        {
-                            Avatar = "unknown",
-                            Name = "symbols",
-                            AutoItem = false,
-                            AutoTeam = true,
-                            Teamsheet = encounterPokemon,
-                        };
-                        wildMonTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        Trainer unownTrainer = GenerateEnemyTrainer("Symbols", pokemonThisFloor, itemsThisFloor, 100, 100, false); // Unowns are unshuffled so they can form the phrase
+                        DefineEnemySet(unownTrainer, int.MaxValue, true); // Defines the enemy set (smart unowns)
                         Console.Write("Encounter resolution: ");
-                        int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, unownTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
                             Console.WriteLine("Player lost");
@@ -707,47 +911,31 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
-                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            GenericMessageCommand(roomEvent.PostEventString);
-                            foreach (PokemonSet pokemonSpecies in encounterPokemon)
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                            string postMessage = roomEvent.PostEventString.Replace("$1", unownChosen.Value);
+                            GenericMessageCommand(postMessage);
+                            foreach (TrainerPokemon pokemonSpecies in unownTrainer.BattleTeam)
                             {
-                                AddPokemonPrize(pokemonSpecies.Species, 0, pokemonSpecies.Shiny, Prizes); // Add all unowns (they're floor 0)
+                                _prizes.AddMon(pokemonSpecies, 1); // Rank 1
                             }
+                            _prizes.AddReward(unownChosen.Value, 1); // Add the unown reward
+                            _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
+                            PostFightTrainerMods();
                         }
                     }
                     break;
                 case RoomEventType.FIRELORD:
                     // Weird one, weakened legendary with rare item
                     {
-                        Console.WriteLine("Firelord battle");
                         // Which mon will be chosen
-                        string item = _dungeonDetails.RareItems[Utilities.GetRandomNumber(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
-                        List<string> validMons = ["moltres", "entei", "ho-oh", "groudon", "heatran", "chi-yu", "koraidon", "volcaion", "blacephalon"];
-                        string pokemonSpecies = validMons[Utilities.GetRandomNumber(validMons.Count)];
-                        List<PokemonSet> encounterPokemon = new List<PokemonSet>();
-                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0);
-                        PokemonSet pokemon = new PokemonSet()
-                        {
-                            Species = pokemonSpecies,
-                            Shiny = isShiny,
-                            Level = Utilities.GetRandomNumber(50, 66),
-                            Item = new Item() { Name = item, Uses = 1 }
-                        };
-                        Console.WriteLine($"Mon: {pokemonSpecies}");
-                        encounterPokemon.Add(pokemon); // Add mon to the set
-                        // Ok now begin event
-                        GenericMessageCommand(roomEvent.PreEventString);
-                        TrainerData wildMonTeam = new TrainerData() // Create the blank trainer
-                        {
-                            Avatar = "unknown",
-                            Name = "firelord",
-                            AutoItem = false,
-                            AutoTeam = true,
-                            Teamsheet = encounterPokemon,
-                        };
-                        wildMonTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.NONE); // Randomize enemy team (movesets, etc)
+                        ItemReward itemPrize = GeneralUtilities.GetRandomPick(_dungeonData.RareItems); // Get a random rare item
+                        List<string> validMons = ["Moltres", "Entei", "Ho-Oh", "Groudon", "Heatran", "Chi-Yu", "Koraidon", "Volcaion", "Blacephalon"];
+                        string pokemonSpecies = GeneralUtilities.GetRandomPick(validMons);
+                        Trainer bossTrainer = GenerateEnemyTrainer("Firelord", [pokemonSpecies], [], 50, 65, true);
+                        DefineEnemySet(bossTrainer, int.MaxValue, true); // Smart set
                         Console.Write("Encounter resolution: ");
-                        int remainingMons = ResolveEncounter(trainerData, wildMonTeam);
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, bossTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
                             Console.WriteLine("Player lost");
@@ -757,40 +945,32 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
-                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            string postMessage = roomEvent.PostEventString.Replace("$1", item);
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                            int rewardQuantity = GeneralUtilities.GetRandomNumber(itemPrize.Min, itemPrize.Max + 1);
+                            rewardQuantity += (int)((rewardQuantity * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                            if (rewardQuantity < 1) rewardQuantity = 1;
+                            string postMessage = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
                             GenericMessageCommand(postMessage);
-                            AddPokemonPrize(pokemonSpecies, 3, isShiny, Prizes); // Add the mon (masterball tho)
+                            _prizes.AddReward(itemPrize.Name, rewardQuantity);
+                            _prizes.AddMons(bossTrainer.BattleTeam, 4); // Add the mon (masterball tho)
+                            _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, GenericMessageCommand);
+                            _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
+                            PostFightTrainerMods();
                         }
                     }
                     break;
                 case RoomEventType.GIANT_POKEMON:
-                    // Single pokemon with a rare item but the mon is lvl 110-125
+                    // Dumb single pokemon with a rare item but the mon is lvl 110-125
                     {
-                        string item = _dungeonDetails.RareItems[Utilities.GetRandomNumber(_dungeonDetails.RareItems.Count)].Trim().ToLower(); // Get a random rare item
-                        List<string> potentialPokemon = _dungeonDetails.PokemonEachFloor[floor]; // Find the possible mons this floor
-                        string pokemonSpecies = potentialPokemon[Utilities.GetRandomNumber(potentialPokemon.Count)].Trim().ToLower(); // Get a random one of these
-                        int level = Utilities.GetRandomNumber(110, 126); // Get lvls 110-125
-                        string alphaString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
-                        GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0); // Will be shiny if i get a 0 dice roll
-                        PokemonSet giantPokemon = new PokemonSet()
-                        {
-                            Species = pokemonSpecies,
-                            Shiny = isShiny,
-                            Level = level,
-                            Item = new Item() { Name = item, Uses = 1 }
-                        };
-                        TrainerData giantTeam = new TrainerData() // Create the blank trainer
-                        {
-                            Avatar = "unknown",
-                            Name = "giant mon",
-                            AutoItem = false,
-                            AutoTeam = true,
-                            Teamsheet = [giantPokemon], // Only mon in the teamsheet
-                        };
-                        giantTeam.ConfirmSets(_backEndData, 1, int.MaxValue, TeambuildSettings.SMART); // Randomize enemy team (movesets, etc), boss/alpha is a bit smarter than normal dungeon mon
-                        int remainingMons = ResolveEncounter(trainerData, giantTeam);
+                        // Which mon will be chosen
+                        ItemReward itemPrize = GeneralUtilities.GetRandomPick(_dungeonData.RareItems); // Get a random rare item
+                        List<string> validMons = [.. _dungeonData.PokemonEachFloor[floor]];
+                        string pokemonSpecies = GeneralUtilities.GetRandomPick(validMons);
+                        Trainer giantMon = GenerateEnemyTrainer("MutantPokemon", [pokemonSpecies], [], 110, 126, true);
+                        DefineEnemySet(giantMon, int.MaxValue, false); // Not smart
+                        Console.Write("Encounter resolution: ");
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, giantMon);
                         if (remainingMons == 0) // Means player lost
                         {
                             Console.WriteLine("Player lost");
@@ -800,42 +980,54 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
-                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            alphaString = roomEvent.PostEventString.Replace("$1", item);
-                            GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
-                            AddRareItemPrize(item, Prizes); // Add item to Prizes
-                            AddPokemonPrize(pokemonSpecies, floor, isShiny, Prizes); // Add giant mon too
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                            int rewardQuantity = GeneralUtilities.GetRandomNumber(itemPrize.Min, itemPrize.Max + 1);
+                            rewardQuantity += (int)((rewardQuantity * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                            if (rewardQuantity < 1) rewardQuantity = 1;
+                            string postMessage = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
+                            GenericMessageCommand(postMessage);
+                            _prizes.AddReward(itemPrize.Name, rewardQuantity);
+                            _prizes.AddMons(giantMon.BattleTeam, floor + 1);
+                            _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, GenericMessageCommand);
+                            _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
+                            PostFightTrainerMods();
                         }
                     }
                     break;
                 case RoomEventType.MIRROR_MATCH:
                     // Fight against yourself but a couple levels lower
                     {
-                        TrainerData copiedTeam = new TrainerData() // Create the blank trainer
+                        Trainer copiedTeam = new Trainer()
                         {
-                            Avatar = trainerData.Avatar,
-                            Name = "illusion",
-                            AutoItem = false,
-                            AutoTeam = false,
-                            Teamsheet = [], // Will add mons after
+                            Name = "Illusion",
+                            Avatar = _trainer.Avatar,
+                            BattleTeam = [] // Will add mons later
                         };
-                        foreach (PokemonSet set in trainerData.Teamsheet)
+                        foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
-                            int level = Utilities.GetRandomNumber(75, 91); // Get lvls 75-90
-                            PokemonSet copiedMon = new PokemonSet()
+                            int level = GeneralUtilities.GetRandomNumber(75, 91); // Get lvls 75-90
+                            TrainerPokemon copiedMon = new TrainerPokemon()
                             {
-                                Species = set.Species,
-                                Shiny = set.Shiny,
-                                Level = level,
-                                Item = set.Item,
-                                Ability = set.Ability,
-                                Moves = set.Moves,
-                                ExplorationStatus = set.ExplorationStatus
+                                Species = mon.Species,
+                                Nickname = mon.Nickname,
+                                IsShiny = mon.IsShiny,
+                                SetItem = mon.SetItem,
+                                ModItem = mon.ModItem,
+                                BattleItem = mon.BattleItem,
+                                ChosenAbility = mon.ChosenAbility,
+                                ChosenMoveset = mon.ChosenMoveset,
+                                Evs = mon.Evs,
+                                Nature = mon.Nature,
+                                TeraType = mon.TeraType,
+                                HealthPercentage = mon.HealthPercentage,
+                                NonVolatileStatus = mon.NonVolatileStatus,
+                                MovePp = mon.MovePp,
+                                Logic = mon.Logic
                             };
-                            copiedTeam.Teamsheet.Add(copiedMon);
                         }
                         GenericMessageCommand(roomEvent.PreEventString);
-                        int remainingMons = ResolveEncounter(trainerData, copiedTeam);
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, copiedTeam);
                         if (remainingMons == 0) // Means player lost
                         {
                             Console.WriteLine("Player lost");
@@ -845,8 +1037,13 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
-                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            GenericMessageCommand(roomEvent.PostEventString); // Prints the message but we know it could have a $1
+                            foreach (TrainerPokemon mon in _trainer.BattleTeam)
+                            {
+                                mon.HealFull(); // Heall all mons as reward
+                            }
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                            GenericMessageCommand(roomEvent.PostEventString);
+                            PostFightTrainerMods();
                         }
                     }
                     break;
@@ -854,53 +1051,61 @@ namespace IndymonBackendProgram
                     {
                         PlotMessageCommand(roomEvent.PreEventString);
                         PlotMessageCommand(roomEvent.PostEventString);
+                        if (roomEvent.SpecialParams != "")
+                        {
+                            _prizes.AddReward(roomEvent.SpecialParams, 1); // Add item if plot event has it
+                        }
                     }
                     break;
                 case RoomEventType.JOINER:
                     // Mon that joins the team for adventures, always catchable
                     {
-                        List<string> pokemonThisFloor = _dungeonDetails.PokemonEachFloor[floor]; // Find the possible mons this floor
-                        string pokemonSpecies = pokemonThisFloor[Utilities.GetRandomNumber(pokemonThisFloor.Count)].Trim().ToLower(); // Get a random one of these
+                        List<string> validMons = [.. _dungeonData.PokemonEachFloor[floor]];
+                        string pokemonSpecies = GeneralUtilities.GetRandomPick(validMons);
+                        Trainer placeholderTrainer = GenerateEnemyTrainer("Whatever", [pokemonSpecies], [], 100, 100, false);
+                        DefineEnemySet(placeholderTrainer, int.MaxValue, false); // Not smart
                         Console.WriteLine($"Joiner {pokemonSpecies}");
                         string joinerString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
                         GenericMessageCommand(joinerString); // Prints the message but we know it could have a $1
-                        bool isShiny = (Utilities.GetRandomNumber(_shinyChance) == 0); // Will be shiny if i get a 0 dice roll
                         string nickName = $"{pokemonSpecies} friend";
                         if (nickName.Length > 18) // Sanitize, name has to be shorter than 19 and no spaces
                         {
                             nickName = nickName[..18].Trim();
                         }
-                        PokemonSet joiner = new PokemonSet()
-                        {
-                            Species = pokemonSpecies,
-                            Shiny = isShiny,
-                            NickName = nickName,
-                            ExplorationStatus = new ExplorationStatus()
-                        };
-                        joiner.RandomizeMon(_backEndData, TeambuildSettings.NONE, 10); // Random set of moves, 10% switch new standard
+                        TrainerPokemon joiner = placeholderTrainer.BattleTeam.First();
+                        joiner.Nickname = nickName;
                         Console.Write("Added to team");
-                        trainerData.Teamsheet.Add(joiner);
+                        _trainer.BattleTeam.Add(joiner);
                         GenericMessageCommand(roomEvent.PostEventString);
-                        AddPokemonPrize(pokemonSpecies, 0, isShiny, Prizes); // Add mon to always capturable
-                        UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
+                        _prizes.AddMon(joiner, 0); // Add mon to lowest floor (free basically)
+                        UpdateTrainerDataInfo(); // Updates numbers in chart
+                        _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
                     }
                     break;
                 case RoomEventType.NPC_BATTLE:
                     {
-                        TrainerData randomNpc = _backEndData.NpcData.Values.ToList()[Utilities.GetRandomNumber(_backEndData.NpcData.Values.Count)]; // Get random npc
-                        int nMons = Math.Min(randomNpc.Teamsheet.Count, trainerData.Teamsheet.Count); // Fight with the highest legal fair count
-                        randomNpc.ConfirmSets(_backEndData, nMons, nMons, TeambuildSettings.SMART); // Get into a trainer fight (they will bring atleast 1 mon at most 3
+                        Trainer randomNpc = GeneralUtilities.GetRandomKvp(GameDataContainers.GlobalGameData.NpcData).Value; // Get random npc
+                        // Define trainer in the same way we defined our own for exploration
+                        List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(randomNpc, _trainer.BattleTeam.Count, [new Constraint()], true); // Since there's no constraint, will get a build consisting of all my mons, matched to trainer's
+                        TeamBuilder.AssembleTrainersBattleTeam(randomNpc, _trainer.BattleTeam.Count, possibleBuilds, true); // Chooses one of the sets, prepares the mons, seed 0
+                        // Now, make the trainer choose it's team sets!
+                        HashSet<Pokemon> enemyMons = new HashSet<Pokemon>();
+                        enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[0].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]); // Add all mons from all floors
+                        enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[1].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
+                        enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[2].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
+                        enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[3].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
+                        TeamBuilder.DefineTrainerSets(randomNpc, true, _dungeonData.DungeonArchetypes, _dungeonData.DungeonWeather, _dungeonData.DungeonTerrain, new Constraint(), [.. enemyMons]); // Team build but with the dungeon's weather and such 
                         Console.WriteLine($"Fighting {randomNpc.Name}");
                         string npcString = roomEvent.PreEventString.Replace("$1", randomNpc.Name);
                         GenericMessageCommand(npcString); // Prints the message but we know it could have a $1
                         // Heal first nMons
-                        for (int i = 0; i < nMons && i < trainerData.Teamsheet.Count; i++)
+                        foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
-                            trainerData.Teamsheet[i].ExplorationStatus.HealthPercentage = 100;
-                            trainerData.Teamsheet[i].ExplorationStatus.NonVolatileStatus = "";
+                            mon.HealFull();
                         }
                         Console.Write("Encounter resolution: ");
-                        int remainingMons = ResolveEncounter(trainerData, randomNpc, nMons); // 3 Mon both players
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, randomNpc);
                         if (remainingMons == 0) // Means player lost
                         {
                             Console.WriteLine("Player lost");
@@ -910,10 +1115,11 @@ namespace IndymonBackendProgram
                         else
                         {
                             Console.WriteLine("Player won");
-                            UpdateTrainerDataInfo(trainerData); // Updates numbers in chart
-                            AddRareItemPrize($"{randomNpc.Name}'s favor", Prizes);
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                            _prizes.AddReward(randomNpc.Name, 1);
                             npcString = roomEvent.PostEventString.Replace("$1", randomNpc.Name);
                             GenericMessageCommand(npcString);
+                            PostFightTrainerMods();
                         }
                     }
                     break;
@@ -964,81 +1170,86 @@ namespace IndymonBackendProgram
         /// <summary>
         /// Saves exploration outcome in a txt file for quick copying
         /// </summary>
-        /// <param name="prizeData">Data of obtained stuff</param>
-        void SaveExplorationOutcome(ExplorationPrizes prizeData)
+        void SaveExplorationOutcome()
         {
-            string explFile = $"expl_result.txt";
-            StringBuilder builder = new StringBuilder();
-            builder.AppendLine($"__{Trainer} has obtained the following items:__");
-            builder.AppendLine();
-            List<string> nextCollection = new List<string>();
-            // Attach commons (or empty list) items
-            foreach (KeyValuePair<string, int> commonItemData in prizeData.CommonItems)
+            string explFile = $"{_trainer}_EXPLORATION.txt";
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Clear();
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"__{_trainer.Name} has obtained the following items:__");
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
+            // Do collections one by one, of the things gained
+            int maxCount = 0;
+            static string GetPrizesStrings<T>(Dictionary<T, int> dict)
             {
-                nextCollection.Add($"{commonItemData.Key} x{commonItemData.Value}");
-            }
-            builder.Append("**Commons: **||");
-            if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
-            else builder.Append(new string('M', Utilities.GetRandomNumber(15, 30)));
-            builder.AppendLine("||");
-            // Attach rares (or empty list) items
-            nextCollection = new List<string>();
-            foreach (KeyValuePair<string, int> rareItemData in prizeData.RareItems)
-            {
-                nextCollection.Add($"{rareItemData.Key} x{rareItemData.Value}");
-            }
-            builder.Append("**Rares: **||");
-            if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
-            else builder.Append(new string('M', Utilities.GetRandomNumber(15, 30)));
-            builder.AppendLine("||");
-            builder.AppendLine();
-            // Then the pokemon one by one
-            builder.AppendLine($"__Catchable Pokemon (As many as you want as long as you have the corresponding poke-ball):__");
-            builder.AppendLine();
-            string[] pokeBallData = ["Poke ball or better", "Great ball or better", "Ultra ball or better", "Master ball"];
-            for (int i = 0; i < prizeData.MonsFound.Length; i++)
-            {
-                nextCollection = new List<string>();
-                builder.Append($"**Floor {i + 1} ({pokeBallData[i]}): **||");
-                foreach (KeyValuePair<string, int> monData in prizeData.MonsFound[i])
+                List<string> collection = new List<string>();
+                foreach (KeyValuePair<T, int> data in dict)
                 {
-                    nextCollection.Add($"{monData.Key} x{monData.Value}");
+                    collection.Add(data.Value > 1 ? $"{data.Key} x{data.Value}" : $"{data.Key}");
                 }
-                if (nextCollection.Count > 0) builder.Append(string.Join(',', nextCollection));
-                else builder.Append(new string('M', Utilities.GetRandomNumber(15, 30)));
-                builder.AppendLine("||");
+                return string.Join(',', collection);
             }
-            // String done, save into file
-            File.WriteAllText(explFile, builder.ToString());
+            // First set items:
+            string setItemString = GetPrizesStrings(_prizes.SetItemsFound);
+            maxCount = Math.Max(maxCount, setItemString.Length);
+            // Mod
+            string modItemString = GetPrizesStrings(_prizes.SetItemsFound);
+            maxCount = Math.Max(maxCount, modItemString.Length);
+            // Mod
+            string battleItemString = GetPrizesStrings(_prizes.BattleItemsFound);
+            maxCount = Math.Max(maxCount, battleItemString.Length);
+            // Favour
+            string favourString = GetPrizesStrings(_prizes.FavoursFound);
+            maxCount = Math.Max(maxCount, favourString.Length);
+            // Key
+            string keyString = GetPrizesStrings(_prizes.KeyItemsFound);
+            maxCount = Math.Max(maxCount, keyString.Length);
+            if (setItemString.Length == 0) setItemString = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
+            if (modItemString.Length == 0) modItemString = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
+            if (battleItemString.Length == 0) battleItemString = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
+            if (favourString.Length == 0) favourString = new string('M', GeneralUtilities.GetRandomNumber(3 * maxCount / 10, 4 * maxCount / 10)); // +- 10%
+            if (keyString.Length == 0) keyString = new string('M', GeneralUtilities.GetRandomNumber(3 * maxCount / 10, 4 * maxCount / 10)); // +- 10%
+            // Now print
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Set Items: **||{setItemString}||");
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Mod Items: **||{modItemString}||");
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Held Items: **||{battleItemString}||");
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Favours: **||{favourString}||");
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"**Key Items: **||{keyString}||");
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
+            // The mon printing is weird
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"__Catchable Pokemon (As many as you want as long as you have the corresponding Poke Ball for the Pokemon rank):__");
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
+            List<int> ranks = [.. _prizes.MonsFound.Keys.Order()];
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Append($"||"); // Beginning of rank Spoilered text
+            foreach (int rank in ranks)
+            {
+                string monsOfRank = GetPrizesStrings(_prizes.MonsFound[rank]);
+                GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Append($"**RANK {rank}:** {monsOfRank}. ");
+            }
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"||"); // Close rank-spoilered text
+            // Save
+            string filePath = Path.Combine(DirectoryPath, explFile);
+            GameDataContainers.GlobalGameData.CurrentEventMessage.SaveToFile(filePath);
         }
         /// <summary>
         /// Updates all the trainer data in the exploration info table
         /// </summary>
-        /// <param name="trainerData">Trainer containing the mons</param>
-        void UpdateTrainerDataInfo(TrainerData trainerData)
+        void UpdateTrainerDataInfo()
         {
-            for (int i = 0; i < trainerData.Teamsheet.Count; i++)
+            for (int i = 0; i < _trainer.BattleTeam.Count; i++)
             {
-                PokemonSet mon = trainerData.Teamsheet[i];
-                Console.WriteLine($"{mon.GetInformalName()} status is {mon.ExplorationStatus}");
+                TrainerPokemon mon = _trainer.BattleTeam[i];
                 // Print stuff
                 ModifyInfoValueCommand(mon.Species, (0, i));
-                ModifyInfoValueCommand($"{mon.ExplorationStatus.HealthPercentage}%", (1, i));
-                ModifyInfoValueCommand(mon.ExplorationStatus.NonVolatileStatus, (2, i));
-                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[0] >= 99) ? "??" : mon.ExplorationStatus.MovePp[0].ToString(), (3, i));
-                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[1] >= 99) ? "??" : mon.ExplorationStatus.MovePp[1].ToString(), (4, i));
-                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[2] >= 99) ? "??" : mon.ExplorationStatus.MovePp[2].ToString(), (5, i));
-                ModifyInfoValueCommand((mon.ExplorationStatus.MovePp[3] >= 99) ? "??" : mon.ExplorationStatus.MovePp[3].ToString(), (6, i));
+                ModifyInfoValueCommand($"{mon.HealthPercentage}%", (1, i));
+                ModifyInfoValueCommand(mon.NonVolatileStatus, (2, i));
             }
         }
         /// <summary>
         /// Verifies whether a trainer fills the consitions to use a shortcut
         /// </summary>
         /// <param name="conditions">Shortcut conditions</param>
-        /// <param name="trainerData">Data of trainer</param>
         /// <param name="message">An extra return indicating the message used (E.g. X used Y)</param>
         /// <returns>Whether shortcut activates or not</returns>
-        bool VerifyShortcutConditions(List<ShortcutCondition> conditions, TrainerData trainerData, out string message)
+        bool VerifyShortcutConditions(List<ShortcutCondition> conditions, out string message)
         {
             bool canTakeShortcut = false;
             message = "";
@@ -1046,35 +1257,37 @@ namespace IndymonBackendProgram
             {
                 foreach (string eachOne in condition.Which)
                 {
-                    string valueToCheck = eachOne.ToLower();
                     switch (condition.ConditionType)
                     {
                         case ShortcutConditionType.MOVE:
-                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has move, all good
+                            foreach (TrainerPokemon pokemon in _trainer.BattleTeam) // If a mon has move, all good
                             {
-                                if (pokemon.Moves.Contains(valueToCheck)) // move found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right set item
+                                if (pokemon.ChosenMoveset.Any(m => m?.Name == eachOne) && pokemon.SetItemChosen && pokemon.SetItem.AddedMoves.Any(m => m?.Name == eachOne)) // move found
                                 {
-                                    message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
+                                    message = $"{pokemon.GetInformalName()}'s {eachOne}";
                                     canTakeShortcut = true;
                                     break;
                                 }
                             }
                             break;
                         case ShortcutConditionType.ABILITY:
-                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has ability, all good
+                            foreach (TrainerPokemon pokemon in _trainer.BattleTeam) // If a mon has ability, all good
                             {
-                                if (pokemon.Ability == valueToCheck) // ability found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right set item
+                                if (pokemon.ChosenAbility.Name == eachOne && pokemon.SetItemChosen && pokemon.SetItem.AddedAbility.Name == eachOne) // ability found
                                 {
-                                    message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
+                                    message = $"{pokemon.GetInformalName()}'s {eachOne}";
                                     canTakeShortcut = true;
                                     break;
                                 }
                             }
                             break;
                         case ShortcutConditionType.POKEMON:
-                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon is there, all good
+                            foreach (TrainerPokemon pokemon in _trainer.BattleTeam) // If a mon is there, all good
                             {
-                                if (pokemon.Species == valueToCheck) // species found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered consciously
+                                if (pokemon.Species == eachOne && !_trainer.AutoTeam) // species found
                                 {
                                     message = $"{pokemon.GetInformalName()}";
                                     canTakeShortcut = true;
@@ -1083,33 +1296,37 @@ namespace IndymonBackendProgram
                             }
                             break;
                         case ShortcutConditionType.TYPE:
-                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has type, all good
+                            foreach (TrainerPokemon pokemon in _trainer.BattleTeam) // If a mon has type, all good
                             {
-                                if (_backEndData.Dex[pokemon.Species].Types.Contains(valueToCheck)) // type of pokemon found
+                                Pokemon monSpecies = MechanicsDataContainers.GlobalMechanicsData.Dex[pokemon.Species];
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered consciously
+                                if (!_trainer.AutoTeam && (monSpecies.Types.Item1.ToString().ToUpper() == eachOne.ToUpper() || monSpecies.Types.Item2.ToString().ToUpper() == eachOne.ToUpper())) // type of pokemon found
                                 {
-                                    message = $"{pokemon.GetInformalName()}'s {valueToCheck} type";
+                                    message = $"{pokemon.GetInformalName()}'s {eachOne} type";
                                     canTakeShortcut = true;
                                     break;
                                 }
                             }
                             break;
-                        case ShortcutConditionType.ITEM:
-                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has item, all good
+                        case ShortcutConditionType.ITEM: // This is outdated but refers to the battle item I THINK ?!?!
+                            foreach (TrainerPokemon pokemon in _trainer.BattleTeam) // If a mon has item, all good
                             {
-                                if (pokemon.Item != null && pokemon.Item.Name == valueToCheck) // item found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right item
+                                if (pokemon.BattleItem?.Name == eachOne && pokemon.BattleItemChosen) // item found
                                 {
-                                    message = $"{pokemon.GetInformalName()}'s {valueToCheck}";
+                                    message = $"{pokemon.GetInformalName()}'s {eachOne}";
                                     canTakeShortcut = true;
                                     break;
                                 }
                             }
                             break;
-                        case ShortcutConditionType.MOVE_DISK:
-                            foreach (PokemonSet pokemon in trainerData.Teamsheet) // If a mon has item, all good
+                        case ShortcutConditionType.MOVE_DISK: // This is an insane guess but I think it refers to set item containin "move disk"
+                            foreach (TrainerPokemon pokemon in _trainer.BattleTeam)
                             {
-                                if (pokemon.Item != null && pokemon.Item.Name.ToLower().Contains(" disk")) // disk found
+                                // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right set item
+                                if (pokemon.SetItem != null && pokemon.SetItemChosen && pokemon.SetItem.Name.Contains("Disk")) // disk found
                                 {
-                                    message = $"{pokemon.GetInformalName()}'s {pokemon.Item.Name}";
+                                    message = $"{pokemon.GetInformalName()}'s {pokemon.SetItem.Name}";
                                     canTakeShortcut = true;
                                     break;
                                 }
@@ -1124,18 +1341,65 @@ namespace IndymonBackendProgram
             return canTakeShortcut;
         }
         /// <summary>
+        /// Applies all pre-fight traine rmods (i.e. team level)
+        /// </summary>
+        void PreFightTrainerMods()
+        {
+            foreach (TrainerPokemon mon in _trainer.BattleTeam)
+            {
+                mon.LevelMod = _context.GetExtraLevel(); // Check if mons get extra lvl
+                if (mon.LevelMod >= mon.Level) mon.LevelMod = mon.Level - 1; // Can't get level <=0 lol
+            }
+        }
+        /// <summary>
+        /// Apllies all trainer post-fight events, including healing and reset of lvl
+        /// </summary>
+        void PostFightTrainerMods()
+        {
+            foreach (TrainerPokemon mon in _trainer.BattleTeam)
+            {
+                mon.LevelMod = 0;
+                mon.HealthPercentage += _context.GetExtraHealing(); // Heal mon randomly
+                mon.HealthPercentage = Math.Clamp(mon.HealthPercentage, 1, 100);
+                _context.UseSandwichEffect(SandwichEffectType.POST_HEALING, GenericMessageCommand);
+                _context.UseSandwichEffect(SandwichEffectType.LEVEL, GenericMessageCommand);
+            }
+        }
+        /// <summary>
+        /// Clears all rooms and table (UNRECOVERABLE!)
+        /// </summary>
+        void SetDungeonCommand(string dungeon)
+        {
+            ExplorationSteps.Add(new ExplorationStep() // Clean the rooms
+            {
+                Type = ExplorationStepType.DEFINE_DUNGEON,
+                StringParam = dungeon
+            });
+        }
+        /// <summary>
+        /// Helper for all messages
+        /// </summary>
+        /// <param name="message">String to add</param>
+        void MessageCommand(string message, ExplorationStepType type)
+        {
+            Console.WriteLine($"> {message}"); // Important for debug too
+            int messagePause = message.Count(c => c == ' ') + 1; // Count spaces (words?)
+            messagePause *= MESSAGE_PAUSE_PER_WORD;
+            if (messagePause < MIN_MESSAGE_PAUSE) messagePause = MIN_MESSAGE_PAUSE;
+            ExplorationSteps.Add(new ExplorationStep()
+            {
+                Type = type,
+                StringParam = message,
+                MillisecondsWait = messagePause
+            });
+        }
+        /// <summary>
         /// Adds to event queue, a generic message string
         /// </summary>
         /// <param name="message">String to add</param>
         void GenericMessageCommand(string message)
         {
-            Console.WriteLine($"> {message}"); // Important for debug too
-            ExplorationSteps.Add(new ExplorationStep()
-            {
-                Type = ExplorationStepType.PRINT_STRING,
-                StringParam = message,
-                MillisecondsWait = STANDARD_MESSAGE_PAUSE
-            });
+            MessageCommand(message, ExplorationStepType.PRINT_STRING);
         }
         /// <summary>
         /// Adds to event queue, a generic message string. Will be informative (i.e. gives clue to a player)
@@ -1143,13 +1407,7 @@ namespace IndymonBackendProgram
         /// <param name="message">String to add</param>
         void ClueMessageCommand(string message)
         {
-            Console.WriteLine($"> {message}"); // Important for debug too
-            ExplorationSteps.Add(new ExplorationStep()
-            {
-                Type = ExplorationStepType.PRINT_CLUE,
-                StringParam = message,
-                MillisecondsWait = STANDARD_MESSAGE_PAUSE
-            });
+            MessageCommand(message, ExplorationStepType.PRINT_CLUE);
         }
         /// <summary>
         /// Adds to event queue, a plot message string. Will be plot-based (i.e. gives clue to a player)
@@ -1157,13 +1415,7 @@ namespace IndymonBackendProgram
         /// <param name="message">String to add</param>
         void PlotMessageCommand(string message)
         {
-            Console.WriteLine($"> {message}"); // Important for debug too
-            ExplorationSteps.Add(new ExplorationStep()
-            {
-                Type = ExplorationStepType.PRINT_PLOT,
-                StringParam = message,
-                MillisecondsWait = STANDARD_MESSAGE_PAUSE
-            });
+            MessageCommand(message, ExplorationStepType.PRINT_PLOT);
         }
         /// <summary>
         /// Adds to event queue, a generic message regarding pokemon evolution
@@ -1171,13 +1423,7 @@ namespace IndymonBackendProgram
         /// <param name="message">String to add</param>
         void EvolutionMessageCommand(string message)
         {
-            Console.WriteLine($"> {message}"); // Important for debug too
-            ExplorationSteps.Add(new ExplorationStep()
-            {
-                Type = ExplorationStepType.PRINT_EVOLUTION,
-                StringParam = message,
-                MillisecondsWait = STANDARD_MESSAGE_PAUSE
-            });
+            MessageCommand(message, ExplorationStepType.PRINT_EVOLUTION);
         }
         /// <summary>
         /// No command, just meant to do a wait
@@ -1291,61 +1537,110 @@ namespace IndymonBackendProgram
             });
         }
         /// <summary>
+        /// Generates an NPC enemy trainer for wild mons, listing the name and the mons/equip used. Traienr avatar will be unknown always
+        /// </summary>
+        /// <param name="trainerName">Name of trainer</param>
+        /// <param name="pokemonList">Pokemon found</param>
+        /// <param name="itemsHeld">Items the mons are holding</param>
+        /// <param name="shuffled">Whether to shuffle the mons in the generated team</param>
+        /// <returns></returns>
+        Trainer GenerateEnemyTrainer(string trainerName, List<string> pokemonList, List<string> itemsHeld, int minLvl, int maxLvl, bool shuffled)
+        {
+            int encounterShinyChance = _context.GetShinyChance();
+            Trainer enemyTrainer = new Trainer() // Create the blank trainer
+            {
+                Avatar = "unknown",
+                Name = trainerName,
+                AutoTeam = shuffled, // Will shuffle shit around unless it's not meant to
+                AutoBattleItem = false,
+                AutoFavour = false,
+                AutoModItem = false,
+                AutoSetItem = false,
+            };
+            if (shuffled)
+            {
+                GeneralUtilities.ShuffleList(itemsHeld); // Shuffle item list rq
+                GeneralUtilities.ShuffleList(pokemonList); // Shuffle mon list rq
+            }
+            for (int i = 0; i < pokemonList.Count; i++)
+            {
+                bool isShiny = (GeneralUtilities.GetRandomNumber(encounterShinyChance) == 0); // Will be shiny if i get a 0 dice roll
+                int level = GeneralUtilities.GetRandomNumber(minLvl, maxLvl + 1);
+                TrainerPokemon nextPokemonInTeam = new TrainerPokemon()
+                {
+                    Species = pokemonList[i],
+                    IsShiny = isShiny,
+                    Level = level,
+                };
+                // Add item if i got one
+                if (itemsHeld.Count > i) // If there's a valid item to give this mon
+                {
+                    string itemName = itemsHeld[i];
+                    IndymonUtilities.RewardType itemType = IndymonUtilities.GetRewardType(itemName); // Find the type of this item
+                    Item itemAux;
+                    switch (itemType)
+                    {
+                        case IndymonUtilities.RewardType.SET:
+                            if (!GameDataContainers.GlobalGameData.SetItems.TryGetValue(itemName, out SetItem setItem))
+                            {
+                                setItem = SetItem.Parse(itemName);
+                                GameDataContainers.GlobalGameData.SetItems.Add(itemName, setItem);
+                            }
+                            nextPokemonInTeam.SetItem = setItem; // Equip the item
+                            break;
+                        case IndymonUtilities.RewardType.MOD:
+                            itemAux = MechanicsDataContainers.GlobalMechanicsData.ModItems[itemName];
+                            nextPokemonInTeam.ModItem = itemAux;
+                            break;
+                        case IndymonUtilities.RewardType.BATTLE:
+                            itemAux = MechanicsDataContainers.GlobalMechanicsData.BattleItems[itemName];
+                            nextPokemonInTeam.ModItem = itemAux;
+                            break;
+                        default: // These items are not equippable
+                            break;
+                    }
+                }
+                enemyTrainer.PartyPokemon.Add(nextPokemonInTeam); // Add mon
+            }
+            return enemyTrainer;
+        }
+        /// <summary>
+        /// Builds a set for an enemy encounter, which may include a set that can counter the trainer alongside using dungeon as best as possible
+        /// </summary>
+        /// <param name="enemy">Trainer to build</param>
+        /// <param name="maxNMons">How many mons to build it for</param>
+        /// <param name="smart">Whether teambuild is smart or not</param>
+        void DefineEnemySet(Trainer enemy, int maxNMons, bool smart)
+        {
+            List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(enemy, maxNMons, [new Constraint()], true);
+            TeamBuilder.AssembleTrainersBattleTeam(enemy, maxNMons, possibleBuilds, true); // Chooses one of the sets, prepares the mons, any seed
+            // Now, make the trainer choose it's team sets!
+            List<Pokemon> enemyMons = null;
+            if (smart) // If smart, build against the trainer
+            {
+                enemyMons = [.. _trainer.BattleTeam.Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m.Species])];
+            }
+            TeamBuilder.DefineTrainerSets(enemy, smart, _dungeonData.DungeonArchetypes, _dungeonData.DungeonWeather, _dungeonData.DungeonTerrain, new Constraint(), enemyMons); // Team build but with the dungeon's weather and such 
+        }
+        /// <summary>
         /// Resolves an encounter between players, no mon limit
         /// </summary>
-        /// <param name="epxlorer">P1</param>
+        /// <param name="explorer">P1</param>
         /// <param name="encounter">P2</param>
-        /// <param name="nMons">If this encounter has a specific number of mons (default is all v all)</param>
         /// <returns>How many mons P1 has left (0 means defeat)</returns>
-        int ResolveEncounter(TrainerData epxlorer, TrainerData encounter, int nMons = int.MaxValue)
+        int ResolveEncounter(Trainer explorer, Trainer encounter)
         {
+            GenericMessageCommand($""); // Marker for video sync
             (int cursorX, int cursorY) = Console.GetCursorPosition(); // Just in case I need to write in same place
             Console.Write("About to simulate bots...");
             Console.ReadLine();
-            BotBattle automaticBattle = new BotBattle(_backEndData); // Generate bot host
             // The challenge string may contain dungeon-specific rules (besides the mandatory ones)
-            List<string> showdownRules = ["!Team Preview", .. _dungeonDetails.CustomShowdownRules];
+            List<string> showdownRules = ["!Team Preview", .. _dungeonData.CustomShowdownRules];
             string challengeString = $"gen9customgame@@@{string.Join(",", showdownRules)}"; // Assemble resulting challenge string
-            (int explorerLeft, _) = automaticBattle.SimulateBotBattle(epxlorer, encounter, nMons, nMons, challengeString); // Initiate battle
+            (int explorerLeft, _) = BotBattle.SimulateBotBattle(explorer, encounter, challengeString); // Initiate battle
             Console.SetCursorPosition(cursorX, cursorY);
             Console.Write($"Explorer left with {explorerLeft} mons. GET THE REPLAY");
             return explorerLeft;
-        }
-        /// <summary>
-        /// Adds item to common prize pool
-        /// </summary>
-        /// <param name="item">Item to add</param>
-        /// <param name="prizes">Prizes container</param>
-        static void AddCommonItemPrize(string item, ExplorationPrizes prizes)
-        {
-            // Add the item to prizes
-            if (prizes.CommonItems.TryGetValue(item, out int previousCount)) prizes.CommonItems[item] = ++previousCount;
-            else prizes.CommonItems.Add(item, 1);
-        }
-        /// <summary>
-        /// Adds item to common prize pool
-        /// </summary>
-        /// <param name="item">Item to add</param>
-        /// <param name="prizes">Prizes container</param>
-        static void AddRareItemPrize(string item, ExplorationPrizes prizes)
-        {
-            // Add the item to prizes
-            if (prizes.RareItems.TryGetValue(item, out int previousCount)) prizes.RareItems[item] = ++previousCount;
-            else prizes.RareItems.Add(item, 1);
-        }
-        /// <summary>
-        /// Add pokemon to prize pool
-        /// </summary>
-        /// <param name="mon">Which mon</param>
-        /// <param name="floor">Which floor to add (0-4), also corresponds to pokeball</param>
-        /// <param name="shiny">Mon is shiny</param>
-        /// <param name="prizes">Prizes list</param>
-        static void AddPokemonPrize(string mon, int floor, bool shiny, ExplorationPrizes prizes)
-        {
-            if (shiny) mon += "★"; // Add shiny tag too
-            Dictionary<string, int> monList = prizes.MonsFound[floor];
-            if (monList.TryGetValue(mon, out int count)) monList[mon] = ++count;
-            else monList.Add(mon, 1);
         }
         #endregion
         #region ANIMATION
@@ -1356,13 +1651,13 @@ namespace IndymonBackendProgram
         /// </summary>
         public void AnimateExploration()
         {
+            _trainer = IndymonUtilities.GetTrainerByName(TrainerAndSeed.Item1); // Find the trainer data
             char[] infoTableTemplate = "|".ToCharArray();
             List<int> infoColOffset = [2]; // First element "would" start from here
             List<char[]> infoRows = [[.. infoTableTemplate], new string('-', infoTableTemplate.Length).ToCharArray()]; // Starts with the (empty) table header, and a separator
             Console.WriteLine("Write anything to begin. Better start recording now");
             Console.ReadLine();
             Console.Clear();
-            _dungeonDetails = _backEndData.Dungeons[Dungeon]; // Obtain dungeon back end data just in case it's not there yet
             int consoleLineStart = (DUNGEON_NUMBER_OF_FLOORS * ROOM_HEIGHT) + DUNGEON_NUMBER_OF_FLOORS + 1; // Rooms + spaces between, above and below
             int consoleOffset = consoleLineStart; // Where console currently at
             string emptyLine = new string(' ', Console.WindowWidth);
@@ -1370,6 +1665,9 @@ namespace IndymonBackendProgram
             {
                 switch (nextStep.Type)
                 {
+                    case ExplorationStepType.DEFINE_DUNGEON:
+                        _dungeonData = GameDataContainers.GlobalGameData.Dungeons[nextStep.StringParam]; // Loads the dungeon
+                        break;
                     case ExplorationStepType.PRINT_STRING:
                         Console.ForegroundColor = ConsoleColor.White; // Reset console just in case
                         Console.SetCursorPosition(0, consoleOffset);
@@ -1473,7 +1771,7 @@ namespace IndymonBackendProgram
         (int, int) GetRoomCoords(int floor, int room)
         {
             // Floor index is 0-2 if goes downwards or 2-0 if upwards
-            int roomY = _dungeonDetails.GoesDownwards ? floor : DUNGEON_NUMBER_OF_FLOORS - floor - 1; // Get the Y coord (vertical)
+            int roomY = _dungeonData.GoesDownwards ? floor : DUNGEON_NUMBER_OF_FLOORS - floor - 1; // Get the Y coord (vertical)
             roomY = 1 + ((1 + ROOM_HEIGHT) * roomY); // Correct Positioning of room Y tile
             // Clamp floor to valid numbers, to avoid weird looping outside the edges
             if (floor >= DUNGEON_NUMBER_OF_FLOORS) floor = DUNGEON_NUMBER_OF_FLOORS - 1;
@@ -1510,7 +1808,7 @@ namespace IndymonBackendProgram
         {
             (int X, int Y) = GetRoomCoords(floor, room);
             // Now i have coord X, Y to draw room
-            DungeonFloor floorData = _dungeonDetails.Floors[floor]; // Obtain room drawing data
+            DungeonFloor floorData = _dungeonData.Floors[floor]; // Obtain room drawing data
             Console.ForegroundColor = floorData.RoomColor; // Set color
             // Draw corners
             Console.SetCursorPosition(X, Y);
@@ -1546,14 +1844,14 @@ namespace IndymonBackendProgram
         /// <param name="destRoom">Where to (room)</param>
         void DrawCharacter(int sourceFloor, int sourceRoom, int destFloor, int destRoom)
         {
-            char playerSymbol = Trainer.ToUpper()[0];
+            string playerSymbol = _trainer.DungeonIdentifier;
             Console.ForegroundColor = ConsoleColor.White; // Set color back to white, for character
             // Delete current character first
             if (IsRoomValid(sourceFloor, sourceRoom))
             {
                 (int fromX, int fromY) = GetRoomCoords(sourceFloor, sourceRoom);
                 Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY + (ROOM_HEIGHT / 2));
-                Console.Write(" ");
+                Console.Write(new string(' ', playerSymbol.Length));
             }
             // Draw new character now
             if (IsRoomValid(destFloor, destRoom))
@@ -1581,7 +1879,7 @@ namespace IndymonBackendProgram
             DungeonFloor sourceFloorData = null, destFloorData = null;
             if (IsRoomValid(sourceFloor, sourceRoom))
             {
-                sourceFloorData = _dungeonDetails.Floors[sourceFloor];
+                sourceFloorData = _dungeonData.Floors[sourceFloor];
                 Console.ForegroundColor = sourceFloorData.RoomColor;
                 // Room is valid, so I need to modify it's corresponding wall depending where it moves to
                 if (fromX < toX) { Console.SetCursorPosition(fromX + ROOM_WIDTH - 1, fromY + (ROOM_HEIGHT / 2)); Console.Write(sourceFloorData.EWallPassageTile); } // Conenct east
@@ -1593,7 +1891,7 @@ namespace IndymonBackendProgram
             // Same for dest room
             if (IsRoomValid(destFloor, destRoom))
             {
-                destFloorData = _dungeonDetails.Floors[destFloor];
+                destFloorData = _dungeonData.Floors[destFloor];
                 Console.ForegroundColor = destFloorData.RoomColor;
                 // Room is valid, so I need to modify it's corresponding wall depending where it moves to
                 if (toX < fromX) { Console.SetCursorPosition(toX + ROOM_WIDTH - 1, toY + (ROOM_HEIGHT / 2)); Console.Write(destFloorData.EWallPassageTile); } // Conenct east
@@ -1630,7 +1928,7 @@ namespace IndymonBackendProgram
             DungeonFloor sourceFloorData = null, destFloorData = null;
             if (IsRoomValid(sourceFloor, sourceRoom))
             {
-                sourceFloorData = _dungeonDetails.Floors[sourceFloor];
+                sourceFloorData = _dungeonData.Floors[sourceFloor];
                 Console.ForegroundColor = sourceFloorData.RoomColor;
                 // Room is valid, so I need to modify it's corresponding wall depending where it moves to
                 // This time, it's only up-down so just compare floors
@@ -1641,7 +1939,7 @@ namespace IndymonBackendProgram
             // Same for dest room
             if (IsRoomValid(destFloor, destRoom))
             {
-                destFloorData = _dungeonDetails.Floors[destFloor];
+                destFloorData = _dungeonData.Floors[destFloor];
                 Console.ForegroundColor = destFloorData.RoomColor;
                 // Room is valid, so I need to modify it's corresponding wall depending where it moves to
                 // This time, it's only up-down so just compare floors
