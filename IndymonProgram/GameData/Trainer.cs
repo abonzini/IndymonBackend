@@ -97,7 +97,7 @@ namespace GameData
             lineBuilder.Append($"Auto Mod Item:,{AutoModItem.ToString().ToUpper()},");
             lineBuilder.Append($"Auto Held Item:,{AutoBattleItem.ToString().ToUpper()},");
             lineBuilder.Append($"Auto Favour:,{AutoFavour.ToString().ToUpper()},");
-            lineBuilder.Append($"{DiscordNumber},{TrainerRank.ToString()},");
+            lineBuilder.Append($"{DiscordNumber},{TrainerRank.ToString()},,,-");
             fileBuilder.AppendLine(lineBuilder.ToString());
             // Line 2 is purely text but does contain actual assembled string
             lineBuilder.Clear();
