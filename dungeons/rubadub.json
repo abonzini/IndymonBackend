@@ -135,8 +135,8 @@
     { "Name": "Miracle Seed", "Min": 1, "Max": 2 }
   ],
   "RareItems": [
-    { "Name": "Water Stone", "Min": 2, "Max": 4 },
-    { "Name": "Sun Stone", "Min": 2, "Max": 4 },
+    { "Name": "Water Stone", "Min": 1, "Max": 1 },
+    { "Name": "Sun Stone", "Min": 1, "Max": 1 },
 		{ "Name": "Big Root", "Min": 2, "Max": 4 },
 		{ "Name": "Electric Seed", "Min": 2, "Max": 4 },
 		{ "Name": "Psychic Seed", "Min": 2, "Max": 4 },

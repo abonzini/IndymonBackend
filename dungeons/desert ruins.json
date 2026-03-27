@@ -167,7 +167,7 @@
     { "Name": "Soft Sand", "Min": 2, "Max": 4 },
     { "Name": "Utility Umbrella", "Min": 2, "Max": 4 }
   ],
-  "BossItem": { "Name": "Sun Stone", "Min": 3, "Max": 3 },
+  "BossItem": { "Name": "Boss Sun Stone", "Min": 3, "Max": 3 },
   "Floors": [
     {
       "RoomColor": "DarkYellow",
