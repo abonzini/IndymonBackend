@@ -105,5 +105,6 @@ namespace MechanicsData
         BASIC,
         FIRST_ONCE,
         DONT_REPEAT,
+        REPEAT_OFTEN,
     }
 }

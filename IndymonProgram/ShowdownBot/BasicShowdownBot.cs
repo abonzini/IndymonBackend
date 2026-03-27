@@ -392,6 +392,18 @@ namespace ShowdownBot
                             moveChoice = GeneralUtilities.GetRandomNumber(0, currentPokemon.ChosenMoveset.Count);
                         } while (!currentPokemon.MovesChosenInBattle.Contains(moveChoice));
                     }
+                    else if (tryLogicMod && currentPokemon.Logic == PokemonLogic.REPEAT_OFTEN) // Repeats the last move with a higher chance
+                    {
+                        bool repeatMove = GeneralUtilities.GetRandomNumber(1000) < 750; // 75% chance of repeating a move
+                        if (repeatMove && currentPokemon.MovesChosenInBattle.Count > 0)
+                        {
+                            moveChoice = GeneralUtilities.GetRandomPick([.. currentPokemon.MovesChosenInBattle]); // Get a random choice of the ones already performed
+                        }
+                        else
+                        {
+                            moveChoice = GeneralUtilities.GetRandomNumber(0, currentPokemon.ChosenMoveset.Count);
+                        }
+                    }
                     else // Normal logic
                     {
                         moveChoice = GeneralUtilities.GetRandomNumber(0, currentPokemon.ChosenMoveset.Count); // 0 -> 3 can be the choice
