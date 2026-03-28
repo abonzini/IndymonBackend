@@ -61,9 +61,9 @@
   ],
   "PokemonEachFloor": [
 	[
+    "Pichu",
 		"Caterpie",
 		"Weedle",
-		"Pikachu",
 		"Oddish",
 		"Paras",
 		"Venonat",
@@ -83,6 +83,7 @@
 		"Hoothoot"
 	],
 	[
+		"Pikachu",
 		"Butterfree",
 		"Gloom",
 		"Parasect",

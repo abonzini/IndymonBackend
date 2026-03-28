@@ -67,7 +67,6 @@
 		"Magikarp",
 		"Totodile",
 		"Azuril",
-		"Marill",
 		"Lotad",
 		"Surskit",
 		"Feebas",
@@ -89,7 +88,7 @@
 		"Wartortle",
 		"Poliwhirl",
 		"Croconaw",
-		"Azumarrill",
+		"Marill",
 		"Lombre",
 		"Masquerain",
 		"Bibarel",
@@ -104,6 +103,7 @@
     "Bellibolt"
 	],
 	[
+		"Azumarrill",
 		"Blastoise",
 		"Poliwrath",
 		"Politoed",

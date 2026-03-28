@@ -71,8 +71,8 @@
   ],
   "PokemonEachFloor": [
 	[
+    "Mime Jr.",
 		"Drowzee",
-		"Mr. Mime-Galar",
 		"Smoochum",
 		"Dratini",
 		"Togepi",
@@ -92,6 +92,7 @@
 		"Castform"
 	],
 	[
+		"Mr. Mime-Galar",
 		"Hypno",
 		"Lickitung",
 		"Jynx",
@@ -110,7 +111,6 @@
 		"Gothorita",
 		"Braviary",
 		"Doublade",
-		"Minior",
 		"Shelgon"
 	],
 	[
