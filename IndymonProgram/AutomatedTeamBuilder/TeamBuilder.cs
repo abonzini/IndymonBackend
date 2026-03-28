@@ -95,8 +95,7 @@ namespace AutomatedTeamBuilder
                 mon.ChosenAbility = null;
                 mon.ChosenMoveset.Clear();
                 // Also get the mons ability and moveset here
-                Pokemon monData;
-                monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
+                Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
                 // First thing is to check if mon has set item equipped, if so, add the move/ability already
                 if (mon.SetItem != null)
                 {

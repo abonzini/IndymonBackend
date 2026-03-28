@@ -34,6 +34,9 @@ namespace MechanicsData
     /// What stat is going to be modified and how
     public enum StatModifier
     {
+        SUFFIX, // Adds a suffix to Pokemon, such as zen mode calcing for darmanitan zen or melo piruette
+        SPECIES_OVEERIDE, // In very special cases when the whole mon changes to a specific other one
+        ABILITY_OVERRIDE, // In transformations, the ability is also overriden, avoids calculating 2 abilities, also will help w mega I think
         WEIGHT_MULTIPLIER, /// Things that modify weight
         // The base multiplier of stuff *X, caused by abilities, items etc
         HP_MULTIPLIER, /// Attack multiplications, usually reductions

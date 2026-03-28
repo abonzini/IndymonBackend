@@ -41,10 +41,13 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="mod">Type of mod</param>
         /// <param name="name">Name of the element to verify</param>
-        public static void AssertStatModExistance(StatModifier mod, string name)
+        public void AssertStatModExistance(StatModifier mod, string name)
         {
             bool modExists = mod switch
             {
+                StatModifier.SUFFIX => name.StartsWith('-'), // Not much more to do other than verify the mod starts with -
+                StatModifier.SPECIES_OVEERIDE => Dex.ContainsKey(name), // Ensure mon exists
+                StatModifier.ABILITY_OVERRIDE => Abilities.ContainsKey(name), // Ensure ability exists
                 StatModifier.WEIGHT_MULTIPLIER or StatModifier.HP_MULTIPLIER or StatModifier.ATTACK_MULTIPLIER or StatModifier.DEFENSE_MULTIPLIER or StatModifier.SPECIAL_ATTACK_MULTIPLIER or StatModifier.SPECIAL_DEFENSE_MULTIPLIER or StatModifier.SPEED_MULTIPLIER or StatModifier.OPP_HP_MULTIPLIER or StatModifier.OPP_ATTACK_MULTIPLIER or StatModifier.OPP_DEFENSE_MULTIPLIER or StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER or StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER or StatModifier.OPP_SPEED_MULTIPLIER or StatModifier.ALTER_RECV_NON_SE_DAMAGE or StatModifier.ALTER_RECV_SE_DAMAGE or StatModifier.ATTACK_BOOST or StatModifier.DEFENSE_BOOST or StatModifier.SPECIAL_ATTACK_BOOST or StatModifier.SPECIAL_DEFENSE_BOOST or StatModifier.SPEED_BOOST or StatModifier.HIGHEST_STAT_BOOST or StatModifier.ALL_BOOSTS or StatModifier.OPP_ATTACK_BOOST or StatModifier.OPP_DEFENSE_BOOST or StatModifier.OPP_SPECIAL_ATTACK_BOOST or StatModifier.OPP_SPECIAL_DEFENSE_BOOST or StatModifier.OPP_SPEED_BOOST or StatModifier.ALL_OPP_BOOSTS or StatModifier.LEVEL => double.TryParse(name, out _),
                 StatModifier.HP_EV or StatModifier.ATK_EV or StatModifier.DEF_EV or StatModifier.SPATK_EV or StatModifier.SPDEF_EV or StatModifier.SPEED_EV or StatModifier.CRIT_BOOST => int.TryParse(name, out _),
                 StatModifier.NATURE => Enum.TryParse<Nature>(name, true, out _),

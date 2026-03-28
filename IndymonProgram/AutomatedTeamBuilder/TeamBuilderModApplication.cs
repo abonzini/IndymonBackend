@@ -1,5 +1,4 @@
-﻿using GameData;
-using MechanicsData;
+﻿using MechanicsData;
 using MechanicsDataContainer;
 
 namespace AutomatedTeamBuilder
@@ -114,10 +113,10 @@ namespace AutomatedTeamBuilder
         /// </summary>
         /// <param name="mon">The pokemon in question</param>
         /// <param name="monCtx">Context where to add the mods</param>
-        static void ExtractMonMods(TrainerPokemon mon, PokemonBuildContext monCtx)
+        static void ExtractMonMods(PokemonBuildContext monCtx)
         {
-            Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species]; // Obtain species of mon
-            ExtractMods((ElementType.POKEMON, mon.Species), monCtx); // Mon activates stuff
+            Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[monCtx.GetPokemonSpecies()]; // Obtain species of mon
+            ExtractMods((ElementType.POKEMON, monCtx.BaseSpecies), monCtx); // Mon activates stuff
             // Types are weird because they're modified before, so the mon needs to extract the ones of the current type at the last moment
             if (monCtx.TeraType != PokemonType.NONE)
             {
@@ -196,6 +195,15 @@ namespace AutomatedTeamBuilder
                     double[] auxStatBoostArray;
                     switch (statMod.Item1)
                     {
+                        case StatModifier.SUFFIX:
+                            monCtx.MonSuffix = statMod.Item2;
+                            break;
+                        case StatModifier.SPECIES_OVEERIDE:
+                            monCtx.SpeciesOverride = statMod.Item2;
+                            break;
+                        case StatModifier.ABILITY_OVERRIDE:
+                            monCtx.AbilityOverride = statMod.Item2;
+                            break;
                         case StatModifier.WEIGHT_MULTIPLIER:
                             monCtx.MonWeight *= double.Parse(statMod.Item2);
                             break;

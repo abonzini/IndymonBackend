@@ -40,6 +40,10 @@ namespace AutomatedTeamBuilder
         public Dictionary<(ElementType, string), HashSet<EffectFlag>> AllRemovedFlags = new Dictionary<(ElementType, string), HashSet<EffectFlag>>(); /// All the extra flags removed from moves/abilities
         public Dictionary<(ElementType, string), double> WeightMods = new Dictionary<(ElementType, string), double>();
         // Then stuff that alters current mon
+        public string BaseSpecies = ""; // The species of the mon itself, can be modified by "some" stuff
+        public string MonSuffix = ""; // The suffix used for this mon, normally an alternate form
+        public string SpeciesOverride = ""; // Possible override of the species
+        public string AbilityOverride = ""; // Possible override of a mons ability, use this for stuff calculation
         public Nature Nature = Nature.SERIOUS;
         public PokemonType TeraType = PokemonType.NONE;
         public (PokemonType, PokemonType) PokemonTypes = (PokemonType.NONE, PokemonType.NONE);
@@ -62,6 +66,12 @@ namespace AutomatedTeamBuilder
         public double DamageScore = 1;
         public double Survivability = 1;
         public double SpeedScore = 1;
+        public string GetPokemonSpecies()
+        {
+            string newSpecies = (SpeciesOverride != "") ? SpeciesOverride : BaseSpecies + MonSuffix;
+            if (!MechanicsDataContainers.GlobalMechanicsData.Dex.ContainsKey(newSpecies)) newSpecies = BaseSpecies; // If mon doesn't exist (e.g. Pikachu-Pirouette) then just go normal form, avoids zen crown and others
+            return newSpecies;
+        }
     }
     public static partial class TeamBuilder
     {
@@ -73,26 +83,18 @@ namespace AutomatedTeamBuilder
         /// <returns>The Pokemon build details</returns>
         static PokemonBuildContext ObtainPokemonSetContext(TrainerPokemon pokemon, TeamBuildContext teamCtx)
         {
-            PokemonBuildContext result = new PokemonBuildContext();
-            // First, need to load mon base stuff
-            Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[pokemon.Species];
-            // And other stuff
-            result.MonStats = monData.Stats;
-            result.MonWeight = monData.Weight;
+            PokemonBuildContext result = new PokemonBuildContext
+            {
+                BaseSpecies = pokemon.Species
+            };
             // Dump all the team-based data into here
             result.AdditionalArchetypes.UnionWith(teamCtx.CurrentTeamArchetypes); // Add all archetypes present overall in the team
             result.AdditionalConstraints.AddRange(teamCtx.TeamBuildConstraints);
             result.CurrentTerrain = teamCtx.CurrentTerrain;
             result.CurrentWeather = teamCtx.CurrentWeather;
-            // Then, a calculation of mon's current type that may involve some hardcoded shenanigans
-            result.PokemonTypes = monData.Types;// Set base type
             // Then obtain, step by step, all mods applied by all the (currently known) elements of the mon's build
             ExtractAlwaysMods(result); // Extract the mods that are present in absolutely everyhting
             ExtractPokeballMods(pokemon.PokeBall, result); // Pokeball can't change so extract its mods now
-            foreach (TeamArchetype archetype in result.AdditionalArchetypes)
-            {
-                ExtractArchetypeMods(archetype, result);
-            }
             if (pokemon.ModItem != null)
             {
                 ExtractModItemMods(pokemon.ModItem, result);
@@ -105,10 +107,6 @@ namespace AutomatedTeamBuilder
             {
                 ExtractMods((ElementType.ITEM_FLAGS, ItemFlag.NO_ITEM.ToString()), result); // Add "no item" to results flag
             }
-            if (pokemon.ChosenAbility != null)
-            {
-                ExtractAbilityMods(pokemon.ChosenAbility, result);
-            }
             foreach (Move move in pokemon.ChosenMoveset)
             {
                 if (move != null)
@@ -116,14 +114,30 @@ namespace AutomatedTeamBuilder
                     ExtractMoveMods(move, result);
                 }
             }
-            ExtractMonMods(pokemon, result);
+            // What ability should I consider for this?
+            Ability currentAbility = (result.AbilityOverride != "") ? MechanicsDataContainers.GlobalMechanicsData.Abilities[result.AbilityOverride] : pokemon.ChosenAbility;
+            if (currentAbility != null)
+            {
+                ExtractAbilityMods(pokemon.ChosenAbility, result);
+            }
+            // Then weather/terrain/archetypes which have been modified by the existing things
+            foreach (TeamArchetype archetype in result.AdditionalArchetypes)
+            {
+                ExtractArchetypeMods(archetype, result);
+            }
             ExtractWeatherMods(result.CurrentWeather, result);
             ExtractTerrainMods(result.CurrentTerrain, result);
+            // All of these mods may have changed the pokemon itself (e.g. zen mode, pirouette, random shit, so only then we verify the mon and stuff)
+            Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[result.GetPokemonSpecies()];
+            result.MonStats = monData.Stats;
+            result.MonWeight = monData.Weight;
+            result.PokemonTypes = monData.Types; // Set base type
+            ExtractMonMods(result);
             // Finally, gather all flags and apply flag mods but only once (e.g. 2 instances of same flag don't stack)
             HashSet<EffectFlag> allFlags = [];
-            if (pokemon.ChosenAbility != null)
+            if (currentAbility != null)
             {
-                allFlags = [.. pokemon.ChosenAbility.Flags]; // Ability flags are already 100% known as abilities aren't modded
+                allFlags = [.. currentAbility.Flags]; // Ability flags are already 100% known as abilities aren't modded
             }
             foreach (Move move in pokemon.ChosenMoveset)
             {
