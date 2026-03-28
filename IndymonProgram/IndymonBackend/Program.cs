@@ -208,6 +208,18 @@ namespace IndymonBackendProgram
                             trainer.SaveTrainerCsv(trainerFilePath);
                         }
                         break;
+                    case "11":
+                        {
+                            Console.WriteLine($"Which dungeon? {string.Join(", ", [.. GameDataContainers.GlobalGameData.Dungeons.Keys])}");
+                            string dungeon = Console.ReadLine();
+                            Dungeon theDungeon = GameDataContainers.GlobalGameData.Dungeons[dungeon];
+                            List<string> possibleMons = theDungeon.PokemonEachFloor[0];
+                            GeneralUtilities.ShuffleList(possibleMons);
+                            Console.WriteLine("How many mons?");
+                            int count = int.Parse(Console.ReadLine());
+                            Console.WriteLine(string.Join(", ", possibleMons[0..count]));
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -231,7 +243,8 @@ namespace IndymonBackendProgram
                 "7 - Animate resolved exploration\n" +
                 "8 - Draw Random Favour\n" +
                 "9 - Random 'Baby' Pokemon from trainer (Favor resolution)\n" +
-                "10 - Random exploration rewards (tiered favor resolutions)\n"
+                "10 - Random exploration rewards (tiered favor resolutions)\n" +
+                "11 - Random exploration mons (for beginning of trainer's adventures)\n"
             );
         }
     }

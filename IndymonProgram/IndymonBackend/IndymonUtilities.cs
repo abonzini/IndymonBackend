@@ -180,7 +180,7 @@ namespace IndymonBackendProgram
             {
                 if (count > max)
                 {
-                    GameDataContainers.GlobalGameData.CurrentEventMessage.PostEventText.AppendLine($"||You currently have {count}/{max} {what}. Please discard or use before the deadline, otherwise the last few will be discarded until they can fit.");
+                    GameDataContainers.GlobalGameData.CurrentEventMessage.PostEventText.AppendLine($"||You currently have {count}/{max} {what}. Please discard or use before the deadline, otherwise the last few will be discarded until they can fit. Please consider re-enabling the auto-item setting too if not planning to use your items.||");
                 }
             }
             WarnIf(trainer.SetItems.Count, MAX_ITEMS, "Set Items");

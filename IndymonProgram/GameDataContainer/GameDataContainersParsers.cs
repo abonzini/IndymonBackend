@@ -92,6 +92,7 @@ namespace GameDataContainer
                                 // Pokeball
                                 string pokeBall = nextLine[j + 3];
                                 MechanicsDataContainers.GlobalMechanicsData.AssertElementExistance(ElementType.POKEBALL, pokeBall);
+                                newPokemon.PokeBall = pokeBall;
                                 // Set item
                                 string setItemName = nextLine[j + 4];
                                 if (setItemName != "")
