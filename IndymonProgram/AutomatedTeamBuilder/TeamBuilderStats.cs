@@ -8,8 +8,10 @@
         /// <param name="monCtx">The extra context (e.g. mods) to apply to stat</param>
         /// <param name="battleContext">Context of battle, basically to get opp data</param>
         /// <param name="isOpponent">If the stat to calculate is the opponent's</param>
+        /// <param name="positiveBoostEffectiveness">How effective positive boosts are (e.g. when calcing opp's on a crit)</param>
+        /// <param name="negativeBoostEffectiveness">How effective negative boosts are (e.g. when calcing opp's on a crit)</param>
         /// <returns>The total stat, after multipliers and all and its variance</returns>
-        static (double[], double[]) MonStatCalculation(PokemonBuildContext monCtx, TeamBuildContext battleContext = null, bool isOpponent = false)
+        static (double[], double[]) MonStatCalculation(PokemonBuildContext monCtx, TeamBuildContext battleContext, bool isOpponent, double positiveBoostEffectiveness, double negativeBoostEffectiveness)
         {
             double[] resultingStats = [0, 0, 0, 0, 0, 0];
             double[] resultingStatVariance = [0, 0, 0, 0, 0, 0];
@@ -52,6 +54,7 @@
             {
                 // Check boost amount (+highest stat if any)
                 double theBoost = boosts[i];
+                if (!isOpponent && monCtx.AddOppBoosts && monCtx.OppStatBoosts[i] > 0) theBoost += monCtx.OppStatBoosts[i]; // I may also be able to add the opp positive stat boosts to myself, e.g. mirror herb
                 if (!isOpponent && i == highestStatIndex) // Opp doesn't have "highest stat boost" options
                 {
                     theBoost += boosts[6];
@@ -59,6 +62,16 @@
                 }
                 // Calculate the boost itself
                 theBoost *= boostsMultiplier; // Multiplier applied last to all possible boosts
+                if (theBoost > 0) // Will apply effectiveness of how much of the positive/negative boosts to ignore
+                {
+                    theBoost *= positiveBoostEffectiveness;
+                }
+                else
+                {
+                    theBoost *= negativeBoostEffectiveness;
+                    if (!isOpponent) theBoost *= monCtx.NegativeStatBoostsMultiplier; // Non-opp mon also has the option of multiplying stat boost further
+                }
+                // Ok now calculate the stat changes
                 double num = 2;
                 double den = 2;
                 if (theBoost > 0) num += theBoost;

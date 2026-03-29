@@ -17,6 +17,7 @@ namespace MechanicsDataContainer
                 ElementType.POKEMON_TYPE => Enum.TryParse<PokemonType>(name, true, out _),
                 ElementType.POKEMON_HAS_PREVO => bool.TryParse(name, out _),
                 ElementType.POKEMON_HAS_EVO => bool.TryParse(name, out _),
+                ElementType.POKEMON_HAS_POSITIVE_BOOSTS or ElementType.POKEMON_HAS_NEGATIVE_BOOSTS => name == "-",
                 ElementType.ARCHETYPE => Enum.TryParse<TeamArchetype>(name, true, out _),
                 ElementType.WEATHER => Enum.TryParse<Weather>(name, true, out _),
                 ElementType.TERRAIN => Enum.TryParse<Terrain>(name, true, out _),
@@ -48,12 +49,12 @@ namespace MechanicsDataContainer
                 StatModifier.SUFFIX => name.StartsWith('-'), // Not much more to do other than verify the mod starts with -
                 StatModifier.SPECIES_OVEERIDE => Dex.ContainsKey(name), // Ensure mon exists
                 StatModifier.ABILITY_OVERRIDE => Abilities.ContainsKey(name), // Ensure ability exists
-                StatModifier.WEIGHT_MULTIPLIER or StatModifier.HP_MULTIPLIER or StatModifier.ATTACK_MULTIPLIER or StatModifier.DEFENSE_MULTIPLIER or StatModifier.SPECIAL_ATTACK_MULTIPLIER or StatModifier.SPECIAL_DEFENSE_MULTIPLIER or StatModifier.SPEED_MULTIPLIER or StatModifier.OPP_HP_MULTIPLIER or StatModifier.OPP_ATTACK_MULTIPLIER or StatModifier.OPP_DEFENSE_MULTIPLIER or StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER or StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER or StatModifier.OPP_SPEED_MULTIPLIER or StatModifier.ALTER_RECV_NON_SE_DAMAGE or StatModifier.ALTER_RECV_SE_DAMAGE or StatModifier.ATTACK_BOOST or StatModifier.DEFENSE_BOOST or StatModifier.SPECIAL_ATTACK_BOOST or StatModifier.SPECIAL_DEFENSE_BOOST or StatModifier.SPEED_BOOST or StatModifier.HIGHEST_STAT_BOOST or StatModifier.ALL_BOOSTS or StatModifier.OPP_ATTACK_BOOST or StatModifier.OPP_DEFENSE_BOOST or StatModifier.OPP_SPECIAL_ATTACK_BOOST or StatModifier.OPP_SPECIAL_DEFENSE_BOOST or StatModifier.OPP_SPEED_BOOST or StatModifier.ALL_OPP_BOOSTS or StatModifier.LEVEL => double.TryParse(name, out _),
+                StatModifier.WEIGHT_MULTIPLIER or StatModifier.HP_MULTIPLIER or StatModifier.ATTACK_MULTIPLIER or StatModifier.DEFENSE_MULTIPLIER or StatModifier.SPECIAL_ATTACK_MULTIPLIER or StatModifier.SPECIAL_DEFENSE_MULTIPLIER or StatModifier.SPEED_MULTIPLIER or StatModifier.OPP_HP_MULTIPLIER or StatModifier.OPP_ATTACK_MULTIPLIER or StatModifier.OPP_DEFENSE_MULTIPLIER or StatModifier.OPP_SPECIAL_ATTACK_MULTIPLIER or StatModifier.OPP_SPECIAL_DEFENSE_MULTIPLIER or StatModifier.OPP_SPEED_MULTIPLIER or StatModifier.ALTER_RECV_NON_SE_DAMAGE or StatModifier.ALTER_RECV_SE_DAMAGE or StatModifier.ATTACK_BOOST or StatModifier.DEFENSE_BOOST or StatModifier.SPECIAL_ATTACK_BOOST or StatModifier.SPECIAL_DEFENSE_BOOST or StatModifier.SPEED_BOOST or StatModifier.HIGHEST_STAT_BOOST or StatModifier.ALL_BOOSTS or StatModifier.OPP_ATTACK_BOOST or StatModifier.OPP_DEFENSE_BOOST or StatModifier.OPP_SPECIAL_ATTACK_BOOST or StatModifier.OPP_SPECIAL_DEFENSE_BOOST or StatModifier.OPP_SPEED_BOOST or StatModifier.ALL_OPP_BOOSTS or StatModifier.ALL_NEGATIVE_BOOSTS or StatModifier.LEVEL => double.TryParse(name, out _),
                 StatModifier.HP_EV or StatModifier.ATK_EV or StatModifier.DEF_EV or StatModifier.SPATK_EV or StatModifier.SPDEF_EV or StatModifier.SPEED_EV or StatModifier.CRIT_BOOST => int.TryParse(name, out _),
                 StatModifier.NATURE => Enum.TryParse<Nature>(name, true, out _),
                 StatModifier.TERA or StatModifier.TYPE_1 or StatModifier.TYPE_2 or StatModifier.NULLIFIES_RECV_DAMAGE_OF_TYPE or StatModifier.DOUBLES_RECV_DAMAGE_OF_TYPE or StatModifier.HALVES_RECV_DAMAGE_OF_TYPE or StatModifier.HALVES_RECV_SE_DAMAGE_OF_TYPE => Enum.TryParse<PokemonType>(name, true, out _),
                 StatModifier.LOGIC => Enum.TryParse<PokemonLogic>(name, true, out _),
-                StatModifier.SHINY_OVERRIDE => bool.TryParse(name.Trim().ToLower(), out _),
+                StatModifier.SHINY_OVERRIDE or StatModifier.ADD_OPP_BOOSTS => bool.TryParse(name.Trim().ToLower(), out _),
                 StatModifier.DEFAULT_STATUS => true, // It's always a string idk
                 _ => false,
             };

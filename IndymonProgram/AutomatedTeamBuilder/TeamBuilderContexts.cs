@@ -52,6 +52,8 @@ namespace AutomatedTeamBuilder
         public int[] Evs = new int[6];
         public double[] StatBoosts = new double[7]; // Where the 7th is not a stat per se, it's the "hightest" stat, applied last in stat calc
         public double StatBoostsMultiplier = 1;
+        public double NegativeStatBoostsMultiplier = 1;
+        public bool AddOppBoosts = false; // Where the user will instead use the opp boosts
         public double[] StatMultipliers = [1, 1, 1, 1, 1, 1];
         public double MonWeight = 1;
         public int CriticalStages = 0;
@@ -147,6 +149,11 @@ namespace AutomatedTeamBuilder
             {
                 ExtractMods((ElementType.EFFECT_FLAGS, flag.ToString()), result);
             }
+            // At this point all stat mods should eb loaded so I can see what's the current average status of the Pokemon's boosts
+            double aggregateBoosts = result.StatBoosts.Sum();
+            if (aggregateBoosts > 0) ExtractMods((ElementType.POKEMON_HAS_POSITIVE_BOOSTS, "-"), result);
+            else if (aggregateBoosts < 0) ExtractMods((ElementType.POKEMON_HAS_NEGATIVE_BOOSTS, "-"), result);
+            else { } // Neithe rpositive nor negative boosts ongoing
             // Weather and specific weather/terrain-dependant effects
             if (pokemon.ChosenAbility?.Name == "Forecast") // Change type on weather
             {
@@ -206,9 +213,9 @@ namespace AutomatedTeamBuilder
                     result.StatMultipliers[4] *= 1.5;
                 }
             }
-            // Finally, need to obtain offensive/defensive/speed scores
-            (double[] monStats, double[] monStatVariance) = MonStatCalculation(result); // Get mon stats (variance is 0 anyway)
-            (double[] oppStats, double[] oppVariance) = MonStatCalculation(result, teamCtx, true); // Get opp stats and variance
+            // Finally, need to obtain offensive/defensive/speed scores to do some comparisons
+            (double[] monStats, double[] monStatVariance) = MonStatCalculation(result, teamCtx, false, 1, 1); // Get mon stats (variance is 0 anyway)
+            (double[] oppStats, double[] oppVariance) = MonStatCalculation(result, teamCtx, true, 1, 1); // Get opp stats and variance
             // Offensive value calculation (this can be only done with 2 or more moves, otherwise comparing offensive utility gets weird when adding the first move
             {
                 List<double> movesDamage = [];
@@ -270,7 +277,7 @@ namespace AutomatedTeamBuilder
                     {
                         continue; // We don't check for status moves
                     }
-                    movesDamage.Add(CalcMoveDamage(move, result, 100 * result.LevelMultiplier, monStats, oppStats, teamCtx,
+                    movesDamage.Add(CalcMoveDamage(move, result, 100 * result.LevelMultiplier, teamCtx,
                         (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
                         pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper adds to crit dmg
                         pokemon.BattleItem?.Name == "Loaded Dice",

@@ -14,6 +14,8 @@ namespace MechanicsData
         POKEMON_TYPE, /// The pokemon type. Can't be affected, but affects stuff
         POKEMON_HAS_PREVO, /// The flag of whether the pokemon has an prevo or not
         POKEMON_HAS_EVO, /// The flag of whether the pokemon has an evo or not
+        POKEMON_HAS_POSITIVE_BOOSTS, /// A flag of whether pokemon has overal positive boosts
+        POKEMON_HAS_NEGATIVE_BOOSTS, /// A flag of whether pokemon has overal negative boosts
         ARCHETYPE, /// Certain archetypes. Not weighted but enabled, and can weight strategies
         WEATHER, /// The ongoing weather of a team comp
         TERRAIN, /// The ongoing terrain of a team comp
@@ -66,7 +68,9 @@ namespace MechanicsData
         // Thigs that affect the boosts in weird ways
         HIGHEST_STAT_BOOST, /// Stat change of the highest stat
         ALL_BOOSTS, /// All boosts are affected a specific amount
+        ALL_NEGATIVE_BOOSTS, /// Affects only negative boosts (e.g. white herb)
         ALL_OPP_BOOSTS, /// Same but for opponent
+        ADD_OPP_BOOSTS, /// Makes the user also add the opp's boosts (e.g. swagger mirror herb)
         // Things that affect the mon (damage calc wise)
         HP_EV, /// EVs
         ATK_EV, /// EVs

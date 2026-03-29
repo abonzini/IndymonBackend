@@ -41,7 +41,7 @@ namespace AutomatedTeamBuilder
         /// <param name="loadedDice">Loaded dice modifies moves like crazy</param>
         /// <param name="highCritDamage">Sniper multilies crit damage</param>
         /// <returns>The damage (in HP) the opp receives</returns>
-        static double CalcMoveDamage(Move move, PokemonBuildContext monCtx, double attackerLevel, double[] attackerStats, double[] defenderStats, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false, bool skillLink = false, bool highCritDamage = false)
+        static double CalcMoveDamage(Move move, PokemonBuildContext monCtx, double attackerLevel, TeamBuildContext battleContext, bool alwaysStab = false, bool extraStab = false, bool loadedDice = false, bool skillLink = false, bool highCritDamage = false)
         {
             // First, get the ACTUAL flags of the move (because some may have been added/removed
             HashSet<EffectFlag> moveFlags = ExtractMoveFlags(move, monCtx);
@@ -66,7 +66,23 @@ namespace AutomatedTeamBuilder
             }
             else // Damage calc incoming...
             {
-                // First, obtain the Bp, some special cases calculate Bp differently, and if no Bp, then it's a default value of 60
+                // First, get crit as it affects stats directly
+                int critStages = 0;
+                if (moveFlags.Contains(EffectFlag.HIGH_CRIT)) critStages++;
+                if (moveFlags.Contains(EffectFlag.CRITICAL)) critStages = 3;
+                critStages += monCtx.CriticalStages;
+                critStages = Math.Clamp(critStages, 0, 3); // Max is 3
+                double critChance = critStages switch // Chance of crit depending on crit stages
+                {
+                    1 => 0.125,
+                    2 => 0.5,
+                    3 => 1,
+                    _ => 0.0417
+                };
+                // Then get stats
+                (double[] attackerStats, _) = MonStatCalculation(monCtx, battleContext, false, 1, 1 - critChance); // Get attacker stats, considering that crits make negative boosts lower
+                (double[] defenderStats, _) = MonStatCalculation(monCtx, battleContext, true, 1 - critChance, 1); // Get opp stats, considering that crits make positive boosts lower
+                // Then, obtain the Bp, some special cases calculate Bp differently, and if no Bp, then it's a default value of 60
                 double moveBp;
                 double moveAccuracy = move.Acc / 100; // 0-1 acc
                 if (moveFlags.Contains(EffectFlag.DAMAGE_PROP_WEIGTH_DIFFERENCE)) // Depending on relative diff
@@ -139,7 +155,8 @@ namespace AutomatedTeamBuilder
                 }
                 else if (moveFlags.Contains(EffectFlag.OPP_ATTACK_DAMAGE))
                 {
-                    attackingStat = defenderStats[1]; // Uses the opp attack stat
+                    (double[] defenderFullStats, _) = MonStatCalculation(monCtx, battleContext, true, 1, 1); // Get opp stats without crit affecting potential positive atk buffs
+                    attackingStat = defenderFullStats[1]; // Uses the opp attack stat
                 }
                 else
                 {
@@ -161,19 +178,7 @@ namespace AutomatedTeamBuilder
                 double remainingFactor = moveBp / (defendingStat * 50); // rest of the damage formula
                 hitDamage *= remainingFactor;
                 hitDamage += 2; // This is the hit damage, no variance needed here
-                // Crit chance
-                int critStages = 0;
-                if (moveFlags.Contains(EffectFlag.HIGH_CRIT)) critStages++;
-                if (moveFlags.Contains(EffectFlag.CRITICAL)) critStages = 3;
-                critStages += monCtx.CriticalStages;
-                critStages = Math.Clamp(critStages, 0, 3); // Max is 3
-                double critChance = critStages switch // Chance of crit depending on crit stages
-                {
-                    1 => 0.125,
-                    2 => 0.5,
-                    3 => 1,
-                    _ => 0.0417
-                };
+                // Crit
                 double critDamage = (highCritDamage) ? 2.25 : 1.5;
                 double critMultiplier = (critChance * critDamage) + ((1 - critChance) * 1); // Crit may increase a hit damage in average
                 hitDamage *= critMultiplier;
@@ -553,10 +558,7 @@ namespace AutomatedTeamBuilder
                 }
                 else // If damage, then the damage it does will be scored too, with a value of 1 corresponding to 50% of the opp average HP
                 {
-                    // Check the actual stats of mon and opp
-                    (double[] monStats, _) = MonStatCalculation(monCtx); // Get mon stats (variance is 0 anyway)
-                    (double[] oppStats, _) = MonStatCalculation(monCtx, buildCtx, true); // Get opp stats and variance
-                    double moveDamage = CalcMoveDamage(move, monCtx, 100 * monCtx.LevelMultiplier, monStats, oppStats, buildCtx,
+                    double moveDamage = CalcMoveDamage(move, monCtx, 100 * monCtx.LevelMultiplier, buildCtx,
                         (mon.ChosenAbility?.Name == "Protean" || mon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
                         mon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper increases crit damage
                         mon.BattleItem?.Name == "Loaded Dice",
@@ -574,6 +576,7 @@ namespace AutomatedTeamBuilder
                     );
                     moveDamage *= moveCoverage.Average(); // Average damage caused by move cvg
                     // Finally, how damage affects score
+                    (double[] oppStats, _) = MonStatCalculation(monCtx, buildCtx, true, 1, 1); // Get opp stats again to check their HP
                     score *= (2 * moveDamage) / oppStats[0]; // A damage of 50% opp HP would have a score of 1
                 }
                 // Finally, all the mults associated with a move, another headache...

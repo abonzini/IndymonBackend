@@ -306,13 +306,19 @@ namespace AutomatedTeamBuilder
                             monCtx.CriticalStages += int.Parse(statMod.Item2);
                             break;
                         case StatModifier.HIGHEST_STAT_BOOST:
-                            monCtx.StatBoosts[6] += int.Parse(statMod.Item2); // Will be stored here and calculated later
+                            monCtx.StatBoosts[6] += double.Parse(statMod.Item2); // Will be stored here and calculated later
                             break;
                         case StatModifier.ALL_BOOSTS:
-                            monCtx.StatBoostsMultiplier *= int.Parse(statMod.Item2);
+                            monCtx.StatBoostsMultiplier *= double.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.ALL_NEGATIVE_BOOSTS:
+                            monCtx.NegativeStatBoostsMultiplier *= double.Parse(statMod.Item2);
                             break;
                         case StatModifier.ALL_OPP_BOOSTS:
-                            monCtx.OppStatBoostsMultiplier *= int.Parse(statMod.Item2);
+                            monCtx.OppStatBoostsMultiplier *= double.Parse(statMod.Item2);
+                            break;
+                        case StatModifier.ADD_OPP_BOOSTS:
+                            monCtx.AddOppBoosts = bool.Parse(statMod.Item2.Trim().ToLower());
                             break;
                         case StatModifier.HP_EV:
                         case StatModifier.ATK_EV:
