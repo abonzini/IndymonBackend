@@ -100,17 +100,20 @@ namespace IndymonBackendProgram
                     case "8":
                         {
                             Console.WriteLine($"Drawing random favour, please select the category (ortherwise random): [{string.Join(',', [.. Enum.GetValues(typeof(TrainerRank))])}]");
-                            string obtainedTrainer;
+                            List<string> trainerBag = [];
                             if (Enum.TryParse(Console.ReadLine().ToUpper(), out TrainerRank rank))
                             {
-                                List<string> possibleTrainers = [.. MechanicsDataContainers.GlobalMechanicsData.TrainerLookup.Where(i => i.Value == rank).Select(i => i.Key)]; // Get keys of trainers filter'd by rank
-                                obtainedTrainer = GeneralUtilities.GetRandomPick(possibleTrainers);
+                                trainerBag = [.. MechanicsDataContainers.GlobalMechanicsData.TrainerLookup.Where(i => i.Value == rank).Select(i => i.Key)]; // Get keys of trainers filter'd by rank
                             }
                             else
                             {
-                                obtainedTrainer = GeneralUtilities.GetRandomKvp(MechanicsDataContainers.GlobalMechanicsData.TrainerLookup).Key;
+                                trainerBag = [.. MechanicsDataContainers.GlobalMechanicsData.TrainerLookup.Select(i => i.Key)]; // Use the whole pool
                             }
-                            Console.WriteLine(obtainedTrainer);
+                            Console.WriteLine("How many pulls?");
+                            int pulls = int.Parse(Console.ReadLine());
+                            GeneralUtilities.ShuffleList(trainerBag);
+                            List<string> obtainedTrainers = trainerBag[0..pulls];
+                            Console.WriteLine(string.Join(", ", obtainedTrainers));
                         }
                         break;
                     case "9":
@@ -248,7 +251,7 @@ namespace IndymonBackendProgram
                 "5 - Generate exploration, choose place, player, etc\n" +
                 "6 - Simulate current exploration\n" +
                 "7 - Animate resolved exploration\n" +
-                "8 - Draw Random Favour\n" +
+                "8 - Draw from Favour Gacha\n" +
                 "9 - Random 'Baby' Pokemon from trainer (Favor resolution)\n" +
                 "10 - Random exploration rewards (tiered favor resolutions)\n" +
                 "11 - Random exploration mons (for beginning of trainer's adventures)\n"
