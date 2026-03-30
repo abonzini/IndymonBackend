@@ -386,6 +386,7 @@ namespace AutomatedTeamBuilder
                     case ElementType.ARCHETYPE:
                     case ElementType.WEATHER:
                     case ElementType.TERRAIN:
+                    case ElementType.POKEBALL:
                         checkPassed = false; // No pass
                         break;
                     default:

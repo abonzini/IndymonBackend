@@ -85,6 +85,7 @@ namespace GameData
         public void HealFull()
         {
             HealthPercentage = 100;
+            if (ChosenAbility?.Name == "Wonder Guard") HealthPercentage = 1; // Wonder guard gives 1 HP let's not fuck around
             NonVolatileStatus = "";
             MovePp = [.. Enumerable.Repeat(99, ChosenMoveset.Count)];
         }

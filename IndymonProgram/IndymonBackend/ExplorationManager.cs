@@ -879,7 +879,15 @@ namespace IndymonBackendProgram
                     // Weird one, select 6 unowns, give them random moves
                     {
                         KeyValuePair<string, string> unownChosen = GeneralUtilities.GetRandomKvp(MechanicsDataContainers.GlobalMechanicsData.UnownLookup);
-                        Console.WriteLine($"Unown battle, will form word {unownChosen.Key} with reward {unownChosen.Value}");
+                        // Calculate the lvl of these dudes
+                        int averageLevel = _trainer.BattleTeam.Select(m => m.Level).Sum();
+                        averageLevel /= unownChosen.Key.Length; // Unown level will be dependent on the trainer lvl but toned down if more unown than mons
+                        int minLvl = 9 * averageLevel / 10;
+                        int maxLvl = 11 * averageLevel / 10;
+                        minLvl = Math.Clamp(minLvl, 65, 100); // But always between 65-100
+                        maxLvl = Math.Clamp(maxLvl, 65, 100);
+                        // Then make the team
+                        Console.WriteLine($"Unown battle, will form word {unownChosen.Key} with reward {unownChosen.Value.Trim()}");
                         List<string> pokemonThisFloor = [];
                         List<string> itemsThisFloor = [];
                         for (int i = 0; i < unownChosen.Key.Length; i++) // Generate party of random unowns
@@ -893,8 +901,8 @@ namespace IndymonBackendProgram
                             else itemsThisFloor.Add(""); // Add no item, leave the space so the list doesn't mismatch
                         }
                         GenericMessageCommand(roomEvent.PreEventString);
-                        Trainer unownTrainer = GenerateEnemyTrainer("Symbols", pokemonThisFloor, itemsThisFloor, 100, 100, false); // Unowns are unshuffled so they can form the phrase
-                        DefineEnemySet(unownTrainer, 24, true); // Defines the enemy set (smart unowns)
+                        Trainer unownTrainer = GenerateEnemyTrainer("Symbols", pokemonThisFloor, itemsThisFloor, minLvl, maxLvl, false, [.. unownChosen.Key.Select(c => c.ToString())]); // Unowns are unshuffled so they can form the phrase, they also got nickname
+                        DefineEnemySet(unownTrainer, 24, false); // Defines the enemy set (smart unowns was proven to be too good so let's use dumb unowns instead)
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
                         int remainingMons = ResolveEncounter(_trainer, unownTrainer);
@@ -908,13 +916,13 @@ namespace IndymonBackendProgram
                         {
                             Console.WriteLine("Player won");
                             UpdateTrainerDataInfo(); // Updates numbers in chart
-                            string postMessage = roomEvent.PostEventString.Replace("$1", unownChosen.Value);
+                            string postMessage = roomEvent.PostEventString.Replace("$1", unownChosen.Value.Trim());
                             GenericMessageCommand(postMessage);
                             foreach (TrainerPokemon pokemonSpecies in unownTrainer.BattleTeam)
                             {
                                 _prizes.AddMon(pokemonSpecies, 1); // Rank 1
                             }
-                            _prizes.AddReward(unownChosen.Value, 1); // Add the unown reward
+                            _prizes.AddReward(unownChosen.Value.Trim(), 1); // Add the unown reward
                             _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
                             PostFightTrainerMods();
                         }
@@ -1591,8 +1599,9 @@ namespace IndymonBackendProgram
         /// <param name="itemsHeld">Items the mons are holding</param>
         /// <param name="shuffled">Whether to shuffle the mons in the generated team</param>
         /// <returns></returns>
-        Trainer GenerateEnemyTrainer(string trainerName, List<string> pokemonList, List<string> itemsHeld, int minLvl, int maxLvl, bool shuffled)
+        Trainer GenerateEnemyTrainer(string trainerName, List<string> pokemonList, List<string> itemsHeld, int minLvl, int maxLvl, bool shuffled, List<string> nicknames = null)
         {
+            if (nicknames == null) nicknames = [];
             int encounterShinyChance = _context.GetShinyChance();
             Trainer enemyTrainer = new Trainer() // Create the blank trainer
             {
@@ -1616,6 +1625,7 @@ namespace IndymonBackendProgram
                 TrainerPokemon nextPokemonInTeam = new TrainerPokemon()
                 {
                     Species = pokemonList[i],
+                    Nickname = (nicknames.Count > i) ? nicknames[i] : "",
                     IsShiny = isShiny,
                     Level = level,
                 };

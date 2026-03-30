@@ -32,6 +32,7 @@ Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone
 
 ---
 POSSIBLE THINGS TO LOOK FOR:
+- In non-smart debug, add a quick sleep talk as move 1. Ensure no constraints due to sleep talk (i.e. non-forced rest), just to make sure as this addition has not been debugged
 - Debug shiny stone (when it happens)
 - Add pokeballs to dbase (when they happen), slp ball needs to add status + rest flag. level ball adjusts level.
 - Debug level multiplier (when it happens)

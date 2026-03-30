@@ -91,6 +91,7 @@ namespace AutomatedTeamBuilder
             };
             // Dump all the team-based data into here
             result.AdditionalArchetypes.UnionWith(teamCtx.CurrentTeamArchetypes); // Add all archetypes present overall in the team
+            List<Constraint> originalConstraints = [.. teamCtx.TeamBuildConstraints]; // Original constraints, will only care about these if non-smart
             result.AdditionalConstraints.AddRange(teamCtx.TeamBuildConstraints);
             result.CurrentTerrain = teamCtx.CurrentTerrain;
             result.CurrentWeather = teamCtx.CurrentWeather;
@@ -226,7 +227,7 @@ namespace AutomatedTeamBuilder
                 List<double> movesDamage = [];
                 List<List<double>> movesTypeCoverage = [];
                 // Calculate damage of moves, if no moves yet, will do some basic stab placeholders at 80BP
-                List<Move> movesToEvaluate = [.. pokemon.ChosenMoveset];
+                List<Move> movesToEvaluate = [.. pokemon.ChosenMoveset.Where(m => m != null)];
                 bool hypotheticalMoves = false;
                 if (!movesToEvaluate.Any(m => m.Category != MoveCategory.STATUS)) // If mon has no damaging moves (only status) will use a placeholder set of moves to get their damaging utility atleast
                 {
@@ -344,6 +345,7 @@ namespace AutomatedTeamBuilder
                 List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(defendingPokemonType, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
                 double averageStabReceived = moveStabsReceived.Average();
                 averageDamage *= averageStabReceived;
+                if (averageDamage == 0) averageDamage = 1; // Always 1HP damage to avoid div 0
                 //  Checks how "bulky" a mon is, which increases surv rating, measured in #hits survived
                 result.Survivability = monStats[0] / averageDamage; // This tells us how many hits the pokemon can take before dying
                 if (result.Survivability < 1 && (pokemon.BattleItem?.Name == "Focus Sash" || pokemon.ChosenAbility?.Name == "Sturdy")) // If mon would be one-shotted, it's not
@@ -365,6 +367,10 @@ namespace AutomatedTeamBuilder
                 {
                     result.SpeedScore = 1 - result.SpeedScore; // Inverts percentile since it will be symmetric around opp speed
                 }
+            }
+            if (!teamCtx.smartTeamBuild) // Keep only original constraints, this way we can keep the team-defined constraints but random moves don't add constraints
+            {
+                result.AdditionalConstraints = originalConstraints;
             }
             return result;
         }

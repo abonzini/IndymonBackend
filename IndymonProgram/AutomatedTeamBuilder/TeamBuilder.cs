@@ -131,7 +131,7 @@ namespace AutomatedTeamBuilder
                                 {
                                     char letter = (mon.Species == "Unown") ? 'a' : mon.Species.ToLower().Last(); // Basic unown is A
                                     possibleAbilities = [.. possibleAbilities.Where(a => a.Name.ToLower().StartsWith(letter))]; // Get all unown abilities
-                                    if (possibleAbilities.Count > 0) possibleAbilities = [MechanicsDataContainers.GlobalMechanicsData.Abilities["Levitate"]]; // If no abilities (X/Y), then use standard (levitate)
+                                    if (possibleAbilities.Count == 0) possibleAbilities = [MechanicsDataContainers.GlobalMechanicsData.Abilities["Levitate"]]; // If no abilities (X/Y), then use standard (levitate)
                                 }
                                 List<double> abilityScores = [.. Enumerable.Repeat<double>(1, possibleAbilities.Count)]; // All of their values is init to 1
                                 if (trainer.AutoSetItem && mon.SetItem != null) // If I can equip other set items AND set item provides useful abilities, I'll add them too

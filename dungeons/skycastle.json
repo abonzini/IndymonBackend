@@ -66,7 +66,7 @@
 	{
       "EventType": "UNOWN",
       "PreEventString": "You enter a set of ruins unlike all previous ones. This one contains weird glyphs embedded in the walls. Suddenly, the glyphs come alive and start attacking!.",
-      "PostEventString": "After being defeated, the symbols sine. A $1 materializes in front of you."
+      "PostEventString": "After being defeated, the symbols shine. A $1 materializes in front of you."
     }
   ],
   "PokemonEachFloor": [
