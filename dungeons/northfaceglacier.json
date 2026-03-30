@@ -118,8 +118,12 @@
   ],
   "CommonItems": [
 		{ "Name": "Sweet Herba Mystica", "Min": 1, "Max": 1 },
+		{ "Name": "Sweet Herba Mystica", "Min": 1, "Max": 1 },
+		{ "Name": "Sour Herba Mystica", "Min": 1, "Max": 1 },
 		{ "Name": "Sour Herba Mystica", "Min": 1, "Max": 1 },
 		{ "Name": "Salty Herba Mystica", "Min": 1, "Max": 1 },
+		{ "Name": "Salty Herba Mystica", "Min": 1, "Max": 1 },
+		{ "Name": "Bitter Herba Mystica", "Min": 1, "Max": 1 },
 		{ "Name": "Bitter Herba Mystica", "Min": 1, "Max": 1 },
 		{ "Name": "Occa Berry", "Min": 1, "Max": 2 },
 		{ "Name": "Charti Berry", "Min": 1, "Max": 2 },
@@ -129,6 +133,7 @@
     { "Name": "Never-Melt Ice", "Min": 2, "Max": 4 }
   ],
   "RareItems": [
+    { "Name": "Spicy Herba Mystica", "Min": 1, "Max": 1 },
     { "Name": "Spicy Herba Mystica", "Min": 1, "Max": 1 },
     { "Name": "Dawn Stone", "Min": 1, "Max": 1 },
     { "Name": "Ice Stone", "Min": 1, "Max": 1 },

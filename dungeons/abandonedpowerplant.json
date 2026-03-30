@@ -119,6 +119,8 @@
 		{ "Name": "Shuca Berry", "Min": 1, "Max": 2 },
 		{ "Name": "Blank Disk", "Min": 3, "Max": 5 },
 		{ "Name": "Blank Disk", "Min": 3, "Max": 5 },
+		{ "Name": "Blank Disk", "Min": 3, "Max": 5 },
+		{ "Name": "Blank Disk", "Min": 3, "Max": 5 },
     { "Name": "Magnet", "Min": 1, "Max": 2 },
     { "Name": "Power Herb", "Min": 1, "Max": 2 },
     { "Name": "Electric Seed", "Min": 1, "Max": 2 },

@@ -2,7 +2,26 @@
 
 Mechanics to implement:
 - Pokeball crafting (aprixorns -> pokeball)
-- Sanwich (herba mystica -> sandwich -> picnic)
+ -> Apricorns in place, just add to shop
+	Nest: gwy
+	
+	Safari (MM, DR, MC): gyw
+	Park (BF, CM, AS): yrw
+	Moon (GT, WI, SC): byk
+	Net (SS, DT, RADP): bgk
+	Sport (WM, NFG, PP): rrw
+
+	Premier: wwwrr
+	Luxury: kkkkwwwyyr
+	
+	Repeat: rybw
+	Heavy: bbbk
+	Strange: ggbbyw
+	Timer: bwr
+	Dream: rryyb
+	Level: kkwry
+- Sandwich (herba mystica -> sandwich -> picnic)
+ -> Herba and sandwiches are in place just need to add text and explanation
 - Esscences (esscence->complete overhaul/addition)
 
 Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone 

@@ -31,6 +31,7 @@ namespace GameData
         MIRROR_MATCH, // Mirror match vs your own party but lvl 80-90
         PLOT_CLUE, // New text color, say cyan, for storyline clue that may lead you to special event
         IMP_GAIN, // Gives IMP instead of items
+        APRICORN, // Fight vs bug, reward is apricorns
         REGISTEEL, // Draws registeel face
         REGIROCK, // Draws regirock face
         REGICE, // Draws regice face

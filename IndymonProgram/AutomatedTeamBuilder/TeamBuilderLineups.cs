@@ -75,7 +75,10 @@ namespace AutomatedTeamBuilder
             {
                 if (!constraint.SatisfiedByMon(mon, true)) // Check if mon would potentially satisfy constraint
                 {
-                    invalidPokemon.Add(mon);
+                    if (mon.PokeBall != "Heavy Ball") // Consider only if no heavy ball
+                    {
+                        invalidPokemon.Add(mon);
+                    }
                 }
                 else
                 {

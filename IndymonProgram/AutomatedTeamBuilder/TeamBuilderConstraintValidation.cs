@@ -24,6 +24,7 @@ namespace AutomatedTeamBuilder
         /// <returns></returns>
         public bool SatisfiedByMon(TrainerPokemon mon, bool potentialConstraintVerification)
         {
+            if (mon.PokeBall == "Heavy Ball") return false; // Heavy ball mon never ever allowed
             if (AllConstraints.Count == 0) return true; // No constraints needed
             Pokemon pokemonData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species]; // Obtain mon data
             // Obtain moveset and ability of mon
@@ -125,6 +126,9 @@ namespace AutomatedTeamBuilder
                     case ElementType.ANY_MOVE:
                         checkPassed |= monMoves.Count > 0;
                         break;
+                    case ElementType.POKEBALL:
+                        checkPassed |= mon.PokeBall == elementName;
+                        break;
                     case ElementType.ARCHETYPE:
                     case ElementType.WEATHER:
                     case ElementType.TERRAIN:
@@ -201,6 +205,7 @@ namespace AutomatedTeamBuilder
                     case ElementType.ITEM_FLAGS:
                     case ElementType.MOD_ITEM:
                     case ElementType.ARCHETYPE:
+                    case ElementType.POKEBALL:
                         checkPassed = false; // No pass
                         break;
                     default:
@@ -307,6 +312,7 @@ namespace AutomatedTeamBuilder
                     case ElementType.ARCHETYPE:
                     case ElementType.WEATHER:
                     case ElementType.TERRAIN:
+                    case ElementType.POKEBALL:
                         checkPassed = false; // No pass
                         break;
                     default:
@@ -447,6 +453,7 @@ namespace AutomatedTeamBuilder
                     case ElementType.BATTLE_ITEM:
                     case ElementType.ITEM_FLAGS:
                     case ElementType.MOD_ITEM:
+                    case ElementType.POKEBALL:
                         checkPassed = false; // No pass
                         break;
                     default:

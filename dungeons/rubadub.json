@@ -128,6 +128,7 @@
   "CommonItems": [
 		{ "Name": "Blank Plate", "Min": 1, "Max": 1 },
 		{ "Name": "Blank Plate", "Min": 1, "Max": 1 },
+		{ "Name": "Blank Plate", "Min": 1, "Max": 1 },
 		{ "Name": "Rindo Berry", "Min": 1, "Max": 2 },
 		{ "Name": "Wacan Berry", "Min": 1, "Max": 2 },
     { "Name": "Absorb Bulb", "Min": 1, "Max": 2 },

@@ -57,6 +57,16 @@
       "EventType": "PARADOX",
       "PreEventString": "You find an abandoned vehicle completely stuck in the mud and covered in vines.",
       "PostEventString": "It has the Paradox Logo, and inside you find an old $1."
+    },
+    {
+      "EventType": "APRICORN",
+      "PreEventString": "In the center of a clearing, you find a huge apricorn tree. You shake the tree, but an angry $1 falls down and attacks!",
+      "PostEventString": "The annoyed Pokemon walks away. You pick up all the apricorns that fell down ($1)"
+    },
+    {
+      "EventType": "APRICORN",
+      "PreEventString": "In the center of a clearing, you find a huge apricorn tree. You shake the tree, but an angry $1 falls down and attacks!",
+      "PostEventString": "The annoyed Pokemon walks away. You pick up all the apricorns that fell down ($1)"
     }
   ],
   "PokemonEachFloor": [
@@ -131,18 +141,22 @@
 	]
   ],
   "CommonItems": [
-    { "Name": "APRICORN PLACEHOLDER", "Min": 0, "Max": 0 },
+    { "Name": "Green Apricorn", "Min": 2, "Max": 3 },
+    { "Name": "Blue Apricorn", "Min": 2, "Max": 3 },
+    { "Name": "Blue Apricorn", "Min": 2, "Max": 3 },
+    { "Name": "Yellow Apricorn", "Min": 2, "Max": 3 },
+    { "Name": "Yellow Apricorn", "Min": 2, "Max": 3 },
+    { "Name": "Red Apricorn", "Min": 2, "Max": 3 },
+    { "Name": "Red Apricorn", "Min": 2, "Max": 3 },
     { "Name": "Payapa Bery", "Min": 1, "Max": 2 },
     { "Name": "Coba Bery", "Min": 1, "Max": 2 },
     { "Name": "Wacan Bery", "Min": 1, "Max": 2 },
     { "Name": "Absorb Bulb", "Min": 1, "Max": 2 },
-    { "Name": "Electric Seed", "Min": 1, "Max": 2 },
-    { "Name": "Psychic Seed", "Min": 1, "Max": 2 },
-    { "Name": "Misty Seed", "Min": 1, "Max": 2 },
-    { "Name": "Grassy Seed", "Min": 1, "Max": 2 },
     { "Name": "Luminous Moss", "Min": 1, "Max": 2 }
   ],
   "RareItems": [
+    { "Name": "Black Apricorn", "Min": 3, "Max": 5 },
+    { "Name": "White Apricorn", "Min": 3, "Max": 5 },
 		{ "Name": "Leaf Stone", "Min": 1, "Max": 1 },
 		{ "Name": "Dusk Stone", "Min": 1, "Max": 1 },
 		{ "Name": "Big Root", "Min": 2, "Max": 4 },

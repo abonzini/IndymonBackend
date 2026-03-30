@@ -1119,6 +1119,50 @@ namespace IndymonBackendProgram
                         }
                     }
                     break;
+                case RoomEventType.APRICORN: // Bug and apricorns
+                    {
+                        List<string> possiblePokemon = ["Forretress", "Ambipom", "Scyther", "Scizor", "Pinsir", "Heracross", "Shuckle", "Beedrill", "Arbok", "Butterfree", "Venomoth"];
+                        string enemySpecies = GeneralUtilities.GetRandomPick(possiblePokemon); // Get a random one of these
+                        string apricornString = roomEvent.PreEventString.Replace("$1", enemySpecies);
+                        GenericMessageCommand(apricornString); // Prints the message but we know it could have a $1
+                        Trainer alphaTrainer = GenerateEnemyTrainer("Tree Dweller", [enemySpecies], [], 100, 100, true);
+                        DefineEnemySet(alphaTrainer, 24, true); // Defines the enemy set (smart for an alpha challenge)
+                        Console.Write("Encounter resolution: ");
+                        PreFightTrainerMods();
+                        int remainingMons = ResolveEncounter(_trainer, alphaTrainer);
+                        if (remainingMons == 0) // Means player lost
+                        {
+                            roomCleared = false; // Failure at clearing room
+                            GenericMessageCommand($"You blacked out...");
+                        }
+                        else
+                        {
+                            List<string> commonApricorns = ["Red", "Yellow", "Blue", "Green"];
+                            List<string> rareApricorns = ["Black", "White"];
+                            List<string> obtainedApricorns = [];
+                            // 5 commons and 2 rares
+                            for (int i = 0; i < 5; i++)
+                            {
+                                obtainedApricorns.Add(GeneralUtilities.GetRandomPick(commonApricorns));
+                            }
+                            for (int i = 0; i < 2; i++)
+                            {
+                                obtainedApricorns.Add(GeneralUtilities.GetRandomPick(rareApricorns));
+                            }
+                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                            apricornString = roomEvent.PostEventString.Replace("$1", string.Join(", ", obtainedApricorns.ToHashSet())); // To hash set to avoid duplicates
+                            GenericMessageCommand(apricornString); // Prints the message but we know it could have a $1
+                            foreach (string apricorn in obtainedApricorns)
+                            {
+                                _prizes.AddReward(apricorn + " Apricorn", 1); // Add them
+                            }
+                            _prizes.AddMons(alphaTrainer.BattleTeam, 2); // All bugs are rank 2 idc
+                            _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, GenericMessageCommand);
+                            _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
+                            PostFightTrainerMods();
+                        }
+                    }
+                    break;
                 case RoomEventType.REGISTEEL: // Dramatic drawing of registeel eyes
                     ClearRoomsCommand();
                     DrawRegiEye(-1, -1, 1000);
@@ -1179,7 +1223,7 @@ namespace IndymonBackendProgram
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"__{_trainer.Name} has obtained the following items:__");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
             // Do collections one by one, of the things gained
-            int maxCount = 0;
+            int maxCount = 15;
             static string GetPrizesStrings<T>(Dictionary<T, int> dict)
             {
                 List<string> collection = new List<string>();
