@@ -210,14 +210,20 @@ namespace IndymonBackendProgram
                         break;
                     case "11":
                         {
-                            Console.WriteLine($"Which dungeon? {string.Join(", ", [.. GameDataContainers.GlobalGameData.Dungeons.Keys])}");
-                            string dungeon = Console.ReadLine();
-                            Dungeon theDungeon = GameDataContainers.GlobalGameData.Dungeons[dungeon];
-                            List<string> possibleMons = theDungeon.PokemonEachFloor[0];
-                            GeneralUtilities.ShuffleList(possibleMons);
+                            Console.WriteLine($"Which dungeons? {string.Join(", ", [.. GameDataContainers.GlobalGameData.Dungeons.Keys])}");
+                            string input = Console.ReadLine();
+                            List<string> dungeons = [.. input.Split(',')];
                             Console.WriteLine("How many mons?");
                             int count = int.Parse(Console.ReadLine());
-                            Console.WriteLine(string.Join(", ", possibleMons[0..count]));
+                            List<string> foundMons = [];
+                            foreach(string nextDungeon in dungeons)
+                            {
+                                Dungeon theDungeon = GameDataContainers.GlobalGameData.Dungeons[nextDungeon.Trim()];
+                                List<string> possibleMons = theDungeon.PokemonEachFloor[0];
+                                GeneralUtilities.ShuffleList(possibleMons);
+                                foundMons.AddRange(possibleMons[0..count]);
+                            }
+                            Console.WriteLine(string.Join(", ", foundMons));
                         }
                         break;
                     default:
