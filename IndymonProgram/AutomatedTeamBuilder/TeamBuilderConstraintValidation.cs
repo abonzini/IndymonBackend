@@ -36,9 +36,13 @@ namespace AutomatedTeamBuilder
             {
                 monAbilities = pokemonData.Abilities;
             }
-            else
+            else if (mon.ChosenAbility != null)
             {
                 monAbilities = [mon.ChosenAbility];
+            }
+            else
+            {
+                monAbilities = [];
             }
             List<Move> monMoves;
             if (potentialConstraintVerification) // This would imply the set moves plus some of the possible mon moves
@@ -122,9 +126,12 @@ namespace AutomatedTeamBuilder
                         checkPassed |= monMoves.Count > 0;
                         break;
                     case ElementType.ARCHETYPE:
-                    default:
-                        checkPassed = false; // No pass
+                    case ElementType.WEATHER:
+                    case ElementType.TERRAIN:
+                        checkPassed = false; // Mon can't guarantee this
                         break;
+                    default:
+                        throw new Exception($"Constraint element type {elementType} not implemented");
                 }
                 if (Operation == ConstraintOperation.OR && checkPassed)
                 {
@@ -194,9 +201,10 @@ namespace AutomatedTeamBuilder
                     case ElementType.ITEM_FLAGS:
                     case ElementType.MOD_ITEM:
                     case ElementType.ARCHETYPE:
-                    default:
                         checkPassed = false; // No pass
                         break;
+                    default:
+                        throw new Exception($"Constraint element type {elementType} not implemented");
                 }
                 if (Operation == ConstraintOperation.OR && checkPassed)
                 {
@@ -297,9 +305,12 @@ namespace AutomatedTeamBuilder
                     case ElementType.ITEM_FLAGS:
                     case ElementType.MOD_ITEM:
                     case ElementType.ARCHETYPE:
-                    default:
+                    case ElementType.WEATHER:
+                    case ElementType.TERRAIN:
                         checkPassed = false; // No pass
                         break;
+                    default:
+                        throw new Exception($"Constraint element type {elementType} not implemented");
                 }
                 if (Operation == ConstraintOperation.OR && checkPassed)
                 {
@@ -367,9 +378,79 @@ namespace AutomatedTeamBuilder
                     case ElementType.ITEM_FLAGS:
                     case ElementType.MOD_ITEM:
                     case ElementType.ARCHETYPE:
-                    default:
+                    case ElementType.WEATHER:
+                    case ElementType.TERRAIN:
                         checkPassed = false; // No pass
                         break;
+                    default:
+                        throw new Exception($"Constraint element type {elementType} not implemented");
+                }
+                if (Operation == ConstraintOperation.OR && checkPassed)
+                {
+                    return true; // A single check passing will be fine
+                }
+                if (Operation == ConstraintOperation.AND && !checkPassed)
+                {
+                    return false; // A single check passing will be over
+                }
+            }
+            if (Operation == ConstraintOperation.OR)
+            {
+                return false; // Failed because not a single constraint passed
+            }
+            if (Operation == ConstraintOperation.AND)
+            {
+                return true; // Passed because not a single constraint failed
+            }
+            throw new NotImplementedException("Unreachable Code");
+        }
+        /// <summary>
+        /// Verifies whether constraint is satisfied by the context of this mon set
+        /// </summary>
+        /// <param name="ctx">Context</param>
+        /// <returns>Whether constraint satisfied or not</returns>
+        public bool SatisfiedByContext(PokemonBuildContext ctx)
+        {
+            if (AllConstraints.Count == 0) return true; // No constraints needed
+            // Now check constraint
+            foreach ((ElementType, string) elementToCheck in AllConstraints)
+            {
+                ElementType elementType = elementToCheck.Item1;
+                string elementName = elementToCheck.Item2;
+                bool checkPassed = false; // Will need to see if this check passes
+                // Elements that may be of use when checking stuff
+                Enum.TryParse(elementName, true, out TeamArchetype archetypeToCheck);
+                Enum.TryParse(elementName, true, out Weather weatherToCheck);
+                Enum.TryParse(elementName, true, out Terrain terrainToCheck);
+                switch (elementType)
+                {
+                    case ElementType.WEATHER:
+                        checkPassed |= ctx.CurrentWeather == weatherToCheck;
+                        break;
+                    case ElementType.TERRAIN:
+                        checkPassed |= ctx.CurrentTerrain == terrainToCheck;
+                        break;
+                    case ElementType.ARCHETYPE:
+                        checkPassed |= ctx.AdditionalArchetypes.Contains(archetypeToCheck);
+                        break;
+                    case ElementType.MOVE:
+                    case ElementType.EFFECT_FLAGS:
+                    case ElementType.ORIGINAL_TYPE_OF_MOVE:
+                    case ElementType.DAMAGING_MOVE_OF_TYPE:
+                    case ElementType.MOVE_CATEGORY:
+                    case ElementType.ANY_DAMAGING_MOVE:
+                    case ElementType.ABILITY: // Verify mon has ability in set item or would have ability
+                    case ElementType.POKEMON:
+                    case ElementType.POKEMON_TYPE:
+                    case ElementType.POKEMON_HAS_PREVO:
+                    case ElementType.POKEMON_HAS_EVO:
+                    case ElementType.BATTLE_ITEM:
+                    case ElementType.ITEM_FLAGS:
+                    case ElementType.MOD_ITEM:
+                        checkPassed = false; // No pass
+                        break;
+                    default:
+                        throw new Exception($"Constraint element type {elementType} not implemented");
                 }
                 if (Operation == ConstraintOperation.OR && checkPassed)
                 {

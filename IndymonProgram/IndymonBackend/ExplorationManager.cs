@@ -212,21 +212,24 @@ namespace IndymonBackendProgram
         /// <returns>Shiny chance</returns>
         public int GetShinyChance()
         {
-            double shinyChanceMultiplier = 0; // Base shiny chance
+            double shinyChanceMultiplier = 1; // Base shiny chance
             List<Sandwich> validSandwichEffects = [.. _sandwichEffects.Where(s => s.Item1.Effect == SandwichEffectType.SHINY_CHANCE).Select(s => s.Item1)]; // Get the valid sandwiches
-            foreach (Sandwich sando in validSandwichEffects)
+            if (validSandwichEffects.Count > 0)
             {
-                double shinyMean = (21.0 - sando.Level) / 21; // This is the mean of the whole thing
-                double delta = (sando.Duration - 1.0) * (1 - shinyMean) / 4; // Will be a delta of this
-                double min = shinyMean - delta;
-                double max = shinyMean + delta;
-                min *= 0.5; max *= 0.5; // Item multilpier make it so that it has a theoretical max of *10 if no delta at lvl 20
-                double randomFloat = min + ((max - min) * GeneralUtilities.GetRandomNumber(RNG_FLOAT_RESOLUTION) / RNG_FLOAT_RESOLUTION);
-                shinyChanceMultiplier += randomFloat;
+                foreach (Sandwich sando in validSandwichEffects)
+                {
+                    double shinyMean = (21.0 - sando.Level) / 21; // This is the mean of the whole thing
+                    double delta = (sando.Duration - 1.0) * (1 - shinyMean) / 4; // Will be a delta of this
+                    double min = shinyMean - delta;
+                    double max = shinyMean + delta;
+                    min *= 0.5; max *= 0.5; // Item multilpier make it so that it has a theoretical max of *10 if no delta at lvl 20
+                    double randomFloat = min + ((max - min) * GeneralUtilities.GetRandomNumber(RNG_FLOAT_RESOLUTION) / RNG_FLOAT_RESOLUTION);
+                    shinyChanceMultiplier += randomFloat;
+                }
+                shinyChanceMultiplier /= validSandwichEffects.Count; // Its the average shiny chance because I didn't find a better way to do it
             }
-            shinyChanceMultiplier /= validSandwichEffects.Count; // Its the average shiny chance because I didn't find a better way to do it
             int resultingChance = (int)((_baseShinyChance * shinyChanceMultiplier) + 0.5); // Get the chance 1/500
-            if (resultingChance < 0) resultingChance = 0; // Chance needs to keep positive
+            if (resultingChance < 1) resultingChance = 1; // Chance needs to keep positive
             return resultingChance;
         }
         /// <summary>
@@ -342,8 +345,9 @@ namespace IndymonBackendProgram
             enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[2].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
             enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[3].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
             TeamBuilder.DefineTrainerSets(_trainer, true, _dungeonData.DungeonArchetypes, _dungeonData.DungeonWeather, _dungeonData.DungeonTerrain, new Constraint(), [.. enemyMons], TrainerAndSeed.Item2); // Team build but with the dungeon's weather and such 
-            List<RoomEvent> possibleEvents = [.. _dungeonData.Events]; // These are the possible events for this dungeon
+            _trainer.RestoreAll(); // Begin expl at full (and also inits the PP thing, weirdly enough)
             // Beginning of expl and event queue
+            List<RoomEvent> possibleEvents = [.. _dungeonData.Events]; // These are the possible events for this dungeon
             if (_trainer.BattleTeam.Any(m => m.ModItem?.Name == "Shiny Stone")) // Shiny stone is a special item that will modify the base shiny chance to 1 in 25
             {
                 _context.ModifyBaseShinyChance(1 / 20); // 20 times more likely
@@ -359,7 +363,6 @@ namespace IndymonBackendProgram
                 ClearRoomsCommand(); // Just in case, just clear the current screen (if coming from another exploration)
                 ClearConsoleCommand(); // Clears mini console to leave space for new event's message
                 string auxString = $"Beginning of {_trainer.Name}'s exploration in {Dungeon}";
-                Console.WriteLine(auxString);
                 GenericMessageCommand(auxString); // Begin of exploration string
                 (int, int) prevCoord = (-1, 0); // Starts from outside i guess
                 bool usedShortcut = false; // If a shortcut was used to the new room
@@ -413,7 +416,7 @@ namespace IndymonBackendProgram
                             RoomEvent pokemonEvent = new RoomEvent()
                             {
                                 EventType = RoomEventType.POKEMON_BATTLE,
-                                PreEventString = "Suddenly, wild pokemon attack!",
+                                PreEventString = "Suddenly, wild Pokemon attack!",
                                 PostEventString = $"You won the battle and obtained multiple items that the wild Pokemon were holding ($1)."
                             }; // Wild pokemon encounter event
                             roomSuccess = ExecuteEvent(pokemonEvent, floor);
@@ -477,7 +480,6 @@ namespace IndymonBackendProgram
             switch (roomEvent.EventType)
             {
                 case RoomEventType.CAMPING:
-                    Console.WriteLine("Camping tile, nothing yet");
                     GenericMessageCommand(roomEvent.PreEventString);
                     // Camping logic: eat a random sandwich
                     if (_trainer.Sandwiches.Count > 0)
@@ -493,7 +495,7 @@ namespace IndymonBackendProgram
                     {
                         ItemReward itemFound = GeneralUtilities.GetRandomPick(_dungeonData.RareItems); // Find a random rare item
                         int amount = GeneralUtilities.GetRandomNumber(itemFound.Min, itemFound.Max + 1); // How many were found
-                        amount += (int)((amount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                        amount = (int)((amount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                         if (amount < 1) amount = 1;
                         Console.WriteLine($"Finds {itemFound.Name}");
                         string itemString = roomEvent.PreEventString.Replace("$1", $"{itemFound.Name} (x{amount})");
@@ -508,11 +510,11 @@ namespace IndymonBackendProgram
                     {
                         int enemyFloor = 3; // Last floor is where bosses are
                         int itemCount = GeneralUtilities.GetRandomNumber(_dungeonData.BossItem.Min, _dungeonData.BossItem.Max + 1); // How much of an item I gained
-                        itemCount += (int)((itemCount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                        itemCount = (int)((itemCount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                         if (itemCount < 1) itemCount = 1;
                         string enemySpecies = GeneralUtilities.GetRandomPick(_dungeonData.PokemonEachFloor[enemyFloor]); // Boss will be a random one
                         Trainer bossTrainer = GenerateEnemyTrainer("Boss", [enemySpecies], [_dungeonData.BossItem.Name], 100, 100, true);
-                        DefineEnemySet(bossTrainer, int.MaxValue, true); // Defines the enemy set (smart for a final boss challenge!)
+                        DefineEnemySet(bossTrainer, 24, true); // Defines the enemy set (smart for a final boss challenge!)
                         string bossString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
                         // Fight and conclusion
@@ -540,14 +542,14 @@ namespace IndymonBackendProgram
                     {
                         ItemReward item = GeneralUtilities.GetRandomPick(_dungeonData.RareItems); // Get a random rare item
                         int itemAmount = GeneralUtilities.GetRandomNumber(item.Min, item.Max + 1);
-                        itemAmount += (int)((itemAmount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                        itemAmount = (int)((itemAmount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                         if (itemAmount < 1) itemAmount = 1;
                         int enemyFloor = (floor + 1 >= DUNGEON_NUMBER_OF_FLOORS) ? floor : floor + 1; // Find enemy of next floor if possible
                         string enemySpecies = GeneralUtilities.GetRandomPick(_dungeonData.PokemonEachFloor[enemyFloor]); // Get a random one of these
                         string alphaString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
                         Trainer alphaTrainer = GenerateEnemyTrainer("Alpha", [enemySpecies], [item.Name], 100, 100, true);
-                        DefineEnemySet(alphaTrainer, int.MaxValue, true); // Defines the enemy set (smart for an alpha challenge)
+                        DefineEnemySet(alphaTrainer, 24, true); // Defines the enemy set (smart for an alpha challenge)
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
                         int remainingMons = ResolveEncounter(_trainer, alphaTrainer);
@@ -705,7 +707,6 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.HEAL:
                     {
-                        Console.WriteLine("A heal of 33% of all mons");
                         GenericMessageCommand(roomEvent.PreEventString);
                         foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
@@ -718,7 +719,6 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.DAMAGE_TRAP:
                     {
-                        Console.WriteLine("A damage trap of 25% to all mons");
                         GenericMessageCommand(roomEvent.PreEventString);
                         foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
@@ -731,7 +731,6 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.CURE:
                     {
-                        Console.WriteLine("Cures all mons status");
                         GenericMessageCommand(roomEvent.PreEventString);
                         foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
@@ -743,7 +742,6 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.BIG_HEAL:
                     {
-                        Console.WriteLine("Single big heal to a mon");
                         TrainerPokemon mon = _trainer.BattleTeam.OrderBy(p => p.HealthPercentage).FirstOrDefault();
                         mon.HealthPercentage = 100;
                         string message = roomEvent.PreEventString.Replace("$1", mon.GetInformalName());
@@ -755,7 +753,6 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.PP_HEAL:
                     {
-                        Console.WriteLine("Cures all mons PP");
                         GenericMessageCommand(roomEvent.PreEventString);
                         foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
@@ -770,7 +767,6 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.STATUS_TRAP:
                     {
-                        Console.WriteLine("A trap that will status one mon");
                         string status = roomEvent.SpecialParams;
                         List<TrainerPokemon> possibleMons = [.. _trainer.BattleTeam.Where(m => m.NonVolatileStatus == "")]; // Get mons without status
                         GenericMessageCommand(roomEvent.PreEventString);
@@ -808,7 +804,7 @@ namespace IndymonBackendProgram
                         }
                         GenericMessageCommand(roomEvent.PreEventString);
                         Trainer wildMonsTrainer = GenerateEnemyTrainer("WildMons", pokemonThisFloor, [.. items.Select(i => i.Name)], 100, 100, true);
-                        DefineEnemySet(wildMonsTrainer, int.MaxValue, false); // Defines the enemy set (dumb mons tho)
+                        DefineEnemySet(wildMonsTrainer, 24, false); // Defines the enemy set (dumb mons tho)
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
                         int remainingMons = ResolveEncounter(_trainer, wildMonsTrainer);
@@ -827,7 +823,7 @@ namespace IndymonBackendProgram
                             foreach (ItemReward item in items) // Add all items to Prizes
                             {
                                 int amount = GeneralUtilities.GetRandomNumber(item.Min, item.Max + 1);
-                                amount += (int)((amount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                                amount = (int)((amount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                                 if (amount < 1) amount = 1;
                                 _prizes.AddReward(item.Name, amount);
                             }
@@ -855,7 +851,7 @@ namespace IndymonBackendProgram
                         }
                         GenericMessageCommand(roomEvent.PreEventString);
                         Trainer swarmTrainer = GenerateEnemyTrainer("Swarm", pokemonThisFloor, [], 60, 75, true); // Lvl between 60-75
-                        DefineEnemySet(swarmTrainer, int.MaxValue, false); // Defines the enemy set (dumb mons tho)
+                        DefineEnemySet(swarmTrainer, 24, false); // Defines the enemy set (dumb mons tho)
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
                         int remainingMons = ResolveEncounter(_trainer, swarmTrainer);
@@ -898,7 +894,7 @@ namespace IndymonBackendProgram
                         }
                         GenericMessageCommand(roomEvent.PreEventString);
                         Trainer unownTrainer = GenerateEnemyTrainer("Symbols", pokemonThisFloor, itemsThisFloor, 100, 100, false); // Unowns are unshuffled so they can form the phrase
-                        DefineEnemySet(unownTrainer, int.MaxValue, true); // Defines the enemy set (smart unowns)
+                        DefineEnemySet(unownTrainer, 24, true); // Defines the enemy set (smart unowns)
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
                         int remainingMons = ResolveEncounter(_trainer, unownTrainer);
@@ -932,7 +928,7 @@ namespace IndymonBackendProgram
                         List<string> validMons = ["Moltres", "Entei", "Ho-Oh", "Groudon", "Heatran", "Chi-Yu", "Koraidon", "Volcaion", "Blacephalon"];
                         string pokemonSpecies = GeneralUtilities.GetRandomPick(validMons);
                         Trainer bossTrainer = GenerateEnemyTrainer("Firelord", [pokemonSpecies], [], 50, 65, true);
-                        DefineEnemySet(bossTrainer, int.MaxValue, true); // Smart set
+                        DefineEnemySet(bossTrainer, 24, true); // Smart set
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
                         int remainingMons = ResolveEncounter(_trainer, bossTrainer);
@@ -947,7 +943,7 @@ namespace IndymonBackendProgram
                             Console.WriteLine("Player won");
                             UpdateTrainerDataInfo(); // Updates numbers in chart
                             int rewardQuantity = GeneralUtilities.GetRandomNumber(itemPrize.Min, itemPrize.Max + 1);
-                            rewardQuantity += (int)((rewardQuantity * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                            rewardQuantity = (int)((rewardQuantity * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                             if (rewardQuantity < 1) rewardQuantity = 1;
                             string postMessage = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
                             GenericMessageCommand(postMessage);
@@ -967,7 +963,7 @@ namespace IndymonBackendProgram
                         List<string> validMons = [.. _dungeonData.PokemonEachFloor[floor]];
                         string pokemonSpecies = GeneralUtilities.GetRandomPick(validMons);
                         Trainer giantMon = GenerateEnemyTrainer("MutantPokemon", [pokemonSpecies], [], 110, 126, true);
-                        DefineEnemySet(giantMon, int.MaxValue, false); // Not smart
+                        DefineEnemySet(giantMon, 24, false); // Not smart
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
                         int remainingMons = ResolveEncounter(_trainer, giantMon);
@@ -982,7 +978,7 @@ namespace IndymonBackendProgram
                             Console.WriteLine("Player won");
                             UpdateTrainerDataInfo(); // Updates numbers in chart
                             int rewardQuantity = GeneralUtilities.GetRandomNumber(itemPrize.Min, itemPrize.Max + 1);
-                            rewardQuantity += (int)((rewardQuantity * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
+                            rewardQuantity = (int)((rewardQuantity * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                             if (rewardQuantity < 1) rewardQuantity = 1;
                             string postMessage = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
                             GenericMessageCommand(postMessage);
@@ -1063,7 +1059,7 @@ namespace IndymonBackendProgram
                         List<string> validMons = [.. _dungeonData.PokemonEachFloor[floor]];
                         string pokemonSpecies = GeneralUtilities.GetRandomPick(validMons);
                         Trainer placeholderTrainer = GenerateEnemyTrainer("Whatever", [pokemonSpecies], [], 100, 100, false);
-                        DefineEnemySet(placeholderTrainer, int.MaxValue, false); // Not smart
+                        DefineEnemySet(placeholderTrainer, 24, false); // Not smart
                         Console.WriteLine($"Joiner {pokemonSpecies}");
                         string joinerString = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
                         GenericMessageCommand(joinerString); // Prints the message but we know it could have a $1
@@ -1172,8 +1168,14 @@ namespace IndymonBackendProgram
         /// </summary>
         void SaveExplorationOutcome()
         {
-            string explFile = $"{_trainer}_EXPLORATION.txt";
+            string explFile = $"{_trainer.ToString().ToUpper()}_EXPLORATION.expl";
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Clear();
+            string fateFlavourText = Console.ReadLine();
+            if (fateFlavourText != "")
+            {
+                GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"Fate: ||{fateFlavourText}||");
+                GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
+            }
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"__{_trainer.Name} has obtained the following items:__");
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
             // Do collections one by one, of the things gained
@@ -1191,7 +1193,7 @@ namespace IndymonBackendProgram
             string setItemString = GetPrizesStrings(_prizes.SetItemsFound);
             maxCount = Math.Max(maxCount, setItemString.Length);
             // Mod
-            string modItemString = GetPrizesStrings(_prizes.SetItemsFound);
+            string modItemString = GetPrizesStrings(_prizes.ModItemsFound);
             maxCount = Math.Max(maxCount, modItemString.Length);
             // Mod
             string battleItemString = GetPrizesStrings(_prizes.BattleItemsFound);
@@ -1224,7 +1226,8 @@ namespace IndymonBackendProgram
                 string monsOfRank = GetPrizesStrings(_prizes.MonsFound[rank]);
                 GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Append($"**RANK {rank}:** {monsOfRank}. ");
             }
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine($"||"); // Close rank-spoilered text
+            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Append($"||"); // Close rank-spoilered text
+            GameDataContainers.GlobalGameData.CurrentEventMessage.Signature = "";
             // Save
             string filePath = Path.Combine(DirectoryPath, explFile);
             GameDataContainers.GlobalGameData.CurrentEventMessage.SaveToFile(filePath);
@@ -1348,7 +1351,7 @@ namespace IndymonBackendProgram
             foreach (TrainerPokemon mon in _trainer.BattleTeam)
             {
                 mon.LevelMod = _context.GetExtraLevel(); // Check if mons get extra lvl
-                if (mon.LevelMod >= mon.Level) mon.LevelMod = mon.Level - 1; // Can't get level <=0 lol
+                mon.LevelMod = Math.Clamp(mon.LevelMod, -(mon.Level - 1), 9999 - mon.Level);
             }
         }
         /// <summary>
@@ -1587,14 +1590,17 @@ namespace IndymonBackendProgram
                                 GameDataContainers.GlobalGameData.SetItems.Add(itemName, setItem);
                             }
                             nextPokemonInTeam.SetItem = setItem; // Equip the item
+                            nextPokemonInTeam.SetItemChosen = true;
                             break;
                         case IndymonUtilities.RewardType.MOD:
                             itemAux = MechanicsDataContainers.GlobalMechanicsData.ModItems[itemName];
                             nextPokemonInTeam.ModItem = itemAux;
+                            nextPokemonInTeam.ModItemChosen = true;
                             break;
                         case IndymonUtilities.RewardType.BATTLE:
                             itemAux = MechanicsDataContainers.GlobalMechanicsData.BattleItems[itemName];
-                            nextPokemonInTeam.ModItem = itemAux;
+                            nextPokemonInTeam.BattleItem = itemAux;
+                            nextPokemonInTeam.BattleItemChosen = true;
                             break;
                         default: // These items are not equippable
                             break;
@@ -1615,12 +1621,13 @@ namespace IndymonBackendProgram
             List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(enemy, maxNMons, [new Constraint()], true);
             TeamBuilder.AssembleTrainersBattleTeam(enemy, maxNMons, possibleBuilds, true); // Chooses one of the sets, prepares the mons, any seed
             // Now, make the trainer choose it's team sets!
-            List<Pokemon> enemyMons = null;
+            List<Pokemon> enemyMons = [];
             if (smart) // If smart, build against the trainer
             {
                 enemyMons = [.. _trainer.BattleTeam.Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m.Species])];
             }
             TeamBuilder.DefineTrainerSets(enemy, smart, _dungeonData.DungeonArchetypes, _dungeonData.DungeonWeather, _dungeonData.DungeonTerrain, new Constraint(), enemyMons); // Team build but with the dungeon's weather and such 
+            enemy.RestoreAll(); // "Init" mons
         }
         /// <summary>
         /// Resolves an encounter between players, no mon limit

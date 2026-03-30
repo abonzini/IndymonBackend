@@ -107,17 +107,16 @@ namespace AutomatedTeamBuilder
                 MonBuildState state = MonBuildState.CHOOSING_ABILITY; // Begin with ability
                 while (state != MonBuildState.DONE)
                 {
-                    PokemonBuildContext monCtx = new PokemonBuildContext();
-                    if (buildCtx.smartTeamBuild) // Build info needs to do scoring stuff if in a smart build
-                    {
-                        monCtx = ObtainPokemonSetContext(mon, buildCtx); // Obtain current Pokemon mods and score and such
-                    }
+                    PokemonBuildContext monCtx = ObtainPokemonSetContext(mon, buildCtx); // Obtain current Pokemon mods and score and such
                     // Monctx contains all the ongoing constraints, need only the ones which haven't been fulfilled yet
                     List<Constraint> ongoingConstraints = new List<Constraint>();
                     foreach (Constraint constraint in monCtx.AdditionalConstraints) // filter constraint set out
                     {
                         // If constraint not yet satisfied, add to list to requirements
-                        if (!constraint.SatisfiedByMon(mon, false)) ongoingConstraints.Add(constraint);
+                        if (!constraint.SatisfiedByMon(mon, false) && !constraint.SatisfiedByContext(monCtx))
+                        {
+                            ongoingConstraints.Add(constraint);
+                        }
                     }
                     // Got constraint list finally! Now just do state machine
                     const double WEIGHT_PER_ITEM = 0.1; // Each item already in inventory adds 0.1 to the item weight, maximizing at 1 (10 items) where it tries to use item as long as useful!
@@ -184,7 +183,7 @@ namespace AutomatedTeamBuilder
                                         acceptableAbilitiesScores[i] *= abilityScore;
                                     } // Otherwise score is kept as is (possibly 1) for "dumb" build
                                 } // Gottem scores
-                                int chosenAbilityIndex = RandomIndexOfWeights(acceptableAbilitiesScores, monRng, 1.2); // Use power of 1.2 nudge toward good
+                                int chosenAbilityIndex = RandomIndexOfWeights(acceptableAbilitiesScores, monRng); // Use power of 1.2 nudge toward good
                                 Ability chosenAbility = acceptableAbilities[chosenAbilityIndex]; // Got the ability
                                 mon.ChosenAbility = chosenAbility; // Apply to mon, all good here
                                 if (!monData.Abilities.Contains(chosenAbility)) // If not in mon, this was seen as a set item then
@@ -306,7 +305,7 @@ namespace AutomatedTeamBuilder
                                             acceptableMovesScores[i] *= nextMoveScore;
                                         } // Otherwise, kept as original (usually 1)
                                     } // Gottem scores
-                                    int chosenMoveIndex = RandomIndexOfWeights(acceptableMovesScores, monRng, 3); // Experimenting with a power to filter out the lesser scored moves, movesets are usually 40+
+                                    int chosenMoveIndex = RandomIndexOfWeights(acceptableMovesScores, monRng); // Experimenting with a power to filter out the lesser scored moves, movesets are usually 40+
                                     Move chosenMove = acceptableMoves[chosenMoveIndex]; // Got the move
                                     // Check if it was part of a set item or not
                                     if (!monData.Moveset.Contains(chosenMove)) // In this case it was caused by a set item
@@ -396,7 +395,7 @@ namespace AutomatedTeamBuilder
                                 }
                                 if (validModItems.Count > 0) // Choose between reasonable items
                                 {
-                                    int chosenItemIndex = RandomIndexOfWeights(modItemScores, monRng, 1.2); // Use power of 1.2 nudge toward good
+                                    int chosenItemIndex = RandomIndexOfWeights(modItemScores, monRng); // Use power of 1.2 nudge toward good
                                     Item chosenModItem = validModItems[chosenItemIndex]; // Got the item
                                     if (chosenModItem != noItem) // Check if winner was actually an item
                                     {
@@ -467,7 +466,7 @@ namespace AutomatedTeamBuilder
                                 }
                                 if (validBattleItems.Count > 0) // Choose between reasonable battle items
                                 {
-                                    int chosenItemIndex = RandomIndexOfWeights(battleItemScores, monRng, 1.2); // Use power of 1.2 nudge toward good
+                                    int chosenItemIndex = RandomIndexOfWeights(battleItemScores, monRng); // Use power of 1.2 nudge toward good
                                     Item chosenBattleItem = validBattleItems[chosenItemIndex]; // Got the item
                                     if (chosenBattleItem != noItem) // Check if winner was actually an item
                                     {
@@ -559,10 +558,13 @@ namespace AutomatedTeamBuilder
         /// Returns an index of a list. The list contains the weights so that chance is weighted towards bigger indices. No need to be normalized
         /// </summary>
         /// <param name="weights">List of weight</param>
-        /// <param name="power">Optional power to elevate weights, to skew the decision towards higher/lower weights</param>
         /// <returns>A random index within the list. List is modified by the power</returns>
-        static int RandomIndexOfWeights(List<double> weights, Random rng, double power = 1.0f)
+        static int RandomIndexOfWeights(List<double> weights, Random rng)
         {
+            // Power will be prop to the count, to help make big sets reasonable
+            double power = weights.Count / 10.0;
+            if (power < 1.5) power = 1.5;
+            // Calculate picks now
             double totalSum = 0;
             for (int i = 0; i < weights.Count; i++)
             {

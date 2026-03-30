@@ -54,7 +54,7 @@ namespace GameData
         public string DefaultStatus = "";
         public string NonVolatileStatus = "";
         public List<int> MovePp = [];
-        public int Level = 100; // Default is 100
+        public int Level = 100; // Default is 100 but loaded into ctx properly as a lvl multiplier if different to 100
         public int LevelMod = 0;
         public HashSet<int> MovesChosenInBattle = [];
         public PokemonLogic Logic = PokemonLogic.BASIC;

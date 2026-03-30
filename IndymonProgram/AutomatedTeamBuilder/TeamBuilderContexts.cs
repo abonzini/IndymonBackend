@@ -9,7 +9,7 @@ namespace AutomatedTeamBuilder
     /// <summary>
     /// A context of things going on, to be able to build mons sets. Includes opp average profile, typechart, and ongoing archetypes if present
     /// </summary>
-    internal class TeamBuildContext
+    public class TeamBuildContext
     {
         public HashSet<TeamArchetype> CurrentTeamArchetypes = new HashSet<TeamArchetype>(); // Contains an ongoing archetype that applies for all team
         public Weather CurrentWeather = Weather.NONE; // Ongoing weather
@@ -24,7 +24,7 @@ namespace AutomatedTeamBuilder
     /// <summary>
     /// The context of a currently building mon. Also used to store data about current mods and stuff
     /// </summary>
-    internal class PokemonBuildContext
+    public class PokemonBuildContext
     {
         // Things that are added on the transcourse of building a set, makes some other stuff more or less desirable
         public HashSet<TeamArchetype> AdditionalArchetypes = new HashSet<TeamArchetype>(); /// Contains archetypes created by this mon
@@ -94,6 +94,8 @@ namespace AutomatedTeamBuilder
             result.AdditionalConstraints.AddRange(teamCtx.TeamBuildConstraints);
             result.CurrentTerrain = teamCtx.CurrentTerrain;
             result.CurrentWeather = teamCtx.CurrentWeather;
+            // Check what level the mon is meant to be because all calcs are based on lvl 100, so I check the lvl modifier
+            result.LevelMultiplier = pokemon.Level / 100.0;
             // Then obtain, step by step, all mods applied by all the (currently known) elements of the mon's build
             ExtractAlwaysMods(result); // Extract the mods that are present in absolutely everyhting
             ExtractPokeballMods(pokemon.PokeBall, result); // Pokeball can't change so extract its mods now
@@ -219,6 +221,7 @@ namespace AutomatedTeamBuilder
             (double[] monStats, double[] monStatVariance) = MonStatCalculation(result, teamCtx, false, 1, 1); // Get mon stats (variance is 0 anyway)
             (double[] oppStats, double[] oppVariance) = MonStatCalculation(result, teamCtx, true, 1, 1); // Get opp stats and variance
             // Offensive value calculation (this can be only done with 2 or more moves, otherwise comparing offensive utility gets weird when adding the first move
+            if (teamCtx.smartTeamBuild) // Non-smart building won't care about this
             {
                 List<double> movesDamage = [];
                 List<List<double>> movesTypeCoverage = [];
@@ -327,6 +330,7 @@ namespace AutomatedTeamBuilder
                 result.DamageScore = Math.Clamp(result.DamageScore, 0, 1); // The score is clamped to 1 to avoid giving lots of points to overkill setup/items
             }
             // Defensive value calculation
+            if (teamCtx.smartTeamBuild) // Non-smart building won't care about this
             {
                 // Gets hit by a ton of moves, both physical and special, equivalent to every single move stab in the game, average both
                 // This gives me the average punch in the face I get, my HP is evaluated inside this
@@ -352,6 +356,7 @@ namespace AutomatedTeamBuilder
                 }
             }
             // Speed value calculation
+            if (teamCtx.smartTeamBuild) // Non-smart building won't care about this
             {
                 // Just compare my speed with opps speed, nothing crazy
                 Normal oppSpeedDistro = new Normal(oppStats[5], Math.Sqrt(oppVariance[5])); // Get the std dev ofc
