@@ -13,12 +13,6 @@ Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone
 
 ---
 POSSIBLE THINGS TO LOOK FOR:
-- Whole team builder has been fucked up beyond recognition, reccomend to debug a few times in normal steps to ensure basic behaviour of system
-	- Mod/Held item teabluider algo has changed a bit
-	- Level override
-	- Stat calc and extra multipliers also in crit damage
-- Debug stuff like storm drain giving the correct def increase (maybe doesn't even need it tbh)
-- Debug dungeons overall
 - Debug shiny stone (when it happens)
 - Add pokeballs to dbase (when they happen), slp ball needs to add status + rest flag. level ball adjusts level.
 - Debug level multiplier (when it happens)
