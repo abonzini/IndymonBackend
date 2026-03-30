@@ -130,8 +130,8 @@ namespace AutomatedTeamBuilder
                                 if (mon.Species.ToLower().Contains("unown")) // And then again, weird mechanic. Unown will actually be able to use all abilities starting with the letter
                                 {
                                     char letter = (mon.Species == "Unown") ? 'a' : mon.Species.ToLower().Last(); // Basic unown is A
-                                    List<Ability> unownAbilities = [.. MechanicsDataContainers.GlobalMechanicsData.Abilities.Values.Where(a => a.Name.ToLower().StartsWith(letter) && !a.Flags.Contains(EffectFlag.BANNED))]; // Get all abilities
-                                    if (unownAbilities.Count > 0) possibleAbilities = unownAbilities; // If no abilities (X/Y), then use standard (levitate)
+                                    possibleAbilities = [.. possibleAbilities.Where(a => a.Name.ToLower().StartsWith(letter))]; // Get all unown abilities
+                                    if (possibleAbilities.Count > 0) possibleAbilities = [MechanicsDataContainers.GlobalMechanicsData.Abilities["Levitate"]]; // If no abilities (X/Y), then use standard (levitate)
                                 }
                                 List<double> abilityScores = [.. Enumerable.Repeat<double>(1, possibleAbilities.Count)]; // All of their values is init to 1
                                 if (trainer.AutoSetItem && mon.SetItem != null) // If I can equip other set items AND set item provides useful abilities, I'll add them too
@@ -190,7 +190,7 @@ namespace AutomatedTeamBuilder
                                 {
                                     mon.SetItem = trainer.SetItems.Keys.First(i => i.AddedAbility == chosenAbility); // Get the first set item that satisfies
                                     GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, -1, true); // Remove 1 charge of set item from trainer
-                                                                                                                       // If set item just equipped, also means the mon has been added moves
+                                    // If set item just equipped, also means the mon has been added moves
                                     mon.ChosenMoveset = [.. mon.ChosenMoveset.Union(mon.SetItem.AddedMoves)];
                                 }
                             }

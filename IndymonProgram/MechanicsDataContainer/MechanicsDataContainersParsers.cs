@@ -182,6 +182,11 @@ namespace MechanicsDataContainer
                 if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
                 theAbility = fields[ABILITY_3_FIELD].Trim();
                 if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
+                if (thePokemon.Name.ToLower().Contains("unown")) // Unown is a special boy, can do anything
+                {
+                    thePokemon.Abilities.Clear();
+                    thePokemon.Abilities = [.. Abilities.Values];
+                }
                 // Prevos
                 string preevo = fields[PREEVO_FIELD].Trim();
                 if (preevo != "") // Mon has prevo
