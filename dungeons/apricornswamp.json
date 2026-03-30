@@ -272,7 +272,7 @@
       "PostEventString": "Little by little, they shaped the world and bound the continents with ropes."
   },
   "CustomShowdownRules" : ["Continuous Grassy Terrain Mod"],
-  "DungeonArchetypes": ["BACKGROUND_TERRAIN"],
+  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_TERRAIN"],
   "DungeonWeather": "NONE",
   "DungeonTerrain": "GRASSY",
   "NextDungeon": "",

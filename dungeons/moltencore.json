@@ -264,7 +264,7 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Desolate Land Mod"],
-  "DungeonArchetypes": ["BACKGROUND_WEATHER"],
+  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_WEATHER"],
   "DungeonWeather": "DESOLATE_LAND",
   "DungeonTerrain": "NONE",
   "NextDungeon": "",

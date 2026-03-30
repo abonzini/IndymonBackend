@@ -280,7 +280,7 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Sand Mod"],
-  "DungeonArchetypes": ["BACKGROUND_WEATHER"],
+  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_WEATHER"],
   "DungeonWeather": "SAND",
   "DungeonTerrain": "NONE",
   "NextDungeon": "",

@@ -271,7 +271,7 @@
       "PostEventString": "They were never seen since. Despite the efforts of their most devout followers, they were never found. ..."
   },
   "CustomShowdownRules" : ["Continuous Rain Mod"],
-  "DungeonArchetypes": ["BACKGROUND_WEATHER"],
+  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_WEATHER"],
   "DungeonWeather": "RAIN",
   "DungeonTerrain": "NONE",
   "NextDungeon": "",

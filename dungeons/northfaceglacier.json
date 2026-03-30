@@ -265,7 +265,7 @@
       "PostEventString": "The my///cal bea... of cre../t... ..ll roam the lands once again."
   },
   "CustomShowdownRules" : ["Continuous Snow Mod"],
-  "DungeonArchetypes": ["BACKGROUND_WEATHER"],
+  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_WEATHER"],
   "DungeonWeather": "SNOW",
   "DungeonTerrain": "NONE",
   "NextDungeon": "",

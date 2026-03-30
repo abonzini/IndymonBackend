@@ -344,7 +344,7 @@ namespace IndymonBackendProgram
             TeamBuilder.DefineTrainerSets(_trainer, true, _dungeonData.DungeonArchetypes, _dungeonData.DungeonWeather, _dungeonData.DungeonTerrain, new Constraint(), [.. enemyMons], TrainerAndSeed.Item2); // Team build but with the dungeon's weather and such 
             List<RoomEvent> possibleEvents = [.. _dungeonData.Events]; // These are the possible events for this dungeon
             // Beginning of expl and event queue
-            if (_trainer.BattleTeam.Any(m => m.ModItem.Name == "Shiny Stone")) // Shiny stone is a special item that will modify the base shiny chance to 1 in 25
+            if (_trainer.BattleTeam.Any(m => m.ModItem?.Name == "Shiny Stone")) // Shiny stone is a special item that will modify the base shiny chance to 1 in 25
             {
                 _context.ModifyBaseShinyChance(1 / 20); // 20 times more likely
             }

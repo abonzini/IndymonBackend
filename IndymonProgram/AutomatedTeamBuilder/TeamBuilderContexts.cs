@@ -127,8 +127,6 @@ namespace AutomatedTeamBuilder
             {
                 ExtractArchetypeMods(archetype, result);
             }
-            ExtractWeatherMods(result.CurrentWeather, result);
-            ExtractTerrainMods(result.CurrentTerrain, result);
             // All of these mods may have changed the pokemon itself (e.g. zen mode, pirouette, random shit, so only then we verify the mon and stuff)
             Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[result.GetPokemonSpecies()];
             result.MonStats = monData.Stats;
@@ -136,6 +134,7 @@ namespace AutomatedTeamBuilder
             result.PokemonTypes = monData.Types; // Set base type
             ExtractMonMods(result);
             // Finally, gather all flags and apply flag mods but only once (e.g. 2 instances of same flag don't stack)
+            // This only extracts the flags that are "present" and affect other's scores, but not caring too much about the ones that affect the move damage and effectiveness itself
             HashSet<EffectFlag> allFlags = [];
             if (currentAbility != null)
             {
@@ -149,7 +148,10 @@ namespace AutomatedTeamBuilder
             {
                 ExtractMods((ElementType.EFFECT_FLAGS, flag.ToString()), result);
             }
-            // At this point all stat mods should eb loaded so I can see what's the current average status of the Pokemon's boosts
+            // Finally, all of these may have affected weather or terrain, which are the last to be loaded
+            ExtractWeatherMods(result.CurrentWeather, result);
+            ExtractTerrainMods(result.CurrentTerrain, result);
+            // At this point all stat mods should be loaded so I can see what's the current average status of the Pokemon's boosts
             double aggregateBoosts = result.StatBoosts.Sum();
             if (aggregateBoosts > 0) ExtractMods((ElementType.POKEMON_HAS_POSITIVE_BOOSTS, "-"), result);
             else if (aggregateBoosts < 0) ExtractMods((ElementType.POKEMON_HAS_NEGATIVE_BOOSTS, "-"), result);

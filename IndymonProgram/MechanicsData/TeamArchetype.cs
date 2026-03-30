@@ -7,6 +7,7 @@ namespace MechanicsData
     public enum TeamArchetype
     {
         NONE,
+        EXPLORATION,
         BACKGROUND_TERRAIN,
         BACKGROUND_WEATHER,
         TRICK_ROOM,

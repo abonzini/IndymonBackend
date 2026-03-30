@@ -278,7 +278,7 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Primordial Sea Mod"],
-  "DungeonArchetypes": ["BACKGROUND_WEATHER"],
+  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_WEATHER"],
   "DungeonWeather": "PRIMORDIAL_SEA",
   "DungeonTerrain": "NONE",
   "NextDungeon": "",

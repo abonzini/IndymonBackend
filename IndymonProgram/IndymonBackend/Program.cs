@@ -60,6 +60,7 @@ namespace IndymonBackendProgram
                         GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
                         Console.WriteLine("Serializing jsons");
                         File.WriteAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE), JsonConvert.SerializeObject(tournamentManager, jsonSettings));
+                        File.WriteAllText(Path.Combine(directoryPath, EXPLORATION_JSON_FILE), JsonConvert.SerializeObject(explorationManager, jsonSettings));
                         break;
                     case "1":
                         tournamentManager = new TournamentManager
@@ -216,7 +217,7 @@ namespace IndymonBackendProgram
                             Console.WriteLine("How many mons?");
                             int count = int.Parse(Console.ReadLine());
                             List<string> foundMons = [];
-                            foreach(string nextDungeon in dungeons)
+                            foreach (string nextDungeon in dungeons)
                             {
                                 Dungeon theDungeon = GameDataContainers.GlobalGameData.Dungeons[nextDungeon.Trim()];
                                 List<string> possibleMons = theDungeon.PokemonEachFloor[0];

@@ -262,7 +262,7 @@
       "PostEventString": "From the moment they were born, a great task fell in their hands..."
   },
   "CustomShowdownRules" : ["Continuous Electric Terrain Mod"],
-  "DungeonArchetypes": ["BACKGROUND_TERRAIN"],
+  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_TERRAIN"],
   "DungeonWeather": "NONE",
   "DungeonTerrain": "ELECTRIC",
   "NextDungeon": "",

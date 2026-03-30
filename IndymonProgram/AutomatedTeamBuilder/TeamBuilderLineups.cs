@@ -301,7 +301,7 @@ namespace AutomatedTeamBuilder
                     AddNextMonToFinalTeam(chosenMon);
                 }
                 // Then, if still need to fill, let's go items
-                if (monsInTeam < nMons && trainer.AutoSetItem)
+                if (monsInTeam < nMons && !acceptLessMons && trainer.AutoSetItem)
                 {
                     // Add mons + battle item as long as i still have mons (and items!) and need to get more
                     while (usedBuild.TrainerOwnPokemonUsingSetItem.Count > 0 && monsInTeam < nMons)

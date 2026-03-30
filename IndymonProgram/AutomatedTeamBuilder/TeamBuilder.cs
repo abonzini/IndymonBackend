@@ -521,7 +521,7 @@ namespace AutomatedTeamBuilder
             // If team accepted, then get all mons ctx one last time, and apply the necessary things to them
             foreach (TrainerPokemon mon in trainer.BattleTeam)
             {
-                PokemonBuildContext monCtx = new PokemonBuildContext(); // Get all the mons context data
+                PokemonBuildContext monCtx = ObtainPokemonSetContext(mon, buildCtx); // Get all the mons context data
                 // In here, a bit of logic. What if the trainer chose a mod item that improves logic (e.g. dawn stone) but has not chosen a set?
                 // Then everything is randomized, and this means the mod item si just luck based, so I'll try to atleast use a first-slot move that makes sense
                 // This will reorder moves a bunch and notify

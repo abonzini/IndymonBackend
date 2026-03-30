@@ -294,7 +294,7 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : [],
-  "DungeonArchetypes": [],
+  "DungeonArchetypes": [ "EXPLORATION", ],
   "DungeonWeather": "NONE",
   "DungeonTerrain": "NONE",
   "NextDungeon": "Northface Glacier",

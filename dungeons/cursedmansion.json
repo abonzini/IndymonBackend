@@ -284,7 +284,7 @@
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Trick Room Mod"],
-  "DungeonArchetypes": ["TRICK_ROOM"],
+  "DungeonArchetypes": [ "EXPLORATION", "TRICK_ROOM"],
   "DungeonWeather": "NONE",
   "DungeonTerrain": "NONE",
   "NextDungeon": "",
