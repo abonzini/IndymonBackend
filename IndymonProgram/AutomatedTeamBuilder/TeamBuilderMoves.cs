@@ -8,24 +8,109 @@ namespace AutomatedTeamBuilder
     {
         // Calc area
         /// <summary>
-        /// Calculated the damage of a simple placeholder move without any crazy mods or even a type. Just to have an idea of the defensive profile of a mon
+        /// Calculated the damage of a simple placeholder move without any crazy mods. Just to have an idea of the defensive profile of a mon in its context
         /// </summary>
         /// <param name="bp">Bp of move</param>
+        /// <param name="type">Type of move</param>
         /// <param name="category">Category of move</param>
         /// <param name="attackerStats">Stats of attacker entity</param>
         /// <param name="defenderStats">Stats of defending entity</param>
+        /// <param name="ctx">Context of enemy mon</param>
         /// <returns></returns>
-        static double CalcPlaceholderMoveDamage(double bp, MoveCategory category, double[] attackerStats, double[] defenderStats)
+        static double GetEvaluationStabMoveDamage(double bp, PokemonType type, MoveCategory category, double[] attackerStats, double[] defenderStats, PokemonBuildContext ctx)
         {
-            double attackingStat = (category == MoveCategory.PHYSICAL) ? attackerStats[1] : attackerStats[3];
-            double defendingStat = (category == MoveCategory.PHYSICAL) ? defenderStats[2] : defenderStats[4];
-            // Actual calculation    
-            double hitDamage = 42; // This depends on mon level so keep in mind. Assume opp always lvl 100 whatever
-            hitDamage *= attackingStat;
-            double remainingFactor = bp / (defendingStat * 50); // rest of the damage formula
-            hitDamage *= remainingFactor;
-            hitDamage += 2; // This is the hit damage, no variance needed here
-            return hitDamage;
+            // Now test move damage
+            Move theMoveToTest = new Move() // Basic vanilla move with no flags
+            {
+                Name = "TEST MOVE",
+                Category = category,
+                Acc = 100,
+                Bp = bp,
+                Type = type
+            };
+            if (category == MoveCategory.STATUS) // Status moves don't deal damage this should never happen tho
+            {
+                return 0;
+            }
+            else // Damage calc incoming...
+            {
+                double moveBp = bp;
+                moveBp *= GetMoveBpMods(theMoveToTest, ctx);
+                double attackingStat = (category == MoveCategory.PHYSICAL) ? attackerStats[1] : attackerStats[3];
+                double defendingStat = (category == MoveCategory.PHYSICAL) ? defenderStats[2] : defenderStats[4];
+                double hitDamage = 42; // This depends on mon level so keep in mind. Assume opp always lvl 100 whatever
+                hitDamage *= attackingStat;
+                double remainingFactor = moveBp / (defendingStat * 50); // rest of the damage formula
+                hitDamage *= remainingFactor;
+                hitDamage += 2; // This is the hit damage, no variance needed here
+                hitDamage *= 1.5; // Assume a stab
+                // Random
+                double randomHitRoll = (100.0 + 85.0) / (2.0 * 100.0); // Hit roll (in float...)
+                hitDamage *= randomHitRoll;
+                return hitDamage;
+            }
+        }
+        /// <summary>
+        /// For a lot of attackers, assume you're being attacked stab for all types with a BP of 80. Attacker has no abilities or flags, but defender does (given by defender context)
+        /// </summary>
+        /// <param name="defendingType">Type of defending mon</param>
+        /// <param name="attackingTypes">Attacking types of attacking mons, will try all stabs</param>
+        /// <returns>A list with all stab damage multipliers</returns>
+        static List<double> EvaluateDefenderMoveTaken((PokemonType, PokemonType) defendingType, PokemonBuildContext ctx, TeamBuildContext battleCtx)
+        {
+            List<double> result = new List<double>();
+            foreach ((PokemonType, PokemonType) attackingType in battleCtx.OpponentsTypes)
+            {
+                (double[] oppStats, _) = MonStatCalculation(ctx, battleCtx, true, 1, 1); // Get opp stats
+                (double[] monStats, _) = MonStatCalculation(ctx, battleCtx, false, 1, 1); // Get mon stats
+                PokemonBuildContext oppContext = new PokemonBuildContext // Extract context from attacker POV (only weather and terrain is known really)
+                {
+                    CurrentWeather = ctx.CurrentWeather,
+                    CurrentTerrain = ctx.CurrentTerrain,
+                };
+                ExtractWeatherMods(oppContext.CurrentWeather, oppContext);
+                ExtractTerrainMods(oppContext.CurrentTerrain, oppContext);
+                // Consider this as 2 separate attacks now, first T1 and then T2. Get basic damage, multiply, then decide if nullify
+                static double DefensiveTypeCheck(PokemonType attackingType, (PokemonType, PokemonType) defendingType, HashSet<(StatModifier, string)> modifiedTypeEffectiveness)
+                {
+                    if (attackingType == PokemonType.NONE) return 1; // Typeless moves just hit but this isn't reachable
+                    double damage = CalculateOffensiveTypeCoverage(attackingType, [defendingType], false, false, false, 1)[0]; // Reuse the attackign formula, check how much this messes me up, don't know enemy abilities so all false
+                    // SE checks here before extra modifiers
+                    if (damage > 1) // SE!
+                    {
+                        if (modifiedTypeEffectiveness.Contains((StatModifier.HALVES_RECV_SE_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 0.5;
+                        foreach ((StatModifier, string) alterSeCase in modifiedTypeEffectiveness.Where(m => m.Item1 == StatModifier.ALTER_RECV_SE_DAMAGE)) // Can be any number so I need to search by key
+                        {
+                            damage *= double.Parse(alterSeCase.Item2);
+                        }
+                    }
+                    else // non SE!
+                    {
+                        foreach ((StatModifier, string) alterSeCase in modifiedTypeEffectiveness.Where(m => m.Item1 == StatModifier.ALTER_RECV_NON_SE_DAMAGE)) // Can be any number so I need to search by key
+                        {
+                            damage *= double.Parse(alterSeCase.Item2);
+                        }
+                    }
+                    if (modifiedTypeEffectiveness.Contains((StatModifier.NULLIFIES_RECV_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 0;
+                    if (modifiedTypeEffectiveness.Contains((StatModifier.HALVES_RECV_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 0.5;
+                    if (modifiedTypeEffectiveness.Contains((StatModifier.HALVES_RECV_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 0.5;
+                    if (modifiedTypeEffectiveness.Contains((StatModifier.DOUBLES_RECV_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 2;
+                    return damage;
+                }
+                // Calculate and add for valid types, incorporate stab mult too and placeholder damage of both types
+                List<PokemonType> typesToEvaluate = [attackingType.Item1, attackingType.Item2];
+                typesToEvaluate = [.. typesToEvaluate.Where(t => t != PokemonType.NONE)]; // Filter only to real types
+                foreach (PokemonType type in typesToEvaluate)
+                {
+                    double typeEffectiveness = DefensiveTypeCheck(type, defendingType, ctx.ModifiedTypeEffectiveness);
+                    // Calculate both damages
+                    double physicalDamage = typeEffectiveness * GetEvaluationStabMoveDamage(80, type, MoveCategory.PHYSICAL, oppStats, monStats, oppContext);
+                    result.Add(physicalDamage);
+                    double specialDamage = typeEffectiveness * GetEvaluationStabMoveDamage(80, type, MoveCategory.SPECIAL, oppStats, monStats, oppContext);
+                    result.Add(specialDamage);
+                }
+            }
+            return result;
         }
         /// <summary>
         /// Calculates the damage of a (damaging!) move
@@ -595,27 +680,27 @@ namespace AutomatedTeamBuilder
                     (ElementType, string) effectTag = (ElementType.EFFECT_FLAGS, effect.ToString());
                     score *= monCtx.WeightMods.GetValueOrDefault(effectTag, 1);
                 }
-                // And finally, if score non-0 add also the additive ones
-                if (score > 0)
-                {
-                    score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(moveNameTag, 0);
-                    score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(moveCatTag, 0);
-                    score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(moveOTypeTag, 0);
-                    score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(anyMoveTag, 0);
-                    if (moveIsDamaging) // Few extra checks for damaging moves
-                    {
-                        score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(damagingMoveOfTypeTag, 0);
-                        score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(damagingMoveTag, 0);
-                    }
-                    foreach (EffectFlag effect in allMoveFlags)
-                    {
-                        (ElementType, string) effectTag = (ElementType.EFFECT_FLAGS, effect.ToString());
-                        score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(effectTag, 0);
-                    }
-                }
                 // Finally, we need to do the hypotetical, does this move add to defensive, offensive or speed utilities?
                 mon.ChosenMoveset.Add(move); // First, equip this move to mon
                 PokemonBuildContext newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
+                // Calculate whether the move created a net positive or negative stat differential, to obtain whether the move is a positive stat boost generator or not
+                double statDelta = MonStatCalculation(newCtx, buildCtx, false, 1, 1).Item1.Sum() -
+                    MonStatCalculation(monCtx, buildCtx, false, 1, 1).Item1.Sum();
+                if (statDelta > 0) // Move was found to generate positive boosts, apply its score
+                {
+                    (ElementType, string) weightTag = (ElementType.POKEMON_HAS_POSITIVE_BOOSTS, "-");
+                    score *= monCtx.WeightMods.GetValueOrDefault(weightTag, 1);
+                }
+                else if (statDelta < 0) // Move was found to generate negative boosts, apply its score
+                {
+                    (ElementType, string) weightTag = (ElementType.POKEMON_HAS_NEGATIVE_BOOSTS, "-");
+                    score *= monCtx.WeightMods.GetValueOrDefault(weightTag, 1);
+                }
+                else
+                {
+                    // Nothing to do
+                }
+                // Offensive score
                 double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
                 double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
                 // Defensive score for moves is a tad different because the def is dependent on the move either being used and in some cases, used afterwards
@@ -658,6 +743,24 @@ namespace AutomatedTeamBuilder
                     score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
                 }
                 mon.ChosenMoveset.RemoveAt(mon.ChosenMoveset.Count - 1); // Remove move ofc
+                // And finally, if score non-0 add also the additive ones
+                if (score > 0)
+                {
+                    score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(moveNameTag, 0);
+                    score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(moveCatTag, 0);
+                    score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(moveOTypeTag, 0);
+                    score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(anyMoveTag, 0);
+                    if (moveIsDamaging) // Few extra checks for damaging moves
+                    {
+                        score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(damagingMoveOfTypeTag, 0);
+                        score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(damagingMoveTag, 0);
+                    }
+                    foreach (EffectFlag effect in allMoveFlags)
+                    {
+                        (ElementType, string) effectTag = (ElementType.EFFECT_FLAGS, effect.ToString());
+                        score += MechanicsDataContainers.GlobalMechanicsData.FlatIncreaseModifiers.GetValueOrDefault(effectTag, 0);
+                    }
+                }
             }
             return score;
         }

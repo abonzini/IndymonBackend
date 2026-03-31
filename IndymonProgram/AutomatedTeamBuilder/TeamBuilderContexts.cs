@@ -158,7 +158,7 @@ namespace AutomatedTeamBuilder
             double aggregateBoosts = result.StatBoosts.Sum();
             if (aggregateBoosts > 0) ExtractMods((ElementType.POKEMON_HAS_POSITIVE_BOOSTS, "-"), result);
             else if (aggregateBoosts < 0) ExtractMods((ElementType.POKEMON_HAS_NEGATIVE_BOOSTS, "-"), result);
-            else { } // Neithe rpositive nor negative boosts ongoing
+            else { } // Neither positive nor negative boosts ongoing
             // Weather and specific weather/terrain-dependant effects
             if (pokemon.ChosenAbility?.Name == "Forecast") // Change type on weather
             {
@@ -219,7 +219,7 @@ namespace AutomatedTeamBuilder
                 }
             }
             // Finally, need to obtain offensive/defensive/speed scores to do some comparisons
-            (double[] monStats, double[] monStatVariance) = MonStatCalculation(result, teamCtx, false, 1, 1); // Get mon stats (variance is 0 anyway)
+            (double[] monStats, _) = MonStatCalculation(result, teamCtx, false, 1, 1); // Get mon stats (variance is 0 anyway)
             (double[] oppStats, double[] oppVariance) = MonStatCalculation(result, teamCtx, true, 1, 1); // Get opp stats and variance
             // Offensive value calculation (this can be only done with 2 or more moves, otherwise comparing offensive utility gets weird when adding the first move
             if (teamCtx.smartTeamBuild) // Non-smart building won't care about this
@@ -337,18 +337,13 @@ namespace AutomatedTeamBuilder
                 // This gives me the average punch in the face I get, my HP is evaluated inside this
                 // This makes underkills make my hp be close to 1 and overkills make it tend to 0
                 // Improvements will then involve moves move me in this curve but if I gain defense for nothing, or is not enough anyway, then it's ok
-                double physicalDamage = CalcPlaceholderMoveDamage(80, MoveCategory.PHYSICAL, oppStats, monStats); // Use 80 BP as indication of an OK move damage
-                double specialDamage = CalcPlaceholderMoveDamage(80, MoveCategory.SPECIAL, oppStats, monStats);
-                double averageDamage = (physicalDamage + specialDamage) / 2;
-                // Also get the average damage of all stabs punching me in the face, affect damage and variance accordingly
                 (PokemonType, PokemonType) defendingPokemonType = (result.TeraType != PokemonType.NONE && result.TeraType != PokemonType.STELLAR) ? (result.TeraType, PokemonType.NONE) : result.PokemonTypes;
-                List<double> moveStabsReceived = CalculateDefensiveTypeStabCoverage(defendingPokemonType, teamCtx.OpponentsTypes, result.ModifiedTypeEffectiveness);
-                double averageStabReceived = moveStabsReceived.Average();
-                averageDamage *= averageStabReceived;
+                List<double> moveDamagesReceived = EvaluateDefenderMoveTaken(defendingPokemonType, result, teamCtx); // All the damages by all types in weather calculating placeholder damage
+                double averageDamage = moveDamagesReceived.Average();
                 if (averageDamage == 0) averageDamage = 1; // Always 1HP damage to avoid div 0
                 //  Checks how "bulky" a mon is, which increases surv rating, measured in #hits survived
                 result.Survivability = monStats[0] / averageDamage; // This tells us how many hits the pokemon can take before dying
-                if (result.Survivability < 1 && (pokemon.BattleItem?.Name == "Focus Sash" || pokemon.ChosenAbility?.Name == "Sturdy")) // If mon would be one-shotted, it's not
+                if (result.Survivability <= 1 && (pokemon.BattleItem?.Name == "Focus Sash" || pokemon.ChosenAbility?.Name == "Sturdy")) // If mon would be one-shotted, it's not
                 {
                     result.Survivability += 1; // Then the mon lasts 1 more turn anyway
                 }

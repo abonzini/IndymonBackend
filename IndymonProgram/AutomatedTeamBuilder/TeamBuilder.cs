@@ -312,7 +312,7 @@ namespace AutomatedTeamBuilder
                                     {
                                         mon.SetItem = trainer.SetItems.Keys.First(i => i.AddedMoves.Contains(chosenMove));
                                         GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, -1, true); // Remove 1 charge of set item from trainer
-                                                                                                                           // Add all the item moves to the dict
+                                        // Add all the item moves to the dict
                                         mon.ChosenMoveset = [.. mon.ChosenMoveset.Union(mon.SetItem.AddedMoves)];
                                     }
                                     else

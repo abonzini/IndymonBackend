@@ -43,50 +43,5 @@ namespace AutomatedTeamBuilder
             }
             return result;
         }
-        /// <summary>
-        /// For a lot of attackers, assume you're being attacked stab for all types, assuming no abilities. Gets you a list of all damage modifiers received, defender may have abilities too
-        /// </summary>
-        /// <param name="defendingType">Type of defending mon</param>
-        /// <param name="attackingTypes">Attacking types of attacking mons, will try all stabs</param>
-        /// <param name="ModifiedTypeEffectiveness">All the mods that would affect defending type effectiveness</param>
-        /// <returns>A list with all stab damage multipliers</returns>
-        static List<double> CalculateDefensiveTypeStabCoverage((PokemonType, PokemonType) defendingType, List<(PokemonType, PokemonType)> attackingTypes, HashSet<(StatModifier, string)> ModifiedTypeEffectiveness)
-        {
-            List<double> result = new List<double>();
-            foreach ((PokemonType, PokemonType) attackingType in attackingTypes)
-            {
-                // Consider this as 2 separate attacks now, first T1 and then T2. Get basic damage, multiply, then decide if nullify
-                static double DefensiveTypeCheck(PokemonType attackingType, (PokemonType, PokemonType) defendingType, HashSet<(StatModifier, string)> ModifiedTypeEffectiveness)
-                {
-                    if (attackingType == PokemonType.NONE) return 1; // Typeless moves just hit
-                    double damage = CalculateOffensiveTypeCoverage(attackingType, [defendingType], false, false, false, 1)[0]; // Reuse the attackign formula, check how much this messes me up, don''t know enemy abilities so all false
-                    // SE checks here before extra modifiers
-                    if (damage > 1) // SE!
-                    {
-                        if (ModifiedTypeEffectiveness.Contains((StatModifier.HALVES_RECV_SE_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 0.5;
-                        foreach ((StatModifier, string) alterSeCase in ModifiedTypeEffectiveness.Where(m => m.Item1 == StatModifier.ALTER_RECV_SE_DAMAGE)) // Can be any number so I need to search by key
-                        {
-                            damage *= double.Parse(alterSeCase.Item2);
-                        }
-                    }
-                    else // non SE!
-                    {
-                        foreach ((StatModifier, string) alterSeCase in ModifiedTypeEffectiveness.Where(m => m.Item1 == StatModifier.ALTER_RECV_NON_SE_DAMAGE)) // Can be any number so I need to search by key
-                        {
-                            damage *= double.Parse(alterSeCase.Item2);
-                        }
-                    }
-                    if (ModifiedTypeEffectiveness.Contains((StatModifier.NULLIFIES_RECV_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 0;
-                    if (ModifiedTypeEffectiveness.Contains((StatModifier.HALVES_RECV_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 0.5;
-                    if (ModifiedTypeEffectiveness.Contains((StatModifier.HALVES_RECV_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 0.5;
-                    if (ModifiedTypeEffectiveness.Contains((StatModifier.DOUBLES_RECV_DAMAGE_OF_TYPE, attackingType.ToString()))) damage *= 2;
-                    return damage;
-                }
-                // Calculate and add for valid types, incorporate stab mult too
-                if (attackingType.Item1 != PokemonType.NONE) result.Add(1.5 * DefensiveTypeCheck(attackingType.Item1, defendingType, ModifiedTypeEffectiveness));
-                if (attackingType.Item2 != PokemonType.NONE) result.Add(1.5 * DefensiveTypeCheck(attackingType.Item2, defendingType, ModifiedTypeEffectiveness));
-            }
-            return result;
-        }
     }
 }
