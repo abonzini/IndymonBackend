@@ -58,18 +58,21 @@ namespace AutomatedTeamBuilder
         /// <returns>A list with all stab damage multipliers</returns>
         static List<double> EvaluateDefenderMoveTaken((PokemonType, PokemonType) defendingType, PokemonBuildContext ctx, TeamBuildContext battleCtx)
         {
+            // Assemble all needed elements (stats + ctx) needed to estimate damage dealt by enemy
+            (double[] oppStats, _) = MonStatCalculation(ctx, battleCtx, true, 1, 1); // Get opp stats
+            (double[] monStats, _) = MonStatCalculation(ctx, battleCtx, false, 1, 1); // Get mon stats
+            PokemonBuildContext oppContext = new PokemonBuildContext // Extract context from attacker POV (only weather and terrain is known really)
+            {
+                CurrentWeather = ctx.CurrentWeather,
+                CurrentTerrain = ctx.CurrentTerrain,
+            };
+            ExtractWeatherMods(oppContext.CurrentWeather, oppContext);
+            ExtractTerrainMods(oppContext.CurrentTerrain, oppContext);
+            // Calculate
             List<double> result = new List<double>();
+            Dictionary<PokemonType, (double, double)> typeDamageLut = new Dictionary<PokemonType, (double, double)>(); // LUT Store data of types so as to not need to do them again
             foreach ((PokemonType, PokemonType) attackingType in battleCtx.OpponentsTypes)
             {
-                (double[] oppStats, _) = MonStatCalculation(ctx, battleCtx, true, 1, 1); // Get opp stats
-                (double[] monStats, _) = MonStatCalculation(ctx, battleCtx, false, 1, 1); // Get mon stats
-                PokemonBuildContext oppContext = new PokemonBuildContext // Extract context from attacker POV (only weather and terrain is known really)
-                {
-                    CurrentWeather = ctx.CurrentWeather,
-                    CurrentTerrain = ctx.CurrentTerrain,
-                };
-                ExtractWeatherMods(oppContext.CurrentWeather, oppContext);
-                ExtractTerrainMods(oppContext.CurrentTerrain, oppContext);
                 // Consider this as 2 separate attacks now, first T1 and then T2. Get basic damage, multiply, then decide if nullify
                 static double DefensiveTypeCheck(PokemonType attackingType, (PokemonType, PokemonType) defendingType, HashSet<(StatModifier, string)> modifiedTypeEffectiveness)
                 {
@@ -102,11 +105,22 @@ namespace AutomatedTeamBuilder
                 typesToEvaluate = [.. typesToEvaluate.Where(t => t != PokemonType.NONE)]; // Filter only to real types
                 foreach (PokemonType type in typesToEvaluate)
                 {
-                    double typeEffectiveness = DefensiveTypeCheck(type, defendingType, ctx.ModifiedTypeEffectiveness);
-                    // Calculate both damages
-                    double physicalDamage = typeEffectiveness * GetEvaluationStabMoveDamage(80, type, MoveCategory.PHYSICAL, oppStats, monStats, oppContext);
+                    double physicalDamage;
+                    double specialDamage;
+                    if (typeDamageLut.TryGetValue(type, out (double, double) damages)) // See if this is in the LUT already
+                    {
+                        physicalDamage = damages.Item1;
+                        specialDamage = damages.Item2;
+                    }
+                    else // Otherwise, calculate it
+                    {
+                        double typeEffectiveness = DefensiveTypeCheck(type, defendingType, ctx.ModifiedTypeEffectiveness);
+                        // Calculate both damages
+                        physicalDamage = typeEffectiveness * GetEvaluationStabMoveDamage(80, type, MoveCategory.PHYSICAL, oppStats, monStats, oppContext);
+                        specialDamage = typeEffectiveness * GetEvaluationStabMoveDamage(80, type, MoveCategory.SPECIAL, oppStats, monStats, oppContext);
+                        typeDamageLut.Add(type, (physicalDamage, specialDamage));
+                    }
                     result.Add(physicalDamage);
-                    double specialDamage = typeEffectiveness * GetEvaluationStabMoveDamage(80, type, MoveCategory.SPECIAL, oppStats, monStats, oppContext);
                     result.Add(specialDamage);
                 }
             }
