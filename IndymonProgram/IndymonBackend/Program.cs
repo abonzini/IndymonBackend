@@ -50,6 +50,7 @@ namespace IndymonBackendProgram
             string InputString;
             do
             {
+                Console.BackgroundColor = ConsoleColor.Black;
                 Console.ForegroundColor = ConsoleColor.White;
                 MainMenuInstructions();
                 InputString = Console.ReadLine();
@@ -230,6 +231,13 @@ namespace IndymonBackendProgram
                             Console.WriteLine(string.Join(", ", foundMons));
                         }
                         break;
+                    case "12":
+                        explorationManager = new ExplorationManager
+                        {
+                            DirectoryPath = directoryPath
+                        };
+                        explorationManager.TestDungeonImage();
+                        break;
                     default:
                         break;
                 }
@@ -254,7 +262,8 @@ namespace IndymonBackendProgram
                 "8 - Draw from Favour Gacha\n" +
                 "9 - Random 'Baby' Pokemon from trainer (Favor resolution)\n" +
                 "10 - Random exploration rewards (tiered favor resolutions)\n" +
-                "11 - Random exploration mons (for beginning of trainer's adventures)\n"
+                "11 - Random exploration mons (for beginning of trainer's adventures)\n" +
+                "12 - Test Dungeon Drawing"
             );
         }
     }

@@ -11,19 +11,22 @@ namespace IndymonBackendProgram
     public enum ExplorationStepType
     {
         NOP, // No operation, just a pause
+        // Data-based
         DEFINE_DUNGEON,
+        // Text-Based
+        CLEAR_CONSOLE,
         PRINT_STRING,
         PRINT_CLUE,
         PRINT_PLOT,
         PRINT_EVOLUTION,
-        CLEAR_CONSOLE,
-        DRAW_ROOM,
-        MOVE_CHARACTER,
-        CONNECT_ROOMS_PASSAGE,
-        CONNECT_ROOMS_SHORTCUT,
+        // Info table
         ADD_INFO_COLUMN,
         ADD_INFO_VALUE,
-        CLEAR_ROOMS,
+        // Graphics
+        MOVE_CHARACTER,
+        DRAW_EVENT,
+        DRAW_MAP,
+        CLEAR_SCREEN,
         DRAW_REGI_EYE
     }
     public enum CardinalDirections
@@ -38,9 +41,10 @@ namespace IndymonBackendProgram
         public ExplorationStepType Type { get; set; } // Which command
         public string StringParam { get; set; } // Parameter to pass. Strings containing $1 will be replaced by this
         public int IntParam { get; set; } // Parameter to pass.
-        public (int, int) SourceCoord { get; set; } // Coord of the source room when moving
-        public (int, int) DestCoord { get; set; } // Coord of destination room when moving
         public int MillisecondsWait { get; set; }
+        public (int, int) CoordParam { get; set; } // When drawing coords or something that is placed somewhere
+        public ConsoleColor FgParam { get; set; } // Colors when requesting to draw a specific thing
+        public ConsoleColor BgParam { get; set; }
         public override string ToString()
         {
             return Type.ToString();
@@ -319,9 +323,7 @@ namespace IndymonBackendProgram
         }
         const int MIN_MESSAGE_PAUSE = 2000; // Show text for this amount of time min
         const int MESSAGE_PAUSE_PER_WORD = 300; // 0.3s per word looks reasonable
-        const int DRAW_ROOM_PAUSE = 1000; // Show text for this amount of time
-        const int DUNGEON_NUMBER_OF_FLOORS = 3; // Hardcoded for now unless we need to make it flexible later on
-        const int DUNGEON_ROOMS_PER_FLOOR = 5;
+        const int DRAW_DELAY = 1000; // Time to wait until showing next section
         #region EXECUTION
         /// <summary>
         /// Begins an exploration, starts a simulation
@@ -333,6 +335,7 @@ namespace IndymonBackendProgram
             Console.Clear();
             Console.CursorVisible = true;
             // Initialize from beginning
+            ExplorationSteps.Clear();
             _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
             _trainer = IndymonUtilities.GetTrainerByName(TrainerAndSeed.Item1); // Find the trainer data
             const int MAX_N_MONS = 6;
@@ -352,6 +355,8 @@ namespace IndymonBackendProgram
             {
                 _context.ModifyBaseShinyChance(1 / 20); // 20 times more likely
             }
+            HashSet<char> mapExplorationProgress = ['0']; // Stores which parts of the map have been discovered, 0 is always discovered
+            SetDungeonCommand(Dungeon); // Need to do first of all otherwise all goes to hell
             AddInfoColumnCommand("Pokemon", 18);
             AddInfoColumnCommand("Health", 6);
             AddInfoColumnCommand("Status", 6);
@@ -360,84 +365,96 @@ namespace IndymonBackendProgram
             do
             {
                 SetDungeonCommand(Dungeon);
-                ClearRoomsCommand(); // Just in case, just clear the current screen (if coming from another exploration)
+                ClearScreenCommand(); // Just in case, just clear the current screen (if coming from another exploration)
                 ClearConsoleCommand(); // Clears mini console to leave space for new event's message
+                DrawMapCommand(mapExplorationProgress);
                 string auxString = $"Beginning of {_trainer.Name}'s exploration in {Dungeon}";
                 GenericMessageCommand(auxString); // Begin of exploration string
-                (int, int) prevCoord = (-1, 0); // Starts from outside i guess
-                bool usedShortcut = false; // If a shortcut was used to the new room
                 // Adds status table. Pokemon have a max of 18 characters, health and status max 3. Fill the info too
                 UpdateTrainerDataInfo();
-                for (int floor = 0; floor < DUNGEON_NUMBER_OF_FLOORS; floor++) // Begin the iteration of all floors
+                for (int floor = 0; floor < _dungeonData.NFloors; floor++) // Begin the iteration of all floors
                 {
-                    for (int room = 0; room < DUNGEON_ROOMS_PER_FLOOR; room++) // Begin the iteration of all rooms
+                    for (int depth = 0; depth < _dungeonData.NRoomsPerFloor; depth++) // Begin the iteration of floor depth
                     {
+                    NewRoomLanding:
                         ClearConsoleCommand(); // Clears mini console to leave space for new event's message
-                        DrawRoomCommand(floor, room); // Will draw the room
-                        DrawConnectRoomCommand(prevCoord.Item1, prevCoord.Item2, floor, room, usedShortcut); // Draws previous connection too
-                        DrawMoveCharacterCommand(prevCoord.Item1, prevCoord.Item2, floor, room); // Put character there
-                        NopWithWaitCommand(DRAW_ROOM_PAUSE);
-                        prevCoord = (floor, room); // For drawing
-                        usedShortcut = false; // Reset shortcut
+                        int roomNumber = _dungeonData.GetRoomNumber(floor, depth);
+                        mapExplorationProgress.Add((char)('a' + roomNumber)); // Add the current room to map
+                        DrawMapCommand(mapExplorationProgress);
+                        MoveCharacterCommand(roomNumber); // Put character there
+                        NopWithWaitCommand(DRAW_DELAY);
                         bool roomSuccess;
-                        if (room == 0) // Room 0 is always the beginning of floor, camping event followed by shortcut check
+                        // Check if there's any shortcut, first check the dungeon one, otherwise a room shortcut
+                        Shortcut currentShortcut = null;
+                        bool shortcutWouldBeFinal = false;
+                        int shortcutNumber = 0; // If shortcut shows something in map, this will be the value
+                        if (_dungeonData.DungeonShortcut.RoomNumber == roomNumber)
                         {
-                            // Check shortcut first
-                            ClueMessageCommand(_dungeonData.Floors[floor].ShortcutClue);
-                            if (VerifyShortcutConditions(_dungeonData.Floors[floor].ShortcutConditions, out string message)) // If shortcut activated
+                            currentShortcut = _dungeonData.DungeonShortcut;
+                            shortcutWouldBeFinal = true;
+                        }
+                        else
+                        {
+                            currentShortcut = _dungeonData.RoomShortcuts.Where(s => s.RoomNumber == roomNumber).FirstOrDefault();
+                            shortcutNumber = _dungeonData.RoomShortcuts.IndexOf(currentShortcut) + 1; // Mark the shortcut index too
+                        }
+                        if (currentShortcut != null) // There's a shortcut, verify
+                        {
+                            ClueMessageCommand(currentShortcut.Clue);
+                            if (VerifyShortcutConditions(currentShortcut.Conditions, out string message))
                             {
-                                // After, need to also check shortcut
-                                string shortcutString = _dungeonData.Floors[floor].ShortcutResolution.Replace("$1", message);
+                                // Shortcut taken, time to print shortcut and skip floor, show this shortcut too
+                                mapExplorationProgress.Add((char)('0' + shortcutNumber)); // Add the current shortcut to map too
+                                string shortcutString = currentShortcut.Resolution.Replace("$1", message);
                                 GenericMessageCommand(shortcutString);
-                                if (floor == DUNGEON_NUMBER_OF_FLOORS - 1) // If dungeon was done in last floor, then the dungeon is over...
+                                if (shortcutWouldBeFinal)
                                 {
-                                    DrawConnectRoomCommand(floor, room, floor + 1, room, true); // Connects to invisible next dungeon, shortcut
-                                    DrawMoveCharacterCommand(floor, room, floor + 1, room); // Character dissapears
-                                    auxString = $"You move onward...";
-                                    Console.WriteLine(auxString);
-                                    GenericMessageCommand(auxString);
-                                    // Also the trypical backend stuff
+                                    MoveCharacterCommand(-1); // Remove character from screen
+                                    GenericMessageCommand("You move onward...");
                                     explorationFinished = false; // Will repeat exploration loop now
                                     Dungeon = _dungeonData.NextDungeonShortcut; // Go to the dungeon indicated by shortcut
                                     _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
-                                    goto ExplorationEnd; // Just break these loops
+                                    goto DungeonEnd; // Just break these loops
                                 }
                                 else
                                 {
-                                    usedShortcut = true;
-                                    break; // Floor is done, can skip all the rooms
+                                    (floor, depth) = _dungeonData.GetRoomCoords(currentShortcut.RoomDestination); // Will teleport here immediately
+                                    goto NewRoomLanding;
                                 }
                             }
-                            // If no shortcut taken, can do a camping event at this stage
+                        }
+                        // Otherwise, I'm safely in a room, do something
+                        if (depth == 0) // First of floor is camping
+                        {
                             roomSuccess = ExecuteEvent(_dungeonData.CampingEvent, floor);
                         }
-                        else if (room == 1) // And first room always a wild pokemon encounter
+                        else if (depth == 1) // Second room of floor always a wild pokemon encounter
                         {
-                            RoomEvent pokemonEvent = new RoomEvent()
-                            {
-                                EventType = RoomEventType.POKEMON_BATTLE,
-                                PreEventString = "Suddenly, wild Pokemon attack!",
-                                PostEventString = $"You won the battle and obtained multiple items that the wild Pokemon were holding ($1)."
-                            }; // Wild pokemon encounter event
-                            roomSuccess = ExecuteEvent(pokemonEvent, floor);
+                            roomSuccess = ExecuteEvent(_dungeonData.WildMonsEvent, floor);
                         }
-                        else if ((room == DUNGEON_ROOMS_PER_FLOOR - 1) && (floor == DUNGEON_NUMBER_OF_FLOORS - 1)) // Last room is always boss event
+                        else if ((depth == _dungeonData.NRoomsPerFloor - 1) && (floor == _dungeonData.NFloors - 1)) // Last room is always boss event
                         {
                             ExecuteEvent(_dungeonData.PreBossEvent, floor); // Pre boss event
+                            DrawMapCommand([]); // Show whole map, deserved
+                            MoveCharacterCommand(roomNumber); // Also put character because the preboss event may remove it or something
                             roomSuccess = ExecuteEvent(_dungeonData.BossEvent, floor); // BOSS
                             if (roomSuccess) // If has been beaten, then dungeon is also over
                             {
                                 ExecuteEvent(_dungeonData.PostBossEvent, floor); // Post boss event
-                                DrawConnectRoomCommand(floor, room, floor + 1, room, false); // Connects to invisible next dungeon, no shortcut
-                                DrawMoveCharacterCommand(floor, room, floor + 1, room); // Character dissapears
-                                auxString = $"You move onward...";
-                                Console.WriteLine(auxString);
-                                GenericMessageCommand(auxString);
                                 // Also the typical backend stuff
-                                explorationFinished = false; // Will repeat exploration loop now
-                                Dungeon = _dungeonData.NextDungeon; // Go to the next dungeon
-                                _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
-                                goto ExplorationEnd;
+                                if (_dungeonData.NextDungeon != "")
+                                {
+                                    MoveCharacterCommand(-1); // Remove character from screen
+                                    GenericMessageCommand("You move onward...");
+                                    explorationFinished = false; // Will repeat exploration loop now
+                                    Dungeon = _dungeonData.NextDungeon; // Go to the next dungeon
+                                    _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
+                                }
+                                else
+                                {
+                                    GenericMessageCommand("End of exploration.");
+                                }
+                                goto DungeonEnd;
                             }
                         }
                         else // Normal room implies a normal event from the possibility list
@@ -448,10 +465,13 @@ namespace IndymonBackendProgram
                             possibleEvents.Remove(nextEvent); // Remove from event pool
                         }
                         if (!roomSuccess) // Player lost during exploration
-                            goto ExplorationEnd; // Just go directly to end
+                        {
+                            GenericMessageCommand($"You blacked out...");
+                            goto DungeonEnd; // Just go directly to end
+                        }
                     }
                 }
-            ExplorationEnd: // Best way to break from a 2 damn nested loops I think
+            DungeonEnd: // Best way to break from a 2 damn nested loops I think
                 ;
             } while (!explorationFinished); // Will do once unless need to continue with another dungeon
             // Return to normal
@@ -477,6 +497,9 @@ namespace IndymonBackendProgram
         {
             bool roomCleared = true;
             Console.WriteLine(roomEvent.ToString());
+            // Visual, will draw the event here
+            DrawEventCommand(roomEvent); // It's position will always draw relative to the character
+            // Mechanics, actually execute the event
             switch (roomEvent.EventType)
             {
                 case RoomEventType.CAMPING:
@@ -523,7 +546,6 @@ namespace IndymonBackendProgram
                         if (remainingMons == 0) // Means player lost
                         {
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -544,7 +566,7 @@ namespace IndymonBackendProgram
                         int itemAmount = GeneralUtilities.GetRandomNumber(item.Min, item.Max + 1);
                         itemAmount = (int)((itemAmount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                         if (itemAmount < 1) itemAmount = 1;
-                        int enemyFloor = (floor + 1 >= DUNGEON_NUMBER_OF_FLOORS) ? floor : floor + 1; // Find enemy of next floor if possible
+                        int enemyFloor = (floor + 1 >= _dungeonData.NFloors) ? floor : floor + 1; // Find enemy of next floor if possible
                         string enemySpecies = GeneralUtilities.GetRandomPick(_dungeonData.PokemonEachFloor[enemyFloor]); // Get a random one of these
                         string alphaString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(alphaString); // Prints the message but we know it could have a $1
@@ -556,7 +578,6 @@ namespace IndymonBackendProgram
                         if (remainingMons == 0) // Means player lost
                         {
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -810,9 +831,7 @@ namespace IndymonBackendProgram
                         int remainingMons = ResolveEncounter(_trainer, wildMonsTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
-                            Console.WriteLine("Player lost");
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -857,9 +876,7 @@ namespace IndymonBackendProgram
                         int remainingMons = ResolveEncounter(_trainer, swarmTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
-                            Console.WriteLine("Player lost");
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -908,9 +925,7 @@ namespace IndymonBackendProgram
                         int remainingMons = ResolveEncounter(_trainer, unownTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
-                            Console.WriteLine("Player lost");
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -942,9 +957,7 @@ namespace IndymonBackendProgram
                         int remainingMons = ResolveEncounter(_trainer, bossTrainer);
                         if (remainingMons == 0) // Means player lost
                         {
-                            Console.WriteLine("Player lost");
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -977,9 +990,7 @@ namespace IndymonBackendProgram
                         int remainingMons = ResolveEncounter(_trainer, giantMon);
                         if (remainingMons == 0) // Means player lost
                         {
-                            Console.WriteLine("Player lost");
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -1034,9 +1045,7 @@ namespace IndymonBackendProgram
                         int remainingMons = ResolveEncounter(_trainer, copiedTeam);
                         if (remainingMons == 0) // Means player lost
                         {
-                            Console.WriteLine("Player lost");
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -1112,9 +1121,7 @@ namespace IndymonBackendProgram
                         int remainingMons = ResolveEncounter(_trainer, randomNpc);
                         if (remainingMons == 0) // Means player lost
                         {
-                            Console.WriteLine("Player lost");
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -1141,7 +1148,6 @@ namespace IndymonBackendProgram
                         if (remainingMons == 0) // Means player lost
                         {
                             roomCleared = false; // Failure at clearing room
-                            GenericMessageCommand($"You blacked out...");
                         }
                         else
                         {
@@ -1172,16 +1178,17 @@ namespace IndymonBackendProgram
                     }
                     break;
                 case RoomEventType.REGISTEEL: // Dramatic drawing of registeel eyes
-                    ClearRoomsCommand();
+                    ClearScreenCommand();
                     DrawRegiEye(-1, -1, 1000);
                     DrawRegiEye(1, -1, 1000);
                     DrawRegiEye(2, 0, 500);
                     DrawRegiEye(1, 1, 333);
                     DrawRegiEye(-1, 1, 333);
                     DrawRegiEye(-2, 0, 333);
+                    NopWithWaitCommand(3000);
                     break;
                 case RoomEventType.REGIROCK: // Dramatic drawing of regirock eyes
-                    ClearRoomsCommand();
+                    ClearScreenCommand();
                     DrawRegiEye(0, 0, 2000);
                     DrawRegiEye(1, 0, 0);
                     DrawRegiEye(-1, 0, 2000);
@@ -1189,9 +1196,10 @@ namespace IndymonBackendProgram
                     DrawRegiEye(1, -1, 0);
                     DrawRegiEye(-1, 1, 0);
                     DrawRegiEye(-1, -1, 2000);
+                    NopWithWaitCommand(1000);
                     break;
                 case RoomEventType.REGICE: // Dramatic drawing of regice eyes
-                    ClearRoomsCommand();
+                    ClearScreenCommand();
                     DrawRegiEye(0, 0, 1000);
                     DrawRegiEye(0, -1, 0);
                     DrawRegiEye(0, 1, 1000);
@@ -1199,16 +1207,18 @@ namespace IndymonBackendProgram
                     DrawRegiEye(-1, 0, 500);
                     DrawRegiEye(2, 0, 0);
                     DrawRegiEye(-2, 0, 500);
+                    NopWithWaitCommand(3000);
                     break;
                 case RoomEventType.REGIELEKI: // Dramatic drawing of regigas eyes
-                    ClearRoomsCommand();
-                    DrawRegiEye(0, 0, 250);
-                    DrawRegiEye(1, 0, 250);
-                    DrawRegiEye(-1, 0, 250);
-                    DrawRegiEye(2, 1, 250);
-                    DrawRegiEye(2, -1, 250);
-                    DrawRegiEye(-2, -1, 250);
-                    DrawRegiEye(-2, 1, 250);
+                    ClearScreenCommand();
+                    DrawRegiEye(13, 3, 250);
+                    DrawRegiEye(14, 3, 250);
+                    DrawRegiEye(12, 3, 250);
+                    DrawRegiEye(15, 4, 0);
+                    DrawRegiEye(15, 2, 250);
+                    DrawRegiEye(11, 2, 0);
+                    DrawRegiEye(11, 4, 250);
+                    NopWithWaitCommand(3000);
                     break;
                 default:
                     break;
@@ -1304,11 +1314,11 @@ namespace IndymonBackendProgram
         /// <param name="conditions">Shortcut conditions</param>
         /// <param name="message">An extra return indicating the message used (E.g. X used Y)</param>
         /// <returns>Whether shortcut activates or not</returns>
-        bool VerifyShortcutConditions(List<ShortcutCondition> conditions, out string message)
+        bool VerifyShortcutConditions(List<ShortcutConditions> conditions, out string message)
         {
             bool canTakeShortcut = false;
             message = "";
-            foreach (ShortcutCondition condition in conditions)
+            foreach (ShortcutConditions condition in conditions)
             {
                 foreach (string eachOne in condition.Which)
                 {
@@ -1505,25 +1515,24 @@ namespace IndymonBackendProgram
         /// <summary>
         /// Clears all rooms and table (UNRECOVERABLE!)
         /// </summary>
-        void ClearRoomsCommand()
+        void ClearScreenCommand()
         {
             ExplorationSteps.Add(new ExplorationStep() // Clean the rooms
             {
-                Type = ExplorationStepType.CLEAR_ROOMS,
-                MillisecondsWait = DRAW_ROOM_PAUSE
+                Type = ExplorationStepType.CLEAR_SCREEN
             });
         }
         /// <summary>
-        /// Commands the system to draw a room box
+        /// Draws the discovered map so far
         /// </summary>
-        /// <param name="floor">Floor of room</param>
-        /// <param name="room">Room number (0-5)</param>
-        void DrawRoomCommand(int floor, int room)
+        /// <param name="shown">Room mask that will be shown, with an empty hash set showing the whole map</param>
+        void DrawMapCommand(HashSet<char> shown)
         {
+            shown ??= [];
             ExplorationSteps.Add(new ExplorationStep()
             {
-                Type = ExplorationStepType.DRAW_ROOM,
-                DestCoord = (floor, room)
+                Type = ExplorationStepType.DRAW_MAP,
+                StringParam = string.Join("", shown)
             });
         }
         /// <summary>
@@ -1536,41 +1545,35 @@ namespace IndymonBackendProgram
             ExplorationSteps.Add(new ExplorationStep()
             {
                 Type = ExplorationStepType.DRAW_REGI_EYE,
-                DestCoord = (x, y),
+                CoordParam = (x, y),
                 MillisecondsWait = milliSecondWait
             });
         }
         /// <summary>
-        /// Draws the connection of rooms either in normal mode or passage mode, can connect to invisible rooms too (i.e. end of dungeon or beginning)
+        /// Draws the movement of character to a room
         /// </summary>
-        /// <param name="floor1">coord of source room</param>
-        /// <param name="room1">coord of source room</param>
-        /// <param name="floor2">coord of dest room</param>
-        /// <param name="room2">coord of dest room</param>
-        /// <param name="isShortcut">If will draw shortcut or passage</param>
-        void DrawConnectRoomCommand(int floor1, int room1, int floor2, int room2, bool isShortcut)
-        {
-            ExplorationSteps.Add(new ExplorationStep()
-            {
-                Type = isShortcut ? ExplorationStepType.CONNECT_ROOMS_SHORTCUT : ExplorationStepType.CONNECT_ROOMS_PASSAGE,
-                SourceCoord = (floor1, room1),
-                DestCoord = (floor2, room2)
-            });
-        }
-        /// <summary>
-        /// Draws the movement of character from one room to another
-        /// </summary>
-        /// <param name="floor1">coord of source room</param>
-        /// <param name="room1">coord of source room</param>
-        /// <param name="floor2">coord of dest room</param>
-        /// <param name="room2">coord of dest room</param>
-        void DrawMoveCharacterCommand(int floor1, int room1, int floor2, int room2)
+        /// <param name="room">New character room, negative number if you want character to disappear</param>
+        void MoveCharacterCommand(int room)
         {
             ExplorationSteps.Add(new ExplorationStep()
             {
                 Type = ExplorationStepType.MOVE_CHARACTER,
-                SourceCoord = (floor1, room1),
-                DestCoord = (floor2, room2)
+                IntParam = room
+            });
+        }
+        /// <summary>
+        /// Will draw an event in the map
+        /// </summary>
+        /// <param name="roomEvent">Event to draw</param>
+        void DrawEventCommand(RoomEvent roomEvent)
+        {
+            ExplorationSteps.Add(new ExplorationStep()
+            {
+                Type = ExplorationStepType.DRAW_EVENT,
+                CoordParam = (_dungeonData.EventAnchorX + roomEvent.OffsetAnchorX, _dungeonData.EventAnchorY + roomEvent.OffsetAnchorY),
+                StringParam = roomEvent.EventLook,
+                FgParam = roomEvent.EventFg,
+                BgParam = roomEvent.EventBg
             });
         }
         void AddInfoColumnCommand(string label, int minWidth)
@@ -1587,7 +1590,7 @@ namespace IndymonBackendProgram
             ExplorationSteps.Add(new ExplorationStep()
             {
                 Type = ExplorationStepType.ADD_INFO_VALUE,
-                DestCoord = tableCoord,
+                CoordParam = tableCoord,
                 StringParam = value
             });
         }
@@ -1601,7 +1604,7 @@ namespace IndymonBackendProgram
         /// <returns></returns>
         Trainer GenerateEnemyTrainer(string trainerName, List<string> pokemonList, List<string> itemsHeld, int minLvl, int maxLvl, bool shuffled, List<string> nicknames = null)
         {
-            if (nicknames == null) nicknames = [];
+            nicknames ??= [];
             int encounterShinyChance = _context.GetShinyChance();
             Trainer enemyTrainer = new Trainer() // Create the blank trainer
             {
@@ -1693,20 +1696,21 @@ namespace IndymonBackendProgram
         {
             GenericMessageCommand($""); // Marker for video sync
             (int cursorX, int cursorY) = Console.GetCursorPosition(); // Just in case I need to write in same place
-            Console.Write("About to simulate bots...");
-            Console.ReadLine();
-            // The challenge string may contain dungeon-specific rules (besides the mandatory ones)
-            List<string> showdownRules = ["!Team Preview", .. _dungeonData.CustomShowdownRules];
-            string challengeString = $"gen9customgame@@@{string.Join(",", showdownRules)}"; // Assemble resulting challenge string
-            (int explorerLeft, _) = BotBattle.SimulateBotBattle(explorer, encounter, challengeString); // Initiate battle
+            Console.Write("About to simulate bots. Enter a number instead to input trainer's outcome...");
+            string outcome = Console.ReadLine();
+            if (!int.TryParse(outcome, out int explorerLeft))
+            {
+                // The challenge string may contain dungeon-specific rules (besides the mandatory ones)
+                List<string> showdownRules = ["!Team Preview", .. _dungeonData.CustomShowdownRules];
+                string challengeString = $"gen9customgame@@@{string.Join(",", showdownRules)}"; // Assemble resulting challenge string
+                (explorerLeft, _) = BotBattle.SimulateBotBattle(explorer, encounter, challengeString); // Initiate battle
+            }
             Console.SetCursorPosition(cursorX, cursorY);
             Console.Write($"Explorer left with {explorerLeft} mons. GET THE REPLAY");
             return explorerLeft;
         }
         #endregion
         #region ANIMATION
-        readonly int ROOM_WIDTH = 5;
-        readonly int ROOM_HEIGHT = 5;
         /// <summary>
         /// Animates the resulting exploration
         /// </summary>
@@ -1719,15 +1723,19 @@ namespace IndymonBackendProgram
             Console.WriteLine("Write anything to begin. Better start recording now");
             Console.ReadLine();
             Console.Clear();
-            int consoleLineStart = (DUNGEON_NUMBER_OF_FLOORS * ROOM_HEIGHT) + DUNGEON_NUMBER_OF_FLOORS + 1; // Rooms + spaces between, above and below
+            int consoleLineStart = 0; // The initial row of the mini console
             int consoleOffset = consoleLineStart; // Where console currently at
             string emptyLine = new string(' ', Console.WindowWidth);
+            int lastKnownCharacterRoom = -1; // Last known location of the character icon
             foreach (ExplorationStep nextStep in ExplorationSteps) // Now, will do event one by one...
             {
+                Console.BackgroundColor = ConsoleColor.Black; // The console is always black by default, except on the map tileset artwork
                 switch (nextStep.Type)
                 {
                     case ExplorationStepType.DEFINE_DUNGEON:
                         _dungeonData = GameDataContainers.GlobalGameData.Dungeons[nextStep.StringParam]; // Loads the dungeon
+                        consoleLineStart = _dungeonData.TilemapSizeY + 1; // Dungeon dimensions may have changed, so adjust console
+                        consoleOffset = consoleLineStart;
                         break;
                     case ExplorationStepType.PRINT_STRING:
                         Console.ForegroundColor = ConsoleColor.White; // Reset console just in case
@@ -1761,18 +1769,6 @@ namespace IndymonBackendProgram
                         }
                         consoleOffset = consoleLineStart;
                         break;
-                    case ExplorationStepType.DRAW_ROOM:
-                        DrawRoom(nextStep.DestCoord.Item1, nextStep.DestCoord.Item2);
-                        break;
-                    case ExplorationStepType.MOVE_CHARACTER:
-                        DrawCharacter(nextStep.SourceCoord.Item1, nextStep.SourceCoord.Item2, nextStep.DestCoord.Item1, nextStep.DestCoord.Item2);
-                        break;
-                    case ExplorationStepType.CONNECT_ROOMS_PASSAGE:
-                        ConnectPassage(nextStep.SourceCoord.Item1, nextStep.SourceCoord.Item2, nextStep.DestCoord.Item1, nextStep.DestCoord.Item2);
-                        break;
-                    case ExplorationStepType.CONNECT_ROOMS_SHORTCUT:
-                        ConnectShortcut(nextStep.SourceCoord.Item1, nextStep.SourceCoord.Item2, nextStep.DestCoord.Item1, nextStep.DestCoord.Item2);
-                        break;
                     case ExplorationStepType.ADD_INFO_COLUMN:
                         // Add template for next time
                         char[] labelSpaces = new string(' ', nextStep.IntParam).ToCharArray();
@@ -1790,31 +1786,41 @@ namespace IndymonBackendProgram
                         break;
                     case ExplorationStepType.ADD_INFO_VALUE:
                         // X (field) and Y (row). First, add rows until satisfied
-                        while ((infoRows.Count - 2) <= nextStep.DestCoord.Item2) // If row not yet present, add new until exist
+                        while ((infoRows.Count - 2) <= nextStep.CoordParam.Item2) // If row not yet present, add new until exist
                         {
                             infoRows.Add([.. infoTableTemplate]); // Copy template into new row
                         }
-                        (int, int) actualTableCoord = (nextStep.DestCoord.Item1, nextStep.DestCoord.Item2 + 2); // The Y offset is because the first 2 rows are not data but labels+sep
+                        (int, int) actualTableCoord = (nextStep.CoordParam.Item1, nextStep.CoordParam.Item2 + 2); // The Y offset is because the first 2 rows are not data but labels+sep
                         UpdateInfoTableField(nextStep.StringParam, actualTableCoord, infoRows, infoColOffset);
                         // Redraw table
                         RedrawInfoTable(infoRows);
                         break;
-                    case ExplorationStepType.CLEAR_ROOMS:
-                        for (int line = 0; line < consoleLineStart; line++) // Clear all until text
+                    case ExplorationStepType.MOVE_CHARACTER:
+                        RedrawCharacter(lastKnownCharacterRoom, nextStep.IntParam);
+                        lastKnownCharacterRoom = nextStep.IntParam; // Register current position for later
+                        break;
+                    case ExplorationStepType.DRAW_EVENT:
+                        DrawEvent(lastKnownCharacterRoom, nextStep.CoordParam, nextStep.StringParam, nextStep.FgParam, nextStep.BgParam);
+                        break;
+                    case ExplorationStepType.DRAW_MAP:
+                        for (int y = 0; y < _dungeonData.TilemapSizeY; y++) // Draw line by line
                         {
-                            Console.SetCursorPosition(0, line);
-                            Console.Write(emptyLine);
+                            DrawMapLine(0, y, int.MaxValue, nextStep.StringParam); // Draw line with visible string filter
                         }
                         break;
+                    case ExplorationStepType.CLEAR_SCREEN:
+                        Console.Clear();
+                        break;
                     case ExplorationStepType.DRAW_REGI_EYE:
+                        Console.BackgroundColor = ConsoleColor.Black;
                         Console.ForegroundColor = ConsoleColor.Red; // Regi eyes are red
-                        int midpointX = Console.WindowWidth / 2; // Midpoint pixel
-                        int midpointY = consoleLineStart / 2;
-                        Console.SetCursorPosition(nextStep.DestCoord.Item1 + midpointX, nextStep.DestCoord.Item2 + midpointY);
-                        Console.Write($"●"); // Draw regi eye
+                        Console.SetCursorPosition(nextStep.CoordParam.Item1, nextStep.CoordParam.Item2);
+                        Console.Write("●"); // Draw regi eye
+                        break;
+                    case ExplorationStepType.NOP:
                         break;
                     default:
-                        break;
+                        throw new Exception($"Event step {nextStep.Type} not impemented");
                 }
                 if (nextStep.MillisecondsWait > 0)
                 {
@@ -1822,226 +1828,7 @@ namespace IndymonBackendProgram
                 }
             }
             Console.ReadLine();
-        }
-        /// <summary>
-        /// Get the coordinates in console space for a room
-        /// </summary>
-        /// <param name="floor">FLoor of room</param>
-        /// <param name="room">Room</param>
-        /// <returns>The X,Y coord</returns>
-        (int, int) GetRoomCoords(int floor, int room)
-        {
-            // Floor index is 0-2 if goes downwards or 2-0 if upwards
-            int roomY = _dungeonData.GoesDownwards ? floor : DUNGEON_NUMBER_OF_FLOORS - floor - 1; // Get the Y coord (vertical)
-            roomY = 1 + ((1 + ROOM_HEIGHT) * roomY); // Correct Positioning of room Y tile
-            // Clamp floor to valid numbers, to avoid weird looping outside the edges
-            if (floor >= DUNGEON_NUMBER_OF_FLOORS) floor = DUNGEON_NUMBER_OF_FLOORS - 1;
-            if (floor < 0) floor = 0;
-            // (Room always left to right in top/bottom (even floors), right to left in mid)
-            int roomX = ((floor % 2) == 0) ? room : DUNGEON_ROOMS_PER_FLOOR - room - 1; // Get the X coord (horiz)
-            roomX = 1 + (ROOM_WIDTH * roomX); // This one has no spaces inbetween just an offset if needed
-            return (roomX, roomY);
-        }
-        /// <summary>
-        /// Check whether requested coord is valid (inside of picture)
-        /// </summary>
-        /// <param name="floor">Which floor</param>
-        /// <param name="room">Which room</param>
-        /// <returns></returns>
-        static bool IsRoomValid(int floor, int room)
-        {
-            if (floor < 0 || floor >= DUNGEON_NUMBER_OF_FLOORS)
-            {
-                return false;
-            }
-            if (room < 0 || floor >= DUNGEON_ROOMS_PER_FLOOR)
-            {
-                return false;
-            }
-            return true;
-        }
-        /// <summary>
-        /// Draws the required room for this dungeon
-        /// </summary>
-        /// <param name="floor">Floor room is in</param>
-        /// <param name="room">Room number</param>
-        void DrawRoom(int floor, int room)
-        {
-            (int X, int Y) = GetRoomCoords(floor, room);
-            // Now i have coord X, Y to draw room
-            DungeonFloor floorData = _dungeonData.Floors[floor]; // Obtain room drawing data
-            Console.ForegroundColor = floorData.RoomColor; // Set color
-            // Draw corners
-            Console.SetCursorPosition(X, Y);
-            Console.Write(floorData.NwWallTile);
-            Console.SetCursorPosition(X + ROOM_WIDTH - 1, Y);
-            Console.Write(floorData.NeWallTile);
-            Console.SetCursorPosition(X, Y + ROOM_HEIGHT - 1);
-            Console.Write(floorData.SwWallTile);
-            Console.SetCursorPosition(X + ROOM_WIDTH - 1, Y + ROOM_HEIGHT - 1);
-            Console.Write(floorData.SeWallTile);
-            // Horizontal Walls
-            for (int i = 1; i < ROOM_WIDTH - 1; i++)
-            {
-                Console.SetCursorPosition(X + i, Y);
-                Console.Write(floorData.NWallTile);
-                Console.SetCursorPosition(X + i, Y + ROOM_HEIGHT - 1);
-                Console.Write(floorData.SWallTile);
-            }
-            for (int i = 1; i < ROOM_HEIGHT - 1; i++)
-            {
-                Console.SetCursorPosition(X, Y + i);
-                Console.Write(floorData.WWallTile);
-                Console.SetCursorPosition(X + ROOM_WIDTH - 1, Y + i);
-                Console.Write(floorData.EWallTile);
-            }
-        }
-        /// <summary>
-        /// Moves character from one room to another
-        /// </summary>
-        /// <param name="sourceFloor">Where from (floor)</param>
-        /// <param name="sourceRoom">Where from (room)</param>
-        /// <param name="destFloor">Where to (floor)</param>
-        /// <param name="destRoom">Where to (room)</param>
-        void DrawCharacter(int sourceFloor, int sourceRoom, int destFloor, int destRoom)
-        {
-            string playerSymbol = _trainer.DungeonIdentifier;
-            Console.ForegroundColor = ConsoleColor.White; // Set color back to white, for character
-            // Delete current character first
-            if (IsRoomValid(sourceFloor, sourceRoom))
-            {
-                (int fromX, int fromY) = GetRoomCoords(sourceFloor, sourceRoom);
-                Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY + (ROOM_HEIGHT / 2));
-                Console.Write(new string(' ', playerSymbol.Length));
-            }
-            // Draw new character now
-            if (IsRoomValid(destFloor, destRoom))
-            {
-                (int toX, int toY) = GetRoomCoords(destFloor, destRoom);
-                Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY + (ROOM_HEIGHT / 2));
-                Console.Write(playerSymbol);
-            }
-        }
-        /// <summary>
-        /// Connects 2 rooms with passage (typical), from->to
-        /// </summary>
-        /// <param name="sourceFloor">Where from (floor)</param>
-        /// <param name="sourceRoom">Where from (room)</param>
-        /// <param name="destFloor">Where to (floor)</param>
-        /// <param name="destRoom">Where to (room)</param>
-        void ConnectPassage(int sourceFloor, int sourceRoom, int destFloor, int destRoom)
-        {
-            // In passage, rooms are just altered in a very simple way, by just modifying its wall closest to the other room (always adjacent)
-            // A vertical passage is then drawn connecting 2 rooms in different floors
-            // First, get room coords (no matter if invalid, just to check who's above what
-            (int fromX, int fromY) = GetRoomCoords(sourceFloor, sourceRoom);
-            (int toX, int toY) = GetRoomCoords(destFloor, destRoom);
-            // Then, draw for first room, if needed
-            DungeonFloor sourceFloorData = null, destFloorData = null;
-            if (IsRoomValid(sourceFloor, sourceRoom))
-            {
-                sourceFloorData = _dungeonData.Floors[sourceFloor];
-                Console.ForegroundColor = sourceFloorData.RoomColor;
-                // Room is valid, so I need to modify it's corresponding wall depending where it moves to
-                if (fromX < toX) { Console.SetCursorPosition(fromX + ROOM_WIDTH - 1, fromY + (ROOM_HEIGHT / 2)); Console.Write(sourceFloorData.EWallPassageTile); } // Conenct east
-                else if (fromX > toX) { Console.SetCursorPosition(fromX, fromY + (ROOM_HEIGHT / 2)); Console.Write(sourceFloorData.WWallPassageTile); } // Connect west
-                else if (fromY < toY) { Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY + ROOM_HEIGHT - 1); Console.Write(sourceFloorData.SWallPassageTile); } // Connect south
-                else if (fromY > toY) { Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY); Console.Write(sourceFloorData.NWallPassageTile); } // Connect north
-                else { } // Should never happen
-            }
-            // Same for dest room
-            if (IsRoomValid(destFloor, destRoom))
-            {
-                destFloorData = _dungeonData.Floors[destFloor];
-                Console.ForegroundColor = destFloorData.RoomColor;
-                // Room is valid, so I need to modify it's corresponding wall depending where it moves to
-                if (toX < fromX) { Console.SetCursorPosition(toX + ROOM_WIDTH - 1, toY + (ROOM_HEIGHT / 2)); Console.Write(destFloorData.EWallPassageTile); } // Conenct east
-                else if (toX > fromX) { Console.SetCursorPosition(toX, toY + (ROOM_HEIGHT / 2)); Console.Write(destFloorData.WWallPassageTile); } // Connect west
-                else if (toY < fromY) { Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY + ROOM_HEIGHT - 1); Console.Write(destFloorData.SWallPassageTile); } // Connect south
-                else if (toY > fromY) { Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY); Console.Write(destFloorData.NWallPassageTile); } // Connect north
-                else { } // Should never happen
-            }
-            // Finally, if the passage occurs between floors, need also to connect them as floors have a gap
-            if (fromY != toY)
-            {
-                int topCoord = Math.Min(fromY, toY); // Which one is higher, don't really care, just connect them
-                DungeonFloor floorDataToUse = sourceFloorData ?? destFloorData; // Use always the source floor unless it didn't exist in which case use the other one idk
-                Console.ForegroundColor = floorDataToUse.PassageColor;
-                Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), topCoord + ROOM_HEIGHT); // X should be same for both rooms (?!?!?!) and then draw ourside of room, use top room for ref
-                Console.Write(floorDataToUse.VerticalPassageTile);
-            }
-        }
-        /// <summary>
-        /// Connects 2 rooms with shortcut (special), from->to
-        /// </summary>
-        /// <param name="sourceFloor">Where from (floor)</param>
-        /// <param name="sourceRoom">Where from (room)</param>
-        /// <param name="destFloor">Where to (floor)</param>
-        /// <param name="destRoom">Where to (room)</param>
-        void ConnectShortcut(int sourceFloor, int sourceRoom, int destFloor, int destRoom)
-        {
-            // In shortcut, rooms are first altered in a very simple way, by just modifying its wall closest to the other room (always adjacent)
-            // Shortcut is then drawn. This always involves a change in floors so shortcut will need to be drawn iteratively
-            // First, get room coords (no matter if invalid, just to check who's above what)
-            (int fromX, int fromY) = GetRoomCoords(sourceFloor, sourceRoom);
-            (int toX, int toY) = GetRoomCoords(destFloor, destRoom);
-            // Then, draw for first room, if needed
-            DungeonFloor sourceFloorData = null, destFloorData = null;
-            if (IsRoomValid(sourceFloor, sourceRoom))
-            {
-                sourceFloorData = _dungeonData.Floors[sourceFloor];
-                Console.ForegroundColor = sourceFloorData.RoomColor;
-                // Room is valid, so I need to modify it's corresponding wall depending where it moves to
-                // This time, it's only up-down so just compare floors
-                if (fromY < toY) { Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY + ROOM_HEIGHT - 1); Console.Write(sourceFloorData.SWallShortcutTile); } // Connect south
-                else if (fromY > toY) { Console.SetCursorPosition(fromX + (ROOM_WIDTH / 2), fromY); Console.Write(sourceFloorData.NWallShortcutTile); } // Connect north
-                else { } // Should never happen
-            }
-            // Same for dest room
-            if (IsRoomValid(destFloor, destRoom))
-            {
-                destFloorData = _dungeonData.Floors[destFloor];
-                Console.ForegroundColor = destFloorData.RoomColor;
-                // Room is valid, so I need to modify it's corresponding wall depending where it moves to
-                // This time, it's only up-down so just compare floors
-                if (toY < fromY) { Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY + ROOM_HEIGHT - 1); Console.Write(destFloorData.SWallShortcutTile); } // Connect south
-                else if (toY > fromY) { Console.SetCursorPosition(toX + (ROOM_WIDTH / 2), toY); Console.Write(destFloorData.NWallShortcutTile); } // Connect north
-                else { } // Should never happen
-            }
-            // Finally, if the passage occurs between floors, need also to connect them as floors have a gap
-            if (fromY != toY)
-            {
-                DungeonFloor floorDataToUse = sourceFloorData ?? destFloorData; // Use always the source floor unless it didn't exist in which case use the other one idk
-                int shortcutY = Math.Min(fromY, toY) + ROOM_HEIGHT; // Shorcut to be between rooms (floors)
-                int leftShortcutX = Math.Min(fromX, toX) + (ROOM_WIDTH / 2);
-                int rightShortcutX = Math.Max(fromX, toX) + (ROOM_WIDTH / 2);
-                char firstTile, lastTile, middleTile;
-                if (fromX < toX) // Left -> right
-                {
-                    firstTile = floorDataToUse.NwShortcutTile;
-                    lastTile = floorDataToUse.SeShortcutTile;
-                    middleTile = floorDataToUse.HorizontalShortcutTile;
-                }
-                else if (fromX > toX) // Right -> left
-                {
-                    firstTile = floorDataToUse.NeShortcutTile;
-                    lastTile = floorDataToUse.SwShortcutTile;
-                    middleTile = floorDataToUse.HorizontalShortcutTile;
-                }
-                else // Just up, which is just in end of dungeon
-                {
-                    firstTile = lastTile = middleTile = floorDataToUse.VerticalShortcutTile;
-                }
-                // Ok we done, new just draw the shortcut
-                Console.ForegroundColor = floorDataToUse.ShortcutColor;
-                Console.SetCursorPosition(leftShortcutX, shortcutY);
-                while (Console.CursorLeft <= rightShortcutX)
-                {
-                    if (Console.CursorLeft == leftShortcutX) Console.Write(firstTile);
-                    else if (Console.CursorLeft == rightShortcutX) Console.Write(lastTile);
-                    else Console.Write(middleTile);
-                }
-            }
+            Console.ResetColor();
         }
         /// <summary>
         /// Updates the field of an info table
@@ -2081,13 +1868,171 @@ namespace IndymonBackendProgram
         /// <param name="rows">Table to print</param>
         void RedrawInfoTable(List<char[]> rows)
         {
-            int tableStart = (DUNGEON_ROOMS_PER_FLOOR * ROOM_WIDTH) + (ROOM_WIDTH); // Where the info table starts (leave 1 room separation)
+            int tableStart = _dungeonData.TilemapSizeX + 1; // Where the info table starts (leave 1 room separation)
             // Printing loop
             for (int i = 0; i < rows.Count; i++)
             {
                 Console.SetCursorPosition(tableStart, i);
                 Console.Write(new string(rows[i]));
             }
+        }
+        /// <summary>
+        /// Draws a line in the map, starting at position X, Y
+        /// </summary>
+        /// <param name="x">X where to start drawing</param>
+        /// <param name="y">Y where to start drawing</param>
+        /// <param name="length">How much to draw, empty if </param>
+        /// <param name="knownAreas">Known areas to be drawn, default draws the whole map</param>
+        void DrawMapLine(int x, int y, int length, string knownAreas = "")
+        {
+            HashSet<char> knownRegion = []; // Mark the valid tiles to draw, upper and lower invariant
+            knownRegion.UnionWith([.. knownAreas.ToLower()]);
+            knownRegion.UnionWith([.. knownAreas.ToUpper()]);
+            Console.SetCursorPosition(x, y);
+            while (x < length && x < _dungeonData.TilemapSizeX)
+            {
+                if (knownRegion.Count == 0 || knownRegion.Contains(_dungeonData.Markers[y][x]))
+                {
+                    // Draw map
+                    Console.BackgroundColor = _dungeonData.BgMap[y][x];
+                    Console.ForegroundColor = _dungeonData.FgMap[y][x];
+                    Console.Write(_dungeonData.TileMap[y][x]);
+                }
+                else
+                {
+                    // Draw fog of war
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.Write(' ');
+                }
+                x++;
+            }
+        }
+        /// <summary>
+        /// Draws character on map, overrides any tile for the moment
+        /// </summary>
+        /// <param name="character">Character string</param>
+        /// <param name="x">X where to start from</param>
+        /// <param name="y">Y where to start from</param>
+        void DrawMapCharacter(string character, int x, int y)
+        {
+            Console.SetCursorPosition(x, y);
+            for (int i = 0; i < character.Length && (x + i) < _dungeonData.TilemapSizeX; i++)
+            {
+                char charToDraw = character[i];
+                // Figure the colors and draw character light or dark depending on contrast
+                Console.BackgroundColor = _dungeonData.BgMap[y][x + i];
+                Console.ForegroundColor = Console.BackgroundColor switch
+                {
+                    ConsoleColor.Black or
+                    ConsoleColor.DarkBlue or
+                    ConsoleColor.DarkGreen or
+                    ConsoleColor.DarkCyan or
+                    ConsoleColor.DarkRed or
+                    ConsoleColor.DarkMagenta or
+                    ConsoleColor.DarkYellow or
+                    ConsoleColor.Red or
+                    ConsoleColor.Magenta or
+                    ConsoleColor.Blue => ConsoleColor.White,
+                    ConsoleColor.Gray or
+                    ConsoleColor.DarkGray or
+                    ConsoleColor.Green or
+                    ConsoleColor.Cyan or
+                    ConsoleColor.Yellow or
+                    ConsoleColor.White => ConsoleColor.Black,
+                    _ => throw new Exception("This color doesn't exist")
+                };
+                Console.Write(charToDraw);
+                x++;
+            }
+        }
+        /// <summary>
+        /// Gets the screen coordinate of a specific marker
+        /// </summary>
+        /// <param name="marker">Marker to find</param>
+        /// <returns>Screen coordinate, x and y</returns>
+        (int, int) GetMarkerCoordinate(char marker)
+        {
+            int x = 0, y = 0;
+            for (int i = 0; i < _dungeonData.Markers.Count; i++)
+            {
+                if (_dungeonData.Markers[i].Contains(marker))
+                {
+                    y = i;
+                    x = _dungeonData.Markers[i].IndexOf(marker);
+                    break;
+                }
+            }
+            return (x, y);
+        }
+        /// <summary>
+        /// Redraws the character in screen
+        /// </summary>
+        /// <param name="oldPos">Where the character was located before (if known)</param>
+        /// <param name="newPos">Where the character is located now</param>
+        void RedrawCharacter(int oldPos, int newPos)
+        {
+            string characterLook = _trainer.DungeonIdentifier; // This is how the character will look
+            // First step, clean where character was
+            if (oldPos >= 0) // Valid pos
+            {
+                char oldPosMarker = (char)('A' + oldPos); // Character should've been standing here, redraw this pixel
+                (int x, int y) = GetMarkerCoordinate(oldPosMarker);
+                DrawMapLine(x, y, characterLook.Length); // Replaces the player with the map tiles in place
+            }
+            // Next, draw character in new place
+            if (newPos >= 0)
+            {
+                char newPosMarker = (char)('A' + newPos); // Character should've been standing here, redraw this pixel
+                (int x, int y) = GetMarkerCoordinate(newPosMarker);
+                DrawMapCharacter(characterLook, x, y); // Draw character on screen
+            }
+        }
+        /// <summary>
+        /// Draws an event in a specific marker
+        /// </summary>
+        /// <param name="markerPosition">Marker to draw event</param>
+        /// <param name="markerOffset">Relative position around marker</param>
+        /// <param name="look">How event looks</param>
+        /// <param name="fg">Fg color of event</param>
+        /// <param name="bg">Bg color of event</param>
+        void DrawEvent(int markerPosition, (int, int) markerOffset, string look, ConsoleColor fg, ConsoleColor bg)
+        {
+            char posMarker = (char)('A' + markerPosition);
+            (int x, int y) = GetMarkerCoordinate(posMarker);
+            x += markerOffset.Item1;
+            y += markerOffset.Item2;
+            Console.SetCursorPosition(x, y);
+            Console.ForegroundColor = fg;
+            Console.BackgroundColor = bg;
+            Console.Write(look);
+        }
+        /// <summary>
+        /// Tests a dungeon image for debugging and visual tests
+        /// </summary>
+        public void TestDungeonImage()
+        {
+            Console.WriteLine($"Which dungeon to test? {string.Join(", ", GameDataContainers.GlobalGameData.Dungeons.Keys)}");
+            string dungeon = Console.ReadLine();
+            _dungeonData = GameDataContainers.GlobalGameData.Dungeons[dungeon];
+            char readChar;
+            List<char> assembledVisibility = [];
+            Console.Clear();
+            do
+            {
+                readChar = Console.ReadKey(true).KeyChar;
+                if (!assembledVisibility.Remove(readChar))
+                {
+                    assembledVisibility.Add(readChar);
+                }
+                // Then, draw
+                string visibilityString = string.Join("", assembledVisibility);
+                for (int y = 0; y < _dungeonData.TilemapSizeY; y++) // Draw line by line
+                {
+                    DrawMapLine(0, y, int.MaxValue, visibilityString); // Draw line with visible string filter
+                }
+            } while (readChar != 'q');
+            Console.ResetColor();
         }
         #endregion
     }

@@ -54,6 +54,13 @@ namespace GameData
         public string PreEventString;
         public string PostEventString;
         public string SpecialParams = "";
+        public string EventLook = "";
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ConsoleColor EventFg = ConsoleColor.White;
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ConsoleColor EventBg = ConsoleColor.Black;
+        public int OffsetAnchorX = 0;
+        public int OffsetAnchorY = 0;
         public override string ToString()
         {
             return EventType.ToString();
@@ -69,64 +76,46 @@ namespace GameData
         ITEM, // Need a specific item
         MOVE_DISK, // Needs any move disk (item ending in move disk)
     }
-    public class ShortcutCondition
+    public class ShortcutConditions
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public ShortcutConditionType ConditionType;
         public List<string> Which = new List<string>();
-        public override string ToString()
-        {
-            return $"{ConditionType} -> {Which}";
-        }
     }
-    public class DungeonFloor
+    public class Shortcut
     {
-        [JsonConverter(typeof(StringEnumConverter))]
-        public ConsoleColor RoomColor = ConsoleColor.White;
-        public char NeWallTile;
-        public char NwWallTile;
-        public char SeWallTile;
-        public char SwWallTile;
-        public char EWallTile;
-        public char WWallTile;
-        public char NWallTile;
-        public char SWallTile;
-        public char EWallPassageTile;
-        public char WWallPassageTile;
-        public char NWallPassageTile;
-        public char SWallPassageTile;
-        public char NWallShortcutTile;
-        public char SWallShortcutTile;
-        [JsonConverter(typeof(StringEnumConverter))]
-        public ConsoleColor PassageColor = ConsoleColor.White;
-        public char VerticalPassageTile;
-        [JsonConverter(typeof(StringEnumConverter))]
-        public ConsoleColor ShortcutColor = ConsoleColor.White;
-        public char NeShortcutTile;
-        public char NwShortcutTile;
-        public char SeShortcutTile;
-        public char SwShortcutTile;
-        public char HorizontalShortcutTile;
-        public char VerticalShortcutTile;
-        public List<ShortcutCondition> ShortcutConditions = new List<ShortcutCondition>();
-        public string ShortcutClue;
-        public string ShortcutResolution;
+        public List<ShortcutConditions> Conditions;
+        public string Clue = "";
+        public string Resolution = "";
+        public int RoomNumber; // Which room shortcut is at
+        public int RoomDestination; // Where does it lead to
     }
     public class Dungeon
     {
         public string Name;
-        public bool GoesDownwards;
+        public int NFloors = 3;
+        public int NRoomsPerFloor = 5;
+        public int EventAnchorX = 0;
+        public int EventAnchorY = 0;
+        public List<List<char>> TileMap = [];
+        public List<List<char>> Markers = [];
+        public List<List<ConsoleColor>> FgMap = [];
+        public List<List<ConsoleColor>> BgMap = [];
+        public int TilemapSizeX = 0;
+        public int TilemapSizeY = 0;
         public List<RoomEvent> Events;
         public List<List<string>> PokemonEachFloor;
         public List<ItemReward> CommonItems;
         public List<ItemReward> RareItems;
         public ItemReward BossItem;
-        public List<DungeonFloor> Floors;
+        public RoomEvent WildMonsEvent;
         public RoomEvent BossEvent;
         public RoomEvent CampingEvent;
         public RoomEvent PreBossEvent;
         public RoomEvent PostBossEvent;
+        public List<Shortcut> RoomShortcuts;
         public string NextDungeon;
+        public Shortcut DungeonShortcut;
         public string NextDungeonShortcut;
         public List<string> CustomShowdownRules;
         public HashSet<TeamArchetype> DungeonArchetypes;
@@ -135,6 +124,27 @@ namespace GameData
         public override string ToString()
         {
             return Name;
+        }
+        /// <summary>
+        /// Gets room number comin from which floor and which depth
+        /// </summary>
+        /// <param name="floor">Current Floor</param>
+        /// <param name="depth">Current Depth within floor</param>
+        /// <returns>Absolute room number</returns>
+        public int GetRoomNumber(int floor, int depth)
+        {
+            return NRoomsPerFloor * floor + depth;
+        }
+        /// <summary>
+        /// Gets coords (floor and depth) of a given room
+        /// </summary>
+        /// <param name="room">Which room</param>
+        /// <returns>Coord of room</returns>
+        public (int, int) GetRoomCoords(int room)
+        {
+            int floor = room / NRoomsPerFloor;
+            int depth = room % NRoomsPerFloor;
+            return (floor, depth);
         }
     }
 }

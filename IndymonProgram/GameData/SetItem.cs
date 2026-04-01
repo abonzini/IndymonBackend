@@ -41,7 +41,6 @@ namespace GameData
         }
         public bool CanEquip(TrainerPokemon mon)
         {
-            if (Name == BLANK_DISK) return false; // Blank disk can't be equipped directly
             if (AlwaysAllowedItem) return true; // If its always allowed, then it's fine too
             // Otherwise need to make sure mon can learn every single thing
             Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];

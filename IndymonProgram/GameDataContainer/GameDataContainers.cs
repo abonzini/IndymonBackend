@@ -23,9 +23,62 @@ namespace GameDataContainer
         {
             if (!Directory.Exists(directoryPath)) throw new Exception($"Directory {directoryPath} does not exist");
             Console.WriteLine("Loading Dungeon Data");
-            foreach (string file in Directory.EnumerateFiles(directoryPath))
+            foreach (string file in Directory.EnumerateFiles(directoryPath, "*.json"))
             {
+                // Start dungeon processing
+                string fileName = Path.GetFileNameWithoutExtension(file); // Obtain the search token to find dungeon
                 Dungeon nextDungeon = JsonConvert.DeserializeObject<Dungeon>(File.ReadAllText(file));
+                // Import rest of dungeon
+                void ImportCharArray(string[] array, List<List<char>> dest)
+                {
+                    foreach (string str in array)
+                    {
+                        dest.Add([.. str.ToCharArray()]);
+                    }
+                }
+                void ImportColorArray(string[] array, List<List<ConsoleColor>> dest)
+                {
+                    foreach (string str in array)
+                    {
+                        List<ConsoleColor> nextRow = [];
+                        foreach (char c in str)
+                        {
+                            ConsoleColor color = c switch
+                            {
+                                'k' or 'K' => ConsoleColor.Black,
+                                'B' => ConsoleColor.DarkBlue,
+                                'G' => ConsoleColor.DarkGreen,
+                                'C' => ConsoleColor.DarkCyan,
+                                'R' => ConsoleColor.DarkRed,
+                                'M' => ConsoleColor.DarkMagenta,
+                                'Y' => ConsoleColor.DarkYellow,
+                                'a' => ConsoleColor.Gray,
+                                'A' => ConsoleColor.DarkGray,
+                                'b' => ConsoleColor.Blue,
+                                'g' => ConsoleColor.Green,
+                                'c' => ConsoleColor.Cyan,
+                                'r' => ConsoleColor.Red,
+                                'm' => ConsoleColor.Magenta,
+                                'y' => ConsoleColor.Yellow,
+                                'w' or 'W' or 't' or 'T' => ConsoleColor.White,
+                                _ => throw new Exception($"{c} not recognized as a valid color for this color code"),
+                            };
+                            nextRow.Add(color);
+                        }
+                        dest.Add(nextRow);
+                    }
+                }
+                string[] nextMask = File.ReadAllLines(Path.Combine(directoryPath, fileName + ".tile")); // Load tile, which also will define XY dimensions
+                nextDungeon.TilemapSizeY = nextMask.Length;
+                nextDungeon.TilemapSizeX = nextMask[0].Length; // Also X
+                ImportCharArray(nextMask, nextDungeon.TileMap);
+                nextMask = File.ReadAllLines(Path.Combine(directoryPath, fileName + ".marker"));
+                ImportCharArray(nextMask, nextDungeon.Markers);
+                nextMask = File.ReadAllLines(Path.Combine(directoryPath, fileName + ".fg"));
+                ImportColorArray(nextMask, nextDungeon.FgMap);
+                nextMask = File.ReadAllLines(Path.Combine(directoryPath, fileName + ".bg"));
+                ImportColorArray(nextMask, nextDungeon.BgMap);
+                // Finished processing dungeon, add
                 Dungeons.Add(nextDungeon.Name, nextDungeon);
             }
         }
