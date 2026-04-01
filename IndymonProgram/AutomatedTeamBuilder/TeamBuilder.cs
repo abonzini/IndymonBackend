@@ -85,11 +85,17 @@ namespace AutomatedTeamBuilder
         {
             int teamSeed = (seed == 0) ? GeneralUtilities.GetRandomNumber(int.MaxValue) : seed;
             Random teamRng = new Random(teamSeed); // Not ideal but lets us retry with same value
-            int monSeed = teamRng.Next(); // Get the next seed of mon
+            int monSeed = 0; // Will be init atleast once
+            bool newMonSeed = true;
             // Will build a set for each mon
             for (int monIndex = 0; monIndex < trainer.BattleTeam.Count; monIndex++)
             {
                 // Init stuff
+                if (newMonSeed)
+                {
+                    monSeed = teamRng.Next(); // Get the next seed of mon
+                    newMonSeed = false;
+                }
                 Random monRng = new Random(monSeed); // Will use this for the mon, in order to be able to reuse seed
                 TrainerPokemon mon = trainer.BattleTeam[monIndex];
                 mon.ChosenAbility = null;
@@ -505,11 +511,16 @@ namespace AutomatedTeamBuilder
                     }
                     // Also redo the mon ofc
                     monIndex--; // Horrible but makes the loop go again
+                    Console.WriteLine("New seed? y/N");
+                    if (Console.ReadLine().ToLower() == "y")
+                    {
+                        newMonSeed = true;
+                    }
                 }
                 else
                 {
                     // All good, do next seed then
-                    monSeed = teamRng.Next();
+                    newMonSeed = true;
                     // Also, this mon may modify the team context
                     PokemonBuildContext monCtx = ObtainPokemonSetContext(mon, buildCtx); // Obtain current Pokemon mods and score and such
                     buildCtx.CurrentTeamArchetypes.UnionWith(monCtx.AdditionalArchetypes); // New archetypes found here are added into all team's archetypes
