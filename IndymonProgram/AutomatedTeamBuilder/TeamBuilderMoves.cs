@@ -698,8 +698,11 @@ namespace AutomatedTeamBuilder
                 mon.ChosenMoveset.Add(move); // First, equip this move to mon
                 PokemonBuildContext newCtx = ObtainPokemonSetContext(mon, buildCtx); // Check the new context
                 // Calculate whether the move created a net positive or negative stat differential, to obtain whether the move is a positive stat boost generator or not
-                double statDelta = MonStatCalculation(newCtx, buildCtx, false, 1, 1).Item1.Sum() -
-                    MonStatCalculation(monCtx, buildCtx, false, 1, 1).Item1.Sum();
+                List<double> statBoostsBefore = [.. monCtx.StatBoosts.Select(b => (b < 0) ? b * monCtx.NegativeStatBoostsMultiplier : b)];
+                double aggregateBoostsBefore = statBoostsBefore.Sum() * monCtx.StatBoostsMultiplier;
+                List<double> statBoostsAfter = [.. newCtx.StatBoosts.Select(b => (b < 0) ? b * newCtx.NegativeStatBoostsMultiplier : b)];
+                double aggregateBoostsAfter = statBoostsAfter.Sum() * newCtx.StatBoostsMultiplier;
+                double statDelta = aggregateBoostsAfter - aggregateBoostsBefore;
                 if (statDelta > 0) // Move was found to generate positive boosts, apply its score
                 {
                     (ElementType, string) weightTag = (ElementType.POKEMON_HAS_POSITIVE_BOOSTS, "-");

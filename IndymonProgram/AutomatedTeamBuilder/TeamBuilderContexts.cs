@@ -155,7 +155,8 @@ namespace AutomatedTeamBuilder
             ExtractWeatherMods(result.CurrentWeather, result);
             ExtractTerrainMods(result.CurrentTerrain, result);
             // At this point all stat mods should be loaded so I can see what's the current average status of the Pokemon's boosts
-            double aggregateBoosts = result.StatBoosts.Sum();
+            List<double> statBoosts = [.. result.StatBoosts.Select(b => (b < 0) ? b * result.NegativeStatBoostsMultiplier : b)];
+            double aggregateBoosts = statBoosts.Sum() * result.StatBoostsMultiplier;
             if (aggregateBoosts > 0) ExtractMods((ElementType.POKEMON_HAS_POSITIVE_BOOSTS, "-"), result);
             else if (aggregateBoosts < 0) ExtractMods((ElementType.POKEMON_HAS_NEGATIVE_BOOSTS, "-"), result);
             else { } // Neither positive nor negative boosts ongoing
