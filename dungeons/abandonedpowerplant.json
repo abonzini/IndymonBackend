@@ -235,7 +235,7 @@
   },
   "CampingEvent": {
       "EventType": "CAMPING",
-      "PreEventString": "You find an abandoned staff cafeteria. The perfect place for a picnic.",
+      "PreEventString": "You find an old lunch table. The perfect place for a picnic.",
       "PostEventString": "But now it's time to move on...",
       "EventLook": "■",
       "EventFg": "DarkYellow",

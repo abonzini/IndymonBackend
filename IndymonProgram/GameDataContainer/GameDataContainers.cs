@@ -43,27 +43,7 @@ namespace GameDataContainer
                         List<ConsoleColor> nextRow = [];
                         foreach (char c in str)
                         {
-                            ConsoleColor color = c switch
-                            {
-                                'k' or 'K' => ConsoleColor.Black,
-                                'B' => ConsoleColor.DarkBlue,
-                                'G' => ConsoleColor.DarkGreen,
-                                'C' => ConsoleColor.DarkCyan,
-                                'R' => ConsoleColor.DarkRed,
-                                'M' => ConsoleColor.DarkMagenta,
-                                'Y' => ConsoleColor.DarkYellow,
-                                'a' => ConsoleColor.Gray,
-                                'A' => ConsoleColor.DarkGray,
-                                'b' => ConsoleColor.Blue,
-                                'g' => ConsoleColor.Green,
-                                'c' => ConsoleColor.Cyan,
-                                'r' => ConsoleColor.Red,
-                                'm' => ConsoleColor.Magenta,
-                                'y' => ConsoleColor.Yellow,
-                                'w' or 'W' or 't' or 'T' => ConsoleColor.White,
-                                _ => throw new Exception($"{c} not recognized as a valid color for this color code"),
-                            };
-                            nextRow.Add(color);
+                            nextRow.Add(Dungeon.CharToColor(c));
                         }
                         dest.Add(nextRow);
                     }

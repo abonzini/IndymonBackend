@@ -4,6 +4,7 @@ using GameDataContainer;
 using MechanicsData;
 using MechanicsDataContainer;
 using ShowdownBot;
+using System.Text;
 using Utilities;
 
 namespace IndymonBackendProgram
@@ -2007,6 +2008,13 @@ namespace IndymonBackendProgram
             Console.BackgroundColor = bg;
             Console.Write(look);
         }
+        enum DungeonTestState
+        {
+            TEST_MARKERS,
+            SET_FG,
+            SET_BG,
+            SET_MARKERS
+        }
         /// <summary>
         /// Tests a dungeon image for debugging and visual tests
         /// </summary>
@@ -2018,21 +2026,142 @@ namespace IndymonBackendProgram
             char readChar;
             List<char> assembledVisibility = [];
             Console.Clear();
+            Console.CursorVisible = true;
+            Console.SetCursorPosition(0, 0); // Set cursor to top left
+            List<DungeonTestState> possibleStates = [.. Enum.GetValues(typeof(DungeonTestState)).Cast<DungeonTestState>()];
+            int stateIdx = 0;
+            int x, y;
+            DungeonTestState testState = possibleStates[stateIdx];
             do
             {
-                readChar = Console.ReadKey(true).KeyChar;
-                if (!assembledVisibility.Remove(readChar))
+                ConsoleKeyInfo pressed = Console.ReadKey(true);
+                // Check if mode changed
+                if (pressed.Key == ConsoleKey.PageUp)
                 {
-                    assembledVisibility.Add(readChar);
+                    stateIdx--;
+                    if (stateIdx < 0) stateIdx = possibleStates.Count - 1;
+                }
+                else if (pressed.Key == ConsoleKey.PageDown)
+                {
+                    stateIdx++;
+                    stateIdx %= possibleStates.Count;
+                }
+                else if (pressed.Key >= ConsoleKey.LeftArrow && pressed.Key <= ConsoleKey.DownArrow)
+                {
+                    (x, y) = Console.GetCursorPosition();
+                    switch (pressed.Key)
+                    {
+                        case ConsoleKey.LeftArrow:
+                            x--;
+                            break;
+                        case ConsoleKey.RightArrow:
+                            x++;
+                            break;
+                        case ConsoleKey.UpArrow:
+                            y--;
+                            break;
+                        case ConsoleKey.DownArrow:
+                            y++;
+                            break;
+                        default:
+                            throw new Exception("Unreachable state");
+                    }
+                    x = Math.Clamp(x, 0, _dungeonData.TilemapSizeX);
+                    y = Math.Clamp(y, 0, _dungeonData.TilemapSizeY);
+                    Console.SetCursorPosition(x, y);
+                }
+                else
+                {
+                }
+                if (testState != possibleStates[stateIdx]) // There was a change of state, reset all
+                {
+                    testState = possibleStates[stateIdx];
+                    assembledVisibility.Clear();
+                    // Notify user too
+                    (x, y) = Console.GetCursorPosition();
+                    Console.SetCursorPosition(0, Console.WindowHeight - 1);
+                    Console.Write($"Test state currently {testState}");
+                    Console.SetCursorPosition(x, y);
+                }
+                // Then, can check the action that was demanded
+                readChar = pressed.KeyChar;
+                if (char.IsLetterOrDigit(readChar) && readChar != 'q') // If it's a "valid" action (letter or digit, may change something)
+                {
+                    switch (testState)
+                    {
+                        case DungeonTestState.TEST_MARKERS:
+                            if (!assembledVisibility.Remove(readChar))
+                            {
+                                assembledVisibility.Add(readChar);
+                            }
+                            break;
+                        case DungeonTestState.SET_FG:
+                        case DungeonTestState.SET_BG:
+                            ConsoleColor newColor = GameData.Dungeon.CharToColor(readChar);
+                            List<List<ConsoleColor>> listToModify = testState switch
+                            {
+                                DungeonTestState.SET_FG => _dungeonData.FgMap,
+                                DungeonTestState.SET_BG => _dungeonData.BgMap,
+                                _ => throw new Exception("Unreachable state")
+                            };
+                            listToModify[Console.CursorTop][Console.CursorLeft] = newColor;
+                            break;
+                        case DungeonTestState.SET_MARKERS:
+                            _dungeonData.Markers[Console.CursorTop][Console.CursorLeft] = readChar;
+                            break;
+                        default:
+                            throw new Exception("Invalid state reached");
+                    }
                 }
                 // Then, draw
+                (x, y) = Console.GetCursorPosition();
+                Console.CursorVisible = false;
                 string visibilityString = string.Join("", assembledVisibility);
-                for (int y = 0; y < _dungeonData.TilemapSizeY; y++) // Draw line by line
+                for (int line = 0; line < _dungeonData.TilemapSizeY; line++) // Draw line by line
                 {
-                    DrawMapLine(0, y, int.MaxValue, visibilityString); // Draw line with visible string filter
+                    DrawMapLine(0, line, int.MaxValue, visibilityString); // Draw line with visible string filter
                 }
+                Console.SetCursorPosition(x, y);
+                Console.CursorVisible = true;
             } while (readChar != 'q');
             Console.ResetColor();
+            Console.CursorVisible = false;
+            // Final thing, ask if want to save new thing
+            Console.WriteLine("Save modified tilesets? Y/n");
+            if (Console.ReadLine().ToLower() != "n")
+            {
+                string targetDirectory = Path.Combine(DirectoryPath, "dungeons");
+                void SaveCharArray(string file, List<List<char>> array)
+                {
+                    StringBuilder lines = new StringBuilder();
+                    foreach (List<char> line in array)
+                    {
+                        lines.AppendLine(string.Join("", line));
+                    }
+                    File.WriteAllText(file, lines.ToString());
+                }
+                void SaveColorArray(string file, List<List<ConsoleColor>> array)
+                {
+                    StringBuilder lines = new StringBuilder();
+                    foreach (List<ConsoleColor> line in array)
+                    {
+                        foreach (ConsoleColor color in line)
+                        {
+                            lines.Append(GameData.Dungeon.ColorToChar(color));
+                        }
+                        lines.AppendLine();
+                    }
+                    File.WriteAllText(file, lines.ToString());
+                }
+                string nextFile = Path.Combine(targetDirectory, "new.tile");
+                SaveCharArray(nextFile, _dungeonData.TileMap);
+                nextFile = Path.Combine(targetDirectory, "new.marker");
+                SaveCharArray(nextFile, _dungeonData.Markers);
+                nextFile = Path.Combine(targetDirectory, "new.fg");
+                SaveColorArray(nextFile, _dungeonData.FgMap);
+                nextFile = Path.Combine(targetDirectory, "new.bg");
+                SaveColorArray(nextFile, _dungeonData.BgMap);
+            }
         }
         #endregion
     }

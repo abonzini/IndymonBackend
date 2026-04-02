@@ -146,5 +146,61 @@ namespace GameData
             int depth = room % NRoomsPerFloor;
             return (floor, depth);
         }
+        /// <summary>
+        /// Returns which color a char describes
+        /// </summary>
+        /// <param name="c">Char describving color</param>
+        /// <returns>Which console color it is</returns>
+        public static ConsoleColor CharToColor(char c)
+        {
+            return c switch
+            {
+                'k' or 'K' => ConsoleColor.Black,
+                'B' => ConsoleColor.DarkBlue,
+                'G' => ConsoleColor.DarkGreen,
+                'C' => ConsoleColor.DarkCyan,
+                'R' => ConsoleColor.DarkRed,
+                'M' => ConsoleColor.DarkMagenta,
+                'Y' => ConsoleColor.DarkYellow,
+                'a' => ConsoleColor.Gray,
+                'A' => ConsoleColor.DarkGray,
+                'b' => ConsoleColor.Blue,
+                'g' => ConsoleColor.Green,
+                'c' => ConsoleColor.Cyan,
+                'r' => ConsoleColor.Red,
+                'm' => ConsoleColor.Magenta,
+                'y' => ConsoleColor.Yellow,
+                'w' or 'W' or 't' or 'T' => ConsoleColor.White,
+                _ => ConsoleColor.Black,
+            };
+        }
+        /// <summary>
+        /// Transforms a color to a char
+        /// </summary>
+        /// <param name="color">Which color</param>
+        /// <returns>Which char will represent the color</returns>
+        public static char ColorToChar(ConsoleColor color)
+        {
+            return color switch
+            {
+                ConsoleColor.Black => 'k',
+                ConsoleColor.DarkBlue => 'B',
+                ConsoleColor.DarkGreen => 'G',
+                ConsoleColor.DarkCyan => 'C',
+                ConsoleColor.DarkRed => 'R',
+                ConsoleColor.DarkMagenta => 'M',
+                ConsoleColor.DarkYellow => 'Y',
+                ConsoleColor.Gray => 'a',
+                ConsoleColor.DarkGray => 'A',
+                ConsoleColor.Blue => 'b',
+                ConsoleColor.Green => 'g',
+                ConsoleColor.Cyan => 'c',
+                ConsoleColor.Red => 'r',
+                ConsoleColor.Magenta => 'm',
+                ConsoleColor.Yellow => 'y',
+                ConsoleColor.White => 'w',
+                _ => throw new Exception($"{color} not recognized as a valid color for this color code"),
+            };
+        }
     }
 }
