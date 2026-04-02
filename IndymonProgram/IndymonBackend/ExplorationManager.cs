@@ -393,6 +393,7 @@ namespace IndymonBackendProgram
                         {
                             currentShortcut = _dungeonData.DungeonShortcut;
                             shortcutWouldBeFinal = true;
+                            shortcutNumber = _dungeonData.RoomShortcuts.Count + 1; // Final shortcut equivalent to the last shortcut
                         }
                         else
                         {
@@ -2066,8 +2067,8 @@ namespace IndymonBackendProgram
                         default:
                             throw new Exception("Unreachable state");
                     }
-                    x = Math.Clamp(x, 0, _dungeonData.TilemapSizeX);
-                    y = Math.Clamp(y, 0, _dungeonData.TilemapSizeY);
+                    x = Math.Clamp(x, 0, _dungeonData.TilemapSizeX - 1);
+                    y = Math.Clamp(y, 0, _dungeonData.TilemapSizeY - 1);
                     Console.SetCursorPosition(x, y);
                 }
                 else
@@ -2112,6 +2113,8 @@ namespace IndymonBackendProgram
                         default:
                             throw new Exception("Invalid state reached");
                     }
+                    Console.CursorLeft++; // Move cursor
+                    if (Console.CursorLeft >= _dungeonData.TilemapSizeX) Console.CursorLeft = 0;
                 }
                 // Then, draw
                 (x, y) = Console.GetCursorPosition();

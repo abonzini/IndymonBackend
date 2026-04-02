@@ -1,0 +1,275 @@
+{
+  "Name": "Deepest Trench",
+  "EventAnchorX": 0,
+  "EventAnchorY": -1,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "You find an old wooden chest. Inside, there's $1.",
+      "PostEventString": "You pick it up and continue on your way.",
+      "EventLook": "▣",
+      "EventFg": "DarkYellow",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "In the darkness, you see only shining eyes from a Pokemon. It's a $1, hunting for it's prey.",
+      "PostEventString": "The Pokemon swims away, leaving its $1 behind.",
+      "EventLook": "¨",
+      "EventFg": "Red",
+      "EventBg": "DarkBlue"
+    },
+	{
+      "EventType": "GIANT_POKEMON",
+      "PreEventString": "You see an extremely large $1, which has been gathering power from a nearby thermal vent. It doesn't seem to be able to control it's power and immediately attacks you.",
+      "PostEventString": "After defeat, the Pokemon shrinks back to normal size. It was holding a $1."      ,
+      "EventLook": "☻",
+      "EventFg": "White",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "You see a shining purple crystal, one of the few sources of light deep below. It talks to you: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on.",
+      "EventLook": "✦",
+      "EventFg": "Magenta",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "A nearby set of hydrothermal vents give you and your pokemon a warm place to recover.",
+      "PostEventString": "Your Pokemon have recovered some health.",
+      "EventLook": "≈",
+      "EventFg": "DarkRed",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "BIG_HEAL",
+      "PreEventString": "A rare sight! A Milotic is swimming around. It is struck with sadness, seeing your injured Pokemon.",
+      "PostEventString": "It uses a huge Life Dew on $1, fully healing it.",
+      "EventLook": "🐍",
+      "EventFg": "Cyan",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "A nearby set of hydrothermal vents give you and your pokemon a warm place to recover.",
+      "PostEventString": "Your Pokemon have recovered from harmful conditions.",
+      "EventLook": "≈",
+      "EventFg": "DarkRed",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "PP_HEAL",
+      "PreEventString": "A nearby set of hydrothermal vents give you and your pokemon a warm place to recover.",
+      "PostEventString": "Your Pokemon moves recover some PP.",
+      "EventLook": "≈",
+      "EventFg": "DarkRed",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "SWARM",
+      "PreEventString": "A small school of Pokemon are swimming by. They don't see you in time, and crash against your party.",
+      "PostEventString": "The school is defeated and the Pokemon swim away, scared.",
+      "EventLook": "𓆟",
+      "EventFg": "Yellow",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "A nearby set of hydrothermal vents give you and your pokemon a warm place to recover.",
+      "PostEventString": "You approach it, but the water was scalding hot, your Pokemon sustain some damage.",
+      "EventLook": "≈",
+      "EventFg": "DarkRed",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "A nearby set of hydrothermal vents give you and your pokemon a warm place to recover.",
+      "PostEventString": "You approach it, but the water was scalding hot. $1 is now burned.",
+	  "SpecialParams": "brn",
+      "EventLook": "≈",
+      "EventFg": "DarkRed",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "RESEARCHER",
+      "PreEventString": "You find a set of undersea ruins, belonging to a very old civilization now lost.",
+      "PostEventString": "In one of the walls, you see a $1. You pick it up.",
+      "EventLook": "☗",
+      "EventFg": "Gray",
+      "EventBg": "Blue"
+    },
+	{
+      "EventType": "UNOWN",
+      "PreEventString": "You find a set of undersea ruins. These ones have weird glyphs on the wall. Suddenly, they start shining and moving!",
+      "PostEventString": "After being defeated, the symbols shine. A $1 materializes in front of you.",
+      "EventLook": "‽",
+      "EventFg": "Black",
+      "EventBg": "White"
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Tentacool",
+		"Horsea",
+		"Qwilfish",
+		"Remoraid",
+		"Basculin",
+		"Skrelp",
+		"Clauncher",
+		"Arrokuda",
+		"Goldeen",
+		"Chinchou",
+		"Carvanha",
+		"Wailmer",
+		"Clamperl",
+		"Finneon",
+		"Frillish",
+		"Popplio",
+		"Mareanie",
+		"Castform"
+	],
+	[
+		"Seadra",
+		"Qwilfish-Hisui",
+		"Octillery",
+		"Basculin-White",
+		"Clawitzer",
+		"Seaking",
+		"Lanturn",
+		"Huntail",
+		"Gorebyss",
+		"Relicanth",
+		"Luvdisc",
+		"Lumineon",
+		"Brionne",
+		"Wishiwashi",
+		"Veluza"
+	],
+	[
+		"Dhelmise",
+		"Tentacruel",
+		"Kingdra",
+		"Basculegion",
+		"Dragalge",
+		"Basculegion-F",
+		"Barraskewda",
+		"Sharpedo",
+		"Wailord",
+		"Jellicent",
+		"Primarina",
+		"Toxapex",
+		"Bruxish"
+	],
+	[
+		"Tapu Fini",
+		"Volcanion"
+	]
+  ],
+  "CommonItems": [
+		{ "Name": "Dark Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Dragon Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Fire Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Psychic Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Water Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Grass Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Fairy Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Ice Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Electric Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Stellar Tera Shard", "Min": 1, "Max": 2 },
+		{ "Name": "Rindo Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Wacan Berry", "Min": 1, "Max": 2 }
+  ],
+  "RareItems": [
+		{ "Name": "Eviolite", "Min": 2, "Max": 4 },
+		{ "Name": "Flame Orb", "Min": 2, "Max": 4 },
+		{ "Name": "Toxic Orb", "Min": 2, "Max": 4 },
+		{ "Name": "Life Orb", "Min": 2, "Max": 4 },
+		{ "Name": "Mystic Water", "Min": 2, "Max": 4 },
+		{ "Name": "Shell Bell", "Min": 2, "Max": 4 },
+		{ "Name": "Sea Incense", "Min": 2, "Max": 4 },
+		{ "Name": "Wave Incense", "Min": 2, "Max": 4 },
+		{ "Name": "Adrenaline Orb", "Min": 2, "Max": 4 }
+  ],
+  "BossItem": { "Name": "Water Stone", "Min": 3, "Max": 3 },
+  "RoomShortcuts":
+  [
+    {
+        "Conditions": [
+            {
+                "ConditionType": "MOVE",
+                "Which": ["Light Screen", "Light Of Ruin", "Light That Burns The Sky", "Moonlight", "Spotlight", "Morning Sun", "Dazzling Gleam"]
+            },
+            {
+                "ConditionType": "ABILITY",
+                "Which": ["Illuminate", "Shiny Stone"]
+            },
+            {
+                "ConditionType": "ITEM",
+                "Which": ["Light Ball", "Light Clay"]
+            }
+        ],
+        "Clue": "You see the entrance to an underwater tunnel. It's pitch dark. Will need a source of light to pass through.",
+        "Resolution": "Your $1 lights up the tunnel, allowing you to take the shortcut down below.",
+        "RoomNumber": 0,
+        "RoomDestination": 5
+    },
+    {
+        "Conditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": ["Alluring Voice", "Boomburst", "Bug Buzz", "Chatter", "Clanging Scales", "Clangorous Soul", "Clangorous Soulblaze", "Confide", "Disarming Voice", "Echoed Voice", "Eerie Spell", "Grass Whistle", "Growl", "Heal Bell", "Howl", "Hyper Voice", "Metal Sound", "Noble Roar", "Overdrive", "Parting Shot", "Perish Song", "Psychic Noise", "Relic Song", "Roar", "Round", "Screech", "Sing", "Snarl", "Snore", "Sparkling Aria", "Supersonic", "Torch Song", "Uproar"]	
+		},
+		{
+			"ConditionType": "ABILITY",
+			"Which": ["Liquid Voice", "Punk Rock"]
+		}
+	  ],
+	  "Clue": "The Primarina an Brionne in this area are expert in navigating deep sea currents, but they're ignoring you. Perhaps you can get their attention with a song.",
+	  "Resolution": "Your $1 is heard, and the Primarina sing along. They help you navigate the sea currents deep below.",
+      "RoomNumber": 5,
+      "RoomDestination": 10
+    }
+  ],
+  "DungeonShortcut":
+  {
+      "Conditions": [],
+      "Clue": "This is the ocean floor. No more shortcuts ahead.",
+      "Resolution": "",
+      "RoomNumber": 10,
+      "RoomDestination": 10
+  },
+  "WildMonsEvent": {
+      "EventType": "POKEMON_BATTLE",
+      "PreEventString": "Suddenly, wild Pokemon attack!",
+      "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
+      "EventLook": "☻",
+      "EventFg": "White",
+      "EventBg": "Blue"
+  },
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "In the deep cold of the ocean floor, the only source of heat is an underwater volcano. Floating around, it's guardian, $1.",
+    "PostEventString": "The guardian backs away, lets you stay in here for a while. You find $1 in the floor, the Pokemon didn't mind that you took it.",
+    "EventLook": "☻",
+    "EventFg": "Cyan",
+    "EventBg": "Blue"
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "The cold, darkness and pressure are unbearable. However you find an air pocket and thermal vents which keep you warm. It's the only chance you have for a picnic.",
+    "PostEventString": "But for now it's time to move on...",
+    "EventLook": "≈",
+    "EventFg": "DarkRed",
+    "EventBg": "Blue"
+  },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
+  "CustomShowdownRules" : ["Continuous Primordial Sea Mod"],
+  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_WEATHER"],
+  "DungeonWeather": "PRIMORDIAL_SEA",
+  "DungeonTerrain": "NONE",
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}

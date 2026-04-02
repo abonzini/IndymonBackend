@@ -60,6 +60,6 @@ nunit-*.xml
 indy.mon
 tournament_stats.*
 tourn_stats.*
-*.json
+current_*.json
 *.trainer
 *.expl
