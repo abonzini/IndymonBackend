@@ -47,8 +47,8 @@
       "EventType": "JOINER",
       "PreEventString": "A $1 is scared. It may have gotten lost in the tunnel.",
       "PostEventString": "You let it go with you. Hopefully you can help it find the way out.",
-      "EventLook": "❉",
-      "EventFg": "Green",
+      "EventLook": "☻",
+      "EventFg": "White",
       "EventBg": "Black"
     },
 	{
