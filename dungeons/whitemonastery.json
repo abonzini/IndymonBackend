@@ -1,0 +1,286 @@
+{
+  "Name": "White Monastery",
+  "EventAnchorX": 1,
+  "EventAnchorY": 0,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "There's a golden chest on a nearby peak.",
+      "PostEventString": "Whith a lot of effort, you manage to climb and retrieve the treasure ($1).",
+      "EventLook": "▣",
+      "EventFg": "DarkYellow",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "ALPHA",
+      "PreEventString": "A strong challenger approaches! $1 attacks you.",
+      "PostEventString": "You feel both of you have grown stronger today. The Pokemon gives you it's prized $1.",
+      "EventLook": "☻",
+      "EventFg": "Black",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "EVO",
+      "PreEventString": "You reach a remote temple. There's a glowing gem in the center: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on.",
+      "EventLook": "✦",
+      "EventFg": "Magenta",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "HEAL",
+      "PreEventString": "You meditate under the waterfall.",
+      "PostEventString": "Your Pokemon have recovered some health.",
+      "EventLook": "SS",
+      "EventFg": "Blue",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "CURE",
+      "PreEventString": "You meditate under the waterfall.",
+      "PostEventString": "Your mind is clear and your Pokemon have grown healthier. They are unburdened from their status conditions.",
+      "EventLook": "SS",
+      "EventFg": "Blue",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "JOINER",
+      "PreEventString": "A $1 looks you in the eye. It wants to become stronger, no matter the cost.",
+      "PostEventString": "It will join you and prove itself.",
+      "EventLook": "☻",
+      "EventFg": "Black",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "There's a golden chest on a nearby peak.",
+      "PostEventString": "Unfortunately, you don't make it. You fall and injure yourself and your Pokemon.",
+      "EventLook": "▣",
+      "EventFg": "DarkYellow",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "You meditate under the waterfall.",
+      "PostEventString": "The water was freezing! Bad idea! One of your Pokemon now has frostbite.",
+	  "SpecialParams": "frz",
+      "EventLook": "SS",
+      "EventFg": "Blue",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "These sacred grounds are not only meant for Pokemon. Trainers also need to get stronger. $1 is ready to battle you. Your pokemon are fully healed before the battle.",
+      "PostEventString": "You feel both of you have grown stronger today.",
+      "EventLook": "☺",
+      "EventFg": "Black",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "RESEARCHER",
+      "PreEventString": "A member of the Pokemon Research Society is also training.",
+      "PostEventString": "She's trying to study the sacred texts, looking for the secrets of life and death. She also gives you a $1, it's useless to her.",
+      "EventLook": "🧑‍🔬",
+      "EventFg": "White",
+      "EventBg": "DarkGray"
+    },
+	{
+      "EventType": "PARADOX",
+      "PreEventString": "On a dark corner, you see a Team Paradox grunt, holding a $1.",
+      "PostEventString": "He tells you: ''Why train? Just get Move Disks!''. Gives you a free one, on the house.",
+      "EventLook": "P",
+      "EventFg": "DarkMagenta",
+      "EventBg": "Gray"
+    }
+  ],
+  "PokemonEachFloor": [
+	[
+		"Pidgey",
+		"Spearow",
+		"Mankey",
+		"Growlithe-Hisui",
+		"Machop",
+		"Tyrogue",
+		"Makuhita",
+		"Meditite",
+		"Starly",
+		"Timburr",
+		"Darumaka",
+		"Mienfoo",
+		"Rufflet",
+		"Fletchling",
+		"Pancham",
+		"Stufful",
+		"Jangmo-o",
+		"Rookidee",
+		"Kubfu",
+		"Darumaka-Galar",
+		"Taillow",
+		"Farfetch'd-Galar",
+		"Riolu"
+	],
+	[
+		"Pidgeotto",
+		"Fearow",
+		"Primeape",
+		"Machoke",
+		"Hitmonchan",
+		"Sneasel-Hisui",
+		"Medicham",
+		"Staravia",
+		"Gurdurr",
+		"Throh",
+		"Sawk",
+		"Braviary",
+		"Fletchinder",
+		"Pangoro",
+		"Bewear",
+		"Passimian",
+		"Hakamo-o",
+		"Corvisquire",
+		"Bombirdier"
+	],
+	[
+		"Pidgeot",
+		"Annihilape",
+		"Arcanine-Hisui",
+		"Machamp",
+		"Hitmontop",
+		"Hitmonlee",
+		"Sneasler",
+		"Hariyama",
+		"Staraptor",
+		"Conkeldurr",
+		"Darmanitan",
+		"Mienshao",
+		"Talonflame",
+		"Drampa",
+		"Kommo-o",
+		"Corviknight",
+		"Darmanitan-Galar",
+		"Swellow",
+		"Sirfetch'd",
+		"Lucario"
+	],
+	[
+		"Cobalion",
+		"Terrakion",
+		"Virizion"
+	]
+  ],
+  "CommonItems": [
+		{ "Name": "Health Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Muscle Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Resist Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Swift Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Scout Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Wall Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Athlete Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Bruiser Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Danger Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Zen Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Assassin Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Phantom Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Tank Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Guardian Feather", "Min": 1, "Max": 2 },
+		{ "Name": "Payapa Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Charti Berry", "Min": 1, "Max": 2 },
+		{ "Name": "Roseli Berry", "Min": 1, "Max": 2 }
+  ],
+  "RareItems": [
+		{ "Name": "Rainbow Feather", "Min": 2, "Max": 4 },
+		{ "Name": "Air Balloon", "Min": 2, "Max": 4 },
+		{ "Name": "Fairy Feather", "Min": 2, "Max": 4 },
+		{ "Name": "Iron Ball", "Min": 2, "Max": 4 },
+		{ "Name": "King's Rock", "Min": 2, "Max": 4 },
+		{ "Name": "Quick Claw", "Min": 2, "Max": 4 },
+		{ "Name": "Sharp Beak", "Min": 2, "Max": 4 },
+		{ "Name": "Black Belt", "Min": 2, "Max": 4 },
+		{ "Name": "Expert Belt", "Min": 2, "Max": 4 }
+  ],
+  "BossItem": { "Name": "Dawn Stone", "Min": 3, "Max": 3 },
+  "RoomShortcuts":
+  [
+      {
+          "Conditions": [
+            {
+                "ConditionType": "MOVE",
+                "Which": ["Strength","Heal Bell"]
+            },
+            {
+                "ConditionType": "POKEMON",
+                "Which": ["Bronzong", "Weepinbell", "Victreebel"]
+            },
+            {
+                "ConditionType": "ITEM",
+                "Which": ["Shell Bell"]
+            }
+        ],
+        "Clue": "Before you is a massive bell. A sign says: 'Those with the strength to make the bell sound will find the way forward'.",
+        "Resolution": "As the sound of $1 echoes through the mountains, a magical passage opens up.",
+        "RoomNumber": 0,
+        "RoomDestination": 5
+      },
+      {
+            "Conditions": [
+            {
+                "ConditionType": "MOVE",
+                "Which": ["Rock Climb"]
+            }
+        ],
+        "Clue": "Before you is the white face of a cliff. The summit is ahead, you may be able to climb the rocks, if you're brave enough.",
+        "Resolution": "Your $1 has defeated the mighty mountain. You're almost at the summit.",
+            "RoomNumber": 5,
+            "RoomDestination": 10
+      }
+  ],
+  "DungeonShortcut":
+  {
+      "Conditions": [
+		{
+			"ConditionType": "MOVE",
+			"Which": ["Fly"]
+		},
+		{
+			"ConditionType": "ABILITY",
+			"Which": ["Levitate"]
+		}
+	  ],
+	  "Clue": "You can't believe what you see. In the distance, there's a castle, floating high on the clouds.",
+	  "Resolution": "You used $1 into the unknown, towards a place few have even seen.",
+      "RoomNumber": 10,
+      "RoomDestination": 10
+  },
+  "WildMonsEvent": {
+      "EventType": "POKEMON_BATTLE",
+      "PreEventString": "Suddenly, wild Pokemon attack!",
+      "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
+      "EventLook": "☻",
+      "EventFg": "Black",
+      "EventBg": "DarkGray"
+  },
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "Nothing left to be said. Time to show $1 how much you've progressed.",
+    "PostEventString": "You have passed your trial. Take this $1, you've earned it.",
+      "EventLook": "☻",
+      "EventFg": "Black",
+      "EventBg": "DarkGray"
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "Proper recovery and rest are just as important as training itself. It's time to take a small break.",
+    "PostEventString": "But now it's time to move on...",
+      "EventLook": "⛺︎",
+      "EventFg": "Red",
+      "EventBg": "DarkGray"
+  },
+  "PreBossEvent": { "EventType": "NONE" },
+  "PostBossEvent": { "EventType": "NONE" },
+  "CustomShowdownRules" : [],
+  "DungeonArchetypes": [ "EXPLORATION" ],
+  "DungeonWeather": "NONE",
+  "DungeonTerrain": "NONE",
+  "NextDungeon": "Northface Glacier",
+  "NextDungeonShortcut": "Sky Castle"
+}
