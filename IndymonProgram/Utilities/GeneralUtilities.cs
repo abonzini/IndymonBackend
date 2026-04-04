@@ -33,7 +33,7 @@ namespace Utilities
                 itemCount = dict[item];
                 itemCount += count;
                 dict[item] = itemCount;
-                if (eliminateIf0 && count <= 0) dict.Remove(item);
+                if (eliminateIf0 && itemCount <= 0) dict.Remove(item);
             }
             return itemCount;
         }
