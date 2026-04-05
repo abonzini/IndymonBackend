@@ -269,35 +269,9 @@ namespace AutomatedTeamBuilder
                                 }
                                 if (acceptableMoves.Count == 0)
                                 {
-                                    // Ok then, no move is mandatory, will choose if I want to pivot or what
-                                    const double BASE_PIVOT_CHANCE = 0.1; // Pivot has a hard chance of 10%
-                                    double pivotModdedChance = monCtx.WeightMods.GetValueOrDefault((ElementType.EFFECT_FLAGS, EffectFlag.PIVOT.ToString()), 1);
-                                    pivotModdedChance *= BASE_PIVOT_CHANCE;
-                                    // Obtain list of pivot moves
-                                    List<Move> pivotMoves = [];
-                                    List<double> pivotScores = [];
-                                    for (int i = 0; i < possibleMoves.Count; i++)
-                                    {
-                                        Move potentialPivot = possibleMoves[i];
-                                        if (!ExtractMoveFlags(potentialPivot, monCtx).Contains(EffectFlag.PIVOT)) // Check if pivot
-                                        {
-                                            continue; // Skip if not pivot
-                                        }
-                                        pivotMoves.Add(potentialPivot);
-                                        pivotScores.Add(moveScores[i]);
-                                    }
-                                    // Will pivot only if the mon actually benefits from pivots, and/or there's pivot moves
-                                    // In this case, the chance will be rolled
-                                    if ((pivotModdedChance > BASE_PIVOT_CHANCE || pivotMoves.Count > 0) && pivotModdedChance > monRng.NextDouble()) // Roll this chance
-                                    {
-                                        acceptableMoves = pivotMoves;
-                                        acceptableMovesScores = pivotScores;
-                                    }
-                                    else // No forced pivot, choose any move
-                                    {
-                                        acceptableMoves = possibleMoves; // If no move fills constraint (or no constraint) then just use all, yolo.
-                                        acceptableMovesScores = moveScores;
-                                    }
+                                    // Ok then, no move is mandatory
+                                    acceptableMoves = possibleMoves; // If no move fills constraint (or no constraint) then just use all, yolo.
+                                    acceptableMovesScores = moveScores;
                                 }
                                 // Score the moves, create an array with same count with scores, choose an index, choose move
                                 if (acceptableMoves.Count > 0) // Theres moves out of a subset to choose from

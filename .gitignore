@@ -63,3 +63,4 @@ tourn_stats.*
 current_*.json
 *.trainer
 *.expl
+SETS.txt

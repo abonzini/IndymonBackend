@@ -4,6 +4,7 @@ using GameDataContainer;
 using MechanicsData;
 using MechanicsDataContainer;
 using ShowdownBot;
+using System.Text;
 using Utilities;
 
 namespace IndymonBackendProgram
@@ -179,6 +180,7 @@ namespace IndymonBackendProgram
                     GeneralUtilities.AddtemToCountDictionary(participant.Favours, OngoingTournament.CommonFavourTrainer, -99, true); // Remove the given favours
                 }
             }
+            StringBuilder teamsheetsString = new StringBuilder();
             foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // Then, build for each trainer
             {
                 // Consider that this involves building against every opp
@@ -198,6 +200,13 @@ namespace IndymonBackendProgram
                 }
                 // Define sets for this trainer. Smart build, no archetypes included at beginning. Build with constraints and enemy mons in mind. Use seed.
                 TeamBuilder.DefineTrainerSets(participant, true, [], Weather.NONE, Terrain.NONE, OngoingTournament.BaseConstraint, enemyMons, participantSeed);
+                teamsheetsString.AppendLine($"{participantName}:");
+                foreach (TrainerPokemon mon in participant.BattleTeam)
+                {
+                    teamsheetsString.AppendLine($"- {mon.PrintSet()}");
+                }
+                string setsPath = Path.Combine(DirectoryPath, "SETS.txt");
+                File.WriteAllText(setsPath, teamsheetsString.ToString());
             }
         }
         /// <summary>

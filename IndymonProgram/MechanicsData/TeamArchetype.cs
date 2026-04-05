@@ -26,6 +26,7 @@ namespace MechanicsData
         RAIN,
         SAND,
         SNOW,
+        HAIL,
         DESOLATE_LAND,
         PRIMORDIAL_SEA
     }

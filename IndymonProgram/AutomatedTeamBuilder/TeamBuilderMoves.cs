@@ -565,11 +565,19 @@ namespace AutomatedTeamBuilder
             {
                 return 0;
             }
+            else if (allMoveFlags.Contains(EffectFlag.NORMALLY_UNAVAILABLE) && !mon.Species.ToLower().Contains("unown")) // Avoids mon using z moves and stuff but unown can
+            {
+                return 0;
+            }
             else if (!isFirstMon && allMoveFlags.Contains(EffectFlag.GOOD_FIRST_MON)) // Moves only for first mon are not chosen!
             {
                 return 0;
             }
             else if (!isLastMon && allMoveFlags.Contains(EffectFlag.GOOD_LAST_MON)) // Moves only for last mon are not chosen!
+            {
+                return 0;
+            }
+            else if (isLastMon && allMoveFlags.Contains(EffectFlag.BAD_LAST_MON)) // Moves only for last mon are not chosen!
             {
                 return 0;
             }

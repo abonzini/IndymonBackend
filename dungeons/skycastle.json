@@ -290,7 +290,7 @@
   "PostBossEvent": { "EventType": "NONE" },
   "CustomShowdownRules" : ["Continuous Hail Mod"],
   "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_WEATHER"],
-  "DungeonWeather": "SNOW",
+  "DungeonWeather": "HAIL",
   "DungeonTerrain": "NONE",
   "NextDungeon": "",
   "NextDungeonShortcut": ""

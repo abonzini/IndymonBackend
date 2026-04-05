@@ -31,9 +31,17 @@ namespace AutomatedTeamBuilder
             {
                 score = 0;
             }
+            else if (isLastMon && ability.Flags.Contains(EffectFlag.BAD_LAST_MON))
+            {
+                score = 0;
+            }
             else if (ability.Flags.Contains(EffectFlag.DOUBLES_ONLY))
             {
                 score = 0;
+            }
+            else if (ability.Flags.Contains(EffectFlag.NORMALLY_UNAVAILABLE) && !theMon.Species.ToLower().Contains("unown")) // Avoids mon using z moves and stuff but unown can
+            {
+                return 0;
             }
             else
             {

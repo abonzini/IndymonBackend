@@ -171,7 +171,7 @@ namespace AutomatedTeamBuilder
                 {
                     result.PokemonTypes = (PokemonType.WATER, PokemonType.NONE);
                 }
-                if (result.CurrentWeather == Weather.SNOW)
+                if (result.CurrentWeather == Weather.SNOW || result.CurrentWeather == Weather.HAIL)
                 {
                     result.PokemonTypes = (PokemonType.ICE, PokemonType.NONE);
                 }

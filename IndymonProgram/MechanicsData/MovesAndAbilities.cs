@@ -8,6 +8,7 @@ namespace MechanicsData
     {
         BANNED, // Forbidden moves
         DOUBLES_ONLY, // Moves that are good in doubles only, do not use in singles
+        NORMALLY_UNAVAILABLE, // Z moves and shit
         DRAIN, // Draining moves, benefit from root
         HEAL, // Status moves that heal the user (non-damaging)
         CHANCE, // Moves with a chance of something nice, for serene grace
@@ -66,6 +67,7 @@ namespace MechanicsData
         SUN_SETTER, // Obvious
         RAIN_SETTER, // Obvious
         SNOW_SETTER, // Obvious
+        HAIL_SETTER, // Obvious
         SAND_SETTER, // Obvious
         ELE_TERRAIN_SETTER, // Obvious
         GRASSY_TERRAIN_SETTER, // Obvious
@@ -78,6 +80,7 @@ namespace MechanicsData
         BYPASSES_IMMUNITY, // Move bypasses immunities thay would've made it do 0 damage
         GOOD_FIRST_MOVE, // Unused logic, moves that are best to be used first and then never, this only works for some dawn stone scenarios and is niche
         GOOD_FIRST_MON, // Moves that are only really interesting on the first mon of the team (i.e. hazard setting)
+        BAD_LAST_MON, // Moves that suck last mon (explosive, pivot)
         GOOD_LAST_MON, // Moves that are only really interesting on the last mon of the team (i.e. last respects)
     }
     [JsonConverter(typeof(StringEnumConverter))]
