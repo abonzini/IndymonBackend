@@ -43,6 +43,7 @@ namespace MechanicsData
         SETUP_DAMAGING, // Damaging moves that increase stat
         SELF_DEBUFF, // Debuff user (contrary, sure crit)
         SETUP_STATUS, // Collection of all the status setup moves
+        DEBUFF_STATUS, // Status moves that solely lower an enemy's stats
         OFF_UTILITY, // Moves with an off utility only
         DEF_UTILITY, // Moves with a def utility only
         SPEED_UTILITY, // Moves with a speed utility only
