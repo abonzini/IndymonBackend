@@ -64,3 +64,4 @@ current_*.json
 *.trainer
 *.expl
 SETS.txt
+TOURNAMENT.txt

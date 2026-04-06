@@ -130,7 +130,8 @@ namespace IndymonBackendProgram
         /// <summary>
         /// Updates the tournament teams, meaning a team randomization and updating team sheets if needed
         /// </summary>
-        public void UpdateTournamentTeams()
+        /// <param name="auto">Whether set building is done auto without expeting verification</param>
+        public void UpdateTournamentTeams(bool auto = false)
         {
             GameDataContainers.GlobalGameData.CurrentEventMessage.Clear(); // This is a new event, so I will clear whatever thet was there before
             // First, shuffle the participants (use seed if needed)
@@ -160,8 +161,6 @@ namespace IndymonBackendProgram
                 }
             }
             OngoingTournament.ShuffleWithSeeds(Seeds);
-            // Reset the tournament if one was already in progress
-            OngoingTournament.ResetTournament();
             // Ok not bad, next step is to update participant team sheet if needed
             foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // First, choose all trainer mons
             {
@@ -199,7 +198,7 @@ namespace IndymonBackendProgram
                     }
                 }
                 // Define sets for this trainer. Smart build, no archetypes included at beginning. Build with constraints and enemy mons in mind. Use seed.
-                TeamBuilder.DefineTrainerSets(participant, true, [], Weather.NONE, Terrain.NONE, OngoingTournament.BaseConstraint, enemyMons, participantSeed);
+                TeamBuilder.DefineTrainerSets(participant, true, [], Weather.NONE, Terrain.NONE, OngoingTournament.BaseConstraint, enemyMons, participantSeed, auto);
                 teamsheetsString.AppendLine($"{participantName}:");
                 foreach (TrainerPokemon mon in participant.BattleTeam)
                 {
@@ -214,6 +213,7 @@ namespace IndymonBackendProgram
         /// </summary>
         public void ExecuteTournament()
         {
+            OngoingTournament.ResetTournament(); // Reset the tournament if one was already in progress
             OngoingTournament.PlayTournament();
         }
         /// <summary>
@@ -222,9 +222,9 @@ namespace IndymonBackendProgram
         public void FinaliseTournament()
         {
             // First, animate tournament
-            Console.WriteLine("Animate? Y/n");
+            Console.WriteLine("Animate? y/N");
             string input = Console.ReadLine();
-            if (input != "n")
+            if (input.ToLower() == "y")
             {
                 OngoingTournament.FinaliseTournament();
             }
@@ -235,11 +235,13 @@ namespace IndymonBackendProgram
             const int SALARY = 2; // Trainers now get paid for playing
             foreach (string participant in OngoingTournament.ParticipantsWithRandomSeed.Select(t => t.Item1))
             {
-                Trainer trainer = IndymonUtilities.GetTrainerByName(participant); // Obtain trainer
-                trainer.Imp += SALARY;
-                IndymonUtilities.ConsumeTrainersItems(trainer); // Trainer does a round of consuming item
-                string trainerFilePath = Path.Combine(DirectoryPath, $"{participant.ToUpper().Replace(" ", "").Replace("?", "")}.trainer");
-                trainer.SaveTrainerCsv(trainerFilePath);
+                if (GameDataContainers.GlobalGameData.TrainerData.TryGetValue(participant, out Trainer trainer)) // Only interesting in players, not npcs
+                {
+                    trainer.Imp += SALARY;
+                    IndymonUtilities.ConsumeTrainersItems(trainer); // Trainer does a round of consuming item
+                    string trainerFilePath = Path.Combine(DirectoryPath, $"{participant.ToUpper().Replace(" ", "").Replace("?", "")}.trainer");
+                    trainer.SaveTrainerCsv(trainerFilePath);
+                }
             }
             // Finally, the tournament string needs to be assembled with the remaining stuff
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Clear();
@@ -843,7 +845,7 @@ namespace IndymonBackendProgram
                     Console.Write(match.Winner);
                 }
             }
-            Console.ReadKey();
+            Console.ReadLine();
             Console.Clear();
             // And that should be it?!
         }
@@ -1067,7 +1069,7 @@ namespace IndymonBackendProgram
                     Console.Write($"WINNER");
                 }
             }
-            Console.ReadKey();
+            Console.ReadLine();
             Console.Clear();
             // And that should be it?!
         }
@@ -1332,7 +1334,7 @@ namespace IndymonBackendProgram
                     localY++;
                 }
             }
-            Console.ReadKey();
+            Console.ReadLine();
             Console.Clear();
             // And that should be it?!
         }

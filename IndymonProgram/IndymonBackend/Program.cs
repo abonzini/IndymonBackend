@@ -57,8 +57,6 @@ namespace IndymonBackendProgram
                 switch (InputString)
                 {
                     case "0":
-                        Console.WriteLine("Writing resulting files");
-                        GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
                         Console.WriteLine("Serializing jsons");
                         File.WriteAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE), JsonConvert.SerializeObject(tournamentManager, jsonSettings));
                         File.WriteAllText(Path.Combine(directoryPath, EXPLORATION_JSON_FILE), JsonConvert.SerializeObject(explorationManager, jsonSettings));
@@ -75,7 +73,10 @@ namespace IndymonBackendProgram
                         tournamentManager.ExecuteTournament();
                         break;
                     case "3":
+                        tournamentManager.UpdateTournamentTeams(true); // May need to redo team seeding if file was loaded (auto tho)
                         tournamentManager.FinaliseTournament();
+                        Console.WriteLine("Writing tournament stats");
+                        GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
                         break;
                     case "4":
                         foreach (Trainer trainer in GameDataContainers.GlobalGameData.TrainerData.Values)

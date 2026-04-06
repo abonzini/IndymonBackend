@@ -26,7 +26,8 @@ namespace AutomatedTeamBuilder
         /// <param name="buildConstraints">Specific constraints needed for mon</param>
         /// <param name="pokemonFaced">All the pokemon that may be faced, to calculate types and stats</param>
         /// <param name="seed">Seed if the trainer set, to ensure consistency if saved</param>
-        public static void DefineTrainerSets(Trainer trainer, bool smart, HashSet<TeamArchetype> archetypes, Weather initialWeather, Terrain initialTerrain, Constraint buildConstraints, List<Pokemon> pokemonFaced, int seed = 0)
+        /// <param name="auto">Do automatically without asking</param>
+        public static void DefineTrainerSets(Trainer trainer, bool smart, HashSet<TeamArchetype> archetypes, Weather initialWeather, Terrain initialTerrain, Constraint buildConstraints, List<Pokemon> pokemonFaced, int seed = 0, bool auto = false)
         {
             // Create a build ctx to start team build
             TeamBuildContext buildCtx = new TeamBuildContext
@@ -73,7 +74,7 @@ namespace AutomatedTeamBuilder
             {
                 // Stupid build, reserved for wild mons
             }
-            BuildTeam(trainer, buildCtx, seed);
+            BuildTeam(trainer, buildCtx, seed, auto);
         }
         /// <summary>
         /// Sets the movesets of all mons of a trainer's battle team
@@ -81,7 +82,8 @@ namespace AutomatedTeamBuilder
         /// <param name="trainer">Which trainer to build</param>
         /// <param name="buildCtx">Context containing other team build things that may be important (May be modified by a set)</param>
         /// <param name="seed">Team building seed, 0 to generate a random one</param>
-        static void BuildTeam(Trainer trainer, TeamBuildContext buildCtx, int seed)
+        /// <param name="auto">Do automatically without asking stuff</param>
+        static void BuildTeam(Trainer trainer, TeamBuildContext buildCtx, int seed, bool auto = false)
         {
             int teamSeed = (seed == 0) ? GeneralUtilities.GetRandomNumber(int.MaxValue) : seed;
             Random teamRng = new Random(teamSeed); // Not ideal but lets us retry with same value
@@ -462,8 +464,12 @@ namespace AutomatedTeamBuilder
                     }
                 }
                 Console.WriteLine($"Chosen set for mon ({teamSeed}-{monSeed}): {mon.PrintSet()}");
-                Console.WriteLine("Accept? Y, n (redo seed for debug)");
-                string monAccepted = Console.ReadLine();
+                string monAccepted = "Y";
+                if (!auto)
+                {
+                    Console.WriteLine("Accept? Y, n (redo seed for debug)");
+                    monAccepted = Console.ReadLine();
+                }
                 // Depending on the choice, a new seed is chosen and the mon is redone
                 if (monAccepted.ToLower() == "n")
                 {

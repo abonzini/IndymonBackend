@@ -96,17 +96,17 @@ namespace IndymonBackendProgram
                     if (trainer.SetItems.TryGetValue(replacementItem, out int value) && value >= trainerMon.SetItem.ItemReplacementQuantity) // Try to remove the replacement item first
                     {
                         Utilities.GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, replacementItem, -trainerMon.SetItem.ItemReplacementQuantity, true); // Remove replacement item instead
-                        if (trainerMon.SetItemChosen) monActions.Add($"{trainerMon.SetItem.ItemReplacementQuantity}x {replacementItem.Name} (due to {trainerMon.SetItem.Name})");
+                        if (!trainerMon.SetItemChosen) monActions.Add($"{trainerMon.SetItem.ItemReplacementQuantity}x {replacementItem.Name} (due to {trainerMon.SetItem.Name})");
                     }
                     else if (trainer.SetItems.ContainsKey(trainerMon.SetItem)) // If not, try to remove the inventory one instead
                     {
                         Utilities.GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, trainerMon.SetItem, -1, true);
-                        if (trainerMon.SetItemChosen) monActions.Add($"{trainerMon.SetItem}");
+                        if (!trainerMon.SetItemChosen) monActions.Add($"{trainerMon.SetItem}");
                     }
                     else // Worst case jsut delete the mon's item
                     {
+                        if (!trainerMon.SetItemChosen) monActions.Add($"{trainerMon.SetItem}");
                         trainerMon.SetItem = null; // Delete
-                        if (trainerMon.SetItemChosen) monActions.Add($"{trainerMon.SetItem}");
                     }
                     // Finally, if mon borrowed this item (auto), return it
                     if (trainerMon.SetItem != null && !trainerMon.SetItemChosen) // If this set item wasn't chosen by the auto builder itself, return it
@@ -121,12 +121,12 @@ namespace IndymonBackendProgram
                     if (trainer.ModItems.ContainsKey(trainerMon.ModItem)) // Try to remove the inventory one
                     {
                         Utilities.GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, trainerMon.ModItem, -1, true);
-                        if (trainerMon.ModItemChosen) monActions.Add($"{trainerMon.ModItem}");
+                        if (!trainerMon.ModItemChosen) monActions.Add($"{trainerMon.ModItem}");
                     }
                     else // Worst case jsut delete the mon's item
                     {
+                        if (!trainerMon.ModItemChosen) monActions.Add($"{trainerMon.ModItem}");
                         trainerMon.ModItem = null; // Delete
-                        if (trainerMon.ModItemChosen) monActions.Add($"{trainerMon.ModItem}");
                     }
                     // Finally, if mon borrowed this item (auto), return it
                     if (trainerMon.ModItem != null && !trainerMon.ModItemChosen) // If this set item wasn't chosen by the auto builder itself, return it
@@ -141,12 +141,12 @@ namespace IndymonBackendProgram
                     if (trainer.BattleItems.ContainsKey(trainerMon.BattleItem)) // Try to remove the inventory one
                     {
                         Utilities.GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, trainerMon.BattleItem, -1, true);
-                        if (trainerMon.SetItemChosen) monActions.Add($"{trainerMon.BattleItem}");
+                        if (!trainerMon.SetItemChosen) monActions.Add($"{trainerMon.BattleItem}");
                     }
-                    else // Worst case jsut delete the mon's item
+                    else // Worst case just delete the mon's item
                     {
+                        if (!trainerMon.SetItemChosen) monActions.Add($"{trainerMon.BattleItem}");
                         trainerMon.BattleItem = null; // Delete
-                        if (trainerMon.SetItemChosen) monActions.Add($"{trainerMon.BattleItem}");
                     }
                     // Finally, if mon borrowed this item (auto), return it
                     if (trainerMon.BattleItem != null && !trainerMon.BattleItemChosen) // If this set item wasn't chosen by the auto builder itself, return it
@@ -164,7 +164,7 @@ namespace IndymonBackendProgram
             }
             if (trainerActions.Count > 0)
             {
-                string trainerText = $"- <@{trainer.DiscordNumber}>: {string.Join(" ", trainerActions)}.";
+                string trainerText = $"- <@{trainer.DiscordNumber}>: {string.Join(" ", trainerActions)}";
                 GameDataContainers.GlobalGameData.CurrentEventMessage.PostEventText.AppendLine(trainerText);
             }
         }

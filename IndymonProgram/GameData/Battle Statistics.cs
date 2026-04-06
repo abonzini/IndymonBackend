@@ -15,14 +15,14 @@
         public string Name { get; set; }
         public Dictionary<string, IndividualMu> EachMuWr { get; set; } = new Dictionary<string, IndividualMu>(); // Contains each matchup
         public int TournamentWins { get; set; } = 0;
-        public int TournamentsPlayed { get; set; } = 1;
-        public double Winrate { get { return (double)TournamentWins / (double)TournamentsPlayed; } }
+        public int TournamentsPlayed { get; set; } = 0;
+        public double Winrate { get { return (TournamentsPlayed == 0) ? 0 : (double)TournamentWins / (double)TournamentsPlayed; } }
         public int GamesWon { get; set; } = 0;
-        public int GamesPlayed { get; set; } = 1;
-        public double GameWinrate { get { return (double)GamesWon / (double)GamesPlayed; } }
+        public int GamesPlayed { get; set; } = 0;
+        public double GameWinrate { get { return (GamesPlayed == 0) ? 0 : (double)GamesWon / (double)GamesPlayed; } }
         public int Kills { get; set; } = 0;
         public int Deaths { get; set; } = 0;
-        public double Diff { get { return ((double)Kills - (double)Deaths) / ((double)GamesPlayed); } }
+        public double Diff { get { return (GamesPlayed == 0) ? 0 : ((double)Kills - (double)Deaths) / ((double)GamesPlayed); } }
         public override string ToString()
         {
             return $"{Name}: {TournamentWins}/{TournamentsPlayed})";
