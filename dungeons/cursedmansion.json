@@ -69,14 +69,6 @@
       "EventBg": "Black"
     },
 	{
-      "EventType": "PP_HEAL",
-      "PreEventString": "Even though you're in a mansion, it is still an extension of the berry forest, with many healthy berries to eat.",
-      "PostEventString": "Your team eats some berries and their moves recover some PP.",
-      "EventLook": "❦",
-      "EventFg": "Red",
-      "EventBg": "Black"
-    },
-	{
       "EventType": "SWARM",
       "PreEventString": "A group of young trickster pokemon challenges you to a fight. You don't feel any malice from them, seems they just want to play.",
       "PostEventString": "The pokemon are satisfied and happy, they move along gleefuly.",
@@ -156,7 +148,7 @@
 		"Gourgeist-Small",
 		"Gourgeist-Large",
 		"Gourgeist-Super",
-		"Dartix",
+		"Dartrix",
 		"Thievul",
 		"Polteageist",
 		"Houndstone"

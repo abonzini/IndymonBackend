@@ -53,7 +53,6 @@ namespace GameData
         public int HealthPercentage = 100; // 100 percent default
         public string DefaultStatus = "";
         public string NonVolatileStatus = "";
-        public List<int> MovePp = [];
         public int Level = 100; // Default is 100 but loaded into ctx properly as a lvl multiplier if different to 100
         public int LevelMod = 0;
         public HashSet<int> MovesChosenInBattle = [];
@@ -87,7 +86,6 @@ namespace GameData
             HealthPercentage = 100;
             if (ChosenAbility?.Name == "Wonder Guard") HealthPercentage = 1; // Wonder guard gives 1 HP let's not fuck around
             NonVolatileStatus = "";
-            MovePp = [.. Enumerable.Repeat(99, ChosenMoveset.Count)];
         }
         /// <summary>
         /// Gets mon set data as part of a packed string as is received by (my modified version of) showdown
@@ -105,7 +103,7 @@ namespace GameData
             for (int i = 0; i < ChosenMoveset.Count; i++)
             {
                 string moveString = (ChosenMoveset[i] != null) ? ChosenMoveset[i].Name : "";
-                movesWithUses.Add($"{moveString}#{MovePp[i]}"); // Add move with the number of recorded uses (no idea how this works with hard switch)
+                movesWithUses.Add($"{moveString}"); // Add move with the number of recorded uses (no idea how this works with hard switch)
             }
             packedStrings.Add(string.Join(",", movesWithUses));
             packedStrings.Add(Nature.ToString());

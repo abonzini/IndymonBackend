@@ -280,10 +280,7 @@ namespace AutomatedTeamBuilder
                 foreach (Move move in movesToEvaluate)
                 {
                     if (move == null) continue; // Nothing to calculate if hard switch
-                    if (move.Category == MoveCategory.STATUS)
-                    {
-                        continue; // We don't check for status moves
-                    }
+                    if (move.Category == MoveCategory.STATUS) continue; // We don't check for status moves
                     movesDamage.Add(CalcMoveDamage(move, result, 100 * result.LevelMultiplier, teamCtx,
                         (pokemon.ChosenAbility?.Name == "Protean" || pokemon.ChosenAbility?.Name == "Libero"), // This will cause stab to be always active unless tera
                         pokemon.ChosenAbility?.Name == "Adaptability", // Adaptability and loaded dice affect move damage in nonlinear ways, sniper adds to crit dmg
@@ -324,7 +321,7 @@ namespace AutomatedTeamBuilder
                 else
                 {
                     bestCaseMoveCoverage = GeneralUtilities.ArrayMax(movesTypeCoverage);
-                    avgMoveDamage = movesDamage.Average() * bestCaseMoveCoverage.Average();
+                    avgMoveDamage = (movesDamage.Sum() / movesToEvaluate.Count) * bestCaseMoveCoverage.Average(); // Average takes into account ALL moves due to expected opportunity loss
                 }
                 // Now, check how the damage I can output works, assume I can deal between 0-X HP of damage (more is "overkill")
                 const double DAMAGE_OVERKILL_THRESHOLD = 2;

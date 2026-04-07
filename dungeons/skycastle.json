@@ -60,14 +60,6 @@
       "EventBg": "Black"
     },
 	{
-      "EventType": "PP_HEAL",
-      "PreEventString": "Like bubbles in the air, you see unripe leppa berries floating. It is a bizarre sight.",
-      "PostEventString": "You and your Pokemon eat some of them. Their moves recover some PP.",
-      "EventLook": "☙",
-      "EventFg": "Red",
-      "EventBg": "Black"
-    },
-	{
       "EventType": "SWARM",
       "PreEventString": "A group of baby pokemon are looking at you. They've never seen a human before, and they're terrified. They decide to attack you, hopefully their last stand will protect their home.",
       "PostEventString": "You have succesfully defeated the babies.",

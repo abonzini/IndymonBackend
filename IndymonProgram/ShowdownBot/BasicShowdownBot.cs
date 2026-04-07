@@ -328,16 +328,6 @@ namespace ShowdownBot
                     {
                         string monId = pokemon.Ident.Split(':')[1].Trim().Replace("’", "'"); ; // Id(ent) of the mon in question
                         currentPokemon = _monsById[monId]; // Find wtf mon am i referring to, this is also the active pokemon btw
-                        // Means the active field also has data of the moves current PP, load here
-                        foreach (AvailableMove move in _currentGameState.Active[0].Moves)
-                        {
-                            string moveNameCleaned = move.Move.Replace("102", "").Trim();
-                            int moveIndex = currentPokemon.ChosenMoveset.FindIndex(m => m?.Name == moveNameCleaned); // For some reason return is called return102
-                            if (moveIndex >= 0)
-                            {
-                                currentPokemon.MovePp[moveIndex] = move.Pp;
-                            }
-                        }
                     }
                 }
             }

@@ -9,7 +9,7 @@
       "PostEventString": "Whith a lot of effort, you manage to climb and retrieve the treasure ($1).",
       "EventLook": "▣",
       "EventFg": "DarkYellow",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "ALPHA",
@@ -17,7 +17,7 @@
       "PostEventString": "You feel both of you have grown stronger today. The Pokemon gives you it's prized $1.",
       "EventLook": "☻",
       "EventFg": "Black",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "EVO",
@@ -25,7 +25,7 @@
       "PostEventString": "It's time to move on.",
       "EventLook": "✦",
       "EventFg": "Magenta",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "HEAL",
@@ -33,7 +33,7 @@
       "PostEventString": "Your Pokemon have recovered some health.",
       "EventLook": "SS",
       "EventFg": "Blue",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "CURE",
@@ -41,7 +41,7 @@
       "PostEventString": "Your mind is clear and your Pokemon have grown healthier. They are unburdened from their status conditions.",
       "EventLook": "SS",
       "EventFg": "Blue",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "JOINER",
@@ -49,7 +49,7 @@
       "PostEventString": "It will join you and prove itself.",
       "EventLook": "☻",
       "EventFg": "Black",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "DAMAGE_TRAP",
@@ -57,7 +57,7 @@
       "PostEventString": "Unfortunately, you don't make it. You fall and injure yourself and your Pokemon.",
       "EventLook": "▣",
       "EventFg": "DarkYellow",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "STATUS_TRAP",
@@ -66,7 +66,7 @@
 	  "SpecialParams": "frz",
       "EventLook": "SS",
       "EventFg": "Blue",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "NPC_BATTLE",
@@ -74,7 +74,7 @@
       "PostEventString": "You feel both of you have grown stronger today.",
       "EventLook": "☺",
       "EventFg": "Black",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "RESEARCHER",
@@ -82,7 +82,7 @@
       "PostEventString": "She's trying to study the sacred texts, looking for the secrets of life and death. She also gives you a $1, it's useless to her.",
       "EventLook": "🧑‍🔬",
       "EventFg": "White",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
     },
 	{
       "EventType": "PARADOX",
@@ -257,7 +257,7 @@
       "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
       "EventLook": "☻",
       "EventFg": "Black",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
   },
   "BossEvent": {
     "EventType": "BOSS",
@@ -265,7 +265,7 @@
     "PostEventString": "You have passed your trial. Take this $1, you've earned it.",
       "EventLook": "☻",
       "EventFg": "Black",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
   },
   "CampingEvent": {
     "EventType": "CAMPING",
@@ -273,7 +273,7 @@
     "PostEventString": "But now it's time to move on...",
       "EventLook": "⛺︎",
       "EventFg": "Red",
-      "EventBg": "DarkGray"
+      "EventBg": "Gray"
   },
   "PreBossEvent": { "EventType": "NONE" },
   "PostBossEvent": { "EventType": "NONE" },

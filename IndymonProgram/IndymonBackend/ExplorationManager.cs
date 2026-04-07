@@ -600,94 +600,106 @@ namespace IndymonBackendProgram
                         foreach (TrainerPokemon mon in _trainer.BattleTeam)
                         {
                             Pokemon baseMon = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
+                            bool error;
                             if (baseMon.Evos.Count > 0) // Mon has evos, ask for each
                             {
-                                Console.WriteLine($"Evolve {mon} ? y/N. Consider:");
-                                Console.WriteLine($"Mon Items: (0) Set: {mon.SetItem}, (1) Mod: {mon.ModItem}, (2) Battle: {mon.BattleItem}");
-                                Console.WriteLine($"(3) Set Items In Bag: {string.Join(", ", _trainer.SetItems.Keys.Select(i => i.Name))}");
-                                Console.WriteLine($"(4) Mod Items In Bag: {string.Join(", ", _trainer.ModItems.Keys.Select(i => i.Name))}");
-                                Console.WriteLine($"(5) Battle Items In Bag: {string.Join(", ", _trainer.BattleItems.Keys.Select(i => i.Name))}");
-                                Console.WriteLine($"(6) Set Items In Prizes: {string.Join(", ", _prizes.SetItemsFound.Keys.Select(i => i.Name))}");
-                                Console.WriteLine($"(7) Mod Items In Prizes: {string.Join(", ", _prizes.ModItemsFound.Keys.Select(i => i.Name))}");
-                                Console.WriteLine($"(8) Battle Items In Prizes: {string.Join(", ", _prizes.BattleItemsFound.Keys.Select(i => i.Name))}");
-                                if (Console.ReadLine().Trim().ToLower() == "y")
+                                do
                                 {
-                                    // Check mon
-                                    List<Pokemon> possibleEvos = [.. baseMon.Evos];
-                                    Console.Write($"0 RANDOM,");
-                                    for (int i = 0; i < possibleEvos.Count; i++)
+                                    try // Very easy to fuck up
                                     {
-                                        Console.Write($"{i + 1} {possibleEvos[i]},");
+                                        Console.WriteLine($"Evolve {mon} ? y/N. Consider:");
+                                        Console.WriteLine($"Mon Items: (0) Set: {mon.SetItem}, (1) Mod: {mon.ModItem}, (2) Battle: {mon.BattleItem}");
+                                        Console.WriteLine($"(3) Set Items In Bag: {string.Join(", ", _trainer.SetItems.Keys.Select(i => i.Name))}");
+                                        Console.WriteLine($"(4) Mod Items In Bag: {string.Join(", ", _trainer.ModItems.Keys.Select(i => i.Name))}");
+                                        Console.WriteLine($"(5) Battle Items In Bag: {string.Join(", ", _trainer.BattleItems.Keys.Select(i => i.Name))}");
+                                        Console.WriteLine($"(6) Set Items In Prizes: {string.Join(", ", _prizes.SetItemsFound.Keys.Select(i => i.Name))}");
+                                        Console.WriteLine($"(7) Mod Items In Prizes: {string.Join(", ", _prizes.ModItemsFound.Keys.Select(i => i.Name))}");
+                                        Console.WriteLine($"(8) Battle Items In Prizes: {string.Join(", ", _prizes.BattleItemsFound.Keys.Select(i => i.Name))}");
+                                        if (Console.ReadLine().Trim().ToLower() == "y")
+                                        {
+                                            // Check mon
+                                            List<Pokemon> possibleEvos = [.. baseMon.Evos];
+                                            Console.Write($"0 RANDOM,");
+                                            for (int i = 0; i < possibleEvos.Count; i++)
+                                            {
+                                                Console.Write($"{i + 1} {possibleEvos[i]},");
+                                            }
+                                            int choice = int.Parse(Console.ReadLine());
+                                            Pokemon chosenMon;
+                                            if (choice == 0) // Random evo
+                                            {
+                                                chosenMon = possibleEvos[GeneralUtilities.GetRandomNumber(possibleEvos.Count)];
+                                            }
+                                            else
+                                            {
+                                                chosenMon = possibleEvos[choice - 1];
+                                            }
+                                            // Check consumed item
+                                            Console.WriteLine("Which index of place to remove item?");
+                                            choice = int.Parse(Console.ReadLine());
+                                            string itemConsumedString;
+                                            if (choice == 0)
+                                            {
+                                                itemConsumedString = $"its equipped {mon.SetItem.Name}";
+                                                mon.SetItem = null;
+                                            }
+                                            else if (choice == 1)
+                                            {
+                                                itemConsumedString = $"its equipped {mon.ModItem.Name}";
+                                                mon.ModItem = null;
+                                            }
+                                            else if (choice == 2)
+                                            {
+                                                itemConsumedString = $"its equipped {mon.BattleItem.Name}";
+                                                mon.BattleItem = null;
+                                            }
+                                            else if (choice == 3 || choice == 6) // Set items...
+                                            {
+                                                Dictionary<SetItem, int> collectionDict;
+                                                if (choice == 3) collectionDict = _trainer.SetItems;
+                                                else if (choice == 6) collectionDict = _prizes.SetItemsFound;
+                                                else throw new Exception("Invalid place to retrieve evo item from!"); // ????
+                                                                                                                      // Now list them and choose
+                                                List<SetItem> itemList = [.. collectionDict.Keys];
+                                                Console.WriteLine($"Which item to use?");
+                                                for (int i = 0; i < itemList.Count; i++) Console.Write($"{i} {itemList[i].Name}, ");
+                                                int idx = int.Parse(Console.ReadLine());
+                                                GeneralUtilities.AddtemToCountDictionary(collectionDict, itemList[idx], -1, true);
+                                                itemConsumedString = $"the {itemList[idx].Name} located in the bag";
+                                            }
+                                            else
+                                            {
+                                                Dictionary<Item, int> collectionDict;
+                                                itemConsumedString = $"in the bag";
+                                                if (choice == 4) collectionDict = _trainer.ModItems;
+                                                else if (choice == 5) collectionDict = _trainer.BattleItems;
+                                                else if (choice == 7) collectionDict = _prizes.ModItemsFound;
+                                                else if (choice == 8) collectionDict = _prizes.BattleItemsFound;
+                                                else throw new Exception("Invalid place to retrieve evo item from!");
+                                                // Now list them and choose
+                                                List<Item> itemList = [.. collectionDict.Keys];
+                                                Console.WriteLine($"Which item to use?");
+                                                for (int i = 0; i < itemList.Count; i++) Console.Write($"{i} {itemList[i].Name}, ");
+                                                int idx = int.Parse(Console.ReadLine());
+                                                GeneralUtilities.AddtemToCountDictionary(collectionDict, itemList[idx], -1, true);
+                                                itemConsumedString = $"the {itemList[idx].Name} located in the bag";
+                                            }
+                                            // Notify all
+                                            string message = mon.ToString();
+                                            message += $" has evolved into {chosenMon} by using " + itemConsumedString + "!";
+                                            GenericMessageCommand(message);
+                                            // Finally, actually do the deed
+                                            mon.Species = chosenMon.Name;
+                                            if (!chosenMon.Abilities.Contains(mon.ChosenAbility)) mon.ChosenAbility = GeneralUtilities.GetRandomPick(chosenMon.Abilities); // Get a random ability if now invalid
+                                            UpdateTrainerDataInfo(); // Updates numbers in chart
+                                        }
+                                        error = false;
                                     }
-                                    int choice = int.Parse(Console.ReadLine());
-                                    Pokemon chosenMon;
-                                    if (choice == 0) // Random evo
+                                    catch
                                     {
-                                        chosenMon = possibleEvos[GeneralUtilities.GetRandomNumber(possibleEvos.Count)];
+                                        error = true;
                                     }
-                                    else
-                                    {
-                                        chosenMon = possibleEvos[choice - 1];
-                                    }
-                                    // Check consumed item
-                                    Console.WriteLine("Which index of place to remove item?");
-                                    choice = int.Parse(Console.ReadLine());
-                                    string itemConsumedString;
-                                    if (choice == 0)
-                                    {
-                                        itemConsumedString = $"its equipped {mon.SetItem.Name}";
-                                        mon.SetItem = null;
-                                    }
-                                    else if (choice == 1)
-                                    {
-                                        itemConsumedString = $"its equipped {mon.ModItem.Name}";
-                                        mon.ModItem = null;
-                                    }
-                                    else if (choice == 2)
-                                    {
-                                        itemConsumedString = $"its equipped {mon.BattleItem.Name}";
-                                        mon.BattleItem = null;
-                                    }
-                                    else if (choice == 3 || choice == 6) // Set items...
-                                    {
-                                        Dictionary<SetItem, int> collectionDict;
-                                        if (choice == 3) collectionDict = _trainer.SetItems;
-                                        else if (choice == 6) collectionDict = _prizes.SetItemsFound;
-                                        else throw new Exception("Invalid place to retrieve evo item from!"); // ????
-                                        // Now list them and choose
-                                        List<SetItem> itemList = [.. collectionDict.Keys];
-                                        Console.WriteLine($"Which item to use?");
-                                        for (int i = 0; i < itemList.Count; i++) Console.Write($"{i} {itemList[i].Name}, ");
-                                        int idx = int.Parse(Console.ReadLine());
-                                        GeneralUtilities.AddtemToCountDictionary(collectionDict, itemList[idx], -1, true);
-                                        itemConsumedString = $"the {itemList[idx].Name} located in the bag";
-                                    }
-                                    else
-                                    {
-                                        Dictionary<Item, int> collectionDict;
-                                        itemConsumedString = $"in the bag";
-                                        if (choice == 4) collectionDict = _trainer.ModItems;
-                                        else if (choice == 5) collectionDict = _trainer.BattleItems;
-                                        else if (choice == 7) collectionDict = _prizes.ModItemsFound;
-                                        else if (choice == 8) collectionDict = _prizes.BattleItemsFound;
-                                        else throw new Exception("Invalid place to retrieve evo item from!");
-                                        // Now list them and choose
-                                        List<Item> itemList = [.. collectionDict.Keys];
-                                        Console.WriteLine($"Which item to use?");
-                                        for (int i = 0; i < itemList.Count; i++) Console.Write($"{i} {itemList[i].Name}, ");
-                                        int idx = int.Parse(Console.ReadLine());
-                                        GeneralUtilities.AddtemToCountDictionary(collectionDict, itemList[idx], -1, true);
-                                        itemConsumedString = $"the {itemList[idx].Name} located in the bag";
-                                    }
-                                    // Notify all
-                                    string message = mon.ToString();
-                                    message += $" has evolved into {chosenMon} by using " + itemConsumedString + "!";
-                                    GenericMessageCommand(message);
-                                    // Finally, actually do the deed
-                                    mon.Species = chosenMon.Name;
-                                    if (!chosenMon.Abilities.Contains(mon.ChosenAbility)) mon.ChosenAbility = GeneralUtilities.GetRandomPick(chosenMon.Abilities); // Get a random ability if now invalid
-                                    UpdateTrainerDataInfo(); // Updates numbers in chart
-                                }
+                                } while (error);
                             }
                         }
                         GenericMessageCommand(roomEvent.PostEventString);
@@ -772,20 +784,6 @@ namespace IndymonBackendProgram
                         UpdateTrainerDataInfo(); // Updates numbers in chart
                         message = roomEvent.PostEventString.Replace("$1", mon.GetInformalName());
                         GenericMessageCommand(message);
-                    }
-                    break;
-                case RoomEventType.PP_HEAL:
-                    {
-                        GenericMessageCommand(roomEvent.PreEventString);
-                        foreach (TrainerPokemon mon in _trainer.BattleTeam)
-                        {
-                            for (int i = 0; i < mon.MovePp.Count; i++) // Restores 3 pp to each move
-                            {
-                                mon.MovePp[i] += 3;
-                            }
-                        }
-                        UpdateTrainerDataInfo(); // Updates numbers in chart
-                        GenericMessageCommand(roomEvent.PostEventString);
                     }
                     break;
                 case RoomEventType.STATUS_TRAP:
@@ -1038,9 +1036,10 @@ namespace IndymonBackendProgram
                                 TeraType = mon.TeraType,
                                 HealthPercentage = mon.HealthPercentage,
                                 NonVolatileStatus = mon.NonVolatileStatus,
-                                MovePp = mon.MovePp,
-                                Logic = mon.Logic
+                                Logic = mon.Logic,
+                                Level = GeneralUtilities.GetRandomNumber(70, 80 + 1) // Random low level
                             };
+                            copiedTeam.BattleTeam.Add(copiedMon);
                         }
                         GenericMessageCommand(roomEvent.PreEventString);
                         PreFightTrainerMods();
@@ -1232,8 +1231,9 @@ namespace IndymonBackendProgram
         /// </summary>
         void SaveExplorationOutcome()
         {
-            string explFile = $"{_trainer.ToString().ToUpper()}_EXPLORATION.expl";
+            string explFile = $"{_trainer.ToString().ToUpper().Replace("?","")}_EXPLORATION.expl";
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Clear();
+            Console.Write("Fate flavour text: ");
             string fateFlavourText = Console.ReadLine();
             if (fateFlavourText != "")
             {

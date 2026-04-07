@@ -24,7 +24,6 @@ namespace GameData
         PARADOX, // Paradox Team member gives you a TR
         SWARM, // Fight 6 lvl 60-75 from first floor
         BIG_HEAL, // One specific mon heals a lot
-        PP_HEAL, // 3PP heal
         UNOWN, // Unown event, 6 random unown with wacky moves
         FIRELORD, // Fire legendary event, summon a legendary of lower lvl
         GIANT_POKEMON, // Underwater event with a mon from same floor but lvl 110-125

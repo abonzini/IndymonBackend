@@ -60,14 +60,6 @@
       "EventBg": "Blue"
     },
 	{
-      "EventType": "PP_HEAL",
-      "PreEventString": "A nearby set of hydrothermal vents give you and your pokemon a warm place to recover.",
-      "PostEventString": "Your Pokemon moves recover some PP.",
-      "EventLook": "≈",
-      "EventFg": "DarkRed",
-      "EventBg": "Blue"
-    },
-	{
       "EventType": "SWARM",
       "PreEventString": "A small school of Pokemon are swimming by. They don't see you in time, and crash against your party.",
       "PostEventString": "The school is defeated and the Pokemon swim away, scared.",
