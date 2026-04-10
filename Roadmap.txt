@@ -33,6 +33,5 @@ Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone
 ---
 POSSIBLE THINGS TO LOOK FOR:
 - Debug shiny stone (when it happens)
-- Add pokeballs to dbase (when they happen), slp ball needs to add status + rest flag. level ball adjusts level.
 - Debug level multiplier (when it happens)
 - Whimsy Island with esscence mechanics and Moon/Shiny stones
