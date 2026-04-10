@@ -117,6 +117,7 @@ namespace AutomatedTeamBuilder
                 MonBuildState state = MonBuildState.CHOOSING_ABILITY; // Begin with ability
                 while (state != MonBuildState.DONE)
                 {
+                    if (!fixedAbility && state == MonBuildState.CHOOSING_ABILITY) mon.ChosenAbility = null; // Ability needs to be re-chosen, calculate ctx without it
                     PokemonBuildContext monCtx = ObtainPokemonSetContext(mon, buildCtx); // Obtain current Pokemon mods and score and such
                     // Monctx contains all the ongoing constraints, need only the ones which haven't been fulfilled yet
                     List<Constraint> ongoingConstraints = new List<Constraint>();
@@ -136,7 +137,6 @@ namespace AutomatedTeamBuilder
                             // Then, define the mon's ability (unless already defined)
                             if (!fixedAbility) // Mon needs an ability
                             {
-                                mon.ChosenAbility = null; // After this stage, there'll be an ability chosen. remove "current" as it'll be recalculated
                                 List<Ability> possibleAbilities = [.. monData.Abilities.Where(a => !a.Flags.Contains(EffectFlag.BANNED))]; // All (non banned) possible abilities
                                 List<double> abilityScores = [.. Enumerable.Repeat<double>(1, possibleAbilities.Count)]; // All of their values is init to 1
                                 if (trainer.AutoSetItem && mon.SetItem != null) // If I can equip other set items AND set item provides useful abilities, I'll add them too. Done on the second pass

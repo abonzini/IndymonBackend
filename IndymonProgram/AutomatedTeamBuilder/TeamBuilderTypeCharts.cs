@@ -21,7 +21,7 @@ namespace AutomatedTeamBuilder
             {
                 static double damageFromType(PokemonType attackingType, PokemonType defendingType, bool ignoresImmunity, bool seAgainstWater)
                 {
-                    if (attackingType == PokemonType.NONE && attackingType == PokemonType.STELLAR) return 1; // Typeless moves just hit
+                    if (attackingType == PokemonType.NONE || attackingType == PokemonType.STELLAR) return 1; // Typeless moves just hit
                     if (seAgainstWater && defendingType == PokemonType.WATER) return 2; // Skip the whole damage calc idc
                     double result = MechanicsDataContainers.GlobalMechanicsData.DefensiveTypeChart[defendingType][attackingType];
                     if (ignoresImmunity && result == 0) result = 1;
