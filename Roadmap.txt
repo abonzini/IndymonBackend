@@ -14,11 +14,11 @@ Mechanics to implement:
 	Premier: wwwrr
 	Luxury: kkkkwwwyyr
 	
-	Repeat: rybw
+	Repeat: rybwk
 	Heavy: bbbk
-	Strange: ggbbyw
-	Timer: bwr
-	Dream: rryyb
+	Strange: ggbbyww
+	Timer: bwrk
+	Dream: rryybk
 	Level: kkwry
 - Sandwich (herba mystica -> sandwich -> picnic)
  -> Herba and sandwiches are in place just need to add text and explanation
