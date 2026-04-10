@@ -185,7 +185,7 @@ namespace AutomatedTeamBuilder
                         break;
                     case ElementType.EFFECT_FLAGS:
                         // This is horrible but works because if an item doesnt have moves it should have ability
-                        checkPassed |= item.AddedMoves.Any(m => m.Flags.Contains(effectFlagToCheck)) || item.AddedAbility.Flags.Contains(effectFlagToCheck);
+                        checkPassed |= item.AddedMoves.Any(m => m.Flags.Contains(effectFlagToCheck)) || (item.AddedAbility != null && item.AddedAbility.Flags.Contains(effectFlagToCheck));
                         break;
                     case ElementType.ORIGINAL_TYPE_OF_MOVE:
                     case ElementType.DAMAGING_MOVE_OF_TYPE:

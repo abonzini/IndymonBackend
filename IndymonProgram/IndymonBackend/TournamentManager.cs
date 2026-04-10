@@ -49,7 +49,36 @@ namespace IndymonBackendProgram
             OngoingTournament.NMons = int.Parse(Console.ReadLine());
             OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
             // Finally, player selection, pre-filter trainers whether they can participate in this event
-            List<Trainer> trainers = [.. GameDataContainers.GlobalGameData.TrainerData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
+            List<Trainer> trainers = [];
+            foreach (Trainer trainer in GameDataContainers.GlobalGameData.TrainerData.Values)
+            {
+                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(trainer, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false);
+                StringBuilder messageBuilder = new StringBuilder();
+                messageBuilder.AppendLine($"<@{trainer.DiscordNumber}>:");
+                foreach (PossibleTeamBuild build in possibleBuilds)
+                {
+                    messageBuilder.AppendLine("Option:");
+                    messageBuilder.AppendLine($"- Trainer could bring these mons: {string.Join(", ", build.TrainerOwnPokemon.Select(m => m.Species))}");
+                    foreach (KeyValuePair<SetItem, List<TrainerPokemon>> kvp in build.TrainerOwnPokemonUsingSetItem)
+                    {
+                        messageBuilder.AppendLine($"- Trainer could also equip {kvp.Key.Name} to these mons: {string.Join(", ", kvp.Value.Select(m => m.Species))}");
+                    }
+                    foreach (KeyValuePair<Trainer, List<TrainerPokemon>> kvp in build.FavourPokemon)
+                    {
+                        messageBuilder.AppendLine($"- Trainer could also use favour from {kvp.Key.Name} to borrow mons: {string.Join(", ", kvp.Value.Select(m => m.Species))}");
+                    }
+                    Console.WriteLine(messageBuilder.ToString());
+                }
+                if (possibleBuilds.Count > 0)
+                {
+                    trainers.Add(trainer);
+                }
+                else
+                {
+                    Console.WriteLine($"<@{trainer.DiscordNumber}>:\n- Trainer doesn't have a sufficient combination of Pokemon, Set Items and Favours for this requirement. May be able to do favour gacha, capture something, or do some other trick if wants to participate.\n");
+                }
+            }
+            Console.WriteLine("If any trainer needs more info (e.g. which moves are valid for each mon, or if there's any way to complete the team (catching something, doing a favour gacha), let me know and we'll find whether there's some way of getting you in this event.");
             List<Trainer> npcs = [.. GameDataContainers.GlobalGameData.NpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
             List<Trainer> namedNpcs = [.. GameDataContainers.GlobalGameData.FamousNpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
             List<Trainer> currentChosenTrainers = null;
