@@ -138,13 +138,14 @@ namespace IndymonBackendProgram
                         {
                             ExplorationPrizes newPrizes = new ExplorationPrizes();
                             Console.WriteLine($"Which trainer? [{string.Join(", ", [.. GameDataContainers.GlobalGameData.TrainerData.Values.Where(t => t.Favours.Count > 0).Select(t => t.Name)])}");
-                            Trainer trainer = GameDataContainers.GlobalGameData.TrainerData[Console.ReadLine()];
+                            string option = Console.ReadLine();
+                            Trainer trainer = GameDataContainers.GlobalGameData.TrainerData[option];
                             Console.WriteLine($"And which favour? [{string.Join(", ", [.. trainer.Favours.Keys.Select(t => t.Name)])}]");
-                            Trainer favourTrainer = trainer.Favours.Where(t => t.Key.Name == Console.ReadLine()).First().Key;
+                            option = Console.ReadLine();
+                            Trainer favourTrainer = trainer.Favours.Where(t => t.Key.Name == option).First().Key;
                             Console.WriteLine($"Which dungeon? {string.Join(", ", [.. GameDataContainers.GlobalGameData.Dungeons.Keys])}");
-                            string dungeon = Console.ReadLine();
-                            Dungeon theDungeon = GameDataContainers.GlobalGameData.Dungeons[dungeon];
-                            string choice = Console.ReadLine();
+                            option = Console.ReadLine();
+                            Dungeon theDungeon = GameDataContainers.GlobalGameData.Dungeons[option];
                             int nCommons = 0, nRares = 0;
                             List<int> rewardOptions = []; // 0,1,2 depending on what the dungeon can give you, disk plate or IMP
                             if (theDungeon.Events.Any(e => e.EventType == RoomEventType.PARADOX)) rewardOptions.Add(0);

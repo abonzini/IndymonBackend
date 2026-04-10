@@ -45,9 +45,7 @@ namespace MechanicsData
         SELF_DEBUFF, // Debuff user (contrary, sure crit)
         SETUP_STATUS, // Collection of all the status setup moves
         DEBUFF_STATUS, // Status moves that solely lower an enemy's stats
-        OFF_UTILITY, // Moves with an off utility only
-        DEF_UTILITY, // Moves with a def utility only
-        SPEED_UTILITY, // Moves with a speed utility only
+        NEED_SYNERGY, // Elements with score > 1 implying they're synergic with others (wouldn't work well w damaging moves), need to be useful to be picked 
         DAMAGE_PROP_WEIGTH_DIFFERENCE, // Damage increases with weight difference
         DAMAGE_PROP_OPP_WEIGTH, // Damage increases solely w opp weight
         DAMAGE_PROP_SPEED_DIFFERENCE, // Damage proportional with speed (e.g. electro ball)

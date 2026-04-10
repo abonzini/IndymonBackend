@@ -736,38 +736,18 @@ namespace AutomatedTeamBuilder
                 double newSurvivability = hpAfterHit / newDamageInHp;
                 newSurvivability += 1; // Return the prev hit to it
                 double defImprovement = Math.Ceiling(newSurvivability) / Math.Ceiling(monCtx.Survivability); // Calculated surv improvement
-                // If needs an improvement, will be accepted as long as some of the improvements succeeds
-                int nImprovChecks = 0;
-                int nImproveFails = 0;
-                if (allMoveFlags.Contains(EffectFlag.OFF_UTILITY))
-                {
-                    nImprovChecks++;
-                    if (dmgImprovement < 1.1) nImproveFails++;
-                }
-                if (allMoveFlags.Contains(EffectFlag.DEF_UTILITY))
-                {
-                    nImprovChecks++;
-                    if (defImprovement < 1.1) nImproveFails++;
-                }
-                if (allMoveFlags.Contains(EffectFlag.SPEED_UTILITY))
-                {
-                    nImprovChecks++;
-                    if (speedImprovement < 1.1) nImproveFails++;
-                }
-                if (nImprovChecks > 0 && nImproveFails == nImprovChecks)
-                {
-                    score *= 0; // If all checks failed, move not good
-                }
-                else
-                {
-                    score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
-                }
+                score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
                 if (move.Flags.Contains(EffectFlag.HEAL)) // Healing status moves are weighted on whether the mon can actually make decent use of this
                 {
                     // This is calculated from the prev context, assuming the move not used yet
                     score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
                 }
                 mon.ChosenMoveset.RemoveAt(mon.ChosenMoveset.Count - 1); // Remove move ofc
+                // If need to cause synergies, at this point ensure the score is >1 (some synergy observed)
+                if (allMoveFlags.Contains(EffectFlag.NEED_SYNERGY))
+                {
+                    if (score <= 1) score = 0;
+                }
                 // And finally, if score non-0 add also the additive ones
                 if (score > 0)
                 {

@@ -184,8 +184,13 @@ namespace MechanicsDataContainer
                 if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
                 if (thePokemon.Name.ToLower().Contains("unown")) // Unown is a special boy, can do anything
                 {
-                    thePokemon.Abilities.Clear();
-                    thePokemon.Abilities = [.. Abilities.Values];
+                    char letter = (thePokemon.Name == "Unown") ? 'a' : thePokemon.Name.ToLower().Last();
+                    List<Ability> unownAbilities = [.. Abilities.Values.Where(a => a.Name.ToLower().StartsWith(letter))]; // All abilities with letter
+                    if (unownAbilities.Count > 0)
+                    {
+                        thePokemon.Abilities.Clear();
+                        thePokemon.Abilities = unownAbilities;
+                    }
                 }
                 // Prevos
                 string preevo = fields[PREEVO_FIELD].Trim();
@@ -209,10 +214,18 @@ namespace MechanicsDataContainer
                     if (theMove == "") break; // Finished this mon's moveset
                     Move move = Moves[theMove];
                     thePokemon.Moveset.Add(move);
-                    if (theMove == "Sketch" || thePokemon.Name.ToLower().Contains("unown"))
+                    if (theMove == "Sketch")
                     {
                         thePokemon.Moveset.Clear(); // Remove whatever was there before, i can learn all anyway
-                        thePokemon.Moveset.AddRange([.. Moves.Values]); // Just add all (unown will filter later)
+                        if (thePokemon.Name.ToLower().Contains("unown"))
+                        {
+                            char letter = (thePokemon.Name == "Unown") ? 'a' : thePokemon.Name.ToLower().Last();
+                            thePokemon.Moveset.AddRange([.. Moves.Values.Where(m => m.Name.ToLower().StartsWith(letter))]); // Add moves filtering by unown letter
+                        }
+                        else
+                        {
+                            thePokemon.Moveset.AddRange([.. Moves.Values]); // Just add all (unown will filter later)
+                        }
                         break; // Stop the rest
                     }
                 }

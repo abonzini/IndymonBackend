@@ -325,6 +325,7 @@ namespace IndymonBackendProgram
         const int MIN_MESSAGE_PAUSE = 2000; // Show text for this amount of time min
         const int MESSAGE_PAUSE_PER_WORD = 300; // 0.3s per word looks reasonable
         const int DRAW_DELAY = 1000; // Time to wait until showing next section
+        const int MAX_TRAINER_MONS = 6; // How many mons trainer can have max (at beginning of expl)
         #region EXECUTION
         /// <summary>
         /// Begins an exploration, starts a simulation
@@ -339,9 +340,8 @@ namespace IndymonBackendProgram
             ExplorationSteps.Clear();
             _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
             _trainer = IndymonUtilities.GetTrainerByName(TrainerAndSeed.Item1); // Find the trainer data
-            const int MAX_N_MONS = 6;
-            List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(_trainer, MAX_N_MONS, [new Constraint()], true); // Since there's no constraint, will get a build consisting of all my mons (max 6)
-            TeamBuilder.AssembleTrainersBattleTeam(_trainer, MAX_N_MONS, possibleBuilds, true, TrainerAndSeed.Item2); // Chooses one of the sets, prepares the mons
+            List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(_trainer, MAX_TRAINER_MONS, [new Constraint()], true); // Since there's no constraint, will get a build consisting of all my mons (max 6)
+            TeamBuilder.AssembleTrainersBattleTeam(_trainer, MAX_TRAINER_MONS, possibleBuilds, true, TrainerAndSeed.Item2); // Chooses one of the sets, prepares the mons
             // Now, make the trainer choose it's team sets!
             HashSet<Pokemon> enemyMons = new HashSet<Pokemon>();
             enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[0].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]); // Add all mons from all floors
@@ -1101,7 +1101,7 @@ namespace IndymonBackendProgram
                         Trainer randomNpc = GeneralUtilities.GetRandomKvp(GameDataContainers.GlobalGameData.NpcData).Value; // Get random npc
                         // Define trainer in the same way we defined our own for exploration
                         List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(randomNpc, _trainer.BattleTeam.Count, [new Constraint()], true); // Since there's no constraint, will get a build consisting of all my mons, matched to trainer's
-                        TeamBuilder.AssembleTrainersBattleTeam(randomNpc, _trainer.BattleTeam.Count, possibleBuilds, true); // Chooses one of the sets, prepares the mons, seed 0
+                        TeamBuilder.AssembleTrainersBattleTeam(randomNpc, Math.Min(MAX_TRAINER_MONS, _trainer.BattleTeam.Count), possibleBuilds, true); // Chooses one of the sets, prepares the mons, seed 0
                         // Now, make the trainer choose it's team sets!
                         HashSet<Pokemon> enemyMons = new HashSet<Pokemon>();
                         enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[0].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]); // Add all mons from all floors
@@ -1231,7 +1231,7 @@ namespace IndymonBackendProgram
         /// </summary>
         void SaveExplorationOutcome()
         {
-            string explFile = $"{_trainer.ToString().ToUpper().Replace("?","")}_EXPLORATION.expl";
+            string explFile = $"{_trainer.ToString().ToUpper().Replace("?", "")}_EXPLORATION.expl";
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Clear();
             Console.Write("Fate flavour text: ");
             string fateFlavourText = Console.ReadLine();

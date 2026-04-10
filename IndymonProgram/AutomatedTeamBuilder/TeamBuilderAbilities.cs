@@ -15,8 +15,9 @@ namespace AutomatedTeamBuilder
         /// <param name="buildCtx">More context</param>
         /// <param name="isFirstMon">Whether the mon is the first one</param>
         /// <param name="isFirstMon">Whether the mon is the last one</param>
+        /// <param name="checkSynergy">Whether to check synergy too or not (for second round)</param>
         /// <returns></returns>
-        static double GetAbilityWeight(Ability ability, TrainerPokemon theMon, PokemonBuildContext monCtx, TeamBuildContext buildCtx, bool isFirstMon, bool isLastMon)
+        static double GetAbilityWeight(Ability ability, TrainerPokemon theMon, PokemonBuildContext monCtx, TeamBuildContext buildCtx, bool isFirstMon, bool isLastMon, bool checkSynergy)
         {
             const double MIN_ABILITY_SCORE = 0.0001; // Abilities can't have a score of 0 because there's too few and in some cases a single one, so I make the score very small but not 0 so it can technically be chosen
             Ability oldAbility = theMon.ChosenAbility; // Save this, because it needs to be put back
@@ -68,31 +69,16 @@ namespace AutomatedTeamBuilder
             double dmgImprovement = newCtx.DamageScore / monCtx.DamageScore; // Add the corresponding utilities
             double defImprovement = Math.Ceiling(newCtx.Survivability) / Math.Ceiling(monCtx.Survivability);
             double speedImprovement = newCtx.SpeedScore / monCtx.SpeedScore;
-            // If needs an improvement, will be accepted as long as some of the improvements succeeds
-            int nImprovChecks = 0;
-            int nImproveFails = 0;
-            if (ability.Flags.Contains(EffectFlag.OFF_UTILITY))
-            {
-                nImprovChecks++;
-                if (dmgImprovement < 1.1) nImproveFails++;
-            }
-            if (ability.Flags.Contains(EffectFlag.DEF_UTILITY))
-            {
-                nImprovChecks++;
-                if (defImprovement < 1.1) nImproveFails++;
-            }
-            if (ability.Flags.Contains(EffectFlag.SPEED_UTILITY))
-            {
-                nImprovChecks++;
-                if (speedImprovement < 1.1) nImproveFails++;
-            }
-            if (nImprovChecks > 0 && nImproveFails == nImprovChecks) score = 0; // If all checks failed, ability not good
             score *= dmgImprovement * defImprovement * speedImprovement; // Then multiply all utilities gain, give or remove utility from final set!
             if (ability.Flags.Contains(EffectFlag.HEAL)) // Healing abilities (or stuff that works on bulky mon) that are healer are weighted on whether the mon can actually make decent use of this
             {
                 score *= newCtx.Survivability / 3; // If you can take 3 hits or more you're officially a bulky mon (because most recovery is 50% based)
             }
             theMon.ChosenAbility = oldAbility; // Revert this ofc
+            if (checkSynergy && ability.Flags.Contains(EffectFlag.NEED_SYNERGY))
+            {
+                if (score <= 1) score = 0; // Synergic abilities need to ensure score >1 to ensure they're actually helping anything
+            }
             // Finally, we got a score, an ability needs to eb chosen so it'll always have a value, even if 0
             if (score <= MIN_ABILITY_SCORE)
             {

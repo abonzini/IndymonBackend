@@ -326,7 +326,7 @@ namespace AutomatedTeamBuilder
                 // Now, check how the damage I can output works, assume I can deal between 0-X HP of damage (more is "overkill")
                 const double DAMAGE_OVERKILL_THRESHOLD = 2;
                 result.DamageScore = avgMoveDamage / (DAMAGE_OVERKILL_THRESHOLD * oppStats[0]);
-                result.DamageScore = Math.Clamp(result.DamageScore, 0, 1); // The score is clamped to 1 to avoid giving lots of points to overkill setup/items
+                result.DamageScore = Math.Clamp(result.DamageScore, 0.1, 1); // The score is clamped to 1 to avoid giving lots of points to overkill setup/items. In the bottom, it's clamped to 0.1 to avoid the unnecessary boosting of low damage mons
             }
             // Defensive value calculation
             if (teamCtx.smartTeamBuild) // Non-smart building won't care about this

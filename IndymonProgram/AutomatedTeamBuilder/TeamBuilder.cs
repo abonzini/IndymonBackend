@@ -111,6 +111,8 @@ namespace AutomatedTeamBuilder
                     mon.ChosenAbility = mon.SetItem.AddedAbility;
                     mon.ChosenMoveset = [.. mon.SetItem.AddedMoves];
                 }
+                bool fixedAbility = mon.ChosenAbility != null; // Determine whether mon has a hardcoded ability that can't be changed
+                bool abilityFirstPass = true; // Ability is checked twice, at beginning and end
                 // Now that the initial set is assembled, evaluate with a state machine
                 MonBuildState state = MonBuildState.CHOOSING_ABILITY; // Begin with ability
                 while (state != MonBuildState.DONE)
@@ -132,17 +134,12 @@ namespace AutomatedTeamBuilder
                     {
                         case MonBuildState.CHOOSING_ABILITY:
                             // Then, define the mon's ability (unless already defined)
-                            if (mon.ChosenAbility == null) // Mon needs an ability
+                            if (!fixedAbility) // Mon needs an ability
                             {
+                                mon.ChosenAbility = null; // After this stage, there'll be an ability chosen. remove "current" as it'll be recalculated
                                 List<Ability> possibleAbilities = [.. monData.Abilities.Where(a => !a.Flags.Contains(EffectFlag.BANNED))]; // All (non banned) possible abilities
-                                if (mon.Species.ToLower().Contains("unown")) // And then again, weird mechanic. Unown will actually be able to use all abilities starting with the letter
-                                {
-                                    char letter = (mon.Species == "Unown") ? 'a' : mon.Species.ToLower().Last(); // Basic unown is A
-                                    possibleAbilities = [.. possibleAbilities.Where(a => a.Name.ToLower().StartsWith(letter))]; // Get all unown abilities
-                                    if (possibleAbilities.Count == 0) possibleAbilities = [MechanicsDataContainers.GlobalMechanicsData.Abilities["Levitate"]]; // If no abilities (X/Y), then use standard (levitate)
-                                }
                                 List<double> abilityScores = [.. Enumerable.Repeat<double>(1, possibleAbilities.Count)]; // All of their values is init to 1
-                                if (trainer.AutoSetItem && mon.SetItem != null) // If I can equip other set items AND set item provides useful abilities, I'll add them too
+                                if (trainer.AutoSetItem && mon.SetItem != null) // If I can equip other set items AND set item provides useful abilities, I'll add them too. Done on the second pass
                                 {
                                     int setItemCount = trainer.SetItems.Values.Sum(); // How many items does the trainer have total?
                                     double initialItemScore = WEIGHT_PER_ITEM * setItemCount;
@@ -187,7 +184,7 @@ namespace AutomatedTeamBuilder
                                     if (buildCtx.smartTeamBuild) // If smart, abilities are weighted according to how useful they are
                                     {
                                         Ability nextAbility = acceptableAbilities[i];
-                                        double abilityScore = GetAbilityWeight(nextAbility, mon, monCtx, buildCtx, monIndex == 0, monIndex == (trainer.BattleTeam.Count - 1));
+                                        double abilityScore = GetAbilityWeight(nextAbility, mon, monCtx, buildCtx, monIndex == 0, monIndex == (trainer.BattleTeam.Count - 1), !abilityFirstPass); // First pass doesn't check synergy (because there'll not be a complete set yet)
                                         acceptableAbilitiesScores[i] *= abilityScore;
                                     } // Otherwise score is kept as is (possibly 1) for "dumb" build
                                 } // Gottem scores
@@ -200,23 +197,16 @@ namespace AutomatedTeamBuilder
                                     GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, mon.SetItem, -1, true); // Remove 1 charge of set item from trainer
                                     // If set item just equipped, also means the mon has been added moves
                                     mon.ChosenMoveset = [.. mon.ChosenMoveset.Union(mon.SetItem.AddedMoves)];
+                                    fixedAbility = true; // If this happens, ability now fixed and can't be changed (can't return the set item!)
                                 }
                             }
-                            if (mon.ChosenAbility != null) // After this step, this should be true always and move on!
-                            {
-                                state = MonBuildState.CHOOSING_MOVES;
-                            }
+                            state = abilityFirstPass ? MonBuildState.CHOOSING_MOVES : MonBuildState.DONE; // Second pass ends the state machine
                             break;
                         case MonBuildState.CHOOSING_MOVES:
                             const int NUMBER_OF_MOVES_PER_MON = 4; // 4 moves, classic unless like, added via crazy move disk
                             if (mon.ChosenMoveset.Count < NUMBER_OF_MOVES_PER_MON) // Time to add a next move (or empty)
                             {
                                 List<Move> possibleMoves = [.. monData.Moveset.Where(m => !m.Flags.Contains(EffectFlag.BANNED))]; // All possible (legal) moves
-                                if (mon.Species.ToLower().Contains("unown")) // And then again, weird mechanic because I can only allow the moves that start with the unown letter
-                                {
-                                    char letter = (mon.Species == "Unown") ? 'a' : mon.Species.ToLower().Last(); // Basic unown is A
-                                    possibleMoves = [.. possibleMoves.Where(m => m.Name.ToLower().StartsWith(letter))]; // Additional move filter
-                                }
                                 List<double> moveScores = [.. Enumerable.Repeat<double>(1, possibleMoves.Count)]; // All of their values is init to 1
                                 // Continue, check if add set item?
                                 if (trainer.AutoSetItem && mon.SetItem == null) // If I can equip other set items AND set item provides useful moves, I'll add them too
@@ -457,7 +447,8 @@ namespace AutomatedTeamBuilder
                                     }
                                 }
                             }
-                            state = MonBuildState.DONE; // Regardless I'm done
+                            state = MonBuildState.CHOOSING_ABILITY; // After whole set is built, go back and check the ability
+                            abilityFirstPass = false; // Second pass of ability
                             break;
                         default:
                             throw new NotImplementedException("State machine broke");
