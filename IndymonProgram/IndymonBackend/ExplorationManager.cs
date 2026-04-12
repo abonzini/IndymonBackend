@@ -546,7 +546,7 @@ namespace IndymonBackendProgram
                             item = GeneralUtilities.GetRandomPick(_dungeonData.RareItems).Name; // Pick new item from rare pool until it's an equippable one
                             itemType = IndymonUtilities.GetRewardType(item);
                         }
-                        Trainer bossTrainer = GenerateEnemyTrainer("Boss", [enemySpecies], [item], 100, 100, true);
+                        Trainer bossTrainer = GenerateEnemyTrainer("BossEncounter", [enemySpecies], [item], 100, 100, true);
                         DefineEnemySet(bossTrainer, 24, true); // Defines the enemy set (smart for a final boss challenge!)
                         string bossString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
@@ -953,6 +953,8 @@ namespace IndymonBackendProgram
                         ItemReward itemPrize = GeneralUtilities.GetRandomPick(_dungeonData.RareItems); // Get a random rare item
                         List<string> validMons = ["Moltres", "Entei", "Ho-Oh", "Groudon", "Heatran", "Chi-Yu", "Koraidon", "Volcaion", "Blacephalon"];
                         string pokemonSpecies = GeneralUtilities.GetRandomPick(validMons);
+                        string message = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
+                        GenericMessageCommand(message);
                         Trainer bossTrainer = GenerateEnemyTrainer("Firelord", [pokemonSpecies], [], 50, 65, true);
                         DefineEnemySet(bossTrainer, 24, true); // Smart set
                         Console.Write("Encounter resolution: ");
@@ -969,8 +971,8 @@ namespace IndymonBackendProgram
                             int rewardQuantity = GeneralUtilities.GetRandomNumber(itemPrize.Min, itemPrize.Max + 1);
                             rewardQuantity = (int)((rewardQuantity * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                             if (rewardQuantity < 1) rewardQuantity = 1;
-                            string postMessage = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
-                            GenericMessageCommand(postMessage);
+                            message = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
+                            GenericMessageCommand(message);
                             _prizes.AddReward(itemPrize.Name, rewardQuantity);
                             _prizes.AddMons(bossTrainer.BattleTeam, 4); // Add the mon (masterball tho)
                             _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, GenericMessageCommand);
@@ -986,8 +988,12 @@ namespace IndymonBackendProgram
                         ItemReward itemPrize = GeneralUtilities.GetRandomPick(_dungeonData.RareItems); // Get a random rare item
                         List<string> validMons = [.. _dungeonData.PokemonEachFloor[floor]];
                         string pokemonSpecies = GeneralUtilities.GetRandomPick(validMons);
+                        string message = roomEvent.PreEventString.Replace("$1", pokemonSpecies);
+                        GenericMessageCommand(message);
                         Trainer giantMon = GenerateEnemyTrainer("MutantPokemon", [pokemonSpecies], [], 110, 126, true);
                         DefineEnemySet(giantMon, 24, false); // Not smart
+                        giantMon.BattleTeam[0].HealthPercentage = 50;
+                        giantMon.BattleTeam[0].NonVolatileStatus = "brn";
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
                         int remainingMons = ResolveEncounter(_trainer, giantMon);
@@ -1002,8 +1008,8 @@ namespace IndymonBackendProgram
                             int rewardQuantity = GeneralUtilities.GetRandomNumber(itemPrize.Min, itemPrize.Max + 1);
                             rewardQuantity = (int)((rewardQuantity * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                             if (rewardQuantity < 1) rewardQuantity = 1;
-                            string postMessage = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
-                            GenericMessageCommand(postMessage);
+                            message = roomEvent.PostEventString.Replace("$1", itemPrize.Name);
+                            GenericMessageCommand(message);
                             _prizes.AddReward(itemPrize.Name, rewardQuantity);
                             _prizes.AddMons(giantMon.BattleTeam, floor + 1);
                             _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, GenericMessageCommand);

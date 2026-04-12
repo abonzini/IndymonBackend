@@ -545,7 +545,7 @@ namespace AutomatedTeamBuilder
         {
             // Power will be prop to the count, to help make big sets reasonable
             double power = weights.Count / 10.0;
-            if (power < 1.5) power = 1.5;
+            if (power < 2) power = 2;
             // Calculate picks now
             double totalSum = 0;
             for (int i = 0; i < weights.Count; i++)

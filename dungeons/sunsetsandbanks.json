@@ -1,6 +1,7 @@
 {
   "Name": "Sunset Sandbanks",
-  "GoesDownwards": false,
+  "EventAnchorX": 1,
+  "EventAnchorY": 0,
   "Events": [
     {
       "EventType": "TREASURE",
@@ -86,7 +87,7 @@
     {
       "EventType": "PARADOX",
       "PreEventString": "A Team Paradox grunt is on a makeshift kiosk selling bootleg Move Disks.",
-      "PostEventString": "When he sees you' he starts getting nervous. ''I'm leaving soon, I swear''. He gaves you a $1 for your silence.",
+      "PostEventString": "When he sees you he starts getting nervous. ''I'm leaving soon, I swear''. He gives you a $1 for your silence.",
       "EventLook": "P",
       "EventFg": "DarkMagenta",
       "EventBg": "Blue"
@@ -128,7 +129,7 @@
       "Octillery",
       "Mantine",
       "Sealeo",
-      "Basculin-White-Striped",
+      "Basculin-White",
       "Barbaracle",
       "Clawitzer",
       "Palossand",

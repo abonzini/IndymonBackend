@@ -60,6 +60,8 @@ namespace IndymonBackendProgram
                         Console.WriteLine("Serializing jsons");
                         File.WriteAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE), JsonConvert.SerializeObject(tournamentManager, jsonSettings));
                         File.WriteAllText(Path.Combine(directoryPath, EXPLORATION_JSON_FILE), JsonConvert.SerializeObject(explorationManager, jsonSettings));
+                        Console.WriteLine("Writing tournament stats");
+                        GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
                         break;
                     case "1":
                         tournamentManager = new TournamentManager

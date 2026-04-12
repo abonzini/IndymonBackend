@@ -237,8 +237,8 @@ namespace AutomatedTeamBuilder
                 {
                     moveBp = move.Bp;
                 }
-                // Then clamp to min 60 if theres tera involved, and apply the Bp mods after (even tho it may not always be correct)
-                if (monCtx.TeraType == GetModifiedMoveType(move, monCtx) && moveBp < 60)
+                // Then clamp to min 60 if theres tera involved, and apply the Bp mods after (even tho it may not always be correct), also doesnt apply to prio or multihit moves
+                if (monCtx.TeraType == GetModifiedMoveType(move, monCtx) && moveBp < 60 && !moveFlags.Contains(EffectFlag.PRIORITY) && !moveFlags.Contains(EffectFlag.MULTIHIT_2_MOVE) && !moveFlags.Contains(EffectFlag.MULTIHIT_2_TO_5_MOVE) && !moveFlags.Contains(EffectFlag.MULTIHIT_3_MOVE) && !moveFlags.Contains(EffectFlag.MULTIHIT_ACC_BASED_10_HIT) && !moveFlags.Contains(EffectFlag.MULTIHIT_ACC_BASED_3_HIT))
                 {
                     moveBp = 60;
                 }
