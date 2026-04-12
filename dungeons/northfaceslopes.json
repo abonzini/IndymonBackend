@@ -1,0 +1,383 @@
+{
+    "Name": "Northface Slopes",
+    "EventAnchorX": -1,
+    "EventAnchorY": 0,
+    "Events": [
+        {
+            "EventType": "TREASURE",
+            "PreEventString": "You hear a crunching sound while stepping on the snow. You find a $1 buried inside.",
+            "PostEventString": "It's not broken. You pick it up and continue on your way.",
+            "EventLook": "~",
+            "EventFg": "Black",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "ALPHA",
+            "PreEventString": "You find yourself alone in the mountains with a threatening $1.",
+            "PostEventString": "The Pokemon leaves you alone, dropping $1 behind.",
+            "EventLook": "☻",
+            "EventFg": "Black",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "EVO",
+            "PreEventString": "There's a purple shining crystal buried in the snow. It's refracted glow looks quite mystical. It whispers: YE WHO SEEK AWAKENING, LET US BEGIN.",
+            "PostEventString": "It's time to move on.",
+            "EventLook": "✦",
+            "EventFg": "Magenta",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "HEAL",
+            "PreEventString": "You find a traveller's Lodge. You stop by for some hot chocolate.",
+            "PostEventString": "Your Pokemon have recovered some health.",
+            "EventLook": "🏡",
+            "EventFg": "Black",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "CURE",
+            "PreEventString": "You find a traveller's Lodge. You stop by for some hot chocolate.",
+            "PostEventString": "Your Pokemon have recovered from their status conditions.",
+            "EventLook": "🏡",
+            "EventFg": "Black",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "JOINER",
+            "PreEventString": "A $1 rolls down from the mountains and bumps into you. It's disoriented.",
+            "PostEventString": "You decided to take care of it for a while.",
+            "EventLook": "☻",
+            "EventFg": "Black",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "DAMAGE_TRAP",
+            "PreEventString": "A blizzard picks up, and a cold wind suddenly strikes you and your team.",
+            "PostEventString": "You are ok, but your Pokemon have sustained a bit of damage.",
+            "EventLook": "❄",
+            "EventFg": "Blue",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "STATUS_TRAP",
+            "PreEventString": "A blizzard picks up, and a cold wind suddenly strikes you and your team.",
+            "PostEventString": "$1 had the worst in particular. It got frostbite.",
+            "SpecialParams": "frz",
+            "EventLook": "❄",
+            "EventFg": "Blue",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "NPC_BATTLE",
+            "PreEventString": "$1 is sitting on a bench, wearing some winter clothes. 'What do you say to a battle?' They then heal your pokemon to full health.",
+            "PostEventString": "$1 is satisfied with the battle, you continue onwards.",
+            "EventLook": "⛷️",
+            "EventFg": "Black",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "RESEARCHER",
+            "PreEventString": "The Pokemon research society is having a skiing trip. They wave when they see you.",
+            "PostEventString": "After spending a bit of time with them, they hand you a $1.",
+            "EventLook": "🧑‍🔬",
+            "EventFg": "Black",
+            "EventBg": "Gray"
+        },
+        {
+            "EventType": "PARADOX",
+            "PreEventString": "Team Paradox is having a skiing trip. They wave when they see you.",
+            "PostEventString": "After spending a bit of time with them, they hand you a $1.",
+            "EventLook": "P",
+            "EventFg": "Magenta",
+            "EventBg": "Gray"
+        }
+    ],
+    "PokemonEachFloor": [
+        [
+            "Sandshrew-Alola",
+            "Vulpix-Alola",
+            "Mr. Mime-Galar",
+            "Sneasel",
+            "Teddiursa",
+            "Swinub",
+            "Smoochum",
+            "Castform",
+            "Snorunt",
+            "Snover",
+            "Darumaka-Galar",
+            "Zorua-Hisui",
+            "Cubchoo",
+            "Bergmite",
+            "Snom",
+            "Cetoddle",
+            "Frigibax"
+        ],
+        [
+            "Sandslash-Alola",
+            "Jynx",
+            "Sneasel-Hisui",
+            "Ursaring",
+            "Piloswine",
+            "Delibird",
+            "Stantler",
+            "Glalie",
+            "Abomasnow",
+            "Beartic",
+            "Cryogonal",
+            "Mr. Rime",
+            "Frosmoth",
+            "Eiscue",
+            "Arctibax"
+        ],
+        [
+            "Ninetales-Alola",
+            "Weavile",
+            "Sneasler",
+            "Ursaluna",
+            "Mamoswine",
+            "Wyrdeer",
+            "Froslass",
+            "Darmanitan-Galar",
+            "Zoroark-Hisui",
+            "Avalugg",
+            "Avalugg-Hisui",
+            "Crabominable",
+            "Cetitan",
+            "Baxcalibur"
+        ],
+        [
+            "Regice"
+        ]
+    ],
+    "CommonItems": [
+        {
+            "Name": "Sweet Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Sweet Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Sour Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Sour Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Salty Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Salty Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Bitter Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Bitter Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Occa Berry",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Charti Berry",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Chople Berry",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Babiri Berry",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Snowball",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Never-Melt Ice",
+            "Min": 2,
+            "Max": 4
+        }
+    ],
+    "RareItems": [
+        {
+            "Name": "Spicy Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Spicy Herba Mystica",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Dawn Stone",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Ice Stone",
+            "Min": 1,
+            "Max": 1
+        },
+        {
+            "Name": "Snowball",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Protector",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Eject Pack",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Grip Claw",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Icy Rock",
+            "Min": 2,
+            "Max": 4
+        }
+    ],
+    "BossItem": {
+        "Name": "Titan Plate 5",
+        "Min": 1,
+        "Max": 1
+    },
+    "RoomShortcuts": [
+        {
+            "Conditions": [
+                {
+                    "ConditionType": "MOVE",
+                    "Which": [
+                        "Shock Wave",
+                        "Double Shock",
+                        "Freeze Shock",
+                        "Thunder Shock",
+                        "Psyshock",
+                        "Venoshock"
+                    ]
+                },
+                {
+                    "ConditionType": "POKEMON",
+                    "Which": [
+                        "Sandy Shocks"
+                    ]
+                },
+                {
+                    "ConditionType": "ABILITY",
+                    "Which": [
+                        "Slow Start"
+                    ]
+                }
+            ],
+            "Clue": "You see a chair-lift system that is currently turned off. If you give it a shock, it may start up.",
+            "Resolution": "Your $1 starts the machine back again. The operator thanks you, and lets you ride for free.",
+            "RoomNumber": 0,
+            "RoomDestination": 5
+        },
+        {
+            "Conditions": [
+                {
+                    "ConditionType": "MOVE",
+                    "Which": [
+                        "Rock Slide",
+                        "Grassy Glide"
+                    ]
+                },
+                {
+                    "ConditionType": "ABILITY",
+                    "Which": [
+                        "Slush Rush"
+                    ]
+                }
+            ],
+            "Clue": "The slope is not so steep, so you may be able to skillfully slide down with the right move...",
+            "Resolution": "Your $1 lets you slide down to the bottom of the mountain!",
+            "RoomNumber": 5,
+            "RoomDestination": 10
+        }
+    ],
+    "DungeonShortcut": {
+        "Conditions": [],
+        "Clue": "You got lost, in a weird part of the slope. No people around, and the path leads deeper into the mountains. Better investigate around for a while.",
+        "Resolution": "",
+        "RoomNumber": 10,
+        "RoomDestination": 10
+    },
+    "WildMonsEvent": {
+        "EventType": "POKEMON_BATTLE",
+        "PreEventString": "Suddenly, wild Pokemon attack!",
+        "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
+        "EventLook": "☻",
+        "EventFg": "Black",
+        "EventBg": "Gray"
+    },
+    "BossEvent": {
+        "EventType": "BOSS",
+        "PreEventString": "In a desolate clearing, you see a slumbering titan made of ice. As you approach, the floor starts rumbling...",
+        "PostEventString": "As you defeat the titan, the ground rumbles again. Your actions here have are changing the world.",
+        "EventLook": "⍣",
+        "EventFg": "Blue",
+        "EventBg": "Gray",
+        "OffsetAnchorX": 2,
+        "OffsetAnchorY": 0
+    },
+    "CampingEvent": {
+        "EventType": "CAMPING",
+        "PreEventString": "You find a small cabin in the mountains. There's enough space inside for a picnic.",
+        "PostEventString": "But now it's time to move on...",
+        "EventLook": "🏡",
+        "EventFg": "DarkYellow",
+        "EventBg": "Gray"
+    },
+    "PreBossEvent": {
+        "EventType": "REGICE"
+    },
+    "PostBossEvent": {
+        "EventType": "PLOT_CLUE",
+        "PreEventString": "... and the balance of power will change forever in the world.",
+        "PostEventString": "The my///cal bea... of cre../t... ..ll roam the lands once again."
+    },
+    "CustomShowdownRules": [
+        "Continuous Snow Mod"
+    ],
+    "DungeonArchetypes": [
+        "EXPLORATION",
+        "BACKGROUND_WEATHER"
+    ],
+    "DungeonWeather": "SNOW",
+    "DungeonTerrain": "NONE",
+    "NextDungeon": "",
+    "NextDungeonShortcut": ""
+}

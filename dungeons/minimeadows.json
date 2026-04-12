@@ -11,7 +11,7 @@
       "EventFg": "Black",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "ALPHA",
       "PreEventString": "A mighty $1 is trashing around and blocking your way!",
       "PostEventString": "After defeating the wild Pokemon, you pick up the $1 it was holding.",
@@ -19,7 +19,7 @@
       "EventFg": "Black",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "EVO",
       "PreEventString": "In the middle of a field, you find a giant glowing crystal. Suddenly, you hear a voice: YE WHO SEEK AWAKENING, LET US BEGIN.",
       "PostEventString": "It's time to move on.",
@@ -27,7 +27,7 @@
       "EventFg": "Magenta",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "HEAL",
       "PreEventString": "You find a stream. You and your Pokemon decide to rest for a while.",
       "PostEventString": "Your Pokemon have recovered some health.",
@@ -35,7 +35,7 @@
       "EventFg": "Blue",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "CURE",
       "PreEventString": "You find a stream. You and your Pokemon decide to rest for a while.",
       "PostEventString": "Your Pokemon have recovered from their status conditions.",
@@ -43,7 +43,7 @@
       "EventFg": "Blue",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "JOINER",
       "PreEventString": "While walking, you find a lonely $1... It looks scared...",
       "PostEventString": "You offer to protect it. It is shy but ends up joining the exploration team!",
@@ -51,7 +51,7 @@
       "EventFg": "Black",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "DAMAGE_TRAP",
       "PreEventString": "You see a rising cloud of dust in the distance. The cloud is getting closer and closer...",
       "PostEventString": "Before you can move out of the way, your team is struck by a Tauros stampede! Everyone got injured.",
@@ -59,16 +59,16 @@
       "EventFg": "DarkYellow",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "STATUS_TRAP",
       "PreEventString": "While walking, you find a lonely Vulpix... It looks scared...",
       "PostEventString": "You approach it, but it uses Will-O-Wisp and runs away. You better have burn heal!",
-	  "SpecialParams": "brn",
+      "SpecialParams": "brn",
       "EventLook": "🦊",
       "EventFg": "DarkYellow",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "NPC_BATTLE",
       "PreEventString": "You've been challenged by $1, who wants to participate in an unsanctioned Pokemon battle! Your pokemon are fully healed before the battle.",
       "PostEventString": "$1 is happy for the fight, you move on.",
@@ -76,7 +76,7 @@
       "EventFg": "Black",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "RESEARCHER",
       "PreEventString": "A member of the Pokemon Research Society is busy exploring some stool samples.",
       "PostEventString": "''Can't you see I'm busy?'' They say, they give you a $1 they found on the ground, and send you on your way.",
@@ -84,7 +84,7 @@
       "EventFg": "White",
       "EventBg": "Yellow"
     },
-	{
+    {
       "EventType": "PARADOX",
       "PreEventString": "In the mud, you find an old backpack. It has the Team Paradox logo, from team Paradox.",
       "PostEventString": "Theres no ID inside, but you find an old $1.",
@@ -94,151 +94,249 @@
     }
   ],
   "PokemonEachFloor": [
-	[
-		"Rattata",
-		"Nidoran-F",
-		"Nidoran-M",
-		"Vulpix",
-		"Growlithe",
-		"Ponyta",
-		"Doduo",
-		"Mareep",
-		"Zigzagoon",
-		"Skitty",
-		"Electrike",
-		"Shinx",
-		"Patrat",
-		"Blitzle",
-		"Helioptile",
-		"Mudbray",
-		"Wooloo",
-		"Tandemaus",
-		"Litleo",
-		"Phanpy",
-		"Meowth",
-		"Pidove",
-		"Ekans"
-	],
-	[
-		"Raticate",
-		"Nidorina",
-		"Girafarig",
-		"Rapidash",
-		"Flaaffy",
-		"Stantler",
-		"Delcatty",
-		"Luxio",
-		"Watchog",
-		"Heatmor",
-		"Dubwool",
-		"Maushold",
-		"Pyroar",
-		"Donphan",
-		"Persian",
-		"Tranquill",
-		"Arbok"
-	],
-	[
-		"Dodrio",
-		"Nidorino",
-		"Tauros",
-		"Miltank",
-		"Arcanine",
-		"Ninetales",
-		"Rhyhorn",
-		"Tauros-Paldea-Blaze",
-		"Linoone",
-		"Manectric",
-		"Zangoose",
-		"Seviper",
-		"Luxray",
-		"Unfezant",
-		"Zebstrika",
-		"Bouffalant",
-		"Heliolisk",
-		"Mudsdale",
-		"Kangaskhan"
-	],
-	[
-		"Raikou",
-		"Entei"
-	]
+    [
+      "Rattata",
+      "Nidoran-F",
+      "Nidoran-M",
+      "Vulpix",
+      "Growlithe",
+      "Ponyta",
+      "Doduo",
+      "Mareep",
+      "Zigzagoon",
+      "Skitty",
+      "Electrike",
+      "Shinx",
+      "Patrat",
+      "Blitzle",
+      "Helioptile",
+      "Mudbray",
+      "Wooloo",
+      "Tandemaus",
+      "Litleo",
+      "Phanpy",
+      "Meowth",
+      "Pidove",
+      "Ekans"
+    ],
+    [
+      "Raticate",
+      "Nidorina",
+      "Girafarig",
+      "Rapidash",
+      "Flaaffy",
+      "Stantler",
+      "Delcatty",
+      "Luxio",
+      "Watchog",
+      "Heatmor",
+      "Dubwool",
+      "Maushold",
+      "Pyroar",
+      "Donphan",
+      "Persian",
+      "Tranquill",
+      "Arbok"
+    ],
+    [
+      "Dodrio",
+      "Nidorino",
+      "Tauros",
+      "Miltank",
+      "Arcanine",
+      "Ninetales",
+      "Rhyhorn",
+      "Tauros-Paldea-Blaze",
+      "Linoone",
+      "Manectric",
+      "Zangoose",
+      "Seviper",
+      "Luxray",
+      "Unfezant",
+      "Zebstrika",
+      "Bouffalant",
+      "Heliolisk",
+      "Mudsdale",
+      "Kangaskhan"
+    ],
+    [
+      "Raikou",
+      "Entei"
+    ]
   ],
   "CommonItems": [
-    { "Name": "Bold Mint", "Min": 1, "Max": 2 },
-    { "Name": "Relaxed Mint", "Min": 1, "Max": 2 },
-    { "Name": "Impish Mint", "Min": 1, "Max": 2 },
-    { "Name": "Lax Mint", "Min": 1, "Max": 2 },
-    { "Name": "Calm Mint", "Min": 1, "Max": 2 },
-    { "Name": "Gentle Mint", "Min": 1, "Max": 2 },
-    { "Name": "Careful Mint", "Min": 1, "Max": 2 },
-    { "Name": "Sassy Mint", "Min": 1, "Max": 2 },
-    { "Name": "Timid Mint", "Min": 1, "Max": 2 },
-    { "Name": "Jolly Mint", "Min": 1, "Max": 2 },
-    { "Name": "Shuca Berry", "Min": 1, "Max": 2 },
-    { "Name": "Chople Berry", "Min": 1, "Max": 2 }
+    {
+      "Name": "Bold Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Relaxed Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Impish Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Lax Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Calm Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Gentle Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Careful Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Sassy Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Timid Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Jolly Mint",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Shuca Berry",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Chople Berry",
+      "Min": 1,
+      "Max": 2
+    }
   ],
   "RareItems": [
-    { "Name": "White Herb", "Min": 2, "Max": 4 },
-    { "Name": "Mental Herb", "Min": 2, "Max": 4 },
-    { "Name": "Mirror Herb", "Min": 2, "Max": 4 },
-    { "Name": "Power Herb", "Min": 2, "Max": 4 },
-    { "Name": "Charcoal", "Min": 2, "Max": 4 },
-    { "Name": "Magnet", "Min": 2, "Max": 4 },
-    { "Name": "Terrain Extender", "Min": 2, "Max": 4 }
+    {
+      "Name": "White Herb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Mental Herb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Mirror Herb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Power Herb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Charcoal",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Magnet",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Terrain Extender",
+      "Min": 2,
+      "Max": 4
+    }
   ],
-  "BossItem": { "Name": "Thunder Stone", "Min": 3, "Max": 3 },
-  "RoomShortcuts":
-  [
+  "BossItem": {
+    "Name": "Thunder Stone",
+    "Min": 3,
+    "Max": 3
+  },
+  "RoomShortcuts": [
+    {
+      "Conditions": [
+        {
+          "ConditionType": "MOVE",
+          "Which": [
+            "Strength"
+          ]
+        }
+      ],
+      "Clue": "You see a boulder blocking a natural passage, you'll need to push it aside.",
+      "Resolution": "Your $1 lets you move the boulder away. You find a ramp that leads you downhill.",
+      "RoomNumber": 0,
+      "RoomDestination": 5
+    },
+    {
+      "Conditions": [
+        {
+          "ConditionType": "MOVE",
+          "Which": [
+            "Bulldoze"
+          ]
+        }
+      ],
+      "Clue": "As the landscape gets more dry, you see piles of mud and debris which could be cleared to find a shortcut.",
+      "Resolution": "Your $1 moves the debris away. The path is clear now.",
+      "RoomNumber": 5,
+      "RoomDestination": 10
+    }
+  ],
+  "DungeonShortcut": {
+    "Conditions": [
       {
-          "Conditions": [
-                {
-                    "ConditionType": "MOVE",
-                    "Which": ["Strength"]
-                }
-            ],
-	        "Clue": "You see a boulder blocking a natural passage, you'll need to push it aside.",
-	        "Resolution": "Your $1 lets you move the boulder away. You find a ramp that leads you downhill.",
-            "RoomNumber": 0,
-            "RoomDestination": 5
+        "ConditionType": "MOVE",
+        "Which": [
+          "Rain Dance",
+          "Sunny Day",
+          "Snowscape",
+          "Hail",
+          "Chilly Reception"
+        ]
       },
       {
-           "Conditions": [
-                {
-                    "ConditionType": "MOVE",
-                    "Which": ["Bulldoze"]
-                }
-            ],
-            "Clue": "As the landscape gets more dry, you see piles of mud and debris which could be cleared to find a shortcut.",
-            "Resolution": "Your $1 moves the debris away. The path is clear now.",
-            "RoomNumber": 5,
-            "RoomDestination": 10
+        "ConditionType": "ABILITY",
+        "Which": [
+          "Air Lock",
+          "Cloud Nine",
+          "Delta Stream",
+          "Desolate Land",
+          "Drizzle",
+          "Drought",
+          "Orichalcum Pulse",
+          "Primordial Sea",
+          "Snow Warning"
+        ]
       }
-  ],
-  "DungeonShortcut":
-  {
-    "Conditions": [
-		{
-            "ConditionType": "MOVE",
-            "Which": ["Rain Dance", "Sunny Day", "Snowscape", "Hail", "Chilly Reception"]
-		},
-		{
-            "ConditionType": "ABILITY",
-            "Which": ["Air Lock", "Cloud Nine", "Delta Stream", "Desolate Land", "Drizzle", "Drought", "Orichalcum Pulse", "Primordial Sea", "Snow Warning"]
-		}
-	  ],
-	  "Clue": "There's a huge sandstorm blocking your way. You won't be able to go through this specific weather.",
-	  "Resolution": "Your $1 makes the sandstorm go away. The passage through a canyon is clear now.",
-      "RoomNumber": 10,
-      "RoomDestination": 10
+    ],
+    "Clue": "There's a huge sandstorm blocking your way. You won't be able to go through this specific weather.",
+    "Resolution": "Your $1 makes the sandstorm go away. The passage through a canyon is clear now.",
+    "RoomNumber": 10,
+    "RoomDestination": 10
   },
   "WildMonsEvent": {
-      "EventType": "POKEMON_BATTLE",
-      "PreEventString": "Suddenly, wild Pokemon attack!",
-      "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
-      "EventLook": "☻",
-      "EventFg": "Black",
-      "EventBg": "Yellow"
+    "EventType": "POKEMON_BATTLE",
+    "PreEventString": "Suddenly, wild Pokemon attack!",
+    "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
+    "EventLook": "☻",
+    "EventFg": "Black",
+    "EventBg": "Yellow"
   },
   "BossEvent": {
     "EventType": "BOSS",
@@ -256,10 +354,16 @@
     "EventFg": "Black",
     "EventBg": "Yellow"
   },
-  "PreBossEvent": { "EventType": "NONE" },
-  "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : [],
-  "DungeonArchetypes": [ "EXPLORATION" ],
+  "PreBossEvent": {
+    "EventType": "NONE"
+  },
+  "PostBossEvent": {
+    "EventType": "NONE"
+  },
+  "CustomShowdownRules": [],
+  "DungeonArchetypes": [
+    "EXPLORATION"
+  ],
   "DungeonWeather": "NONE",
   "DungeonTerrain": "NONE",
   "NextDungeon": "Abandoned Power Plant",

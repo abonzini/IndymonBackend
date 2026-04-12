@@ -11,7 +11,7 @@
       "EventFg": "Gray",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "ALPHA",
       "PreEventString": "A $1 is protecting the area, it sees you as a threat to the Sky Castle.",
       "PostEventString": "You defeated the guardian and took its $1 as a prize.",
@@ -19,7 +19,7 @@
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "ALPHA",
       "PreEventString": "A $1 is protecting the area, it sees you as a threat to the Sky Castle.",
       "PostEventString": "You defeated the guardian and took its $1 as a prize.",
@@ -27,7 +27,7 @@
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "EVO",
       "PreEventString": "Floating in the air, a huge shining crystal talks to you: YE WHO SEEK AWAKENING, LET US BEGIN.",
       "PostEventString": "It's time to move on.",
@@ -35,7 +35,7 @@
       "EventFg": "Magenta",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "HEAL",
       "PreEventString": "You reach an area where the temperature is warmer and the air is pure.",
       "PostEventString": "Your Pokemon have recovered some health.",
@@ -43,7 +43,7 @@
       "EventFg": "Red",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "BIG_HEAL",
       "PreEventString": "You can't believe your eyes. You have found the famed fountain of life.",
       "PostEventString": "Before you can react, $1 leaps and drinks from it. It is fully healed.",
@@ -51,7 +51,7 @@
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "CURE",
       "PreEventString": "You reach an area where the temperature is warmer and the air is pure.",
       "PostEventString": "Your Pokemon have recovered from harmful conditions.",
@@ -59,7 +59,7 @@
       "EventFg": "Red",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "SWARM",
       "PreEventString": "A group of baby pokemon are looking at you. They've never seen a human before, and they're terrified. They decide to attack you, hopefully their last stand will protect their home.",
       "PostEventString": "You have succesfully defeated the babies.",
@@ -67,7 +67,7 @@
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "DAMAGE_TRAP",
       "PreEventString": "You can't believe your eyes. You have found the famed fountain of life.",
       "PostEventString": "You approach it, but it was a trap, your Pokemon fall into a pitfall trap, and sustain some damage.",
@@ -75,16 +75,16 @@
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "STATUS_TRAP",
       "PreEventString": "As you climb, the environment becomes more hostile. The low temperatures are extremely dangerous.",
       "PostEventString": "You try your best, but the harsh temperature have affected $1, it is now frozen.",
-	  "SpecialParams": "frz",
+      "SpecialParams": "frz",
       "EventLook": "❄",
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "RESEARCHER",
       "PreEventString": "The walls of the castle contain a lot of ancient texts and tablets. No one truly knows the significance of these texts.",
       "PostEventString": "You pick up a $1 that was embedded on a wall. Only a small fraction of the vast knowledge found in this place.",
@@ -92,7 +92,7 @@
       "EventFg": "Gray",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "UNOWN",
       "PreEventString": "You enter a set of ruins unlike all previous ones. This one contains weird glyphs embedded in the walls. Suddenly, the glyphs come alive and start attacking!.",
       "PostEventString": "After being defeated, the symbols shine. A $1 materializes in front of you.",
@@ -102,186 +102,320 @@
     }
   ],
   "PokemonEachFloor": [
-	[
-    "Mime Jr.",
-		"Drowzee",
-		"Smoochum",
-		"Dratini",
-		"Togepi",
-		"Natu",
-		"Spoink",
-		"Swablu",
-		"Abra",
-		"Baltoy",
-		"Chingling",
-		"Drifloon",
-		"Munna",
-		"Gothita",
-		"Rufflet",
-		"Honedge",
-		"Minior",
-		"Bagon",
-		"Castform"
-	],
-	[
-		"Mr. Mime-Galar",
-		"Hypno",
-		"Lickitung",
-		"Jynx",
-		"Dragonair",
-		"Togetic",
-		"Xatu",
-		"Delibird",
-		"Grumpig",
-		"Lunatone",
-		"Solrock",
-		"Kadabra",
-		"Chimecho",
-		"Bronzor",
-		"Musharna",
-		"Sigilyph",
-		"Gothorita",
-		"Braviary",
-		"Doublade",
-		"Shelgon"
-	],
-	[
-		"Lickilicky",
-		"Mr. Rime",
-		"Gyarados",
-		"Aerodactyl",
-		"Dragonite",
-		"Togekiss",
-		"Altaria",
-		"Alakazam",
-		"Claydol",
-		"Drifblim",
-		"Bronzong",
-		"Gothitelle",
-		"Braviary-Hisui",
-		"Aegislash",
-		"Drampa",
-		"Salamence"
-	],
-	[
-		"Articuno",
-		"Articuno-Galar",
-		"Enamorus",
-		"Enamorus-Therian"
-	]
+    [
+      "Mime Jr.",
+      "Drowzee",
+      "Smoochum",
+      "Dratini",
+      "Togepi",
+      "Natu",
+      "Spoink",
+      "Swablu",
+      "Abra",
+      "Baltoy",
+      "Chingling",
+      "Drifloon",
+      "Munna",
+      "Gothita",
+      "Rufflet",
+      "Honedge",
+      "Minior",
+      "Bagon",
+      "Castform"
+    ],
+    [
+      "Mr. Mime-Galar",
+      "Hypno",
+      "Lickitung",
+      "Jynx",
+      "Dragonair",
+      "Togetic",
+      "Xatu",
+      "Delibird",
+      "Grumpig",
+      "Lunatone",
+      "Solrock",
+      "Kadabra",
+      "Chimecho",
+      "Bronzor",
+      "Musharna",
+      "Sigilyph",
+      "Gothorita",
+      "Braviary",
+      "Doublade",
+      "Shelgon"
+    ],
+    [
+      "Lickilicky",
+      "Mr. Rime",
+      "Gyarados",
+      "Aerodactyl",
+      "Dragonite",
+      "Togekiss",
+      "Altaria",
+      "Alakazam",
+      "Claydol",
+      "Drifblim",
+      "Bronzong",
+      "Gothitelle",
+      "Braviary-Hisui",
+      "Aegislash",
+      "Drampa",
+      "Salamence"
+    ],
+    [
+      "Articuno",
+      "Articuno-Galar",
+      "Enamorus",
+      "Enamorus-Therian"
+    ]
   ],
   "CommonItems": [
-		{ "Name": "Health Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Genius Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Clever Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Swift Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Scholar Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Force-Field Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Athlete Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Danger Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Zen Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Phantom Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Tank Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Amnesia Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Sniper Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Mystic Feather", "Min": 1, "Max": 2 },
-		{ "Name": "Haban Berry", "Min": 1, "Max": 2 },
-		{ "Name": "Colbur Berry", "Min": 1, "Max": 2 },
-		{ "Name": "Yache Berry", "Min": 1, "Max": 2 }
-  ],
-  "RareItems": [
-		{ "Name": "Rainbow Feather", "Min": 2, "Max": 4 },
-		{ "Name": "Metronome", "Min": 2, "Max": 4 },
-		{ "Name": "Dragon Fang", "Min": 2, "Max": 4 },
-		{ "Name": "Twisted Spoon", "Min": 2, "Max": 4 },
-		{ "Name": "Clear Amulet", "Min": 2, "Max": 4 },
-		{ "Name": "Odd Incense", "Min": 2, "Max": 4 },
-		{ "Name": "Sharp Beak", "Min": 2, "Max": 4 },
-		{ "Name": "Assault Vest", "Min": 2, "Max": 4 },
-		{ "Name": "Big Nugget", "Min": 2, "Max": 4 }
-  ],
-  "BossItem": { "Name": "Ice Stone", "Min": 3, "Max": 3 },
-  "RoomShortcuts":
-  [
     {
-        "Conditions": [
-		{
-			"ConditionType": "MOVE",
-			"Which": ["Autotomize"]
-		},
-		{
-			"ConditionType": "ABILITY",
-			"Which": ["Light Metal", "Levitate"]
-		},
-		{
-			"ConditionType": "ITEM",
-			"Which": ["Float Stone"]
-		}
-        ],
-        "Clue": "You can walk through the clouds in this area, but they won't support much weight. Try to make sure you can lower your party's weight somehow.",
-        "Resolution": "Your $1 allows the party to be light enough, you can take the shortcut through the clouds.",
-        "RoomNumber": 0,
-        "RoomDestination": 5
+      "Name": "Health Feather",
+      "Min": 1,
+      "Max": 2
     },
     {
-        "Conditions": [
-		{
-			"ConditionType": "MOVE",
-			"Which": ["Dragon Ascent", "Dragon Cheer", "Dragon Dance", "Dragon Energy", "Dragon Pulse", "Dragon Rush", "Dragon Tail"]
-		},
-		{
-			"ConditionType": "ABILITY",
-			"Which": ["Dragon's Maw"]
-		},
-		{
-			"ConditionType": "TYPE",
-			"Which": ["Dragon"]
-		}
-	  ],
-	  "Clue": "You see the end of the sky castle in the distance. You clearly can't make it across from here, but a dragon Pokemon flying nearby seems friendly, you may be able to get it's attention and ask it for help.",
-	  "Resolution": "Your $1 made the dragon happy. The dragon is now happy to give you a hand.",
+      "Name": "Genius Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Clever Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Swift Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Scholar Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Force-Field Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Athlete Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Danger Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Zen Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Phantom Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Tank Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Amnesia Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Sniper Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Mystic Feather",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Haban Berry",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Colbur Berry",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Yache Berry",
+      "Min": 1,
+      "Max": 2
+    }
+  ],
+  "RareItems": [
+    {
+      "Name": "Rainbow Feather",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Metronome",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Dragon Fang",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Twisted Spoon",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Clear Amulet",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Odd Incense",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Sharp Beak",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Assault Vest",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Big Nugget",
+      "Min": 2,
+      "Max": 4
+    }
+  ],
+  "BossItem": {
+    "Name": "Ice Stone",
+    "Min": 3,
+    "Max": 3
+  },
+  "RoomShortcuts": [
+    {
+      "Conditions": [
+        {
+          "ConditionType": "MOVE",
+          "Which": [
+            "Autotomize"
+          ]
+        },
+        {
+          "ConditionType": "ABILITY",
+          "Which": [
+            "Light Metal",
+            "Levitate"
+          ]
+        },
+        {
+          "ConditionType": "ITEM",
+          "Which": [
+            "Float Stone"
+          ]
+        }
+      ],
+      "Clue": "You can walk through the clouds in this area, but they won't support much weight. Try to make sure you can lower your party's weight somehow.",
+      "Resolution": "Your $1 allows the party to be light enough, you can take the shortcut through the clouds.",
+      "RoomNumber": 0,
+      "RoomDestination": 5
+    },
+    {
+      "Conditions": [
+        {
+          "ConditionType": "MOVE",
+          "Which": [
+            "Dragon Ascent",
+            "Dragon Cheer",
+            "Dragon Dance",
+            "Dragon Energy",
+            "Dragon Pulse",
+            "Dragon Rush",
+            "Dragon Tail"
+          ]
+        },
+        {
+          "ConditionType": "ABILITY",
+          "Which": [
+            "Dragon's Maw"
+          ]
+        },
+        {
+          "ConditionType": "TYPE",
+          "Which": [
+            "Dragon"
+          ]
+        }
+      ],
+      "Clue": "You see the end of the sky castle in the distance. You clearly can't make it across from here, but a dragon Pokemon flying nearby seems friendly, you may be able to get it's attention and ask it for help.",
+      "Resolution": "Your $1 made the dragon happy. The dragon is now happy to give you a hand.",
       "RoomNumber": 5,
       "RoomDestination": 10
     }
   ],
-  "DungeonShortcut":
-  {
-      "ShortcutConditions": [],
-	  "Clue": "This is the end of the line. No more shortcuts ahead.",
-	  "Resolution": "",
-      "RoomNumber": 10,
-      "RoomDestination": 10
+  "DungeonShortcut": {
+    "ShortcutConditions": [],
+    "Clue": "This is the end of the line. No more shortcuts ahead.",
+    "Resolution": "",
+    "RoomNumber": 10,
+    "RoomDestination": 10
   },
   "WildMonsEvent": {
-      "EventType": "POKEMON_BATTLE",
-      "PreEventString": "Suddenly, wild Pokemon attack!",
-      "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
-      "EventLook": "☻",
-      "EventFg": "White",
-      "EventBg": "Black"
+    "EventType": "POKEMON_BATTLE",
+    "PreEventString": "Suddenly, wild Pokemon attack!",
+    "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
+    "EventLook": "☻",
+    "EventFg": "White",
+    "EventBg": "Black"
   },
   "BossEvent": {
     "EventType": "BOSS",
     "PreEventString": "You face against $1, the guardian of the Sky Castle. It's clearly angry thet you're trespassing it's territory, but also curious that you made it so far.",
     "PostEventString": "The guardian flies away. For a second, there's not a sound in the air. You're so high up that you can even see the curvature of the earth. But now it's time to return home.",
-      "EventLook": "☻",
-      "EventFg": "White",
-      "EventBg": "Black",
-      "OffsetAnchorX": -5,
-      "OffsetAnchorY": 0
+    "EventLook": "☻",
+    "EventFg": "White",
+    "EventBg": "Black",
+    "OffsetAnchorX": -5,
+    "OffsetAnchorY": 0
   },
   "CampingEvent": {
     "EventType": "CAMPING",
     "PreEventString": "The air is cold and thin, you can hardly breathe. This is a hostile land, not meant for humans and Pokemon from the surface. You should use any opportunity you can to have a picnic.",
     "PostEventString": "But for now it's time to move on...",
-      "EventLook": "⛺︎",
-      "EventFg": "Gray",
-      "EventBg": "Black"
+    "EventLook": "⛺︎",
+    "EventFg": "Gray",
+    "EventBg": "Black"
   },
-  "PreBossEvent": { "EventType": "NONE" },
-  "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : ["Continuous Hail Mod"],
-  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_WEATHER"],
+  "PreBossEvent": {
+    "EventType": "NONE"
+  },
+  "PostBossEvent": {
+    "EventType": "NONE"
+  },
+  "CustomShowdownRules": [
+    "Continuous Hail Mod"
+  ],
+  "DungeonArchetypes": [
+    "EXPLORATION",
+    "BACKGROUND_WEATHER"
+  ],
   "DungeonWeather": "HAIL",
   "DungeonTerrain": "NONE",
   "NextDungeon": "",

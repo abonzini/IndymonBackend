@@ -10,7 +10,7 @@
       "EventFg": "Gray",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "ALPHA",
       "PreEventString": "As the dusk approaches, stronger Pokemon begin to hunt. A $1 attacks you.",
       "PostEventString": "After defeating the wild Pokemon, you pick up the $1 it was holding.",
@@ -18,7 +18,7 @@
       "EventFg": "White",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "EVO",
       "PreEventString": "Deep in the water, you see a glowing crystal. A voice sounds in your mind: YE WHO SEEK AWAKENING, LET US BEGIN.",
       "PostEventString": "It's time to move on.",
@@ -26,7 +26,7 @@
       "EventFg": "Magenta",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "HEAL",
       "PreEventString": "Nothing like the relaxing sunset to forget all of your troubles. You lie in the sand alongside your Pokemon.",
       "PostEventString": "Your Pokemon have recovered some health.",
@@ -34,7 +34,7 @@
       "EventFg": "White",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "CURE",
       "PreEventString": "Nothing like the relaxing sunset to forget all of your troubles. You lie in the sand alongside your Pokemon.",
       "PostEventString": "Your Pokemon have recovered from their status conditions.",
@@ -42,7 +42,7 @@
       "EventFg": "White",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "JOINER",
       "PreEventString": "In the distance, you see a $1 following you. It has been doing so for miles. It's pretending not to like you, but it's clear it wants to have an adventure.",
       "PostEventString": "It will probably help you during your battles.",
@@ -50,7 +50,7 @@
       "EventFg": "White",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "DAMAGE_TRAP",
       "PreEventString": "The wind picks up, sand blows in your face. It's coarse and rough and irritating and it gets everywhere.",
       "PostEventString": "You trip trying to find a place to get cover. Your Pokemon sustain some damage.",
@@ -58,16 +58,16 @@
       "EventFg": "White",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "STATUS_TRAP",
       "PreEventString": "As you walk knee-deep in the water, it starts to get cold as the sun sets...",
       "PostEventString": "A Pokemon in your team has frostbite due to the cold water.",
-	    "SpecialParams": "frz",
+      "SpecialParams": "frz",
       "EventLook": "❄",
       "EventFg": "White",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "NPC_BATTLE",
       "PreEventString": "$1 is wating for you. The sun is shining on your face: Before you can even react, you're thrust into a fight! Your pokemon are fully healed before the battle.",
       "PostEventString": "Truly a duel for the ages... But it's time to move on.",
@@ -75,7 +75,7 @@
       "EventFg": "White",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "RESEARCHER",
       "PreEventString": "A member of the Pokemon Research Society is sunbathing.",
       "PostEventString": "He's reading a $1, but it's clear they don't really understand what it says. 'Well maybe you'll have better luck'",
@@ -83,7 +83,7 @@
       "EventFg": "White",
       "EventBg": "Blue"
     },
-	{
+    {
       "EventType": "PARADOX",
       "PreEventString": "A Team Paradox grunt is on a makeshift kiosk selling bootleg Move Disks.",
       "PostEventString": "When he sees you' he starts getting nervous. ''I'm leaving soon, I swear''. He gaves you a $1 for your silence.",
@@ -93,172 +93,276 @@
     }
   ],
   "PokemonEachFloor": [
-	[
-		"Tentacool",
-		"Seel",
-		"Shellder",
-		"Krabby",
-		"Horsea",
-		"Staryu",
-		"Qwilfish",
-		"Corsola",
-		"Remoraid",
-		"Mantyke",
-		"Wingull",
-		"Spheal",
-		"Shellos",
-		"Basculin",
-		"Binacle",
-		"Skrelp",
-		"Clauncher",
-		"Sandygast",
-		"Arrokuda",
-		"Finizen",
-		"Wattrel",
-		"Clobbopus",
-		"Wiglett"
-	],
-	[
-		"Dewgong",
-		"Kingler",
-		"Seadra",
-		"Lapras",
-		"Qwilfish-Hisui",
-		"Corsola-Galar",
-		"Octillery",
-		"Mantine",
-		"Sealeo",
-		"Basculin-White-Striped",
-		"Barbaracle",
-		"Clawitzer",
-		"Palossand",
-		"Pyukumuku",
-		"Palafin",
-		"Grapploct",
-		"Wugtrio"
-	],
-	[
-		"Cursola",
-		"Tentacruel",
-		"Cloyster",
-		"Kingdra",
-		"Starmie",
-		"Pelipper",
-		"Walrein",
-		"Gastrodon",
-		"Basculegion",
-		"Basculegion-F",
-		"Dhelmise",
-		"Barraskewda",
-		"Alomomola",
-		"Kilowattrel"
-	],
-	[
-		"Phione",
-		"Manaphy"
-	]
+    [
+      "Tentacool",
+      "Seel",
+      "Shellder",
+      "Krabby",
+      "Horsea",
+      "Staryu",
+      "Qwilfish",
+      "Corsola",
+      "Remoraid",
+      "Mantyke",
+      "Wingull",
+      "Spheal",
+      "Shellos",
+      "Basculin",
+      "Binacle",
+      "Skrelp",
+      "Clauncher",
+      "Sandygast",
+      "Arrokuda",
+      "Finizen",
+      "Wattrel",
+      "Clobbopus",
+      "Wiglett"
+    ],
+    [
+      "Dewgong",
+      "Kingler",
+      "Seadra",
+      "Lapras",
+      "Qwilfish-Hisui",
+      "Corsola-Galar",
+      "Octillery",
+      "Mantine",
+      "Sealeo",
+      "Basculin-White-Striped",
+      "Barbaracle",
+      "Clawitzer",
+      "Palossand",
+      "Pyukumuku",
+      "Palafin",
+      "Grapploct",
+      "Wugtrio"
+    ],
+    [
+      "Cursola",
+      "Tentacruel",
+      "Cloyster",
+      "Kingdra",
+      "Starmie",
+      "Pelipper",
+      "Walrein",
+      "Gastrodon",
+      "Basculegion",
+      "Basculegion-F",
+      "Dhelmise",
+      "Barraskewda",
+      "Alomomola",
+      "Kilowattrel"
+    ],
+    [
+      "Phione",
+      "Manaphy"
+    ]
   ],
   "CommonItems": [
-		{ "Name": "Steel Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Flying Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Rock Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Fighting Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Ghost Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Ground Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Bug Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Poison Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Normal Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Stellar Tera Shard", "Min": 1, "Max": 2 },
-		{ "Name": "Rindo Berry", "Min": 1, "Max": 2 },
-		{ "Name": "Wacan Berry", "Min": 1, "Max": 2 }
+    {
+      "Name": "Steel Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Flying Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Rock Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Fighting Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Ghost Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Ground Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Bug Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Poison Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Normal Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Stellar Tera Shard",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Rindo Berry",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Wacan Berry",
+      "Min": 1,
+      "Max": 2
+    }
   ],
   "RareItems": [
-		{ "Name": "Eviolite", "Min": 2, "Max": 4 },
-		{ "Name": "Flame Orb", "Min": 2, "Max": 4 },
-		{ "Name": "Toxic Orb", "Min": 2, "Max": 4 },
-		{ "Name": "Life Orb", "Min": 2, "Max": 4 },
-		{ "Name": "Mystic Water", "Min": 2, "Max": 4 },
-		{ "Name": "Shell Bell", "Min": 2, "Max": 4 },
-		{ "Name": "Soft Sand", "Min": 2, "Max": 4 },
-		{ "Name": "Sticky Barb", "Min": 2, "Max": 4 },
-		{ "Name": "Poison Barb", "Min": 2, "Max": 4 },
-		{ "Name": "Adrenaline Orb", "Min": 2, "Max": 4 }
+    {
+      "Name": "Eviolite",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Flame Orb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Toxic Orb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Life Orb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Mystic Water",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Shell Bell",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Soft Sand",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Sticky Barb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Poison Barb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Adrenaline Orb",
+      "Min": 2,
+      "Max": 4
+    }
   ],
-  "BossItem": { "Name": "Dusk Stone", "Min": 3, "Max": 3 },
-  "RoomShortcuts":
-  [
-      {
-          "Conditions": [
+  "BossItem": {
+    "Name": "Dusk Stone",
+    "Min": 3,
+    "Max": 3
+  },
+  "RoomShortcuts": [
+    {
+      "Conditions": [
         {
-            "ConditionType": "MOVE",
-            "Which": ["Surf"]
+          "ConditionType": "MOVE",
+          "Which": [
+            "Surf"
+          ]
         },
         {
-            "ConditionType": "ABILITY",
-            "Which": ["Swift Swim"]
+          "ConditionType": "ABILITY",
+          "Which": [
+            "Swift Swim"
+          ]
         }
-        ],
-        "Clue": "You could probably swim across to reach ahead faster.",
-        "Resolution": "Your $1 allows you to reach the distant sandbanks.",
-        "RoomNumber": 0,
-        "RoomDestination": 5
-      },
-      {
-            "Conditions": [
-            {
-                "ConditionType": "MOVE",
-                "Which": ["Whirlpool"]
-            }
-            ],
-            "Clue": "You can swim across to the next set of sandbanks, but the currents are strong and whirlpools are forming...",
-            "Resolution": "Your $1 lets you cross safely.",
-            "RoomNumber": 5,
-            "RoomDestination": 10
-      }
-  ],
-  "DungeonShortcut":
-  {
+      ],
+      "Clue": "You could probably swim across to reach ahead faster.",
+      "Resolution": "Your $1 allows you to reach the distant sandbanks.",
+      "RoomNumber": 0,
+      "RoomDestination": 5
+    },
+    {
       "Conditions": [
+        {
+          "ConditionType": "MOVE",
+          "Which": [
+            "Whirlpool"
+          ]
+        }
+      ],
+      "Clue": "You can swim across to the next set of sandbanks, but the currents are strong and whirlpools are forming...",
+      "Resolution": "Your $1 lets you cross safely.",
+      "RoomNumber": 5,
+      "RoomDestination": 10
+    }
+  ],
+  "DungeonShortcut": {
+    "Conditions": [
       {
         "ConditionType": "MOVE",
-        "Which": ["Dive"]
+        "Which": [
+          "Dive"
+        ]
       }
-      ],
-      "Clue": "In this spot, you can't see the sea floor. Just a dark abbyss below.",
-      "Resolution": "Your $1 lets you ride a sea current into the unknown...",
-      "RoomNumber": 10,
-      "RoomDestination": 10
+    ],
+    "Clue": "In this spot, you can't see the sea floor. Just a dark abbyss below.",
+    "Resolution": "Your $1 lets you ride a sea current into the unknown...",
+    "RoomNumber": 10,
+    "RoomDestination": 10
   },
   "WildMonsEvent": {
-      "EventType": "POKEMON_BATTLE",
-      "PreEventString": "Suddenly, wild Pokemon attack!",
-      "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
-      "EventLook": "☻",
-      "EventFg": "White",
-      "EventBg": "Blue"
+    "EventType": "POKEMON_BATTLE",
+    "PreEventString": "Suddenly, wild Pokemon attack!",
+    "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
+    "EventLook": "☻",
+    "EventFg": "White",
+    "EventBg": "Blue"
   },
   "BossEvent": {
     "EventType": "BOSS",
     "PreEventString": "Even though it's getting dark, you suddenly don't feel cold anymore. The sea begins to shine as your heart feels warm...",
     "PostEventString": "The angel of the sea bids you farewell. It gives you $1 as a sign of your eternal friendship ♥",
-      "EventLook": "☻",
-      "EventFg": "White",
-      "EventBg": "Blue"
+    "EventLook": "☻",
+    "EventFg": "White",
+    "EventBg": "Blue"
   },
   "CampingEvent": {
     "EventType": "CAMPING",
     "PreEventString": "Nothing like the relaxing sunset to forget all of your troubles. It's a perfect place for a picnic.",
     "PostEventString": "But now it's time to move on...",
-      "EventLook": "🏖️",
-      "EventFg": "White",
-      "EventBg": "Blue"
+    "EventLook": "🏖️",
+    "EventFg": "White",
+    "EventBg": "Blue"
   },
-  "PreBossEvent": { "EventType": "NONE" },
-  "PostBossEvent": { "EventType": "NONE" },
-  "CustomShowdownRules" : [],
-  "DungeonArchetypes": [ "EXPLORATION" ],
+  "PreBossEvent": {
+    "EventType": "NONE"
+  },
+  "PostBossEvent": {
+    "EventType": "NONE"
+  },
+  "CustomShowdownRules": [],
+  "DungeonArchetypes": [
+    "EXPLORATION"
+  ],
   "DungeonWeather": "NONE",
   "DungeonTerrain": "NONE",
-  "NextDungeon": "",
+  "NextDungeon": "Whimsy Island",
   "NextDungeonShortcut": "Deepest Trench"
 }

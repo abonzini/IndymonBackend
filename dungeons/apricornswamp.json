@@ -6,13 +6,12 @@
     {
       "EventType": "TREASURE",
       "PreEventString": "You find a $1 buried under the mud.",
-      "PostEventString": "You pick it up, clean it and put it in your bag."
-      ,
+      "PostEventString": "You pick it up, clean it and put it in your bag.",
       "EventLook": "▪",
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "ALPHA",
       "PreEventString": "A $1 is resting in the mud, when it sees you, it gives you a hungry look.",
       "PostEventString": "The Pokemon slowly goes away, leaving $1 behind.",
@@ -20,7 +19,7 @@
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "EVO",
       "PreEventString": "Buried in the mud, you see an evolution crystal. YE WHO SEEK AWAKENING, LET US BEGIN.",
       "PostEventString": "It's time to move on.",
@@ -28,7 +27,7 @@
       "EventFg": "Magenta",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "HEAL",
       "PreEventString": "You managed to find some berries in this swamp, even if not too common.",
       "PostEventString": "Your Pokemon have recovered some health.",
@@ -36,7 +35,7 @@
       "EventFg": "Red",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "CURE",
       "PreEventString": "You managed to find some berries in this swamp, even if not too common.",
       "PostEventString": "Your Pokemon have recovered from their status conditions.",
@@ -44,7 +43,7 @@
       "EventFg": "Red",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "JOINER",
       "PreEventString": "A hungry $1 smells something nice coming from your bag.",
       "PostEventString": "You try to leave it behind, but it keeps following you.",
@@ -52,7 +51,7 @@
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "DAMAGE_TRAP",
       "PreEventString": "You unfortunately stepped on deep mud and start sinking.",
       "PostEventString": "After struggling, you managed to get out but your team is injured.",
@@ -60,16 +59,16 @@
       "EventFg": "DarkMagenta",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "STATUS_TRAP",
       "PreEventString": "A wave of toxic fumes suddenly fill the air.",
       "PostEventString": "$1 breathed some of it and got badly poisoned.",
-	  "SpecialParams": "tox",
+      "SpecialParams": "tox",
       "EventLook": "ss",
       "EventFg": "DarkMagenta",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "NPC_BATTLE",
       "PreEventString": "You find a camping spot. $1 is there and clearly has been lost in the swamp for days. They are going insane and challenge you to a fight.",
       "PostEventString": "After beating $1, you show them the way out and continue on your way.",
@@ -77,7 +76,7 @@
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "RESEARCHER",
       "PreEventString": "Researcher Kaspar is sifting for treasures buried in the mud.",
       "PostEventString": "'Earlier today I found $1, here, have one'",
@@ -85,7 +84,7 @@
       "EventFg": "White",
       "EventBg": "Black"
     },
-	{
+    {
       "EventType": "PARADOX",
       "PreEventString": "You find an abandoned vehicle completely stuck in the mud and covered in vines.",
       "PostEventString": "It has the Paradox Logo, and inside you find an old $1.",
@@ -111,149 +110,255 @@
     }
   ],
   "PokemonEachFloor": [
-	[
-		"Bulbasaur",
-        "Oddish",
-        "Bellsprout",
-        "Slowpoke-Galar",
-        "Tangela",
-        "Wooper",
-        "Wooper-Paldea",
-        "Mudkip",
-        "Budew",
-        "Gulpin",
-        "Barboach",
-        "Stunky",
-        "Croagunk",
-        "Tympole",
-        "Trubbish",
-        "Foongus",
-        "Froakie",
-        "Skiddo",
-        "Goomy",
-        "Bounsweet",
-        "Shroodle",
-        "Toedscool",
-        "Capsakid",
-        "Sobble"
-	],
-	[
-        "Ivysaur",
-        "Gloom",
-        "Weepinbell",
-        "Slowbro-Galar",
-        "Quagsire",
-        "Marshtomp",
-        "Roselia",
-        "Swalot",
-        "Whiscash",
-        "Kecleon",
-        "Skuntank",
-        "Toxicroak",
-        "Palpitoad",
-        "Frogadier",
-        "Sliggoo",
-        "Steenee",
-        "Grafaiai",
-        "Scovillain",
-        "Drizzile",
-        "Carnivine"
-	],
-	[
-        "Venusaur",
-        "Vileplume",
-        "Victreebel",
-        "Slowking-Galar",
-        "Tangrowth",
-        "Clodsire",
-        "Swampert",
-        "Roserade",
-        "Seismitoad",
-        "Garbodor",
-        "Amoonguss",
-        "Greninja",
-        "Gogoat",
-        "Goodra",
-        "Tsareena",
-        "Toedscruel",
-        "Inteleon"
-	],
-	[
-		"Regirock"
-	]
+    [
+      "Bulbasaur",
+      "Oddish",
+      "Bellsprout",
+      "Slowpoke-Galar",
+      "Tangela",
+      "Wooper",
+      "Wooper-Paldea",
+      "Mudkip",
+      "Budew",
+      "Gulpin",
+      "Barboach",
+      "Stunky",
+      "Croagunk",
+      "Tympole",
+      "Trubbish",
+      "Foongus",
+      "Froakie",
+      "Skiddo",
+      "Goomy",
+      "Bounsweet",
+      "Shroodle",
+      "Toedscool",
+      "Capsakid",
+      "Sobble"
+    ],
+    [
+      "Ivysaur",
+      "Gloom",
+      "Weepinbell",
+      "Slowbro-Galar",
+      "Quagsire",
+      "Marshtomp",
+      "Roselia",
+      "Swalot",
+      "Whiscash",
+      "Kecleon",
+      "Skuntank",
+      "Toxicroak",
+      "Palpitoad",
+      "Frogadier",
+      "Sliggoo",
+      "Steenee",
+      "Grafaiai",
+      "Scovillain",
+      "Drizzile",
+      "Carnivine"
+    ],
+    [
+      "Venusaur",
+      "Vileplume",
+      "Victreebel",
+      "Slowking-Galar",
+      "Tangrowth",
+      "Clodsire",
+      "Swampert",
+      "Roserade",
+      "Seismitoad",
+      "Garbodor",
+      "Amoonguss",
+      "Greninja",
+      "Gogoat",
+      "Goodra",
+      "Tsareena",
+      "Toedscruel",
+      "Inteleon"
+    ],
+    [
+      "Regirock"
+    ]
   ],
   "CommonItems": [
-    { "Name": "Green Apricorn", "Min": 2, "Max": 3 },
-    { "Name": "Blue Apricorn", "Min": 2, "Max": 3 },
-    { "Name": "Blue Apricorn", "Min": 2, "Max": 3 },
-    { "Name": "Yellow Apricorn", "Min": 2, "Max": 3 },
-    { "Name": "Yellow Apricorn", "Min": 2, "Max": 3 },
-    { "Name": "Red Apricorn", "Min": 2, "Max": 3 },
-    { "Name": "Red Apricorn", "Min": 2, "Max": 3 },
-    { "Name": "Payapa Bery", "Min": 1, "Max": 2 },
-    { "Name": "Coba Bery", "Min": 1, "Max": 2 },
-    { "Name": "Wacan Bery", "Min": 1, "Max": 2 },
-    { "Name": "Absorb Bulb", "Min": 1, "Max": 2 },
-    { "Name": "Luminous Moss", "Min": 1, "Max": 2 }
+    {
+      "Name": "Green Apricorn",
+      "Min": 2,
+      "Max": 3
+    },
+    {
+      "Name": "Blue Apricorn",
+      "Min": 2,
+      "Max": 3
+    },
+    {
+      "Name": "Blue Apricorn",
+      "Min": 2,
+      "Max": 3
+    },
+    {
+      "Name": "Yellow Apricorn",
+      "Min": 2,
+      "Max": 3
+    },
+    {
+      "Name": "Yellow Apricorn",
+      "Min": 2,
+      "Max": 3
+    },
+    {
+      "Name": "Red Apricorn",
+      "Min": 2,
+      "Max": 3
+    },
+    {
+      "Name": "Red Apricorn",
+      "Min": 2,
+      "Max": 3
+    },
+    {
+      "Name": "Payapa Bery",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Coba Bery",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Wacan Bery",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Absorb Bulb",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Luminous Moss",
+      "Min": 1,
+      "Max": 2
+    }
   ],
   "RareItems": [
-    { "Name": "Black Apricorn", "Min": 3, "Max": 5 },
-    { "Name": "White Apricorn", "Min": 3, "Max": 5 },
-    { "Name": "Leaf Stone", "Min": 1, "Max": 1 },
-    { "Name": "Dusk Stone", "Min": 1, "Max": 1 },
-    { "Name": "Razor Fang", "Min": 2, "Max": 4 },
-    { "Name": "Razor Claw", "Min": 2, "Max": 4 },
-    { "Name": "Toxic Orb", "Min": 2, "Max": 4 },
-    { "Name": "Poison Barb", "Min": 2, "Max": 4 },
-    { "Name": "Black Sludge", "Min": 2, "Max": 4 }
+    {
+      "Name": "Black Apricorn",
+      "Min": 3,
+      "Max": 5
+    },
+    {
+      "Name": "White Apricorn",
+      "Min": 3,
+      "Max": 5
+    },
+    {
+      "Name": "Leaf Stone",
+      "Min": 1,
+      "Max": 1
+    },
+    {
+      "Name": "Dusk Stone",
+      "Min": 1,
+      "Max": 1
+    },
+    {
+      "Name": "Razor Fang",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Razor Claw",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Toxic Orb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Poison Barb",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Black Sludge",
+      "Min": 2,
+      "Max": 4
+    }
   ],
-  "BossItem": { "Name": "Titan Plate 2", "Min": 1, "Max": 1 },
-  "RoomShortcuts":
-  [
-      {
-          "Conditions": [
-            {
-                "ConditionType": "MOVE",
-                "Which": ["Sweet Scent", "Smelling Salts", "Aromatic Mist", "Aromatherapy"]
-            },
-            {
-                "ConditionType": "ABILITY",
-                "Which": ["Stench", "Aroma Veil", "Lingering Aroma"]
-            }
-        ],
-        "Clue": "You find an abandoned rowboat that can help you cross the swamp, but the smell is overwhelming.",
-        "Resolution": "Your $1 masks the swamp smell and allows you to go through.",
-        "RoomNumber": 0,
-        "RoomDestination": 5
-      },
-      {
-        "Conditions": [
-        {   
-            "ConditionType": "Item",
-            "Which": ["Fire Stone", "Thunder Stone", "Leaf Stone", "Water Stone", "Sun Stone", "Shiny Stone", "Dawn Stone", "Dusk Stone", "Ice Stone", "Moon Stone"]
+  "BossItem": {
+    "Name": "Titan Plate 2",
+    "Min": 1,
+    "Max": 1
+  },
+  "RoomShortcuts": [
+    {
+      "Conditions": [
+        {
+          "ConditionType": "MOVE",
+          "Which": [
+            "Sweet Scent",
+            "Smelling Salts",
+            "Aromatic Mist",
+            "Aromatherapy"
+          ]
+        },
+        {
+          "ConditionType": "ABILITY",
+          "Which": [
+            "Stench",
+            "Aroma Veil",
+            "Lingering Aroma"
+          ]
         }
-        ],
-        "Clue": "You find the remains of old ruins in the swamp. There's a mystical gate, with a symbol of what seems to be Evolutionary Stones.",
-        "Resolution": "Your $1 shines and opens the gate. The path forward is clear.",
-        "RoomNumber": 5,
-        "RoomDestination": 10
-      }
-  ],
-  "DungeonShortcut":
-  {
-      "Conditions": [],
-	  "Clue": "You have reached the ruins of an old city buried in the mud. Doesn't seem there's any way but forward.",
-	  "Resolution": "",
-      "RoomNumber": 10,
+      ],
+      "Clue": "You find an abandoned rowboat that can help you cross the swamp, but the smell is overwhelming.",
+      "Resolution": "Your $1 masks the swamp smell and allows you to go through.",
+      "RoomNumber": 0,
+      "RoomDestination": 5
+    },
+    {
+      "Conditions": [
+        {
+          "ConditionType": "Item",
+          "Which": [
+            "Fire Stone",
+            "Thunder Stone",
+            "Leaf Stone",
+            "Water Stone",
+            "Sun Stone",
+            "Shiny Stone",
+            "Dawn Stone",
+            "Dusk Stone",
+            "Ice Stone",
+            "Moon Stone"
+          ]
+        }
+      ],
+      "Clue": "You find the remains of old ruins in the swamp. There's a mystical gate, with a symbol of what seems to be Evolutionary Stones.",
+      "Resolution": "Your $1 shines and opens the gate. The path forward is clear.",
+      "RoomNumber": 5,
       "RoomDestination": 10
+    }
+  ],
+  "DungeonShortcut": {
+    "Conditions": [],
+    "Clue": "You have reached the ruins of an old city buried in the mud. Doesn't seem there's any way but forward.",
+    "Resolution": "",
+    "RoomNumber": 10,
+    "RoomDestination": 10
   },
   "WildMonsEvent": {
-      "EventType": "POKEMON_BATTLE",
-      "PreEventString": "Suddenly, wild Pokemon attack!",
-      "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
-      "EventLook": "☻",
-      "EventFg": "White",
-      "EventBg": "Black"
+    "EventType": "POKEMON_BATTLE",
+    "PreEventString": "Suddenly, wild Pokemon attack!",
+    "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
+    "EventLook": "☻",
+    "EventFg": "White",
+    "EventBg": "Black"
   },
   "BossEvent": {
     "EventType": "BOSS",
@@ -269,19 +374,25 @@
     "EventType": "CAMPING",
     "PreEventString": "You find a clearing in the swamp. A perfect place for a picnic.",
     "PostEventString": "But now it's time to move on...",
-      "EventLook": "⛺︎",
-      "EventFg": "DarkYellow",
-      "EventBg": "Black"
+    "EventLook": "⛺︎",
+    "EventFg": "DarkYellow",
+    "EventBg": "Black"
   },
-  "PreBossEvent": { "EventType": "REGIROCK" },
-  "PostBossEvent":
-  {
-      "EventType": "PLOT_CLUE",
-      "PreEventString": "... They were tasked to put the continents together.",
-      "PostEventString": "Little by little, they shaped the world and bound the continents with ropes."
+  "PreBossEvent": {
+    "EventType": "REGIROCK"
   },
-  "CustomShowdownRules" : ["Continuous Grassy Terrain Mod"],
-  "DungeonArchetypes": [ "EXPLORATION", "BACKGROUND_TERRAIN"],
+  "PostBossEvent": {
+    "EventType": "PLOT_CLUE",
+    "PreEventString": "... They were tasked to put the continents together.",
+    "PostEventString": "Little by little, they shaped the world and bound the continents with ropes."
+  },
+  "CustomShowdownRules": [
+    "Continuous Grassy Terrain Mod"
+  ],
+  "DungeonArchetypes": [
+    "EXPLORATION",
+    "BACKGROUND_TERRAIN"
+  ],
   "DungeonWeather": "NONE",
   "DungeonTerrain": "GRASSY",
   "NextDungeon": "",
