@@ -1204,13 +1204,13 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.REGICE: // Dramatic drawing of regice eyes
                     ClearScreenCommand();
-                    DrawRegiEye(0, 0, 1000);
-                    DrawRegiEye(0, -1, 0);
-                    DrawRegiEye(0, 1, 1000);
-                    DrawRegiEye(1, 0, 0);
-                    DrawRegiEye(-1, 0, 500);
-                    DrawRegiEye(2, 0, 0);
-                    DrawRegiEye(-2, 0, 500);
+                    DrawRegiEye(58, 8, 1000);
+                    DrawRegiEye(58, 7, 0);
+                    DrawRegiEye(58, 9, 1000);
+                    DrawRegiEye(60, 8, 0);
+                    DrawRegiEye(56, 8, 500);
+                    DrawRegiEye(59, 8, 0);
+                    DrawRegiEye(57, 8, 500);
                     NopWithWaitCommand(3000);
                     break;
                 case RoomEventType.REGIELEKI: // Dramatic drawing of regigas eyes
