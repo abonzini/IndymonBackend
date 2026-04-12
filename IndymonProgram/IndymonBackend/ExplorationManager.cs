@@ -509,10 +509,10 @@ namespace IndymonBackendProgram
                     // Camping logic: eat a random sandwich
                     if (_trainer.Sandwiches.Count > 0)
                     {
-                        Sandwich sando = GeneralUtilities.GetRandomKvp(_trainer.Sandwiches).Key;
+                        Sandwich sando = _trainer.Sandwiches[0];
                         _context.AddSandwichEffect(sando);
                         GenericMessageCommand($"Your team has eaten {sando.Name}");
-                        GeneralUtilities.AddtemToCountDictionary(_trainer.Sandwiches, sando, -1, true); // Consume sandwich
+                        _trainer.Sandwiches.RemoveAt(0); // Consume sandwich
                     }
                     GenericMessageCommand(roomEvent.PostEventString);
                     break;

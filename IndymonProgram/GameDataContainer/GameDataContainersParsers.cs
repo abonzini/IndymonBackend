@@ -185,7 +185,8 @@ namespace GameDataContainer
                                 Sandwiches.Add(itemName, sandwich);
                             }
                             int sandwichCount = int.Parse(nextLine[j + 20]);
-                            GeneralUtilities.AddtemToCountDictionary(nextTrainer.Sandwiches, sandwich, sandwichCount);
+                            if (sandwichCount != 0) throw new Exception("Sandwich must be 1 in each row"); // Non dictionary anymore, now it's 1 per row
+                            nextTrainer.Sandwiches.Add(sandwich);
                         }
                     }
                     trainerContainer.Add(nextTrainer.Name, nextTrainer);

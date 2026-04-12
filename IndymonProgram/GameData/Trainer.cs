@@ -26,7 +26,7 @@ namespace GameData
         public Dictionary<string, int> KeyItems = new Dictionary<string, int>();
         public Dictionary<Trainer, int> Favours = new Dictionary<Trainer, int>();
         public Dictionary<string, int> PokeBalls = new Dictionary<string, int>();
-        public Dictionary<Sandwich, int> Sandwiches = new Dictionary<Sandwich, int>();
+        public List<Sandwich> Sandwiches = new List<Sandwich>();
         public override string ToString()
         {
             return Name;
@@ -64,27 +64,19 @@ namespace GameData
         {
             const int TRAINER_CARD_ROWS = 22;
             // Unlike mons, every other thing needs to be sorted in alphabetical order
-            List<(string, int)> setItemList = [];
-            foreach (KeyValuePair<SetItem, int> setItemData in SetItems) setItemList.Add((setItemData.Key.Name, setItemData.Value));
+            List<(string, int)> setItemList = [.. SetItems.Select(s => (s.Key.Name, s.Value))];
             setItemList = [.. setItemList.OrderBy(s => s.Item1)];
-            List<(string, int)> modItemList = [];
-            foreach (KeyValuePair<Item, int> modItemData in ModItems) modItemList.Add((modItemData.Key.Name, modItemData.Value));
+            List<(string, int)> modItemList = [.. ModItems.Select(m => (m.Key.Name, m.Value))];
             modItemList = [.. modItemList.OrderBy(s => s.Item1)];
-            List<(string, int)> battleItemList = [];
-            foreach (KeyValuePair<Item, int> battleItemData in BattleItems) battleItemList.Add((battleItemData.Key.Name, battleItemData.Value));
+            List<(string, int)> battleItemList = [.. BattleItems.Select(s => (s.Key.Name, s.Value))];
             battleItemList = [.. battleItemList.OrderBy(s => s.Item1)];
-            List<(string, int)> keyItemList = [];
-            foreach (KeyValuePair<string, int> keyItemData in KeyItems) keyItemList.Add((keyItemData.Key, keyItemData.Value));
+            List<(string, int)> keyItemList = [.. KeyItems.Select(k => (k.Key, k.Value))];
             keyItemList = [.. keyItemList.OrderBy(s => s.Item1)];
-            List<(string, int)> favourList = [];
-            foreach (KeyValuePair<Trainer, int> favourData in Favours) favourList.Add((favourData.Key.Name, favourData.Value));
+            List<(string, int)> favourList = [.. Favours.Select(f => (f.Key.Name, f.Value))];
             favourList = [.. favourList.OrderBy(s => s.Item1)];
-            List<(string, int)> ballList = [];
-            foreach (KeyValuePair<string, int> pokeBallData in PokeBalls) ballList.Add((pokeBallData.Key, pokeBallData.Value));
+            List<(string, int)> ballList = [.. PokeBalls.Select(p => (p.Key, p.Value))];
             ballList = [.. ballList.OrderBy(s => s.Item1)];
-            List<(string, int)> sandwichList = [];
-            foreach (KeyValuePair<Sandwich, int> sandwichData in Sandwiches) sandwichList.Add((sandwichData.Key.Name, sandwichData.Value));
-            sandwichList = [.. sandwichList.OrderBy(s => s.Item1)];
+            List<string> sandwichList = [.. Sandwiches.Select(s => s.Name)]; // Not sorted, order is important
             BoxedPokemon = [.. BoxedPokemon.OrderBy(p => p.Species)]; // Also sort the boxed mons in place whatever
             // Ok now ready to go
             StringBuilder fileBuilder = new StringBuilder();
@@ -108,7 +100,7 @@ namespace GameData
             lineBuilder.Append($"Key Items:,{String.Join("; ", keyItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
             lineBuilder.Append($"Favours:,{String.Join("; ", favourList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
             lineBuilder.Append($"PokeBalls:,{String.Join("; ", ballList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
-            lineBuilder.Append($"Sandwiches:,{String.Join("; ", sandwichList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))}");
+            lineBuilder.Append($"Sandwiches:,{String.Join(" → ", sandwichList)}");
             fileBuilder.AppendLine(lineBuilder.ToString());
             // Finally, remaining lines are listing stuff in order
             for (int i = 0; i < TRAINER_CARD_ROWS - 2; i++) // Starting from line 2 until end of trainer card
@@ -217,7 +209,7 @@ namespace GameData
                 // Sandwiches
                 if (sandwichList.Count > i)
                 {
-                    lineBuilder.Append($"{sandwichList[i].Item1},{sandwichList[i].Item2}");
+                    lineBuilder.Append($"{sandwichList[i]},1");
                 }
                 else
                 {
