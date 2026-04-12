@@ -538,7 +538,15 @@ namespace IndymonBackendProgram
                         itemCount = (int)((itemCount * _context.GetItemMult()) + 0.5); // Item multiplier obtained at random
                         if (itemCount < 1) itemCount = 1;
                         string enemySpecies = GeneralUtilities.GetRandomPick(_dungeonData.PokemonEachFloor[enemyFloor]); // Boss will be a random one
-                        Trainer bossTrainer = GenerateEnemyTrainer("Boss", [enemySpecies], [_dungeonData.BossItem.Name], 100, 100, true);
+                        // Find what item the enemy will have, ensure boss has something atleast
+                        string item = _dungeonData.BossItem.Name;
+                        IndymonUtilities.RewardType itemType = IndymonUtilities.GetRewardType(item);
+                        while (!(itemType == IndymonUtilities.RewardType.MOD || itemType == IndymonUtilities.RewardType.BATTLE || itemType == IndymonUtilities.RewardType.SET))
+                        {
+                            item = GeneralUtilities.GetRandomPick(_dungeonData.RareItems).Name; // Pick new item from rare pool until it's an equippable one
+                            itemType = IndymonUtilities.GetRewardType(item);
+                        }
+                        Trainer bossTrainer = GenerateEnemyTrainer("Boss", [enemySpecies], [item], 100, 100, true);
                         DefineEnemySet(bossTrainer, 24, true); // Defines the enemy set (smart for a final boss challenge!)
                         string bossString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
@@ -906,19 +914,14 @@ namespace IndymonBackendProgram
                         // Then make the team
                         Console.WriteLine($"Unown battle, will form word {unownChosen.Key} with reward {unownChosen.Value.Trim()}");
                         List<string> pokemonThisFloor = [];
-                        List<string> itemsThisFloor = [];
                         for (int i = 0; i < unownChosen.Key.Length; i++) // Generate party of random unowns
                         {
                             char letter = unownChosen.Key[i]; // Obtain next unown
                             string nextPokemon = (letter == 'A') ? "Unown" : $"Unown-{letter}"; // Get the correct unown
                             pokemonThisFloor.Add(nextPokemon); // Add mon to the set
-                            // Check if mon can have an item (any, idk)
-                            List<string> itemCandidates = [.. MechanicsDataContainers.GlobalMechanicsData.BattleItems.Keys.Where(i => i.First() == letter)];
-                            if (itemCandidates.Count > 0) { itemsThisFloor.Add(GeneralUtilities.GetRandomPick(itemCandidates)); }
-                            else itemsThisFloor.Add(""); // Add no item, leave the space so the list doesn't mismatch
                         }
                         GenericMessageCommand(roomEvent.PreEventString);
-                        Trainer unownTrainer = GenerateEnemyTrainer("Symbols", pokemonThisFloor, itemsThisFloor, minLvl, maxLvl, false, [.. unownChosen.Key.Select(c => c.ToString())]); // Unowns are unshuffled so they can form the phrase, they also got nickname
+                        Trainer unownTrainer = GenerateEnemyTrainer("Symbols", pokemonThisFloor, [], minLvl, maxLvl, false, [.. unownChosen.Key.Select(c => c.ToString())]); // Unowns are unshuffled so they can form the phrase, they also got nickname
                         DefineEnemySet(unownTrainer, 24, false); // Defines the enemy set (smart unowns was proven to be too good so let's use dumb unowns instead)
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
