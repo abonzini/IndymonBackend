@@ -255,6 +255,16 @@
       "Max": 3
     },
     {
+      "Name": "Black Apricorn",
+      "Min": 1,
+      "Max": 3
+    },
+    {
+      "Name": "White Apricorn",
+      "Min": 1,
+      "Max": 3
+    },
+    {
       "Name": "Leaf Stone",
       "Min": 1,
       "Max": 1
