@@ -91,6 +91,14 @@
       "EventLook": "P",
       "EventFg": "DarkMagenta",
       "EventBg": "Yellow"
+    },
+    {
+      "EventType": "APRICORN",
+      "PreEventString": "Somehow, an apricorn tree managed to find its way into the meadows. You shake it, but an angry $1 falls down and attacks!",
+      "PostEventString": "The annoyed Pokemon walks away. You pick up all the apricorns that fell down ($1)",
+      "EventLook": "🎄",
+      "EventFg": "White",
+      "EventBg": "Yellow"
     }
   ],
   "PokemonEachFloor": [
