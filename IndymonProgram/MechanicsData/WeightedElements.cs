@@ -109,9 +109,9 @@ namespace MechanicsData
     /// </summary>
     public enum PokemonLogic
     {
-        BASIC,
-        FIRST_ONCE,
         DONT_REPEAT,
+        FIRST_ONCE,
+        ORDER,
         REPEAT_OFTEN,
     }
 }

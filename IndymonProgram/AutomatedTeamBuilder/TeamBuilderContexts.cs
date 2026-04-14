@@ -47,7 +47,7 @@ namespace AutomatedTeamBuilder
         public Nature Nature = Nature.SERIOUS;
         public PokemonType TeraType = PokemonType.NONE;
         public (PokemonType, PokemonType) PokemonTypes = (PokemonType.NONE, PokemonType.NONE);
-        public PokemonLogic MonLogic = PokemonLogic.BASIC;
+        public PokemonLogic MonLogic = PokemonLogic.DONT_REPEAT;
         public double[] MonStats = new double[6];
         public int[] Evs = new int[6];
         public double[] StatBoosts = new double[7]; // Where the 7th is not a stat per se, it's the "hightest" stat, applied last in stat calc
@@ -327,6 +327,11 @@ namespace AutomatedTeamBuilder
                 const double DAMAGE_OVERKILL_THRESHOLD = 2;
                 result.DamageScore = avgMoveDamage / (DAMAGE_OVERKILL_THRESHOLD * oppStats[0]);
                 result.DamageScore = Math.Clamp(result.DamageScore, 0.1, 1); // The score is clamped to 1 to avoid giving lots of points to overkill setup/items. In the bottom, it's clamped to 0.1 to avoid the unnecessary boosting of low damage mons
+                // Little trick to ensure the mon tries to get a move coverage that can hit every mon (e.g. if there's immunities)
+                if (!hypotheticalMoves && bestCaseMoveCoverage.Min() > 0)
+                {
+                    result.DamageScore *= 2;
+                }
             }
             // Defensive value calculation
             if (teamCtx.smartTeamBuild) // Non-smart building won't care about this
@@ -360,6 +365,7 @@ namespace AutomatedTeamBuilder
                 {
                     result.SpeedScore = 1 - result.SpeedScore; // Inverts percentile since it will be symmetric around opp speed
                 }
+                result.SpeedScore = Math.Clamp(result.SpeedScore, 0.1, 1); // Min value 0.1 to avoid some improvements suddenly dividing by 0
             }
             if (!teamCtx.smartTeamBuild) // Keep only original constraints, this way we can keep the team-defined constraints but random moves don't add constraints
             {

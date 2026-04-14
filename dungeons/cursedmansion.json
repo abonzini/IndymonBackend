@@ -369,9 +369,9 @@
     }
   ],
   "DungeonShortcut": {
-    "ShortcutConditions": [],
-    "ShortcutClue": "No way through the fog but forward. Nowhere else to go.",
-    "ShortcutResolution": "",
+    "Conditions": [],
+    "Clue": "No way through the fog but forward. Nowhere else to go.",
+    "Resolution": "",
     "RoomNumber": 10,
     "RoomDestination": 10
   },

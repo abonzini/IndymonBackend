@@ -56,7 +56,7 @@ namespace GameData
         public int Level = 100; // Default is 100 but loaded into ctx properly as a lvl multiplier if different to 100
         public int LevelMod = 0;
         public HashSet<int> MovesChosenInBattle = [];
-        public PokemonLogic Logic = PokemonLogic.BASIC;
+        public PokemonLogic Logic = PokemonLogic.DONT_REPEAT;
         public bool ShinyOverride = false;
         /// <summary>
         /// Imports status as seen in showdown

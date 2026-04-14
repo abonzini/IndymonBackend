@@ -504,9 +504,9 @@ namespace AutomatedTeamBuilder
             {
                 PokemonBuildContext monCtx = ObtainPokemonSetContext(mon, buildCtx); // Get all the mons context data
                 // In here, a bit of logic. What if the trainer chose a mod item that improves logic (e.g. dawn stone) but has not chosen a set?
-                // Then everything is randomized, and this means the mod item si just luck based, so I'll try to atleast use a first-slot move that makes sense
+                // Then everything is randomized, and this means the mod item is just luck based, so I'll try to atleast use a first-slot move that makes sense
                 // This will reorder moves a bunch and notify
-                if (monCtx.MonLogic == PokemonLogic.FIRST_ONCE && (mon.SetItem == null || !mon.SetItemChosen)) // Ensure logic item is there without a conscious set item choice
+                if ((monCtx.MonLogic == PokemonLogic.FIRST_ONCE || monCtx.MonLogic == PokemonLogic.ORDER) && (mon.SetItem == null || !mon.SetItemChosen)) // Ensure logic item is there without a conscious set item choice
                 {
                     // Need to find best move candidate for swap
                     List<Move> goodFirstMoves = [.. mon.ChosenMoveset.Where(m => ExtractMoveFlags(m, monCtx).Contains(EffectFlag.GOOD_FIRST_MOVE))]; // Obtain moves that are good first move candidate

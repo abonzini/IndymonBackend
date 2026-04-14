@@ -135,6 +135,7 @@ namespace IndymonBackendProgram
             foreach (KeyValuePair<Item, int> kvp in BattleItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, kvp.Key, kvp.Value);
             foreach (KeyValuePair<string, int> kvp in KeyItemsFound) GeneralUtilities.AddtemToCountDictionary(trainer.KeyItems, kvp.Key, kvp.Value);
             foreach (KeyValuePair<Trainer, int> kvp in FavoursFound) GeneralUtilities.AddtemToCountDictionary(trainer.Favours, kvp.Key, kvp.Value);
+            trainer.Imp += ImpFound;
         }
     }
     public class ExplorationContext
@@ -356,15 +357,16 @@ namespace IndymonBackendProgram
             {
                 _context.ModifyBaseShinyChance(1 / 20); // 20 times more likely
             }
-            HashSet<char> mapExplorationProgress = ['0']; // Stores which parts of the map have been discovered, 0 is always discovered
             SetDungeonCommand(Dungeon); // Need to do first of all otherwise all goes to hell
             AddInfoColumnCommand("Pokemon", 18);
             AddInfoColumnCommand("Health", 6);
             AddInfoColumnCommand("Status", 6);
-            bool explorationFinished = true;
             GameDataContainers.GlobalGameData.CurrentEventMessage.EventTitle = $"<@{_trainer.DiscordNumber}> Meanwhile, {_trainer.Name} went on to explore the {Dungeon}.";
+            bool explorationFinished;
             do
             {
+                HashSet<char> mapExplorationProgress = ['0']; // Stores which parts of the map have been discovered, 0 is always discovered
+                explorationFinished = true;
                 SetDungeonCommand(Dungeon);
                 ClearScreenCommand(); // Just in case, just clear the current screen (if coming from another exploration)
                 ClearConsoleCommand(); // Clears mini console to leave space for new event's message
@@ -413,9 +415,11 @@ namespace IndymonBackendProgram
                                 {
                                     MoveCharacterCommand(-1); // Remove character from screen
                                     GenericMessageCommand("You move onward...");
+                                    NopWithWaitCommand(1000);
                                     explorationFinished = false; // Will repeat exploration loop now
                                     Dungeon = _dungeonData.NextDungeonShortcut; // Go to the dungeon indicated by shortcut
                                     _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
+                                    possibleEvents = [.. _dungeonData.Events];
                                     goto DungeonEnd; // Just break these loops
                                 }
                                 else
@@ -448,9 +452,11 @@ namespace IndymonBackendProgram
                                 {
                                     MoveCharacterCommand(-1); // Remove character from screen
                                     GenericMessageCommand("You move onward...");
+                                    NopWithWaitCommand(1000);
                                     explorationFinished = false; // Will repeat exploration loop now
                                     Dungeon = _dungeonData.NextDungeon; // Go to the next dungeon
                                     _dungeonData = GameDataContainers.GlobalGameData.Dungeons[Dungeon];
+                                    possibleEvents = [.. _dungeonData.Events];
                                 }
                                 else
                                 {
@@ -1165,11 +1171,11 @@ namespace IndymonBackendProgram
                             List<string> rareApricorns = ["Black", "White"];
                             List<string> obtainedApricorns = [];
                             // 5 commons and 2 rares
-                            for (int i = 0; i < 5; i++)
+                            for (int i = 0; i < 3; i++)
                             {
                                 obtainedApricorns.Add(GeneralUtilities.GetRandomPick(commonApricorns));
                             }
-                            for (int i = 0; i < 2; i++)
+                            for (int i = 0; i < 1; i++)
                             {
                                 obtainedApricorns.Add(GeneralUtilities.GetRandomPick(rareApricorns));
                             }
@@ -1260,7 +1266,7 @@ namespace IndymonBackendProgram
                 {
                     collection.Add(data.Value > 1 ? $"{data.Key} x{data.Value}" : $"{data.Key}");
                 }
-                return string.Join(',', collection);
+                return string.Join(", ", collection);
             }
             // First set items:
             string setItemString = GetPrizesStrings(_prizes.SetItemsFound);
@@ -1276,6 +1282,8 @@ namespace IndymonBackendProgram
             maxCount = Math.Max(maxCount, favourString.Length);
             // Key
             string keyString = GetPrizesStrings(_prizes.KeyItemsFound);
+            if (_prizes.ImpFound > 0) keyString = $"{_prizes.ImpFound} IMP, " + _prizes.ImpFound;
+            // Analyze string
             maxCount = Math.Max(maxCount, keyString.Length);
             if (setItemString.Length == 0) setItemString = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
             if (modItemString.Length == 0) modItemString = new string('M', GeneralUtilities.GetRandomNumber(9 * maxCount / 10, 11 * maxCount / 10)); // +- 10%
@@ -1351,7 +1359,7 @@ namespace IndymonBackendProgram
                             foreach (TrainerPokemon pokemon in _trainer.BattleTeam) // If a mon has ability, all good
                             {
                                 // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right set item
-                                if (pokemon.ChosenAbility.Name == eachOne && pokemon.SetItemChosen && pokemon.SetItem.AddedAbility.Name == eachOne) // ability found
+                                if (pokemon.ChosenAbility.Name == eachOne && pokemon.SetItemChosen && pokemon.SetItem.AddedAbility?.Name == eachOne) // ability found
                                 {
                                     message = $"{pokemon.GetInformalName()}'s {eachOne}";
                                     canTakeShortcut = true;

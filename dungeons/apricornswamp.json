@@ -184,38 +184,38 @@
   "CommonItems": [
     {
       "Name": "Green Apricorn",
-      "Min": 2,
-      "Max": 3
+      "Min": 1,
+      "Max": 2
     },
     {
       "Name": "Blue Apricorn",
-      "Min": 2,
-      "Max": 3
+      "Min": 1,
+      "Max": 2
     },
     {
       "Name": "Blue Apricorn",
-      "Min": 2,
-      "Max": 3
+      "Min": 1,
+      "Max": 2
     },
     {
       "Name": "Yellow Apricorn",
-      "Min": 2,
-      "Max": 3
+      "Min": 1,
+      "Max": 2
     },
     {
       "Name": "Yellow Apricorn",
-      "Min": 2,
-      "Max": 3
+      "Min": 1,
+      "Max": 2
     },
     {
       "Name": "Red Apricorn",
-      "Min": 2,
-      "Max": 3
+      "Min": 1,
+      "Max": 2
     },
     {
       "Name": "Red Apricorn",
-      "Min": 2,
-      "Max": 3
+      "Min": 1,
+      "Max": 2
     },
     {
       "Name": "Payapa Bery",
@@ -246,13 +246,13 @@
   "RareItems": [
     {
       "Name": "Black Apricorn",
-      "Min": 3,
-      "Max": 5
+      "Min": 1,
+      "Max": 3
     },
     {
       "Name": "White Apricorn",
-      "Min": 3,
-      "Max": 5
+      "Min": 1,
+      "Max": 3
     },
     {
       "Name": "Leaf Stone",

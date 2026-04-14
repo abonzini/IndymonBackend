@@ -377,10 +377,23 @@ namespace ShowdownBot
                         {
                             currentPokemon.MovesChosenInBattle = [];
                         }
-                        do // Try a next unique move
+                        HashSet<int> options = []; // Add all the possible remaining options
+                        for (int i = 0; i < currentPokemon.ChosenMoveset.Count; i++) options.Add(i);
+                        options.ExceptWith(currentPokemon.MovesChosenInBattle);
+                        // Then choose a move
+                        moveChoice = GeneralUtilities.GetRandomPick(options.ToList());
+                    }
+                    else if (tryLogicMod && currentPokemon.Logic == PokemonLogic.ORDER) // Logic here it do moves in order
+                    {
+                        if (currentPokemon.MovesChosenInBattle.Count == currentPokemon.ChosenMoveset.Count) // All options have been used, reset list
                         {
-                            moveChoice = GeneralUtilities.GetRandomNumber(0, currentPokemon.ChosenMoveset.Count);
-                        } while (!currentPokemon.MovesChosenInBattle.Contains(moveChoice));
+                            currentPokemon.MovesChosenInBattle = [];
+                            moveChoice = 0;
+                        }
+                        else // Otherwise use next move
+                        {
+                            moveChoice = currentPokemon.MovesChosenInBattle.Max() + 1;
+                        }
                     }
                     else if (tryLogicMod && currentPokemon.Logic == PokemonLogic.REPEAT_OFTEN) // Repeats the last move with a higher chance
                     {
