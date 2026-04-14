@@ -54,7 +54,7 @@ namespace IndymonBackendProgram
             {
                 List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(trainer, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false);
                 StringBuilder messageBuilder = new StringBuilder();
-                messageBuilder.AppendLine($"<@{trainer.DiscordNumber}>:");
+                messageBuilder.AppendLine($"{trainer.Name} <@{trainer.DiscordNumber}>:");
                 foreach (PossibleTeamBuild build in possibleBuilds)
                 {
                     messageBuilder.AppendLine("Option:");
@@ -75,7 +75,7 @@ namespace IndymonBackendProgram
                 }
                 else
                 {
-                    Console.WriteLine($"<@{trainer.DiscordNumber}>:\n- Trainer doesn't have a sufficient combination of Pokemon, Set Items and Favours for this requirement. May be able to do favour gacha, capture something, or do some other trick if wants to participate.\n");
+                    Console.WriteLine($"{trainer.Name} <@{trainer.DiscordNumber}>:\n- Trainer doesn't have a sufficient combination of Pokemon, Set Items and Favours for this requirement. May be able to do favour gacha, capture something, or do some other trick if wants to participate.\n");
                 }
             }
             Console.WriteLine("If any trainer needs more info (e.g. which moves are valid for each mon, or if there's any way to complete the team (catching something, doing a favour gacha), let me know and we'll find whether there's some way of getting you in this event.");
