@@ -1,0 +1,350 @@
+{
+    "Name": "Molten Core",
+    "EventAnchorX": 1,
+    "EventAnchorY": 0,
+    "Events": [
+        {
+            "EventType": "TREASURE",
+            "PreEventString": "Floating in the molten rock, there's an undamaged $1.",
+            "PostEventString": "You carefully retrieve it and continue on your way.",
+            "EventLook": "▪",
+            "EventFg": "Gray",
+            "EventBg": "Red"
+        },
+        {
+            "EventType": "ALPHA",
+            "PreEventString": "A $1 sees you an immediately moves on to attack you. In this area, you're easy prey!",
+            "PostEventString": "The attacker has been defeated, you take it's $1.",
+            "EventLook": "☻",
+            "EventFg": "Black",
+            "EventBg": "DarkGray"
+        },
+        {
+            "EventType": "EVO",
+            "PreEventString": "Embedded in the black rock walls you see a huge shining crystal: YE WHO SEEK AWAKENING, LET US BEGIN.",
+            "PostEventString": "It's time to move on.",
+            "EventLook": "✦",
+            "EventFg": "Magenta",
+            "EventBg": "Black"
+        },
+        {
+            "EventType": "HEAL",
+            "PreEventString": "Someone has left a triage box in the way, with medicines and water bottles, good opportunity to heal up.",
+            "PostEventString": "Your Pokemon have recovered some health.",
+            "EventLook": "▫",
+            "EventFg": "Red",
+            "EventBg": "DarkGray"
+        },
+        {
+            "EventType": "BIG_HEAL",
+            "PreEventString": "Someone has left a triage box in the way, but it only has one last ointment remaining.",
+            "PostEventString": "$1 needs it the most, you use the ointment on it and it becomes fully healed.",
+            "EventLook": "▫",
+            "EventFg": "Red",
+            "EventBg": "DarkGray"
+        },
+        {
+            "EventType": "CURE",
+            "PreEventString": "This place is so hostile, so dangerous that your partner Pokemon forget all of their other status conditions.",
+            "PostEventString": "No condition seems too bad when the air is burning and you can hardly breathe...",
+            "EventLook": "",
+            "EventFg": "Red",
+            "EventBg": "DarkGray"
+        },
+        {
+            "EventType": "SWARM",
+            "PreEventString": "Even the baby Pokemon are tough in this place. They gang up on you and try to take you down.",
+            "PostEventString": "You have succesfully defeated the babies.",
+            "EventLook": "☻",
+            "EventFg": "Black",
+            "EventBg": "DarkGray"
+        },
+        {
+            "EventType": "DAMAGE_TRAP",
+            "PreEventString": "There's lava everywhere, lava in the floor, in the ceiling...",
+            "PostEventString": "Some of it burns your Pokemon, they're gravely injured.",
+            "EventLook": "█",
+            "EventFg": "Red",
+            "EventBg": "Red"
+        },
+        {
+            "EventType": "STATUS_TRAP",
+            "PreEventString": "There's lava everywhere, lava in the floor, in the ceiling...",
+            "PostEventString": "Some of it burns $1.",
+            "SpecialParams": "brn",
+            "EventLook": "█",
+            "EventFg": "Red",
+            "EventBg": "Red"
+        },
+        {
+            "EventType": "PARADOX",
+            "PreEventString": "You find a group of Team Paradox members just hanging about. For some reason they're all wearing winter jackets.",
+            "PostEventString": "'Hey I've seen you around before!', one of them says. They give you $1, they seem to be in a good mood.",
+            "EventLook": "P",
+            "EventFg": "DarkMagenta",
+            "EventBg": "DarkGray"
+        },
+        {
+            "EventType": "FIRELORD",
+            "PreEventString": "A group of weirdos are trying to summon a legendary fiery creature to bring destruction into this world. They get spooked when they see you, and go away. The legendary creature is summoned, but TOO SOON. It is severely weakened and it's your chance to bring it down.",
+            "PostEventString": "You have vanquished the creature, it dropped some loot: $1",
+            "EventLook": "⛧",
+            "EventFg": "DarkRed",
+            "EventBg": "Gray"
+        }
+    ],
+    "PokemonEachFloor": [
+        [
+            "Vulpix",
+            "Growlithe-Hisui",
+            "Magby",
+            "Cyndaquil",
+            "Slugma",
+            "Houndour",
+            "Onix",
+            "Numel",
+            "Castform",
+            "Pansear",
+            "Larvesta",
+            "Rolycoly",
+            "Sizzlipede",
+            "Fuecoco",
+            "Charcadet"
+        ],
+        [
+            "Ninetales",
+            "Magmar",
+            "Quilava",
+            "Magcargo",
+            "Camerupt",
+            "Torkoal",
+            "Simisear",
+            "Carkol",
+            "Centiskorch",
+            "Crocalor"
+        ],
+        [
+            "Arcanine-Hisui",
+            "Magmortar",
+            "Typhlosion",
+            "Houndoom",
+            "Steelix",
+            "Volcarona",
+            "Turtonator",
+            "Coalossal",
+            "Skeledirge",
+            "Armarouge",
+            "Ceruledge"
+        ],
+        [
+            "Moltres",
+            "Heatran",
+            "Volcanion"
+        ]
+    ],
+    "CommonItems": [
+        {
+            "Name": "Dark Gem",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Dragon Gem",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Fire Gem",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Psychic Gem",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Water Gem",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Grass Gem",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Fairy Gem",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Ice Gem",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Electric Gem",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Passho Berry",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Shuca Berry",
+            "Min": 1,
+            "Max": 2
+        },
+        {
+            "Name": "Charti Berry",
+            "Min": 1,
+            "Max": 2
+        }
+    ],
+    "RareItems": [
+        {
+            "Name": "Heat Rock",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Flame Orb",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Rawst Berry",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Binding Band",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Charcoal",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Rock Incense",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Red Card",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Muscle Band",
+            "Min": 2,
+            "Max": 4
+        },
+        {
+            "Name": "Focus Band",
+            "Min": 2,
+            "Max": 4
+        }
+    ],
+    "BossItem": {
+        "Name": "Fire Stone",
+        "Min": 3,
+        "Max": 3
+    },
+    "RoomShortcuts": [
+        {
+            "Conditions": [
+                {
+                    "ConditionType": "MOVE_DISK",
+                    "Which": [
+                        ""
+                    ]
+                }
+            ],
+            "Clue": "You find a group of Team Paradox members just hanging about and blocking the way. For some reason they're all wearing winter jackets. They're in a bad mood and say 'I've never seen you around before', you'll need to show them something to prove you're on their side.",
+            "Resolution": "They see your $1 and go crazy. They start cheering and headbanging and move out of the way.",
+            "RoomNumber": 0,
+            "RoomDestination": 5
+        },
+        {
+            "Conditions": [
+                {
+                    "ConditionType": "MOVE",
+                    "Which": [
+                        "Sand Attack",
+                        "Sand Tomb",
+                        "Sandstorm",
+                        "Scorching Sands"
+                    ]
+                },
+                {
+                    "ConditionType": "ITEM",
+                    "Which": [
+                        "Soft Sand"
+                    ]
+                },
+                {
+                    "ConditionType": "ABILITY",
+                    "Which": [
+                        "Sand Force",
+                        "Sand Rush",
+                        "Sand Spit",
+                        "Sand Stream",
+                        "Sand Veil"
+                    ]
+                }
+            ],
+            "Clue": "The floor is so hot on this passage that the stone is soft. Anything touching it will combust immediately. You figure if you cover the surface with sand you may have enough time to cross safely.",
+            "Resolution": "Your $1 fills the surface with sand. You cross just in time before the sand melts too.",
+            "RoomNumber": 5,
+            "RoomDestination": 10
+        }
+    ],
+    "DungeonShortcut": {
+        "Conditions": [],
+        "Clue": "This is the end of the line. No more shortcuts ahead.",
+        "Resolution": "",
+        "RoomNumber": 10,
+        "RoomDestination": 10
+    },
+    "WildMonsEvent": {
+        "EventType": "POKEMON_BATTLE",
+        "PreEventString": "Suddenly, wild Pokemon attack!",
+        "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
+        "EventLook": "☻",
+        "EventFg": "Black",
+        "EventBg": "DarkGray"
+    },
+    "BossEvent": {
+        "EventType": "BOSS",
+        "PreEventString": "At the bottom of the underground cave you see it. A raging creature with a burning body, hotter than the sun.",
+        "PostEventString": "You defeat the raging creature, which retreats under the lava. It will sure return. But now it's time to return home."
+    },
+    "CampingEvent": {
+        "EventType": "CAMPING",
+        "PreEventString": "The air is burning. You can barely continue on, your eyes and dry and can barely breathe. This is a hostile land, and you can't even know where it ends, the air filled with thick smoke. You find a small grotto, where you could establish a camping location.",
+        "PostEventString": "But for now it's time to move on..."
+    },
+    "PreBossEvent": {
+        "EventType": "NONE"
+    },
+    "PostBossEvent": {
+        "EventType": "NONE"
+    },
+    "CustomShowdownRules": [
+        "Continuous Desolate Land Mod"
+    ],
+    "DungeonArchetypes": [
+        "EXPLORATION",
+        "BACKGROUND_WEATHER"
+    ],
+    "DungeonWeather": "DESOLATE_LAND",
+    "DungeonTerrain": "NONE",
+    "NextDungeon": "",
+    "NextDungeonShortcut": ""
+}

@@ -153,6 +153,7 @@ namespace IndymonBackendProgram
                             if (theDungeon.Events.Any(e => e.EventType == RoomEventType.PARADOX)) rewardOptions.Add(0);
                             if (theDungeon.Events.Any(e => e.EventType == RoomEventType.RESEARCHER)) rewardOptions.Add(1);
                             if (theDungeon.Events.Any(e => e.EventType == RoomEventType.IMP_GAIN)) rewardOptions.Add(2);
+                            if (theDungeon.Events.Any(e => e.EventType == RoomEventType.APRICORN)) rewardOptions.Add(3);
                             int diskPlateOrImp = GeneralUtilities.GetRandomPick(rewardOptions);
                             switch (favourTrainer.TrainerRank)
                             {
@@ -174,6 +175,7 @@ namespace IndymonBackendProgram
                                     nRares = 0;
                                     break;
                             }
+                            Console.WriteLine($"<@{trainer.DiscordNumber}> sent their friend {favourTrainer.Name} to explore the {theDungeon.Name} (Used a favour)");
                             for (int i = 0; i < nCommons; i++)
                             {
                                 ItemReward item = GeneralUtilities.GetRandomPick(theDungeon.CommonItems);
@@ -199,6 +201,25 @@ namespace IndymonBackendProgram
                                     int impGain = GeneralUtilities.GetRandomNumber(2, 4); // 2-3 IMP
                                     newPrizes.AddImp(impGain);
                                     Console.WriteLine($"Obtained {impGain} IMP");
+                                    break;
+                                case 3: // Apricorn
+                                    List<string> commonApricorns = ["Red", "Yellow", "Blue", "Green"];
+                                    List<string> rareApricorns = ["Black", "White"];
+                                    List<string> obtainedApricorns = [];
+                                    // 5 commons and 2 rares
+                                    for (int i = 0; i < 3; i++)
+                                    {
+                                        obtainedApricorns.Add(GeneralUtilities.GetRandomPick(commonApricorns));
+                                    }
+                                    for (int i = 0; i < 1; i++)
+                                    {
+                                        obtainedApricorns.Add(GeneralUtilities.GetRandomPick(rareApricorns));
+                                    }
+                                    foreach (string apricorn in obtainedApricorns)
+                                    {
+                                        newPrizes.AddReward(apricorn + " Apricorn", 1); // Add them
+                                    }
+                                    Console.WriteLine($"Obtained apricorns ({string.Join(", ", obtainedApricorns)})");
                                     break;
                                 default:
                                     throw new Exception("Unreachabale code");
