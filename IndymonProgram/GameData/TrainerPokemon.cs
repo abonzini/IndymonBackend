@@ -15,6 +15,7 @@ namespace GameData
         public Item ModItem = null;
         public bool BattleItemChosen = false;
         public Item BattleItem = null;
+        public bool Borrowed = false;
         public override string ToString()
         {
             return (Nickname != "") ? $"{Nickname} ({Species})" : Species;

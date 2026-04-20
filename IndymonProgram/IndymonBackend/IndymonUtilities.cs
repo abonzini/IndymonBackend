@@ -109,7 +109,7 @@ namespace IndymonBackendProgram
                         trainerMon.SetItem = null; // Delete
                     }
                     // Finally, if mon borrowed this item (auto), return it
-                    if (trainerMon.SetItem != null && !trainerMon.SetItemChosen) // If this set item wasn't chosen by the auto builder itself, return it
+                    if (trainerMon.SetItem != null && (!trainerMon.SetItemChosen || trainerMon.Borrowed)) // If this item wasn't chosen by the trainer, or the mon doesn't belong to trainer, return it
                     {
                         // Return item
                         Utilities.GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, trainerMon.SetItem, 1);
@@ -129,7 +129,7 @@ namespace IndymonBackendProgram
                         trainerMon.ModItem = null; // Delete
                     }
                     // Finally, if mon borrowed this item (auto), return it
-                    if (trainerMon.ModItem != null && !trainerMon.ModItemChosen) // If this set item wasn't chosen by the auto builder itself, return it
+                    if (trainerMon.ModItem != null && (!trainerMon.ModItemChosen || trainerMon.Borrowed)) // If this item wasn't chosen by the trainer, or the mon doesn't belong to trainer, return it
                     {
                         // Return item
                         Utilities.GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, trainerMon.ModItem, 1);
@@ -149,7 +149,7 @@ namespace IndymonBackendProgram
                         trainerMon.BattleItem = null; // Delete
                     }
                     // Finally, if mon borrowed this item (auto), return it
-                    if (trainerMon.BattleItem != null && !trainerMon.BattleItemChosen) // If this set item wasn't chosen by the auto builder itself, return it
+                    if (trainerMon.BattleItem != null && (!trainerMon.BattleItemChosen || trainerMon.Borrowed)) // If this item wasn't chosen by the trainer, or the mon doesn't belong to trainer, return it
                     {
                         // Return item
                         Utilities.GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, trainerMon.BattleItem, 1);

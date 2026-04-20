@@ -228,6 +228,7 @@ namespace AutomatedTeamBuilder
                     {
                         borrowedMon = usedBuild.FavourPokemon[borrowedTrainer].Where(m => m.Species == input).First();
                     }
+                    borrowedMon.Borrowed = true;
                     // Then, item building
                     if (trainer.SetItems.Count > 0)
                     {
@@ -241,6 +242,7 @@ namespace AutomatedTeamBuilder
                             SetItem item = trainer.SetItems.Keys.Where(i => i.Name == input).First();
                             borrowedMon.SetItem = item;
                             borrowedMon.SetItemChosen = true;
+                            GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, item, -1, true);
                         }
                     }
                     if (trainer.ModItems.Count > 0)
@@ -255,6 +257,7 @@ namespace AutomatedTeamBuilder
                             Item item = trainer.ModItems.Keys.Where(i => i.Name == input).First();
                             borrowedMon.ModItem = item;
                             borrowedMon.ModItemChosen = true;
+                            GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, item, -1, true);
                         }
                     }
                     if (trainer.BattleItems.Count > 0)
@@ -269,6 +272,7 @@ namespace AutomatedTeamBuilder
                             Item item = trainer.BattleItems.Keys.Where(i => i.Name == input).First();
                             borrowedMon.BattleItem = item;
                             borrowedMon.BattleItemChosen = true;
+                            GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, item, -1, true);
                         }
                     }
                     // Finally, where to put the mon
