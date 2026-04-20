@@ -371,7 +371,7 @@
     }
   ],
   "DungeonShortcut": {
-    "ShortcutConditions": [],
+    "Conditions": [],
     "Clue": "This is the end of the line. No more shortcuts ahead.",
     "Resolution": "",
     "RoomNumber": 10,

@@ -123,7 +123,7 @@ namespace AutomatedTeamBuilder
             Ability currentAbility = (result.AbilityOverride != "") ? MechanicsDataContainers.GlobalMechanicsData.Abilities[result.AbilityOverride] : pokemon.ChosenAbility;
             if (currentAbility != null)
             {
-                ExtractAbilityMods(pokemon.ChosenAbility, result);
+                ExtractAbilityMods(currentAbility, result);
             }
             // Then weather/terrain/archetypes which have been modified by the existing things
             foreach (TeamArchetype archetype in result.AdditionalArchetypes)
