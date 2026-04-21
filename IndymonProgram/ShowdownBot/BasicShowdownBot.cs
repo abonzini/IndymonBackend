@@ -385,7 +385,7 @@ namespace ShowdownBot
                     }
                     else if (tryLogicMod && currentPokemon.Logic == PokemonLogic.ORDER) // Logic here it do moves in order
                     {
-                        if (currentPokemon.MovesChosenInBattle.Count == currentPokemon.ChosenMoveset.Count) // All options have been used, reset list
+                        if (currentPokemon.MovesChosenInBattle.Count == 0 || currentPokemon.MovesChosenInBattle.Count == currentPokemon.ChosenMoveset.Count) // All options have been used, or first time, reset list
                         {
                             currentPokemon.MovesChosenInBattle = [];
                             moveChoice = 0;
