@@ -297,11 +297,6 @@
       "Name": "Assault Vest",
       "Min": 2,
       "Max": 4
-    },
-    {
-      "Name": "Big Nugget",
-      "Min": 2,
-      "Max": 4
     }
   ],
   "BossItem": {

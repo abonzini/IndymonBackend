@@ -1105,7 +1105,8 @@ namespace IndymonBackendProgram
                         joiner.Nickname = nickName;
                         Console.Write("Added to team");
                         _trainer.BattleTeam.Add(joiner);
-                        GenericMessageCommand(roomEvent.PostEventString);
+                        joinerString = roomEvent.PostEventString.Replace("$1", pokemonSpecies);
+                        GenericMessageCommand(joinerString);
                         _prizes.AddMon(joiner, 0); // Add mon to lowest floor (free basically)
                         UpdateTrainerDataInfo(); // Updates numbers in chart
                         _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, GenericMessageCommand);
@@ -1236,6 +1237,17 @@ namespace IndymonBackendProgram
                     DrawRegiEye(11, 2, 0);
                     DrawRegiEye(11, 4, 250);
                     NopWithWaitCommand(3000);
+                    break;
+                case RoomEventType.REGIDRAGO: // Dramatic drawing of regigas eyes (53,10)
+                    ClearScreenCommand();
+                    DrawRegiEye(53, 11, 1000);
+                    DrawRegiEye(53, 12, 0);
+                    DrawRegiEye(52, 10, 0);
+                    DrawRegiEye(54, 10, 1000);
+                    DrawRegiEye(51, 9, 0);
+                    DrawRegiEye(53, 9, 0);
+                    DrawRegiEye(55, 9, 1000);
+                    NopWithWaitCommand(1000);
                     break;
                 default:
                     break;

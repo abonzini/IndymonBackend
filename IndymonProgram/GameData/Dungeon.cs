@@ -35,6 +35,7 @@ namespace GameData
         REGIROCK, // Draws regirock face
         REGICE, // Draws regice face
         REGIELEKI, // Draws regieleki face
+        REGIDRAGO, // Draws regidrago face
     }
     public class ItemReward
     {

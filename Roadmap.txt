@@ -3,16 +3,7 @@
 Mechanics to implement:
 - Sandwich (herba mystica -> sandwich -> picnic)
  -> Herba and sandwiches are in place just need to add text and explanation
-- Esscences (esscence->complete overhaul/addition)
-
-Sunset Sandbanks -> Phione/Manaphy -> Dusk Stone 
-	Underwater -> Tapu Fini/Volcanion -> Water Stone
-	Faraway Island -> Regidrago (Esscence)
-	"PreEventString": "One day they will awaken once more.",
-    "PostEventString": "The Earth will shake, in two, will break ..."
-
 ---
 POSSIBLE THINGS TO LOOK FOR:
 - Debug shiny stone (when it happens)
 - Debug level multiplier (when it happens)
-- Whimsy Island with esscence mechanics and Moon/Shiny stones

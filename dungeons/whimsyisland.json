@@ -1,0 +1,433 @@
+{
+  "Name": "Whimsy Island",
+  "EventAnchorX": 0,
+  "EventAnchorY": -1,
+  "Events": [
+    {
+      "EventType": "TREASURE",
+      "PreEventString": "You see a suspicious looking flower.",
+      "PostEventString": "Surprise! It's a Floette. It gives you $1 as a gift.",
+      "EventLook": "⚘",
+      "EventFg": "Magenta",
+      "EventBg": "Green"
+    },
+    {
+      "EventType": "ALPHA",
+      "PreEventString": "You accidentally bump against a $1. It drops it's ice cream, and now it's extremely angry.",
+      "PostEventString": "The Pokemon goes away, leaving $1 behind.",
+      "EventLook": "☻",
+      "EventFg": "Black",
+      "EventBg": "Green"
+    },
+    {
+      "EventType": "EVO",
+      "PreEventString": "Floating around, you see an Evolution Crystal. YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on.",
+      "EventLook": "✦",
+      "EventFg": "Magenta",
+      "EventBg": "Green"
+    },
+    {
+      "EventType": "HEAL",
+      "PreEventString": "You find some delicious candy in the floor... Maybe you shouldn't...",
+      "PostEventString": "Your Pokemon eat it anyway, they recover some health.",
+      "EventLook": "🎁",
+      "EventFg": "Red",
+      "EventBg": "Green"
+    },
+    {
+      "EventType": "CURE",
+      "PreEventString": "You see a suspicious looking flower.",
+      "PostEventString": "Surprise! It's a Floette. It uses Aromatherapy and heals all your Pokemon's status.",
+      "EventLook": "⚘",
+      "EventFg": "Magenta",
+      "EventBg": "Green"
+    },
+    {
+      "EventType": "JOINER",
+      "PreEventString": "All your Pokemon are singing and having fun, especially $1.",
+      "PostEventString": "Wait... Was $1 always in the team?",
+      "EventLook": "☻",
+      "EventFg": "Black",
+      "EventBg": "Green"
+    },
+    {
+      "EventType": "DAMAGE_TRAP",
+      "PreEventString": "You find some delicious candy in the floor... Maybe you shouldn't...",
+      "PostEventString": "Your Pokemon eat it anyway, but they get tummy ache.",
+      "EventLook": "🎁",
+      "EventFg": "Red",
+      "EventBg": "Green"
+    },
+    {
+      "EventType": "STATUS_TRAP",
+      "PreEventString": "You see a suspicious looking flower.",
+      "PostEventString": "Surprise! It's a Floette. It uses Toxic and floats away.",
+      "EventLook": "⚘",
+      "EventFg": "Magenta",
+      "EventBg": "Green",
+      "SpecialParams": "tox"
+    },
+    {
+      "EventType": "NPC_BATTLE",
+      "PreEventString": "$1 is pissed off, the Clefairy int he island stole all their stuff. They're in such a bad mood that they fight you.",
+      "PostEventString": "$1 calms down, and decides to take a break you continue on your way.",
+      "EventLook": "☻",
+      "EventFg": "Black",
+      "EventBg": "Green"
+    },
+    {
+      "EventType": "RESEARCHER",
+      "PreEventString": "You find an abandoned spaceship crashed on the floor. You probably don't want to ask many questions.",
+      "PostEventString": "However, inside the ship you find a $1.",
+      "EventLook": "🛸",
+      "EventFg": "White",
+      "EventBg": "Green"
+    },
+    {
+      "EventType": "APRICORN",
+      "PreEventString": "In the center of a clearing, you find a huge apricorn tree. You have no idea why there's an apricorn tree here. You shake it, but an angry $1 falls down and attacks!",
+      "PostEventString": "The annoyed Pokemon walks away. You pick up all the apricorns that fell down ($1)",
+      "EventLook": "🎄",
+      "EventFg": "White",
+      "EventBg": "Green"
+    }
+  ],
+  "PokemonEachFloor": [
+    [
+      "Cleffa",
+      "Igglybuff",
+      "Ponyta-Galar",
+      "Exeggcute",
+      "Happiny",
+      "Mime Jr.",
+      "Eevee",
+      "Porygon",
+      "Togepi",
+      "Hoppip",
+      "Snubbull",
+      "Ralts",
+      "Wynaut",
+      "Cherubi",
+      "Cottonee",
+      "Petilil",
+      "Flabebe",
+      "Spritzee",
+      "Swirlix",
+      "Cutiefly",
+      "Morelull",
+      "Hatenna",
+      "Impidimp",
+      "Milcery",
+      "Fidough",
+      "Flittle",
+      "Tinkatink"
+    ],
+    [
+      "Clefairy",
+      "Jigglypuff",
+      "Rapidash-Galar",
+      "Exeggutor",
+      "Chansey",
+      "Mr. Mime",
+      "Porygon2",
+      "Togetic",
+      "Skiploom",
+      "Granbull",
+      "Smeargle",
+      "Kirlia",
+      "Volbeat",
+      "Illumise",
+      "Cherrim",
+      "Lilligant",
+      "Floette",
+      "Aromatisse",
+      "Slurpuff",
+      "Dedenne",
+      "Shiinotic",
+      "Hattrem",
+      "Morgrem",
+      "Tinkatuff"
+    ],
+    [
+      "Clefable",
+      "Wigglytuff",
+      "Exeggutor-Alola",
+      "Blissey",
+      "Ditto",
+      "Togekiss",
+      "Jumpluff",
+      "Wobbufet",
+      "Gardevoir",
+      "Gallade",
+      "Whimsicott",
+      "Lilligant-Hisui",
+      "Florges",
+      "Sylveon",
+      "Klefki",
+      "Ribombee",
+      "Comfey",
+      "Hatterene",
+      "Grimmsnarl",
+      "Alcremie",
+      "Dachsbun",
+      "Espathra",
+      "Tinkaton"
+    ],
+    [
+      "Regidrago"
+    ]
+  ],
+  "CommonItems": [
+    {
+      "Name": "Fire Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Water Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Grass Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Electric Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Normal Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Fighting Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Flying Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Poison Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Ground Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Rock Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Bug Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Ghost Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Psychic Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Ice Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Dragon Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Dark Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Steel Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Fairy Esscence",
+      "Min": 3,
+      "Max": 6
+    },
+    {
+      "Name": "Babiri Berry",
+      "Min": 1,
+      "Max": 2
+    },
+    {
+      "Name": "Kebia Berry",
+      "Min": 1,
+      "Max": 2
+    }
+  ],
+  "RareItems": [
+    {
+      "Name": "Moon Stone",
+      "Min": 1,
+      "Max": 1
+    },
+    {
+      "Name": "Shiny Stone",
+      "Min": 1,
+      "Max": 1
+    },
+    {
+      "Name": "Choice Band",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Choice Specs",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Choice Scarf",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Metronome",
+      "Min": 2,
+      "Max": 4
+    },
+    {
+      "Name": "Fairy Feather",
+      "Min": 2,
+      "Max": 4
+    }
+  ],
+  "BossItem": {
+    "Name": "Titan Plate 4",
+    "Min": 1,
+    "Max": 1
+  },
+  "RoomShortcuts": [
+    {
+      "Conditions": [
+        {
+          "ConditionType": "MOVE",
+          "Which": [
+            "Play Nice",
+            "Play Rough",
+            "Foul Play",
+            "Role Play",
+            "Tickle",
+            "Baby-Doll Eyes",
+            "Hold Hands"
+          ]
+        }
+      ],
+      "Clue": "Upon entrance to the island, a number of Fairy Pokemon demand their toll (you need to play with them).",
+      "Resolution": "The Fairies play with $1 eye the whole afternoon. Then they give you safe passage through the island.",
+      "RoomNumber": 0,
+      "RoomDestination": 5
+    },
+    {
+      "Conditions": [
+        {
+          "ConditionType": "MOVE",
+          "Which": [
+            "Dig",
+            "Strength",
+            "Rock Smash",
+            "Fly",
+            "Cut"
+          ]
+        },
+        {
+          "ConditionType": "POKEMON",
+          "Which": [
+            "Wailord",
+            "Relicanth"
+          ]
+        },
+        {
+          "ConditionType": "ITEM",
+          "Which": [
+            "Icicle Plate",
+            "Icy Rock",
+            "Never-Melt Ice",
+            "Snowball"
+          ]
+        }
+      ],
+      "Clue": "There's a magic bridge ahead. It could be activated but the instructions are in a weird language: ⠗⠑⠛⠊ ⠏⠥⠵⠵⠇⠑",
+      "Resolution": "Your $1 shines and... You know what this doesn't make any sense.",
+      "RoomNumber": 5,
+      "RoomDestination": 10
+    }
+  ],
+  "DungeonShortcut": {
+    "Conditions": [],
+    "Clue": "You're on the top of whimsy island. What adventures lie ahead?",
+    "Resolution": "",
+    "RoomNumber": 10,
+    "RoomDestination": 10
+  },
+  "WildMonsEvent": {
+    "EventType": "POKEMON_BATTLE",
+    "PreEventString": "Suddenly, wild Pokemon attack!",
+    "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
+    "EventLook": "☻",
+    "EventFg": "Black",
+    "EventBg": "Green"
+  },
+  "BossEvent": {
+    "EventType": "BOSS",
+    "PreEventString": "In the center of the island, you find an overwhelming energy. The rocks start floating as a great ancient force is awoken...",
+    "PostEventString": "As you defeat the titan, the ground rumbles. Your actions here have are changing the world.",
+    "EventLook": "",
+    "EventFg": "Black",
+    "EventBg": "Black",
+    "OffsetAnchorX": 0,
+    "OffsetAnchorY": 0
+  },
+  "CampingEvent": {
+    "EventType": "CAMPING",
+    "PreEventString": "You find an area safe from the mischievous Fairy Pokemon.",
+    "PostEventString": "But now it's time to move on...",
+    "EventLook": "⛺︎",
+    "EventFg": "DarkYellow",
+    "EventBg": "Green"
+  },
+  "PreBossEvent": {
+    "EventType": "REGIDRAGO"
+  },
+  "PostBossEvent": {
+    "EventType": "PLOT_CLUE",
+    "PreEventString": "One day they will awaken once more.",
+    "PostEventString": "The Earth will shake, in two, will break ..."
+  },
+  "CustomShowdownRules": [
+    "Continuous Misty Terrain Mod"
+  ],
+  "DungeonArchetypes": [
+    "EXPLORATION",
+    "BACKGROUND_TERRAIN"
+  ],
+  "DungeonWeather": "NONE",
+  "DungeonTerrain": "MISTY",
+  "NextDungeon": "",
+  "NextDungeonShortcut": ""
+}
