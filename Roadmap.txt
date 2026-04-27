@@ -4,6 +4,9 @@ Mechanics to implement:
 - Sandwich (herba mystica -> sandwich -> picnic)
  -> Herba and sandwiches are in place just need to add text and explanation
 ---
+BUGS:
+- Item not working properly with favors
+- Advanced Disk not consuming Blank Item
 POSSIBLE THINGS TO LOOK FOR:
 - Debug shiny stone (when it happens)
 - Debug level multiplier (when it happens)

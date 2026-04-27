@@ -93,7 +93,7 @@ namespace IndymonBackendProgram
                 if (trainerMon.SetItem != null && trainerMon.SetItem.Expires)
                 {
                     SetItem replacementItem = GameDataContainers.GlobalGameData.SetItems.GetValueOrDefault(trainerMon.SetItem.ItemReplacement); // Obtain the potential replacement item, which will be consumed instead
-                    if (trainer.SetItems.TryGetValue(replacementItem, out int value) && value >= trainerMon.SetItem.ItemReplacementQuantity) // Try to remove the replacement item first
+                    if (replacementItem != null && trainer.SetItems.TryGetValue(replacementItem, out int value) && value >= trainerMon.SetItem.ItemReplacementQuantity) // Try to remove the replacement item first
                     {
                         Utilities.GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, replacementItem, -trainerMon.SetItem.ItemReplacementQuantity, true); // Remove replacement item instead
                         if (!trainerMon.SetItemChosen) monActions.Add($"{trainerMon.SetItem.ItemReplacementQuantity}x {replacementItem.Name} (due to {trainerMon.SetItem.Name})");
