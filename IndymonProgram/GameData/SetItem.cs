@@ -84,6 +84,7 @@ namespace GameData
                 resultingItem.AlwaysAllowedItem = true;
                 resultingItem.ItemReplacementQuantity = addedMoveNames.Length;
                 resultingItem.Expires = resultingItem.ItemReplacementQuantity > 0; // Only expires if it requires Blank Disks
+                resultingItem.ItemReplacement = BLANK_DISK;
             }
             else if (itemName.Contains(ABILITY_CHARM))
             {
