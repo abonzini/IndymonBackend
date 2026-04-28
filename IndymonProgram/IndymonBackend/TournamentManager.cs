@@ -245,19 +245,21 @@ namespace IndymonBackendProgram
             OngoingTournament.ResetTournament(); // Reset the tournament if one was already in progress
             OngoingTournament.PlayTournament();
         }
-        /// <summary>
-        /// Does the animation and stuff
-        /// </summary>
-        public void FinaliseTournament()
+        public void AnimateTournament()
         {
             // First, animate tournament
             Console.WriteLine("Animate? y/N");
             string input = Console.ReadLine();
             if (input.ToLower() == "y")
             {
-                OngoingTournament.FinaliseTournament();
+                OngoingTournament.AnimateTournament();
             }
-
+        }
+        /// <summary>
+        /// Does the final team update
+        /// </summary>
+        public void FinaliseTournament()
+        {
             // Also, ask the tournament to update the sheets
             OngoingTournament.UpdateLeaderboard();
             // Also, need to update the items and sheets for participants
@@ -343,7 +345,7 @@ namespace IndymonBackendProgram
         /// <summary>
         /// Performs tournament animation once complete
         /// </summary>
-        public abstract void FinaliseTournament();
+        public abstract void AnimateTournament();
         /// <summary>
         /// Asks tournament to update leaderboard according to match history
         /// </summary>
@@ -799,7 +801,7 @@ namespace IndymonBackendProgram
             }
             Console.CursorVisible = false;
         }
-        public override void FinaliseTournament()
+        public override void AnimateTournament()
         {
             // Find person with the longest name
             int nameLength = 0;
@@ -1040,7 +1042,7 @@ namespace IndymonBackendProgram
             }
             Console.CursorVisible = false;
         }
-        public override void FinaliseTournament()
+        public override void AnimateTournament()
         {
             // Find person with the longest name
             int nameLength = 0;
@@ -1293,7 +1295,7 @@ namespace IndymonBackendProgram
                 return $"{Name}, {Wins}W ({Diff})";
             }
         }
-        public override void FinaliseTournament()
+        public override void AnimateTournament()
         {
             // Find person with the longest name
             int groupTextLength = "group 000".Length; // Minimum size needs to fit header and 999 (!) groups

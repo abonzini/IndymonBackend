@@ -75,6 +75,7 @@ namespace IndymonBackendProgram
                         tournamentManager.ExecuteTournament();
                         break;
                     case "3":
+                        tournamentManager.AnimateTournament();
                         tournamentManager.UpdateTournamentTeams(true); // May need to redo team seeding if file was loaded (auto tho)
                         tournamentManager.FinaliseTournament();
                         Console.WriteLine("Writing tournament stats");
