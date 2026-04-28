@@ -112,7 +112,7 @@ namespace IndymonBackendProgram
                 MonsFound.Add(rank, rankMons);
             }
             string monName = mon.Species;
-            if (mon.IsShiny) monName += "✦"; // Add shiny tag too
+            if (mon.IsShiny) monName += "★"; // Add shiny tag too
             GeneralUtilities.AddtemToCountDictionary(rankMons, monName, 1);
         }
         /// <summary>
@@ -732,7 +732,8 @@ namespace IndymonBackendProgram
                     break;
                 case RoomEventType.PARADOX:
                     {
-                        string chosenMove = GeneralUtilities.GetRandomPick(MechanicsDataContainers.GlobalMechanicsData.Moves.Keys.ToList());
+                        List<Move> validMoves = [.. MechanicsDataContainers.GlobalMechanicsData.Moves.Values.Where(m => !m.Flags.Contains(EffectFlag.NORMALLY_UNAVAILABLE) && !m.Flags.Contains(EffectFlag.BANNED))];
+                        string chosenMove = GeneralUtilities.GetRandomPick(validMoves).Name;
                         string diskName = $"{chosenMove} {SetItem.ADVANCED_DISK}"; // Create the advanced disk
                         int blankDiskCount = GeneralUtilities.GetRandomNumber(2, 5); // 2 to 4 blank disks
                         string giftString = $"{diskName} and {blankDiskCount} Blank Disks";
@@ -1125,6 +1126,7 @@ namespace IndymonBackendProgram
                         enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[2].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
                         enemyMons.UnionWith([.. _dungeonData.PokemonEachFloor[3].Select(m => MechanicsDataContainers.GlobalMechanicsData.Dex[m])]);
                         TeamBuilder.DefineTrainerSets(randomNpc, true, _dungeonData.DungeonArchetypes, _dungeonData.DungeonWeather, _dungeonData.DungeonTerrain, new Constraint(), [.. enemyMons]); // Team build but with the dungeon's weather and such 
+                        randomNpc.RestoreAll();
                         Console.WriteLine($"Fighting {randomNpc.Name}");
                         string npcString = roomEvent.PreEventString.Replace("$1", randomNpc.Name);
                         GenericMessageCommand(npcString); // Prints the message but we know it could have a $1
