@@ -351,12 +351,6 @@
           "Which": [
             "Dragon's Maw"
           ]
-        },
-        {
-          "ConditionType": "TYPE",
-          "Which": [
-            "Dragon"
-          ]
         }
       ],
       "Clue": "You see the end of the sky castle in the distance. You clearly can't make it across from here, but a dragon Pokemon flying nearby seems friendly, you may be able to get it's attention and ask it for help.",
