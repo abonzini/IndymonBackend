@@ -176,19 +176,21 @@ namespace IndymonBackendProgram
         {
             const int MAX_ITEMS = 20;
             const int MAX_BOX = 16;
-            static void WarnIf(int count, int max, string what)
+            static void WarnIf(List<string> container, int max, string what)
             {
-                if (count > max)
+                if (container.Count > max)
                 {
-                    GameDataContainers.GlobalGameData.CurrentEventMessage.PostEventText.AppendLine($"||You currently have {count}/{max} {what}. Please discard or use before the deadline, otherwise the last few will be discarded until they can fit. Please consider re-enabling the auto-item setting too if not planning to use your items.||");
+                    int overflow = max - container.Count;
+                    string potentialDiscarded = string.Join(", ", container[^max..]); // Get the last elements
+                    GameDataContainers.GlobalGameData.CurrentEventMessage.PostEventText.AppendLine($"||You currently have {container.Count}/{max} {what}. Please discard or use before the deadline, otherwise the last few will be discarded until they can fit. Please consider re-enabling the auto-item setting too if not planning to use your items. Currently the following would otherwise be discarded: {potentialDiscarded}||");
                 }
             }
-            WarnIf(trainer.SetItems.Count, MAX_ITEMS, "Set Items");
-            WarnIf(trainer.ModItems.Count, MAX_ITEMS, "Mod Items");
-            WarnIf(trainer.BattleItems.Count, MAX_ITEMS, "Battle Items");
-            WarnIf(trainer.Favours.Count, MAX_ITEMS, "Favours");
-            WarnIf(trainer.KeyItems.Count, MAX_ITEMS, "Key Items");
-            WarnIf(trainer.BoxedPokemon.Count, MAX_BOX, "Boxed Pokemon");
+            WarnIf([.. trainer.SetItems.Select(i => (i.Value > 1) ? $"{i.Key.Name} x{i.Value}" : $"{i.Key.Name}").Order()], MAX_ITEMS, "Set Items");
+            WarnIf([.. trainer.ModItems.Select(i => (i.Value > 1) ? $"{i.Key.Name} x{i.Value}" : $"{i.Key.Name}").Order()], MAX_ITEMS, "Mod Items");
+            WarnIf([.. trainer.BattleItems.Select(i => (i.Value > 1) ? $"{i.Key.Name} x{i.Value}" : $"{i.Key.Name}").Order()], MAX_ITEMS, "Battle Items");
+            WarnIf([.. trainer.Favours.Select(i => (i.Value > 1) ? $"{i.Key.Name} x{i.Value}" : $"{i.Key.Name}").Order()], MAX_ITEMS, "Favours");
+            WarnIf([.. trainer.KeyItems.Select(i => (i.Value > 1) ? $"{i.Key} x{i.Value}" : $"{i.Key}").Order()], MAX_ITEMS, "Key Items");
+            WarnIf([.. trainer.BoxedPokemon.Select(i => $"{i.Species}").Order()], MAX_BOX, "Boxed Pokemon");
         }
     }
 }

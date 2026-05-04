@@ -284,7 +284,7 @@
         }
     ],
     "BossItem": {
-        "Name": "Boss Sun Stone",
+        "Name": "Sun Stone",
         "Min": 3,
         "Max": 3
     },

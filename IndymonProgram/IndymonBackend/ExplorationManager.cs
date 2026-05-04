@@ -545,14 +545,18 @@ namespace IndymonBackendProgram
                         if (itemCount < 1) itemCount = 1;
                         string enemySpecies = GeneralUtilities.GetRandomPick(_dungeonData.PokemonEachFloor[enemyFloor]); // Boss will be a random one
                         // Find what item the enemy will have, ensure boss has something atleast
-                        string item = _dungeonData.BossItem.Name;
-                        IndymonUtilities.RewardType itemType = IndymonUtilities.GetRewardType(item);
+                        string equippedItem = _dungeonData.BossItem.Name;
+                        IndymonUtilities.RewardType itemType = IndymonUtilities.GetRewardType(equippedItem);
                         while (!(itemType == IndymonUtilities.RewardType.MOD || itemType == IndymonUtilities.RewardType.BATTLE || itemType == IndymonUtilities.RewardType.SET))
                         {
-                            item = GeneralUtilities.GetRandomPick(_dungeonData.RareItems).Name; // Pick new item from rare pool until it's an equippable one
-                            itemType = IndymonUtilities.GetRewardType(item);
+                            equippedItem = GeneralUtilities.GetRandomPick(_dungeonData.RareItems).Name; // Pick new item from rare pool until it's an equippable one
+                            itemType = IndymonUtilities.GetRewardType(equippedItem);
                         }
-                        Trainer bossTrainer = GenerateEnemyTrainer("BossEncounter", [enemySpecies], [item], 100, 100, true);
+                        if (equippedItem == "Sun Stone") // Bosses are immune to sun stone's negative effect
+                        {
+                            equippedItem = "Boss Sun Stone";
+                        }
+                        Trainer bossTrainer = GenerateEnemyTrainer("BossEncounter", [enemySpecies], [equippedItem], 100, 100, true);
                         DefineEnemySet(bossTrainer, 24, true); // Defines the enemy set (smart for a final boss challenge!)
                         string bossString = roomEvent.PreEventString.Replace("$1", enemySpecies);
                         GenericMessageCommand(bossString); // Prints the message but we know it could have a $1
