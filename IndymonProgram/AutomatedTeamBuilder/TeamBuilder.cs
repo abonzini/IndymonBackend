@@ -1,4 +1,5 @@
 ﻿using GameData;
+using GameDataContainer;
 using MechanicsData;
 using MechanicsDataContainer;
 using Utilities;
@@ -147,12 +148,17 @@ namespace AutomatedTeamBuilder
                                     List<SetItem> possibleSetItems = [.. trainer.SetItems.Keys.OrderBy(s => s.Name)];
                                     foreach (SetItem setItem in possibleSetItems) // Need to check which set items are available
                                     {
-                                        if (setItem.CanEquip(mon))
+                                        // Check if item could be replaced
+                                        SetItem replacementItem = GameDataContainers.GlobalGameData.SetItems.GetValueOrDefault(setItem.ItemReplacement);
+                                        if (replacementItem == null || (trainer.SetItems.TryGetValue(replacementItem, out int count) && count >= setItem.ItemReplacementQuantity)) // If null, meaning set item doesn't have a valid replacement, or it has replacement but trainer has, then it could eb considered
                                         {
-                                            if (setItem.AddedAbility != null && !possibleAbilities.Contains(setItem.AddedAbility)) // if available and not included yet, I add to possibilities
+                                            if (setItem.CanEquip(mon))
                                             {
-                                                possibleAbilities.Add(setItem.AddedAbility);
-                                                abilityScores.Add(initialItemScore);
+                                                if (setItem.AddedAbility != null && !possibleAbilities.Contains(setItem.AddedAbility)) // if available and not included yet, I add to possibilities
+                                                {
+                                                    possibleAbilities.Add(setItem.AddedAbility);
+                                                    abilityScores.Add(initialItemScore);
+                                                }
                                             }
                                         }
                                     }
@@ -217,16 +223,21 @@ namespace AutomatedTeamBuilder
                                     List<SetItem> possibleSetItems = [.. trainer.SetItems.Keys.OrderBy(s => s.Name)];
                                     foreach (SetItem setItem in possibleSetItems) // Need to check which set items are available
                                     {
-                                        if (setItem.CanEquip(mon))
+                                        // Check if item could be replaced
+                                        SetItem replacementItem = GameDataContainers.GlobalGameData.SetItems.GetValueOrDefault(setItem.ItemReplacement);
+                                        if (replacementItem == null || (trainer.SetItems.TryGetValue(replacementItem, out int count) && count >= setItem.ItemReplacementQuantity)) // If null, meaning set item doesn't have a valid replacement, or it has replacement but trainer has, then it could eb considered
                                         {
-                                            if (setItem.AddedMoves.Count > 0 && setItem.AddedMoves.Except(possibleMoves).Any()) // if available and some move would be new, add to option
+                                            if (setItem.CanEquip(mon))
                                             {
-                                                foreach (Move addedMove in setItem.AddedMoves)
+                                                if (setItem.AddedMoves.Count > 0 && setItem.AddedMoves.Except(possibleMoves).Any()) // if available and some move would be new, add to option
                                                 {
-                                                    if (!possibleMoves.Contains(addedMove)) // Add the moves that weren't there before
+                                                    foreach (Move addedMove in setItem.AddedMoves)
                                                     {
-                                                        possibleMoves.Add(addedMove); // Adds the missing moves to list
-                                                        moveScores.Add(initialItemScore);
+                                                        if (!possibleMoves.Contains(addedMove)) // Add the moves that weren't there before
+                                                        {
+                                                            possibleMoves.Add(addedMove); // Adds the missing moves to list
+                                                            moveScores.Add(initialItemScore);
+                                                        }
                                                     }
                                                 }
                                             }
