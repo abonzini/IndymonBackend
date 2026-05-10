@@ -130,7 +130,8 @@ namespace AutomatedTeamBuilder
         /// <param name="possibleTeamBuilds">All the possible builds for the trainers</param>
         /// <param name="acceptLessMons">If we accept less mons than the exace value of nMons</param>
         /// <param name="seed">Seed used to select trainer mons</param>
-        public static void AssembleTrainersBattleTeam(Trainer trainer, int nMons, List<PossibleTeamBuild> possibleTeamBuilds, bool acceptLessMons, int seed = 0)
+        /// <param name="defaultFavourTrainer">To hasten ultrabeast tournament, will do the whole favour selection quickly by auto borrowing for this trainer</param>
+        public static void AssembleTrainersBattleTeam(Trainer trainer, int nMons, List<PossibleTeamBuild> possibleTeamBuilds, bool acceptLessMons, int seed = 0, Trainer defaultFavourTrainer = null)
         {
             Console.WriteLine($"Assembling {trainer.Name}'s team");
             Random rng;
@@ -206,21 +207,39 @@ namespace AutomatedTeamBuilder
             }
             while (monsInTeam < nMons && usedBuild.FavourPokemon.Count > 0) // While need mons and there's favour to use
             {
-                Console.WriteLine("Will favour be used? y/N");
-                string input = Console.ReadLine();
-                if (input.ToLower() == "y") // Favour to be used
+                string input = "";
+                if (defaultFavourTrainer == null)
+                {
+                    Console.WriteLine("Will favour be used? y/N");
+                    input = Console.ReadLine();
+                }
+                if (defaultFavourTrainer != null || input.ToLower() == "y") // Favour to be used
                 {
                     // Get trainer
-                    List<string> nameList = [.. usedBuild.FavourPokemon.Keys.Select(f => f.Name)];
-                    Console.WriteLine($"Which favour to use? {string.Join(",", nameList)}");
-                    input = Console.ReadLine();
-                    // Get mon
-                    Trainer borrowedTrainer = usedBuild.FavourPokemon.Keys.Where(f => f.Name == input).First();
+                    Trainer borrowedTrainer;
+                    List<string> nameList;
+                    if (defaultFavourTrainer == null)
+                    {
+
+                        nameList = [.. usedBuild.FavourPokemon.Keys.Select(f => f.Name)];
+                        Console.WriteLine($"Which favour to use? {string.Join(",", nameList)}");
+                        input = Console.ReadLine();
+                        // Get mon
+                        borrowedTrainer = usedBuild.FavourPokemon.Keys.Where(f => f.Name == input).First();
+                    }
+                    else
+                    {
+                        borrowedTrainer = defaultFavourTrainer;
+                    }
                     nameList = [.. usedBuild.FavourPokemon[borrowedTrainer].Select(m => m.Species)];
-                    Console.WriteLine($"Which mon to borrow? 0 if random. {string.Join(",", nameList)}");
-                    input = Console.ReadLine();
+                    if (defaultFavourTrainer == null)
+                    {
+
+                        Console.WriteLine($"Which mon to borrow? 0 if random. {string.Join(",", nameList)}");
+                        input = Console.ReadLine();
+                    }
                     TrainerPokemon borrowedMon;
-                    if (input == "0")
+                    if (defaultFavourTrainer != null || input == "0")
                     {
                         borrowedMon = GeneralUtilities.GetRandomPick(usedBuild.FavourPokemon[borrowedTrainer]);
                     }
@@ -228,9 +247,16 @@ namespace AutomatedTeamBuilder
                     {
                         borrowedMon = usedBuild.FavourPokemon[borrowedTrainer].Where(m => m.Species == input).First();
                     }
-                    borrowedMon.Borrowed = true;
+                    TrainerPokemon borrowedClone = new TrainerPokemon() // Clone the mon because multiple trainers may borrow the same mon
+                    {
+                        Nickname = borrowedMon.Nickname,
+                        Species = borrowedMon.Species,
+                        IsShiny = borrowedMon.IsShiny,
+                        PokeBall = borrowedMon.PokeBall,
+                        Borrowed = true
+                    };
                     // Then, item building
-                    if (trainer.SetItems.Count > 0)
+                    if (defaultFavourTrainer == null && trainer.SetItems.Count > 0)
                     {
                         Console.WriteLine("Use set item? y/N");
                         input = Console.ReadLine();
@@ -245,7 +271,7 @@ namespace AutomatedTeamBuilder
                             GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, item, -1, true);
                         }
                     }
-                    if (trainer.ModItems.Count > 0)
+                    if (defaultFavourTrainer == null && trainer.ModItems.Count > 0)
                     {
                         Console.WriteLine("Use mod item? y/N");
                         input = Console.ReadLine();
@@ -260,7 +286,7 @@ namespace AutomatedTeamBuilder
                             GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, item, -1, true);
                         }
                     }
-                    if (trainer.BattleItems.Count > 0)
+                    if (defaultFavourTrainer == null && trainer.BattleItems.Count > 0)
                     {
                         Console.WriteLine("Use battle item? y/N");
                         input = Console.ReadLine();
@@ -284,14 +310,14 @@ namespace AutomatedTeamBuilder
                             validSelections.Add(i);
                         }
                     }
-                    Console.WriteLine($"Where to place the mon? {string.Join(",", validSelections)}, -1 if random");
-                    int selection = int.Parse(Console.ReadLine());
-                    if (selection == -1)
+                    int selection = -1;
+                    if (defaultFavourTrainer == null)
                     {
-                        selection = rng.Next(0, validSelections.Count);
+                        Console.WriteLine($"Where to place the mon? {string.Join(",", validSelections)}, -1 if random");
+                        selection = int.Parse(Console.ReadLine());
                     }
                     BorrowFavour(borrowedTrainer, borrowedMon); // Housekeeping regarding the favour in question
-                    AddNextMonToFinalTeam(borrowedMon, selection);
+                    AddNextMonToFinalTeam(borrowedClone, selection);
                 }
                 else
                 {

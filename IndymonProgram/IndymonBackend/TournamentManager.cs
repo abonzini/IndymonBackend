@@ -52,7 +52,8 @@ namespace IndymonBackendProgram
             List<Trainer> trainers = [];
             foreach (Trainer trainer in GameDataContainers.GlobalGameData.TrainerData.Values)
             {
-                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(trainer, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false);
+                bool acceptLessMons = OngoingTournament.CommonFavourTrainer != null; // If there's a common favour trainer, then it's ok that trainers may have less valid mons than allowed
+                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(trainer, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, acceptLessMons);
                 StringBuilder messageBuilder = new StringBuilder();
                 messageBuilder.AppendLine($"{trainer.Name} <@{trainer.DiscordNumber}>:");
                 foreach (PossibleTeamBuild build in possibleBuilds)
@@ -202,7 +203,7 @@ namespace IndymonBackendProgram
                 }
                 // Indymon S2 addition, confirm sets now does the smart teambuild
                 List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false); // Get all of the possible sets that would satisfy this
-                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds, false, participantData.Item2); // Chooses one of the sets, prepares the mons
+                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds, false, participantData.Item2, OngoingTournament.CommonFavourTrainer); // Chooses one of the sets, prepares the mons
                 if (OngoingTournament.CommonFavourTrainer != null) // If trainers will borrow mons from a pool too...
                 {
                     GeneralUtilities.AddtemToCountDictionary(participant.Favours, OngoingTournament.CommonFavourTrainer, -99, true); // Remove the given favours
@@ -630,6 +631,9 @@ namespace IndymonBackendProgram
                     };
                     CommonFavourTrainer.PartyPokemon.Add(nextPokemonInTeam); // Add mon
                 }
+                // The rest of tourn continues without specific constraints
+                BaseConstraint.AllConstraints = [];
+                TeamBuildConstrainOptions = [BaseConstraint];
             }
             else // Normal tournament, empty constraint
             {
