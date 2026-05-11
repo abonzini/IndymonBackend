@@ -141,11 +141,11 @@ namespace IndymonBackendProgram
                     if (trainer.BattleItems.ContainsKey(trainerMon.BattleItem)) // Try to remove the inventory one
                     {
                         Utilities.GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, trainerMon.BattleItem, -1, true);
-                        if (!trainerMon.SetItemChosen) monActions.Add($"{trainerMon.BattleItem}");
+                        if (!trainerMon.BattleItemChosen) monActions.Add($"{trainerMon.BattleItem}");
                     }
                     else // Worst case just delete the mon's item
                     {
-                        if (!trainerMon.SetItemChosen) monActions.Add($"{trainerMon.BattleItem}");
+                        if (!trainerMon.BattleItemChosen) monActions.Add($"{trainerMon.BattleItem}");
                         trainerMon.BattleItem = null; // Delete
                     }
                     // Finally, if mon borrowed this item (auto), return it
