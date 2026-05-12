@@ -21,9 +21,9 @@
     },
     {
       "EventType": "PLOT_CLUE",
-      "PreEventString": "An old man is standing in front of you with a blank stare. He smells like coffee. He says 'You don't know how to catch a Pokémon? I suppose I had better show you then!'.",
-      "PostEventString": "He throws a Pokeball at the middle of the room, but there wasn't anything in there. Then, the old man stays in place, not doing anything. You pick the Poke Ball in the ground, and immediately feel uneasy.",
-      "SpecialParams": "Corrupted Poke Ball",
+      "PreEventString": "An old man is standing in front of you happy. He smells like coffee.",
+      "PostEventString": "He gives you a Poke Ball, happy that you came to visit.",
+      "SpecialParams": "Poke Ball",
       "EventLook": "⚇",
       "EventFg": "White",
       "EventBg": "Black"
