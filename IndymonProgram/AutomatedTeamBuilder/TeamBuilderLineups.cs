@@ -266,8 +266,8 @@ namespace AutomatedTeamBuilder
                             Console.WriteLine($"Which set item? {string.Join(",", nameList)}");
                             input = Console.ReadLine();
                             SetItem item = trainer.SetItems.Keys.Where(i => i.Name == input).First();
-                            borrowedMon.SetItem = item;
-                            borrowedMon.SetItemChosen = true;
+                            borrowedClone.SetItem = item;
+                            borrowedClone.SetItemChosen = true;
                             GeneralUtilities.AddtemToCountDictionary(trainer.SetItems, item, -1, true);
                         }
                     }
@@ -281,8 +281,8 @@ namespace AutomatedTeamBuilder
                             Console.WriteLine($"Which mod item? {string.Join(",", nameList)}");
                             input = Console.ReadLine();
                             Item item = trainer.ModItems.Keys.Where(i => i.Name == input).First();
-                            borrowedMon.ModItem = item;
-                            borrowedMon.ModItemChosen = true;
+                            borrowedClone.ModItem = item;
+                            borrowedClone.ModItemChosen = true;
                             GeneralUtilities.AddtemToCountDictionary(trainer.ModItems, item, -1, true);
                         }
                     }
@@ -296,8 +296,8 @@ namespace AutomatedTeamBuilder
                             Console.WriteLine($"Which battle item? {string.Join(",", nameList)}");
                             input = Console.ReadLine();
                             Item item = trainer.BattleItems.Keys.Where(i => i.Name == input).First();
-                            borrowedMon.BattleItem = item;
-                            borrowedMon.BattleItemChosen = true;
+                            borrowedClone.BattleItem = item;
+                            borrowedClone.BattleItemChosen = true;
                             GeneralUtilities.AddtemToCountDictionary(trainer.BattleItems, item, -1, true);
                         }
                     }

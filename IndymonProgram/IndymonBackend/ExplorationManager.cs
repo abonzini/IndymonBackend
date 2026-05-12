@@ -1427,7 +1427,7 @@ namespace IndymonBackendProgram
                             foreach (TrainerPokemon pokemon in _trainer.BattleTeam)
                             {
                                 // Shortcuts shouldn't be triggered accindentally, so they can only be triggered with the right set item
-                                if (pokemon.SetItem != null && pokemon.SetItemChosen && pokemon.SetItem.Name.Contains("Disk")) // disk found
+                                if (pokemon.SetItem != null && pokemon.SetItemChosen && pokemon.SetItem.Name.Contains("Advanced Disk")) // disk found
                                 {
                                     message = $"{pokemon.GetInformalName()}'s {pokemon.SetItem.Name}";
                                     canTakeShortcut = true;
