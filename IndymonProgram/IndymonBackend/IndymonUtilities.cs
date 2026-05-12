@@ -180,8 +180,8 @@ namespace IndymonBackendProgram
             {
                 if (container.Count > max)
                 {
-                    int overflow = max - container.Count;
-                    string potentialDiscarded = string.Join(", ", container[^max..]); // Get the last elements
+                    int overflow = container.Count - max;
+                    string potentialDiscarded = string.Join(", ", container[^overflow..]); // Get the last elements
                     GameDataContainers.GlobalGameData.CurrentEventMessage.PostEventText.AppendLine($"||You currently have {container.Count}/{max} {what}. Please discard or use before the deadline, otherwise the last few will be discarded until they can fit. Please consider re-enabling the auto-item setting too if not planning to use your items. Currently the following would otherwise be discarded: {potentialDiscarded}||");
                 }
             }
