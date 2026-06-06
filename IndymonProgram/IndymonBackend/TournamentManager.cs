@@ -52,7 +52,7 @@ namespace IndymonBackendProgram
             List<Trainer> trainers = [];
             foreach (Trainer trainer in GameDataContainers.GlobalGameData.TrainerData.Values)
             {
-                bool acceptLessMons = OngoingTournament.CommonFavourTrainer != null; // If there's a common favour trainer, then it's ok that trainers may have less valid mons than allowed
+                bool acceptLessMons = OngoingTournament.CommonFavourMons.Count > 0; // If there's a common favour trainer, then it's ok that trainers may have less valid mons than allowed
                 List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(trainer, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, acceptLessMons);
                 StringBuilder messageBuilder = new StringBuilder();
                 messageBuilder.AppendLine($"{trainer.Name} <@{trainer.DiscordNumber}>:");
@@ -197,16 +197,33 @@ namespace IndymonBackendProgram
                 string participantName = participantData.Item1;
                 // Try to find the participant in the place where located
                 Trainer participant = IndymonUtilities.GetTrainerByName(participantName);
-                if (OngoingTournament.CommonFavourTrainer != null) // If trainers will borrow mons from a pool too...
+
+                Trainer CommonFavourTrainer = null;
+                if (OngoingTournament.CommonFavourMons.Count > 0) // If trainers will borrow mons from a pool too...
                 {
-                    GeneralUtilities.AddtemToCountDictionary(participant.Favours, OngoingTournament.CommonFavourTrainer, 99); // Add 99 of these favours
+                    CommonFavourTrainer = new Trainer()
+                    {
+                        Name = "CommonTrainer"
+                    };
+                    for (int i = 0; i < OngoingTournament.CommonFavourMons.Count; i++)
+                    {
+                        bool isShiny = (GeneralUtilities.GetRandomNumber(50) == 0); // Will be shiny if i get a 0 dice roll
+                        TrainerPokemon nextPokemonInTeam = new TrainerPokemon()
+                        {
+                            Species = OngoingTournament.CommonFavourMons[i],
+                            IsShiny = isShiny
+                        };
+                        CommonFavourTrainer.PartyPokemon.Add(nextPokemonInTeam); // Add mon
+                    }
+
+                    GeneralUtilities.AddtemToCountDictionary(participant.Favours, CommonFavourTrainer, 99); // Add 99 of these favours
                 }
                 // Indymon S2 addition, confirm sets now does the smart teambuild
                 List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false); // Get all of the possible sets that would satisfy this
-                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds, false, participantData.Item2, OngoingTournament.CommonFavourTrainer); // Chooses one of the sets, prepares the mons
-                if (OngoingTournament.CommonFavourTrainer != null) // If trainers will borrow mons from a pool too...
+                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds, false, participantData.Item2, CommonFavourTrainer); // Chooses one of the sets, prepares the mons
+                if (OngoingTournament.CommonFavourMons.Count > 0) // If trainers have borrowed mons from a pool...
                 {
-                    GeneralUtilities.AddtemToCountDictionary(participant.Favours, OngoingTournament.CommonFavourTrainer, -99, true); // Remove the given favours
+                    GeneralUtilities.AddtemToCountDictionary(participant.Favours, CommonFavourTrainer, -99, true); // Remove the given favours
                 }
             }
             StringBuilder teamsheetsString = new StringBuilder();
@@ -322,7 +339,7 @@ namespace IndymonBackendProgram
         public bool FirstInstallment { get; set; } = true;
         public Constraint BaseConstraint { get; set; } = new Constraint();
         public List<Constraint> TeamBuildConstrainOptions { get; set; } = new List<Constraint>();
-        public Trainer CommonFavourTrainer { get; set; } = null;
+        public List<string> CommonFavourMons { get; set; } = new List<string>();
         public int NPlayers { get; set; } = 0;
         public int NMons { get; set; } = 3;
         public List<(string, int)> ParticipantsWithRandomSeed { get; set; } = new List<(string, int)>(); // Participants and teambuild seed
@@ -613,24 +630,10 @@ namespace IndymonBackendProgram
             }
             else if (response.Trim().ToLower() == "ultra")
             {
-                CommonFavourTrainer = new Trainer()
-                {
-                    Name = "UltraParadox"
-                };
-                List<string> pokemonList = ["Nihilego", "Buzzwole", "Pheromosa", "Xurkitree", "Celesteela", "Kartana", "Guzzlord", "Naganadel", "Stakataka", "Blacephalon",
+                CommonFavourMons = ["Nihilego", "Buzzwole", "Pheromosa", "Xurkitree", "Celesteela", "Kartana", "Guzzlord", "Naganadel", "Stakataka", "Blacephalon",
                     "Great Tusk", "Scream Tail", "Brute Bonnet", "Flutter Mane", "Slither Wing", "Sandy Shocks", "Roaring Moon", "Walking Wake", "Gouging Fire", "Raging Bolt",
                     "Iron Treads", "Iron Bundle", "Iron Hands", "Iron Jugulis", "Iron Moth", "Iron Thorns", "Iron Valiant", "Iron Leaves", "Iron Boulder", "Iron Crown"
                 ]; // List of Pokemon borrowed here
-                for (int i = 0; i < pokemonList.Count; i++)
-                {
-                    bool isShiny = (GeneralUtilities.GetRandomNumber(50) == 0); // Will be shiny if i get a 0 dice roll
-                    TrainerPokemon nextPokemonInTeam = new TrainerPokemon()
-                    {
-                        Species = pokemonList[i],
-                        IsShiny = isShiny
-                    };
-                    CommonFavourTrainer.PartyPokemon.Add(nextPokemonInTeam); // Add mon
-                }
                 // The rest of tourn continues without specific constraints
                 BaseConstraint.AllConstraints = [];
                 TeamBuildConstrainOptions = [BaseConstraint];
