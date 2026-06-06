@@ -4,14 +4,16 @@ namespace MoveParser
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Console.WriteLine("Folder where learnsets.ts and pokedex.ts are located?");
             string path = Console.ReadLine();
+            Console.WriteLine("What string to match at beginning?");
+            string stringFilter = Console.ReadLine();
             string learnsetPath = Path.Combine(path, "learnsets.ts");
             string dexPath = Path.Combine(path, "pokedex.ts");
-            string learnsetCsvPath = Path.Combine(path, "learnsets.csv");
-            string abilityCsvPath = Path.Combine(path, "abilities.csv");
+            string learnsetCsvPath = Path.Combine(path, $"learnsets{stringFilter}.csv");
+            string abilityCsvPath = Path.Combine(path, $"abilities.csv");
             if (!File.Exists(learnsetPath))
             {
                 Console.WriteLine("Learnset file not found.");
@@ -25,7 +27,7 @@ namespace MoveParser
             // Get mons first
             Dictionary<string, Pokemon> monData = DexParser.ParseDexFile(dexPath);
             // Update the moves
-            MovesetParser.ParseMovests(learnsetPath, monData);
+            MovesetParser.ParseMovests(learnsetPath, monData, stringFilter);
             // Cleanup
             monData = Cleanups.NameAndMovesetCleanup(monData);
             // Finally, write csv

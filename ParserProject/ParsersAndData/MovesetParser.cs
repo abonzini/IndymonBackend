@@ -12,7 +12,7 @@ namespace ParsersAndData
         /// </summary>
         /// <param name="path">Path to ts</param>
         /// <param name="pokemonLookup">Pokemon list where the moves will be added</param>
-        public static void ParseMovests(string path, Dictionary<string, Pokemon> pokemonLookup)
+        public static void ParseMovests(string path, Dictionary<string, Pokemon> pokemonLookup, string filterMatch)
         {
             string script = File.ReadAllText(path);
             Engine engine = new Engine();
@@ -33,10 +33,14 @@ namespace ParsersAndData
                         ObjectInstance monLearnset = monObject.Get("learnset").AsObject();
                         foreach (KeyValuePair<JsValue, PropertyDescriptor> moveData in monLearnset.GetOwnProperties())
                         {
-                            if (true/*moveData.Value.Value.AsArray().GetOwnProperties().First().Value.Value.ToString().StartsWith("9")*/)
+                            // Separate all gens
+                            foreach (KeyValuePair<JsValue, PropertyDescriptor> prop in moveData.Value.Value.AsArray().GetOwnProperties())
                             {
-                                string move = moveData.Key.ToString().ToLower();
-                                pokemon.Moves.Add(move);
+                                if (prop.Key != "length" && prop.Value.Value.ToString().StartsWith(filterMatch)) // Need to filter out the last field
+                                {
+                                    string move = moveData.Key.ToString().ToLower();
+                                    pokemon.Moves.Add(move);
+                                }
                             }
                         }
                     }
