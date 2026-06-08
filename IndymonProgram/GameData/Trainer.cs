@@ -93,7 +93,7 @@ namespace GameData
             fileBuilder.AppendLine(lineBuilder.ToString());
             // Line 2 is purely text but does contain actual assembled string
             lineBuilder.Clear();
-            lineBuilder.Append($"Mons,,{String.Join("; ", BoxedPokemon.Select(m => m.IsShiny ? $"{m.Species}" : $"{m.Species}✦"))},,Set,Mod,Battle,");
+            lineBuilder.Append($"Mons,,{String.Join("; ", BoxedPokemon.Select(m => m.IsShiny ? $"{m.Species}✦" : $"{m.Species}"))},,Set,Mod,Battle,");
             lineBuilder.Append($"Set Items:,{String.Join("; ", setItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
             lineBuilder.Append($"Mod Items:,{String.Join("; ", modItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
             lineBuilder.Append($"Held Items:,{String.Join("; ", battleItemList.Select(i => (i.Item2 > 1) ? $"{i.Item1} x{i.Item2}" : i.Item1))},");
@@ -126,12 +126,13 @@ namespace GameData
                 }
                 else // Otherwise I look for boxed mons
                 {
+                    int boxRow = i - MAX_MONS_IN_TEAM;
                     // Left boxed mon
-                    if (BoxedPokemon.Count > 2 * i)
+                    if (BoxedPokemon.Count > 2 * boxRow)
                     {
-                        TrainerPokemon nextMon = PartyPokemon[2 * i];
+                        TrainerPokemon nextMon = BoxedPokemon[2 * boxRow];
                         lineBuilder.Append($"{nextMon.Species},");
-                        lineBuilder.Append($"{nextMon.PokeBall}");
+                        lineBuilder.Append($"{nextMon.PokeBall},");
                         lineBuilder.Append($"{nextMon.IsShiny.ToString().ToUpper()},");
                     }
                     else
@@ -140,11 +141,11 @@ namespace GameData
                     }
                     lineBuilder.Append(','); // The space between boxed stuff
                     // Right boxed mon
-                    if (BoxedPokemon.Count > ((2 * i) + 1))
+                    if (BoxedPokemon.Count > ((2 * boxRow) + 1))
                     {
-                        TrainerPokemon nextMon = PartyPokemon[(2 * i) + 1];
+                        TrainerPokemon nextMon = BoxedPokemon[(2 * boxRow) + 1];
                         lineBuilder.Append($"{nextMon.Species},");
-                        lineBuilder.Append($"{nextMon.PokeBall}");
+                        lineBuilder.Append($"{nextMon.PokeBall},");
                         lineBuilder.Append($"{nextMon.IsShiny.ToString().ToUpper()},");
                     }
                     else
