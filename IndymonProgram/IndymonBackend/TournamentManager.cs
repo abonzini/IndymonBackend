@@ -335,8 +335,6 @@ namespace IndymonBackendProgram
     }
     public abstract class Tournament
     {
-        public bool Official { get; set; } = true;
-        public bool FirstInstallment { get; set; } = true;
         public Constraint BaseConstraint { get; set; } = new Constraint();
         public List<Constraint> TeamBuildConstrainOptions { get; set; } = new List<Constraint>();
         public List<string> CommonFavourMons { get; set; } = new List<string>();
@@ -423,8 +421,6 @@ namespace IndymonBackendProgram
         /// <param name="backend">Backend for data</param>
         protected void RegisterTournamentParticipation()
         {
-            if (!FirstInstallment) return; // Dont do anything if tournament had already begun
-            if (!Official) return; // Non official tournaments are not tallied
             foreach ((string, int) participant in ParticipantsWithRandomSeed)
             {
                 List<PlayerAndStats> participantLocation = null;
@@ -488,12 +484,9 @@ namespace IndymonBackendProgram
                 // Update all remaining stats
                 if (p1Stats != null)
                 {
-                    if (Official) // These only tallied in official
-                    {
-                        p1Stats.GamesPlayed++;
-                        p1Stats.Kills += p1Kills;
-                        p1Stats.Deaths += p2Kills;
-                    }
+                    p1Stats.GamesPlayed++;
+                    p1Stats.Kills += p1Kills;
+                    p1Stats.Deaths += p2Kills;
                     if (!p1Stats.EachMuWr.TryGetValue(match.Player2, out IndividualMu mu))
                     {
                         mu = new IndividualMu();
@@ -502,7 +495,7 @@ namespace IndymonBackendProgram
                     bool playerWon = (match.Winner.Trim().ToLower() == p1Stats.Name.Trim().ToLower());
                     if (playerWon)
                     {
-                        if (Official) p1Stats.GamesWon++;
+                        p1Stats.GamesWon++;
                         mu.Wins++;
                     }
                     else
@@ -512,12 +505,9 @@ namespace IndymonBackendProgram
                 }
                 if (p2Stats != null)
                 {
-                    if (Official) // These only tallied in official
-                    {
-                        p2Stats.GamesPlayed++;
-                        p2Stats.Kills += p2Kills;
-                        p2Stats.Deaths += p1Kills;
-                    }
+                    p2Stats.GamesPlayed++;
+                    p2Stats.Kills += p2Kills;
+                    p2Stats.Deaths += p1Kills;
                     if (!p2Stats.EachMuWr.TryGetValue(match.Player1, out IndividualMu mu))
                     {
                         mu = new IndividualMu();
@@ -526,7 +516,7 @@ namespace IndymonBackendProgram
                     bool playerWon = (match.Winner.Trim().ToLower() == p2Stats.Name.Trim().ToLower());
                     if (playerWon)
                     {
-                        if (Official) p2Stats.GamesWon++;
+                        p2Stats.GamesWon++;
                         mu.Wins++;
                     }
                     else
@@ -542,9 +532,8 @@ namespace IndymonBackendProgram
         /// <param name="winner">Who won</param>
         /// <param name="leaderboard">Leaderboard to update</param>
         /// <param name="backend">Backend for extra data</param>
-        protected void SetTournamentWinner(string winnerName)
+        protected static void SetTournamentWinner(string winnerName)
         {
-            if (!Official) return; // Non official tournaments are not tallied
             BattleStats leaderboard = GameDataContainers.GlobalGameData.BattleStats;
             List<PlayerAndStats> winnerLocation = null;
             if (GameDataContainers.GlobalGameData.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
@@ -552,38 +541,6 @@ namespace IndymonBackendProgram
             else { } // Never mind then
             PlayerAndStats winnerStats = winnerLocation?.FirstOrDefault(p => (p.Name == winnerName));
             if (winnerStats != null) winnerStats.TournamentWins++;
-        }
-        /// <summary>
-        /// Checks if certain tournaments are official or not (just to set official tournament wins)
-        /// </summary>
-        protected void AskIfOfficial()
-        {
-            Console.WriteLine("Is this an official (sanctioned) tournament? Y/n");
-            string response = Console.ReadLine();
-            if (response.Trim().ToLower() == "n")
-            {
-                Official = false;
-            }
-            else
-            {
-                Official = true;
-            }
-        }
-        /// <summary>
-        /// Checks if tournament is a 2nd part (e.g. elim after groups) so it doesnt increment counter twice
-        /// </summary>
-        protected void AskIf2ndPart()
-        {
-            Console.WriteLine("Is this the first installment of a tournament? Y/n (Otherwise a 2nd part of an already started tournament)");
-            string response = Console.ReadLine();
-            if (response.Trim().ToLower() == "n")
-            {
-                FirstInstallment = false;
-            }
-            else
-            {
-                FirstInstallment = true;
-            }
         }
         /// <summary>
         /// Checks if certain tournaments are monotype or not
@@ -656,8 +613,6 @@ namespace IndymonBackendProgram
         public int[] SeedOrder { get; set; }
         public override void RequestAdditionalInfo()
         {
-            AskIfOfficial();
-            AskIf2ndPart();
             AskSpecialRulesets();
         }
         public override void ResetTournament()
@@ -965,8 +920,6 @@ namespace IndymonBackendProgram
         public List<TournamentMatch> MatchHistory { get; set; } = null;
         public override void RequestAdditionalInfo()
         {
-            AskIfOfficial();
-            AskIf2ndPart();
             AskSpecialRulesets();
         }
         public override void ResetTournament()
@@ -1135,9 +1088,6 @@ namespace IndymonBackendProgram
         public List<List<List<TournamentMatch>>> MatchHistory { get; set; } = null; // Will go by weeks (list), each week will contain all groups with all matches due that week for that group
         public override void RequestAdditionalInfo()
         {
-            // Ask the typical
-            AskIfOfficial();
-            AskIf2ndPart();
             AskSpecialRulesets();
             // Then group specific
             Console.WriteLine("How many players each group?");
