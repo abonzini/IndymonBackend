@@ -182,7 +182,9 @@ namespace IndymonBackendProgram
                 {
                     int overflow = container.Count - max;
                     string potentialDiscarded = string.Join(", ", container[^overflow..]); // Get the last elements
-                    GameDataContainers.GlobalGameData.CurrentEventMessage.PostEventText.AppendLine($"||You currently have {container.Count}/{max} {what}. Please discard or use before the deadline, otherwise the last few will be discarded until they can fit. Please consider re-enabling the auto-item setting too if not planning to use your items. Currently the following would otherwise be discarded: {potentialDiscarded}||");
+                    string warnString = $"||You currently have {container.Count}/{max} {what}. Please discard or use before the deadline, otherwise the last few will be discarded until they can fit. Please consider re-enabling the auto-item setting too if not planning to use your items. Currently the following would otherwise be discarded: {potentialDiscarded}||";
+                    GameDataContainers.GlobalGameData.CurrentEventMessage.PostEventText.AppendLine(warnString);
+                    Console.WriteLine(warnString);
                 }
             }
             WarnIf([.. trainer.SetItems.Select(i => (i.Value > 1) ? $"{i.Key.Name} x{i.Value}" : $"{i.Key.Name}").Order()], MAX_ITEMS, "Set Items");

@@ -361,7 +361,21 @@ namespace IndymonBackendProgram
             AddInfoColumnCommand("Pokemon", 18);
             AddInfoColumnCommand("Health", 6);
             AddInfoColumnCommand("Status", 6);
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventTitle = $"<@{_trainer.DiscordNumber}> Meanwhile, {_trainer.Name} went on to explore the {Dungeon}.";
+            bool explTicket = false;
+            if (_trainer.KeyItems.ContainsKey("Exploration Ticket"))
+            {
+                Console.WriteLine("Use ticket? y/N");
+                explTicket = Console.ReadLine().ToLower() == "y";
+            }
+            if (explTicket) // Remove ticket and also differen message
+            {
+                GeneralUtilities.AddtemToCountDictionary(_trainer.KeyItems, "Exploration Ticket", -1, true); // Remove a ticket
+                GameDataContainers.GlobalGameData.CurrentEventMessage.EventTitle = $"<@{_trainer.DiscordNumber}> Meanwhile, {_trainer.Name} used their Exploration Ticket for a free trip to {Dungeon}.";
+            }
+            else
+            {
+                GameDataContainers.GlobalGameData.CurrentEventMessage.EventTitle = $"<@{_trainer.DiscordNumber}> Meanwhile, {_trainer.Name} went on to explore the {Dungeon}.";
+            }
             bool explorationFinished;
             do
             {
