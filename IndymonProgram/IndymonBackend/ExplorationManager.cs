@@ -859,6 +859,7 @@ namespace IndymonBackendProgram
                         GenericMessageCommand(roomEvent.PreEventString);
                         Trainer wildMonsTrainer = GenerateEnemyTrainer("WildMons", pokemonThisFloor, [.. items.Select(i => i.Name)], 100, 100, true);
                         DefineEnemySet(wildMonsTrainer, 24, false); // Defines the enemy set (dumb mons tho)
+                        GenericMessageCommand($"Pokemon encountered: {string.Join(", ", pokemonThisFloor)}");
                         Console.Write("Encounter resolution: ");
                         PreFightTrainerMods();
                         int remainingMons = ResolveEncounter(_trainer, wildMonsTrainer);

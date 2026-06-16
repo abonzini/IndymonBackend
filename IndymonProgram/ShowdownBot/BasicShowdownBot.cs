@@ -364,7 +364,15 @@ namespace ShowdownBot
                     {
                         if (currentPokemon.MovesChosenInBattle.Contains(0)) // Do 0 unless already done, in which case do all others 
                         {
-                            moveChoice = GeneralUtilities.GetRandomNumber(1, currentPokemon.ChosenMoveset.Count);
+                            if (currentPokemon.MovesChosenInBattle.Count == currentPokemon.ChosenMoveset.Count) // All options have been used, reset list (0 considered used ofc)
+                            {
+                                currentPokemon.MovesChosenInBattle = [0];
+                            }
+                            HashSet<int> options = []; // Add all the possible remaining options
+                            for (int i = 0; i < currentPokemon.ChosenMoveset.Count; i++) options.Add(i);
+                            options.ExceptWith(currentPokemon.MovesChosenInBattle);
+                            // Then choose a move
+                            moveChoice = GeneralUtilities.GetRandomPick(options.ToList());
                         }
                         else
                         {
