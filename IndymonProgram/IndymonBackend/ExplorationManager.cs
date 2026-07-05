@@ -903,6 +903,7 @@ namespace IndymonBackendProgram
                             pokemonThisFloor.Add(nextPokemon); // Add mon to the set
                         }
                         GenericMessageCommand(roomEvent.PreEventString);
+                        GenericMessageCommand($"Pokemon encountered: {string.Join(", ", pokemonThisFloor)}");
                         Trainer swarmTrainer = GenerateEnemyTrainer("Swarm", pokemonThisFloor, [], 60, 75, true); // Lvl between 60-75
                         DefineEnemySet(swarmTrainer, 24, false); // Defines the enemy set (dumb mons tho)
                         Console.Write("Encounter resolution: ");
