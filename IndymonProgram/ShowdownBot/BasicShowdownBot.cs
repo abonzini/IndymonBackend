@@ -240,6 +240,10 @@ namespace ShowdownBot
                     {
                         string monId = m.Groups[1].Value.Split(':')[1].Trim().Replace("’", "'"); // Id of the mon in question
                         string status = m.Groups[2].Value.Trim(); // Hp status
+                        if (status.Contains("|[silent]")) // Weird thing here
+                        {
+                            status = status.Split("|")[0];
+                        }
                         //Console.WriteLine($"Damage debug: {monId}->{status}");
                         TrainerPokemon pokemonInTeam = _monsById[monId];
                         pokemonInTeam.ImportShowdownStatus(status);
