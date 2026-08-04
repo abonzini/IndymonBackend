@@ -1,12 +1,129 @@
-^.*Name":\s+"([\w \-']+)".*
+S3 Complete rework:
 
-Mechanics to implement:
-- Sandwich (herba mystica -> sandwich -> picnic)
- -> Herba and sandwiches are in place just need to add text and explanation
----
-BUGS:
-- Item not working properly with favors
-- Advanced Disk not consuming Blank Item
-POSSIBLE THINGS TO LOOK FOR:
-- Debug shiny stone (when it happens)
-- Debug level multiplier (when it happens)
+TODO:
+- Cleanup of unneccessary elements in code (including battle statistics)
+- Main program comment everything out again... Load file going back in folders until found
+
+// Will explore backwards until mechanics data is found (useful). Save spreadsheet url only in mechanics back end, will parse from there. Single origin this time, will do all operations
+string MECHANICS_DATA_FILE = "backend_spreadsheet_link.txt";
+string directoryPath = Directory.GetCurrentDirectory();
+Console.WriteLine($"Checking file in {directoryPath}");
+string filePath = Path.Combine(directoryPath, MECHANICS_DATA_FILE);
+while (!File.Exists(filePath))
+{
+    if (directoryPath == null || directoryPath == "")
+    {
+        throw new Exception("Backend file was not found in any previous directory");
+    }
+    directoryPath = Path.GetDirectoryName(directoryPath);
+    Console.WriteLine($"Checking file in {directoryPath}");
+    filePath = Path.Combine(directoryPath, MECHANICS_DATA_FILE);
+}
+Console.WriteLine($"Path found at {filePath}\n");
+string spreadsheetLink = File.ReadAllText(filePath);
+MechanicsDataContainers.GlobalMechanicsData.InitializeData(spreadsheetLink); // Initialize mechanics data
+
+- Start from scratch in mechanics containers, load excel-based elements in mechanics from a single spreadsheet
+- Input parsing in XLSX of Mechanics + Game Data, do it once from a single xlsx instead of loading individual pages
+    suggest:
+    - Dex
+    - Learnsets
+    - Plates
+    - Key/crafting items
+- Item type ENUM, mechanics data depth
+
+- Elements that have JSON mechanics will be filled later, nothing we can really do at this time
+- Refill trainer data (add corresponding fields) -> Currently mons don't have their move/ability/item fields, keep it easy
+- Refill NPC data (+ Famous)
+- Exporting of NPC and Famous, option for creating new famous NPC
+- Exporting of trainer data
+
+AI GENERATED NATURE AI (revise steal, delete):
+The 5 Neutral Natures (Balanced / Unpredictable)
+
+Hardy
+While Charging: Moves steadily forward down the lane at a moderate pace, ignoring minor positioning shifts.
+Post-Charge: Takes the first valid target in range straight ahead; if none, resumes steady advance.
+Docile
+While Charging: Mimics the movement of the nearest ally mon, staying roughly parallel or trailing slightly behind them.
+Post-Charge: Targets whatever enemy the ally it's following is currently targeting (if valid), otherwise targets closest enemy.
+Bashful
+While Charging: Frequently switches behavior—takes a few steps forward, then stutters back or shifts sideways to adjacent rows.
+Post-Charge: Executes attack nervously; if multiple targets, hesitates briefly before picking one randomly.
+Quirky
+While Charging: Moves in erratic zig-zags across the 3 rows, changing columns randomly every turn.
+Post-Charge: Fires immediately at whatever random target is currently in range, regardless of how optimal it is.
+Serious
+While Charging: Takes the absolute shortest precomputed path directly toward its preliminary target.
+Post-Charge: Fires instantly upon the primary target; if out of range, moves straight to it without deviating.
+
+The Attack-Boosted Natures (Aggressive / Forward-Pressuring)
+Lonely
+While Charging: Rushes forward aggressively, but tends to drift toward the edges of the 3-row grid as if "isolated."
+Post-Charge: Immediately attacks the nearest enemy, prioritizing targets that are isolated from other enemies.
+Brave
+While Charging: Charges head-on down the middle row (Row 2), marching straight into the thick of the enemy team.
+Post-Charge: Fires at the strongest-looking enemy or the one furthest ahead in the enemy lines.
+Adamant
+While Charging: Marches relentlessly toward the closest enemy, refusing to step back even if blocked or taking damage.
+Post-Charge: Executes attack with zero hesitation on the first available target in range.
+Naughty
+While Charging: Wanders into blind spots or behind obstacles near the enemy lines to flank them.
+Post-Charge: Targets enemies unpredictably, favoring targets with low health or annoying status effects.
+
+The Defense-Boosted Natures (Cautious / Frontline Anchors)
+Bold
+While Charging: Steps forward to claim the front tiles of its side, then holds its ground stubbornly.
+Post-Charge: Attacks the closest approaching enemy to push them back.
+Relaxed
+While Charging: Barely moves at all; if forced to move by obstacles, takes the slowest possible drift.
+Post-Charge: Waits until an enemy walks directly into its move's optimal range before firing.
+Impish
+While Charging: Bounces back and forth between two adjacent tiles, micro-adjusting position playfully.
+Post-Charge: Prefers targeting enemies that haven't attacked yet or are moving around.
+Lax
+While Charging: Stays completely still, effectively acting as a stationary turret while charging.
+Post-Charge: Fires on whatever target wanders into range; if none, simply stays put and waits for the next cycle.
+
+The Speed-Boosted Natures (Hit-and-Run / Evasive)
+Timid
+While Charging: Retreats backward toward its own board edge, maximizing distance from enemies while charging.
+Post-Charge: Fires max-range moves safely from afar; if an enemy gets too close, immediately steps back.
+Hasty
+While Charging: Sprints diagonally back and forth across the 3 rows at maximum movement speed.
+Post-Charge: Fires the instant the charge completes, rushing forward just enough to hit and then dodging away.
+Jolly
+While Charging: Constantly shifts forward and backward, maintaining a lively, energetic pacing.
+Post-Charge: Targets enemies dynamically, bouncing to a new tile right after the attack executes.
+Naive
+While Charging: Runs carelessly right past enemies into the enemy backline, ignoring danger zones.
+Post-Charge: Turns around wildly and fires at whatever target is closest behind or beside it.
+
+The Special Attack-Boosted Natures (Calculated / Area-Focused)
+
+Modest
+While Charging: Moves steadily to the center row to maximize the potential coverage area of its moves.
+Post-Charge: Deliberately targets groups of enemies or lines up AoE/beam attacks for maximum collateral.
+Mild
+While Charging: Creeps forward cautiously, halting its movement the moment an enemy enters its field of view.
+Post-Charge: Executes attack carefully, backing away slightly if the target is too close for comfort.
+Quiet
+While Charging: Slows its movement down to a crawl, focusing entirely on internal timing.
+Post-Charge: Unleashes its move with pinpoint precision on the highest-priority target in range.
+Rash
+While Charging: Dashes forward haphazardly toward the largest cluster of enemies on the map.
+Post-Charge: Fires immediately at the closest target, completely unconcerned about hitting friendlies (if friendly fire is a factor) or collateral.
+
+The Special Defense-Boosted Natures (Tactical / Defensive Positioning)
+Calm
+While Charging: Smoothly slides behind obstacles or allies to use them as physical cover.
+Post-Charge: Calmly selects a target and executes the move with clinical precision.
+Gentle
+While Charging: Softly drifts away from direct confrontations, favoring the outer rows (Rows 1 or 3) to stay out of the crossfire.
+Post-Charge: Attacks defensive or support-oriented targets if available.
+Sassy
+While Charging: Stays put or takes a slow, mocking step backward, facing the enemy defiantly.
+Post-Charge: Targets the enemy that dealt the most recent damage or the one directly across from it.
+Careful
+While Charging: Scans the grid, actively pathing around hazards, traps, or bottlenecked areas to stay safe.
+Post-Charge: Double-checks target validity; only fires if the target is safely within range and line-of-sight is completely clear.
