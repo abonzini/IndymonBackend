@@ -49,75 +49,33 @@ namespace MechanicsDataContainer
             }
         }
         /// <summary>
-        /// Parses the move data
+        /// Parses the move data found in json files
         /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseMoves(string sheetId, string sheetTab)
+        /// <param name="folder">Path to base folder for all jsons</param>
+        void ParseMoves(string folder)
         {
             Console.WriteLine("Parsing Moves");
             Moves.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int NAME_COL = 0;
-            const int TYPE_COL = 1;
-            const int CATEGORY_COL = 2;
-            const int BP_COL = 3;
-            const int ACC_COL = 4;
-            const int FLAGS_COL = 5; // Contains all effect keys of this particular move
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
+            // Parse all json files
+            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
             {
-                string[] fields = lines[i].Split(","); // Csv
-                Move nextMove = new Move
-                {
-                    Name = fields[NAME_COL].Trim(),
-                    Type = Enum.Parse<PokemonType>(fields[TYPE_COL].Trim().ToUpper()),
-                    Category = Enum.Parse<MoveCategory>(fields[CATEGORY_COL].Trim().ToUpper()),
-                    Bp = double.Parse(fields[BP_COL].Trim()),
-                    Acc = double.Parse(fields[ACC_COL].Trim())
-                };
-                string[] flagsFields = fields[FLAGS_COL].Split(";");
-                foreach (string flag in flagsFields)
-                {
-                    string nextFlag = flag.Trim();
-                    if (nextFlag == "") continue; // If flag is invalid, skip
-                    nextMove.Flags.Add(Enum.Parse<EffectFlag>(nextFlag.Trim()));
-                }
-                // Move parsed, add
-                Moves.Add(nextMove.Name, nextMove);
+                // Will find the jsons, deserialize here, and then add to dictionary
+                //Moves.Add(...);
             }
         }
         /// <summary>
-        /// Parses the ability data
+        /// Parses the ability data found in json files
         /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseAbilities(string sheetId, string sheetTab)
+        /// <param name="folder">Path to base folder for all jsons</param>
+        void ParseAbilities(string folder)
         {
-            Console.WriteLine("Parsing Abilities");
+            Console.WriteLine("Parsing Moves");
             Abilities.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int NAME_COL = 0;
-            const int FLAGS_COL = 1; // Contains all effect keys of this particular ability (more manual...)
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
+            // Parse all json files
+            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
             {
-                string[] fields = lines[i].Split(","); // Csv
-                Ability nextAbility = new Ability
-                {
-                    Name = fields[NAME_COL].Trim(),
-                };
-                string[] flagsFields = fields[FLAGS_COL].Split(";");
-                foreach (string flag in flagsFields)
-                {
-                    string nextFlag = flag.Trim();
-                    if (nextFlag == "") continue; // If flag is invalid, skip
-                    nextAbility.Flags.Add(Enum.Parse<EffectFlag>(nextFlag.Trim()));
-                }
-                // Ability parsed, add
-                Abilities.Add(nextAbility.Name, nextAbility);
+                // Will find the jsons, deserialize here, and then add to dictionary
+                //Abilities.Add(...);
             }
         }
         /// <summary>
@@ -141,7 +99,7 @@ namespace MechanicsDataContainer
                 string pokemonName = pokemonLines[i][..indexUntilComma]; // Get only mon name
                 Dex.Add(pokemonName, new Pokemon()); // Start with a default mon, just to add to list
             }
-            // Second pass, parse mon data
+            // Second pass, parse the actual mon data
             for (int i = 1; i < pokemonLines.Length; i++)
             {
                 string[] fields = pokemonLines[i].Split(','); // Csv
@@ -155,10 +113,13 @@ namespace MechanicsDataContainer
                 const int SPDEF_FIELD = 7;
                 const int SPEED_FIELD = 8;
                 const int WEIGHT_FIELD = 10;
-                const int ABILITY_1_FIELD = 11;
-                const int ABILITY_2_FIELD = 12;
-                const int ABILITY_3_FIELD = 13;
-                const int PREEVO_FIELD = 14;
+                const int HEIGHT_FIELD = 11;
+                const int ABILITY_1_FIELD = 12;
+                const int ABILITY_2_FIELD = 13;
+                const int ABILITY_3_FIELD = 14;
+                const int PREEVO_FIELD = 15;
+                const int ALTERNATE_OF_FIELD = 16;
+                const int IMAGE_URL_FIELD = 17;
                 string nextPokemonName = fields[NAME_FIELD];
                 Pokemon thePokemon = Dex[nextPokemonName];
                 thePokemon.Name = nextPokemonName;
@@ -175,23 +136,15 @@ namespace MechanicsDataContainer
                 double Speed = int.Parse(fields[SPEED_FIELD]);
                 thePokemon.Stats = [Hp, Attack, Defense, SpecialAttack, SpecialDefense, Speed];
                 thePokemon.Weight = double.Parse(fields[WEIGHT_FIELD]);
+                thePokemon.Height = double.Parse(fields[HEIGHT_FIELD]);
                 // Ability
                 string theAbility = fields[ABILITY_1_FIELD].Trim();
-                if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
+                if (theAbility != "" && Abilities.TryGetValue(theAbility, out Ability nextValidAbility)) thePokemon.Abilities.Add(nextValidAbility);
                 theAbility = fields[ABILITY_2_FIELD].Trim();
-                if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
+                if (theAbility != "" && Abilities.TryGetValue(theAbility, out nextValidAbility)) thePokemon.Abilities.Add(nextValidAbility);
                 theAbility = fields[ABILITY_3_FIELD].Trim();
-                if (theAbility != "") thePokemon.Abilities.Add(Abilities[theAbility]);
-                if (thePokemon.Name.ToLower().Contains("unown")) // Unown is a special boy, can do anything
-                {
-                    char letter = (thePokemon.Name == "Unown") ? 'a' : thePokemon.Name.ToLower().Last();
-                    List<Ability> unownAbilities = [.. Abilities.Values.Where(a => a.Name.ToLower().StartsWith(letter))]; // All abilities with letter
-                    if (unownAbilities.Count > 0)
-                    {
-                        thePokemon.Abilities.Clear();
-                        thePokemon.Abilities = unownAbilities;
-                    }
-                }
+                if (theAbility != "" && Abilities.TryGetValue(theAbility, out nextValidAbility)) thePokemon.Abilities.Add(nextValidAbility);
+                // Unowns used to have all abilities but we won't do that here
                 // Prevos
                 string preevo = fields[PREEVO_FIELD].Trim();
                 if (preevo != "") // Mon has prevo
@@ -200,366 +153,57 @@ namespace MechanicsDataContainer
                     thePokemon.Prevo = thePreevo; // Add each other
                     thePreevo.Evos.Add(thePokemon);
                 }
+                // Alternate wild
+                string alternateOf = fields[ALTERNATE_OF_FIELD].Trim();
+                if (alternateOf != "") // Mon has prevo
+                {
+                    Pokemon theBaseMon = Dex[alternateOf];
+                    thePokemon.AlternativeOf = theBaseMon; // Add each other
+                    theBaseMon.WildAlternatives.Add(thePokemon);
+                }
+                // Image Url
+                thePokemon.ImageUrl = fields[IMAGE_URL_FIELD].Trim();
             }
             // Next step, process the learnset
             string[] learnsetLines = learnsetCsv.Split('\n');
+            Dictionary<string, Pokemon> pokemonToCalculateStill = Dex.ToDictionary(e => e.Key, e => e.Value);
             foreach (string learnsetLine in learnsetLines) // This one doesnt have labels
             {
                 string[] fields = learnsetLine.Split(","); // Csv
                 string pokemonName = fields[0]; // First field is the move
-                Pokemon thePokemon = Dex[pokemonName]; // Retrieve from DB, it HAS to be there
+                Pokemon thePokemon = pokemonToCalculateStill[pokemonName]; // Retrieve from DB, it HAS to be there
                 for (int i = 1; i < fields.Length; i++) // Then the moves
                 {
-                    string theMove = fields[i].Trim();
-                    if (theMove == "") break; // Finished this mon's moveset
-                    Move move = Moves[theMove];
-                    thePokemon.Moveset.Add(move);
-                    if (theMove == "Sketch")
+                    string moveName = fields[i].Trim();
+                    if (moveName == "") break; // Finished this mon's moveset
+                    if (Moves.TryGetValue(moveName, out Move move))
                     {
-                        thePokemon.Moveset.Clear(); // Remove whatever was there before, i can learn all anyway
-                        if (thePokemon.Name.ToLower().Contains("unown"))
+                        if (moveName == "Sketch")
                         {
-                            char letter = (thePokemon.Name == "Unown") ? 'a' : thePokemon.Name.ToLower().Last();
-                            thePokemon.Moveset.AddRange([.. Moves.Values.Where(m => m.Name.ToLower().StartsWith(letter))]); // Add moves filtering by unown letter
+                            thePokemon.Moveset.Clear(); // Remove whatever was there before, i can learn all anyway
+                            if (thePokemon.Name.ToLower().Contains("unown"))
+                            {
+                                char letter = (thePokemon.Name == "Unown") ? 'a' : thePokemon.Name.ToLower().Last();
+                                thePokemon.Moveset.AddRange([.. Moves.Values.Where(m => m.Name.ToLower().StartsWith(letter))]); // Add moves filtering by unown letter
+                            }
+                            else
+                            {
+                                thePokemon.Moveset.AddRange([.. Moves.Values]); // Just add all
+                            }
+                            break; // Stop the rest because have all moves anyway lol
                         }
                         else
                         {
-                            thePokemon.Moveset.AddRange([.. Moves.Values]); // Just add all (unown will filter later)
-                        }
-                        break; // Stop the rest
-                    }
-                }
-            }
-            // Then, ensure each mon has a learnset (validation)
-            foreach (Pokemon mon in Dex.Values)
-            {
-                if (mon.Moveset.Count == 0) throw new Exception("This mon has no moveset");
-            }
-            // Final step, calculate average stats
-        }
-        /// <summary>
-        /// Parses all mod items
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseModItems(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Mod Item List");
-            ModItems.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int NAME_COL = 0;
-            const int FLAGS_COL = 4; // Contains all effect keys of this particular item
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] fields = lines[i].Split(","); // Csv
-                Item nextItem = new Item
-                {
-                    Name = fields[NAME_COL]
-                };
-                string[] flagsFields = fields[FLAGS_COL].Split(";");
-                foreach (string flag in flagsFields)
-                {
-                    string nextFlag = flag.Trim();
-                    if (nextFlag == "") continue; // If flag is invalid, skip
-                    nextItem.Flags.Add(Enum.Parse<ItemFlag>(nextFlag.Trim()));
-                }
-                // Move parsed, add
-                ModItems.Add(nextItem.Name, nextItem);
-            }
-        }
-        /// <summary>
-        /// Parses all battle items
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseBattleItems(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Battle Items");
-            BattleItems.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int NAME_COL = 0;
-            const int FLAGS_COL = 10; // Contains all effect keys of this particular item
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] fields = lines[i].Split(","); // Csv
-                Item nextItem = new Item
-                {
-                    Name = fields[NAME_COL]
-                };
-                string[] flagsFields = fields[FLAGS_COL].Split(";");
-                foreach (string flag in flagsFields)
-                {
-                    string nextFlag = flag.Trim();
-                    if (nextFlag == "") continue; // If flag is invalid, skip
-                    nextItem.Flags.Add(Enum.Parse<ItemFlag>(nextFlag.Trim()));
-                }
-                if (!nextItem.Flags.Contains(ItemFlag.ALL_ITEMS)) throw new Exception($"{nextItem} does not have the ALL_ITEMS flag, corruption supsected.");
-                // Move parsed, add
-                BattleItems.Add(nextItem.Name, nextItem);
-            }
-        }
-        /// <summary>
-        /// Parses the enablements of items/strats and assembles also the disabled list. This requires all data (moves,dex,etc) to be pre-parsed
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseEnabledOptions(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Enablement List");
-            Enablers.Clear();
-            ForcedBuilds.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int ENABLER_TYPE_COL = 0;
-            const int ENABLER_NAME_COL = 1;
-            const int ENABLED_TYPE_COL = 2;
-            const int ENABLED_NAME_COL = 3;
-            const int WEIGHT_COL = 4;
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] fields = lines[i].Split(","); // Csv
-                ElementType enablerType = Enum.Parse<ElementType>(fields[ENABLER_TYPE_COL].Trim());
-                string enablerName = fields[ENABLER_NAME_COL].Trim();
-                ElementType enabledType = Enum.Parse<ElementType>(fields[ENABLED_TYPE_COL].Trim());
-                string enabledName = fields[ENABLED_NAME_COL].Trim();
-                double weight = (fields[WEIGHT_COL].Trim() != "-") ? double.Parse(fields[WEIGHT_COL]) : 1;
-                // Validate if all's good
-                AssertElementExistance(enablerType, enablerName);
-                AssertElementExistance(enabledType, enabledName);
-                // Add to enabler list
-                if (!Enablers.TryGetValue((enablerType, enablerName), out Dictionary<(ElementType, string), double> enableds))
-                {
-                    enableds = new Dictionary<(ElementType, string), double>();
-                    Enablers.Add((enablerType, enablerName), enableds);
-                }
-                enableds.Add((enabledType, enabledName), weight);
-            }
-            // Then, elements that enable stuff will imply a forced build, where the inverse needs the enabler to be present
-            // However weather, terrain, archetype have an extra layer of enablement, so I add them first
-            foreach (KeyValuePair<(ElementType, string), Dictionary<(ElementType, string), double>> kvp in Enablers)
-            {
-                foreach (KeyValuePair<(ElementType, string), double> enabledKvps in kvp.Value) // Find all of the enableds
-                {
-                    if (enabledKvps.Key.Item1 == ElementType.WEATHER || enabledKvps.Key.Item1 == ElementType.TERRAIN || enabledKvps.Key.Item1 == ElementType.ARCHETYPE) // Get the weather, terrain, archetypes
-                    {
-                        if (!ForcedBuilds.TryGetValue(enabledKvps.Key, out HashSet<(ElementType, string)> enablers))
-                        {
-                            enablers = new HashSet<(ElementType, string)>();
-                            ForcedBuilds.Add(enabledKvps.Key, enablers);
-                        }
-                        enablers.Add(kvp.Key);
-                    }
-                }
-            }
-            // Ok good, and now the whole rest of things (... a second iteration unfortunately)
-            foreach (KeyValuePair<(ElementType, string), Dictionary<(ElementType, string), double>> kvp in Enablers)
-            {
-                foreach (KeyValuePair<(ElementType, string), double> enabledKvps in kvp.Value) // Find all of the enableds
-                {
-                    if (enabledKvps.Key.Item1 == ElementType.WEATHER || enabledKvps.Key.Item1 == ElementType.TERRAIN || enabledKvps.Key.Item1 == ElementType.ARCHETYPE) // Get the weather, terrain, archetypes
-                    {
-                        continue; // These were already done...
-                    }
-                    if (!ForcedBuilds.TryGetValue(enabledKvps.Key, out HashSet<(ElementType, string)> enablers))
-                    {
-                        enablers = new HashSet<(ElementType, string)>();
-                        ForcedBuilds.Add(enabledKvps.Key, enablers);
-                    }
-                    enablers.Add(kvp.Key);
-                    // Here, the thing that enables me may be a weather, archetype, terrain, in which case I need their direct enablers
-                    if (kvp.Key.Item1 == ElementType.WEATHER || kvp.Key.Item1 == ElementType.TERRAIN || kvp.Key.Item1 == ElementType.ARCHETYPE)
-                    {
-                        if (ForcedBuilds.TryGetValue(kvp.Key, out HashSet<(ElementType, string)> enabler))
-                        {
-                            enablers.UnionWith(enabler); // Add all of the "parent" enablers
+                            thePokemon.Moveset.Add(move);
                         }
                     }
                 }
+                pokemonToCalculateStill.Remove(pokemonName);
             }
-        }
-        /// <summary>
-        /// Parses the stat modifiers list. This requires all data (moves,dex,etc) to be pre-parsed
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseStatModifiers(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Stat Mods List");
-            StatModifiers.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int ELEMENT_TYPE_COL = 0;
-            const int ELEMENT_NAME_COL = 1;
-            const int STAT_MOD_TYPE_COL = 2;
-            const int STAT_MOD_VALUE_NAME = 3;
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
+            // Check who I forgor
+            if (pokemonToCalculateStill.Count > 0)
             {
-                string[] fields = lines[i].Split(","); // Csv
-                ElementType elementType = Enum.Parse<ElementType>(fields[ELEMENT_TYPE_COL].Trim());
-                string elementName = fields[ELEMENT_NAME_COL].Trim();
-                StatModifier statModType = Enum.Parse<StatModifier>(fields[STAT_MOD_TYPE_COL].Trim());
-                string statModValue = fields[STAT_MOD_VALUE_NAME].Trim();
-                // Validate if all's good
-                AssertElementExistance(elementType, elementName);
-                AssertStatModExistance(statModType, statModValue);
-                // Add to the corresponding matrices
-                if (!StatModifiers.TryGetValue((elementType, elementName), out HashSet<(StatModifier, string)> statMods))
-                {
-                    statMods = new HashSet<(StatModifier, string)>();
-                    StatModifiers.Add((elementType, elementName), statMods);
-                }
-                statMods.Add((statModType, statModValue));
-            }
-        }
-        /// <summary>
-        /// Parses the move modifiers list. This requires all data (moves,dex,etc) to be pre-parsed
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseMoveModifiers(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Move Mods List");
-            MoveModifiers.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int MODIFIER_TYPE_COL = 0;
-            const int MODIFIER_NAME_COL = 1;
-            const int MODIFIED_TYPE_COL = 2;
-            const int MODIFIED_NAME_COL = 3;
-            const int MOD_TYPE_COL = 4;
-            const int MOD_NAME_COL = 5;
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] fields = lines[i].Split(","); // Csv
-                ElementType modifierType = Enum.Parse<ElementType>(fields[MODIFIER_TYPE_COL].Trim());
-                string modifierName = fields[MODIFIER_NAME_COL].Trim();
-                ElementType modifiedType = Enum.Parse<ElementType>(fields[MODIFIED_TYPE_COL].Trim());
-                string modifiedName = fields[MODIFIED_NAME_COL].Trim();
-                MoveModifier modType = Enum.Parse<MoveModifier>(fields[MOD_TYPE_COL].Trim());
-                string modName = fields[MOD_NAME_COL].Trim();
-                // Validate if all's good
-                AssertElementExistance(modifierType, modifierName);
-                AssertElementExistance(modifiedType, modifiedName);
-                AssertMoveModExistance(modType, modName);
-                // Add to the corresponding matrices
-                if (!MoveModifiers.TryGetValue((modifierType, modifierName), out Dictionary<(ElementType, string), Dictionary<MoveModifier, string>> modifieds))
-                {
-                    modifieds = new Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>();
-                    MoveModifiers.Add((modifierType, modifierName), modifieds);
-                }
-                if (!modifieds.TryGetValue((modifiedType, modifiedName), out Dictionary<MoveModifier, string> moveMods))
-                {
-                    moveMods = new Dictionary<MoveModifier, string>();
-                    modifieds.Add((modifiedType, modifiedName), moveMods);
-                }
-                moveMods.Add(modType, modName);
-            }
-        }
-        /// <summary>
-        /// Parses the weight modifiers list. This requires all data (moves,dex,etc) to be pre-parsed
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseWeightModifiers(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Weight Mods List");
-            WeightModifiers.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int MOD_1_TYPE_COL = 0;
-            const int MOD_1_NAME_COL = 1;
-            const int MOD_2_TYPE_COL = 2;
-            const int MOD_2_NAME_COL = 3;
-            const int WEIGHT_COL = 4;
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] fields = lines[i].Split(","); // Csv
-                ElementType mod1Type = Enum.Parse<ElementType>(fields[MOD_1_TYPE_COL].Trim());
-                string mod1Name = fields[MOD_1_NAME_COL].Trim();
-                ElementType mod2Type = Enum.Parse<ElementType>(fields[MOD_2_TYPE_COL].Trim());
-                string mod2Name = fields[MOD_2_NAME_COL].Trim();
-                double weight = double.Parse(fields[WEIGHT_COL]);
-                // Validate if all's good
-                AssertElementExistance(mod1Type, mod1Name);
-                AssertElementExistance(mod2Type, mod2Name);
-                // Add to the corresponding matrices, add both ways
-                if (!WeightModifiers.TryGetValue((mod1Type, mod1Name), out Dictionary<(ElementType, string), double> modifieds1))
-                {
-                    modifieds1 = new Dictionary<(ElementType, string), double>();
-                    WeightModifiers.Add((mod1Type, mod1Name), modifieds1);
-                }
-                if (mod2Type == ElementType.WEATHER || mod2Type == ElementType.TERRAIN || mod2Type == ElementType.ARCHETYPE) // This means that mod1 will affect all that sets this
-                {
-                    if (ForcedBuilds.ContainsKey((mod2Type, mod2Name)))
-                    {
-                        foreach ((ElementType, string) enabler in ForcedBuilds[(mod2Type, mod2Name)]) // Get all enablers
-                        {
-                            modifieds1.Add((enabler.Item1, enabler.Item2), weight); // This should be unique
-                        }
-                    }
-                }
-                else // Then just add it
-                {
-                    modifieds1.Add((mod2Type, mod2Name), weight); // This should be unique
-                }
-                // The other way too (but only if not bidirectional)
-                if (mod1Name != mod2Name || mod1Type != mod2Type) // If they're exacly the same thing, don't need to add twice
-                {
-                    if (!WeightModifiers.TryGetValue((mod2Type, mod2Name), out Dictionary<(ElementType, string), double> modifieds2))
-                    {
-                        modifieds2 = new Dictionary<(ElementType, string), double>();
-                        WeightModifiers.Add((mod2Type, mod2Name), modifieds2);
-                    }
-                    if (mod1Type == ElementType.WEATHER || mod1Type == ElementType.TERRAIN || mod1Type == ElementType.ARCHETYPE) // This means that mod1 will affect all that sets this
-                    {
-                        if (ForcedBuilds.ContainsKey((mod1Type, mod1Name)))
-                        {
-                            foreach ((ElementType, string) enabler in ForcedBuilds[(mod1Type, mod1Name)]) // Get all enablers
-                            {
-                                modifieds2.Add((enabler.Item1, enabler.Item2), weight); // This should be unique
-                            }
-                        }
-                    }
-                    else // Then just add it
-                    {
-                        modifieds2.Add((mod1Type, mod1Name), weight); // This should be unique
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Parses the fixed modifiers list. This requires all data (moves,dex,etc) to be pre-parsed
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseFixedModifiers(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Fixed Mods List");
-            FlatIncreaseModifiers.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            const int MODIFIER_TYPE_COL = 0;
-            const int MODIFIER_NAME_COL = 1;
-            const int WEIGHT_COL = 2;
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] fields = lines[i].Split(","); // Csv
-                ElementType modifierType = Enum.Parse<ElementType>(fields[MODIFIER_TYPE_COL].Trim());
-                string modifierName = fields[MODIFIER_NAME_COL].Trim();
-                double weight = double.Parse(fields[WEIGHT_COL]);
-                // Validate if all's good
-                AssertElementExistance(modifierType, modifierName);
-                // Add to the corresponding matrices
-                FlatIncreaseModifiers.Add((modifierType, modifierName), weight); // This should be unique
+                throw new Exception($"These mons don't have learnset: {string.Join(",", pokemonToCalculateStill.Keys)}");
             }
         }
         /// <summary>
@@ -577,7 +221,7 @@ namespace MechanicsDataContainer
             for (int i = 0; i < lines.Length; i++)
             {
                 string[] fields = lines[i].Split(","); // Csv
-                UnownLookup.Add(fields[0], fields[1]); // This should be unique
+                UnownLookup.Add(fields[0], fields[1].Trim()); // This should be unique
             }
         }
         /// <summary>
@@ -585,34 +229,116 @@ namespace MechanicsDataContainer
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        void ParseTrainerNamesLookup(string sheetId, string sheetTab)
+        void ParseNpcTrainerList(string sheetId, string sheetTab)
         {
-            Console.WriteLine("Parsing Trainer Names Lookup");
-            TrainerLookup.Clear();
+            Console.WriteLine("Parsing NPC Trainers available in the game");
+            AllNpcTrainers.Clear();
             // Parse csv
             string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] lines = csv.Split("\n");
             for (int i = 0; i < lines.Length; i++)
             {
                 string[] fields = lines[i].Split(","); // Csv
-                TrainerLookup.Add(fields[0], Enum.Parse<TrainerRank>(fields[1]));
+                NpcTrainer newTrainer = new NpcTrainer()
+                {
+                    Name = fields[0],
+                    TrainerRank = Enum.Parse<TrainerRank>(fields[1]),
+                    FullyLoadedData = false // Not yet, this is in another tab
+                };
+                AllNpcTrainers.Add(newTrainer.Name, newTrainer);
             }
         }
         /// <summary>
-        /// Gets the list of Pokeballs
+        /// Gets the list of evolution plates
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>
         /// <param name="sheetTab">Which tab has the data</param>
-        void ParsePokeballs(string sheetId, string sheetTab)
+        void ParseEvoPlateList(string sheetId, string sheetTab)
         {
-            Console.WriteLine("Parsing Pokeballs");
-            PokeBalls.Clear();
+            Console.WriteLine("Parsing Evolution Plates");
+            EvoPlates.Clear();
             // Parse csv
             string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] lines = csv.Split("\n");
             for (int i = 0; i < lines.Length; i++)
             {
-                PokeBalls.Add(lines[i].Trim());
+                string[] fields = lines[i].Split(","); // Csv
+                EvoPlate newPlate = new EvoPlate()
+                {
+                    Name = fields[0],
+                    Type = Enum.Parse<PokemonType>(fields[1].Trim().ToUpper()),
+                };
+                EvoPlates.Add(newPlate.Name, newPlate);
+            }
+        }
+        /// <summary>
+        /// Gets the list of key items
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
+        void ParseKeyItemList(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Parsing Key Items");
+            KeyItems.Clear();
+            // Parse csv
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string[] lines = csv.Split("\n");
+            for (int i = 1; i < lines.Length; i++) // Has a header so ignore first item
+            {
+                string[] fields = lines[i].Split(","); // Csv
+                KeyItem newItem = new KeyItem()
+                {
+                    Name = fields[0],
+                    CramType = Enum.Parse<PokemonType>(fields[1].Trim().ToUpper()),
+                };
+                KeyItems.Add(newItem.Name, newItem);
+            }
+        }
+        /// <summary>
+        /// Fills NPC data for existing NPCs given a place in the spreadseet
+        /// </summary>
+        /// <param name="sheetId"></param>
+        /// <param name="sheetTab"></param>
+        void FillNpcData(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Filling NPC data");
+            // Parse csv
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string[] lines = csv.Split("\n");
+
+            const int NPC_CARD_HEIGHT = 4;
+            const int NPC_CARD_NAME_FIELD = 2;
+            const int NPC_CARD_POKEMON_FIELD_START = 6;
+            const int NPC_CARD_POKEMON_FIELD_END = 17;
+            const int NPC_CARD_ITEM_FIELD_START = 18;
+            const int NPC_CARD_ITEM_FIELD_END = 20;
+
+            string[] cols = lines[0].Trim().Split(","); // Keep this because the csv may be smaller if no data for long amount of time
+            for (int line = 1; line < lines.Length; line += NPC_CARD_HEIGHT) // First line has a space so it's not needed (second space is already counted by the += 4)
+            {
+                string[] nameFields = lines[line].Trim().Split(","); // Funnily enough most of the data is in the first line and most of this is ignored
+                string trainerName = nameFields[NPC_CARD_NAME_FIELD];
+                NpcTrainer theTrainer = AllNpcTrainers[trainerName]; // This will (and has to) throw if trainer is not found
+                for (int monIndex = NPC_CARD_POKEMON_FIELD_START; monIndex <= NPC_CARD_POKEMON_FIELD_END && monIndex < cols.Length; monIndex++) // Load all mons
+                {
+                    string pokemonName = nameFields[monIndex];
+                    if (pokemonName == "") continue; // Skip, nothing here
+                    theTrainer.AvailablePokemon.Add(Dex[pokemonName]); // Again this will throw if doesnt exist
+                }
+                // Finally all items which is a bit more annoying because it's in multiple levels
+                for (int i = 0; i < NPC_CARD_HEIGHT && line + i < lines.Length; i++)
+                {
+                    string[] itemLines = lines[line + i].Trim().Split(",");
+                    for (int j = NPC_CARD_ITEM_FIELD_START; j <= NPC_CARD_ITEM_FIELD_END && j < cols.Length; j++)
+                    {
+                        string nextItem = itemLines[j];
+                        if (nextItem != "")
+                        {
+                            theTrainer.AvailableItems.Add(nextItem);
+                        }
+                    }
+                }
+                theTrainer.FullyLoadedData = true; // Now all the trainer's data has been loaded
             }
         }
     }

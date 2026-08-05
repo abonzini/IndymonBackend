@@ -1,6 +1,5 @@
 ﻿using GameData;
 using GameDataContainer;
-using MechanicsData;
 using Utilities;
 
 namespace AutomatedTeamBuilder

@@ -8,56 +8,44 @@ namespace MechanicsDataContainer
         /// <summary>
         /// Initializes data
         /// </summary>
-        /// <param name="filePath">Path with links to google sheets for where to find the stuff</param>
-        public void InitializeData(string filePath)
+        /// <param name="masterDirectory">Master directory, contains the mechanicsFilePath as well as hardcoded data as JSON</param>
+        /// <param name="mechanicsFilePath">Name of file with google spreadsheet</param>
+        public void InitializeData(string masterDirectory, string mechanicsFilePath)
         {
-            if (!File.Exists(filePath)) throw new Exception($"Path {filePath} does not exist");
-            string[] lines = File.ReadAllLines(filePath);
-            string sheetId = lines[0].Split(",")[0];
-            string typechartTab = lines[2].Split(",")[0];
+            string[] lines = File.ReadAllLines(Path.Combine(masterDirectory, mechanicsFilePath));
+            string sheetId = lines[0].Split(",")[0]; // Obtained google sheets
+            // Firstly, find Moves, Abilities, and all other core gameplay elements that are found in json, important as the game won't contain all, so only the ones in json actually exist
+            const string MECHANICS_DATA_FOLDER = "mechanics data";
+            string nextFolder = Path.Combine(masterDirectory, MECHANICS_DATA_FOLDER, "moves");
+            ParseMoves(nextFolder);
+            nextFolder = Path.Combine(masterDirectory, MECHANICS_DATA_FOLDER, "abilities");
+            ParseAbilities(nextFolder);
+            // Then, load the data from the google sheets
+            string typechartTab = lines[1].Split(",")[0];
             ParseTypeChart(sheetId, typechartTab);
-            string moveTab = lines[3].Split(",")[0];
-            ParseMoves(sheetId, moveTab);
-            string abilityTab = lines[7].Split(",")[0];
-            ParseAbilities(sheetId, abilityTab);
-            string pokedexTab = lines[1].Split(",")[0];
-            string learnsetsTab = lines[4].Split(",")[0];
+            string pokedexTab = lines[2].Split(",")[0];
+            string learnsetsTab = lines[3].Split(",")[0];
             ParsePokemonData(sheetId, pokedexTab, learnsetsTab);
-            string modItemsTab = lines[5].Split(",")[0];
-            ParseModItems(sheetId, modItemsTab);
-            string battleItemsTab = lines[6].Split(",")[0];
-            ParseBattleItems(sheetId, battleItemsTab);
-            string ballsTab = lines[15].Split(",")[0];
-            ParsePokeballs(sheetId, ballsTab);
-            string enablementTab = lines[8].Split(",")[0];
-            ParseEnabledOptions(sheetId, enablementTab);
-            string statModsTab = lines[9].Split(",")[0];
-            ParseStatModifiers(sheetId, statModsTab);
-            string moveModsTab = lines[10].Split(",")[0];
-            ParseMoveModifiers(sheetId, moveModsTab);
-            string weightModsTab = lines[11].Split(",")[0];
-            ParseWeightModifiers(sheetId, weightModsTab);
-            string fixedModsTab = lines[12].Split(",")[0];
-            ParseFixedModifiers(sheetId, fixedModsTab);
-            string unownTab = lines[13].Split(",")[0];
+            string unownTab = lines[4].Split(",")[0];
             ParseUnownLookup(sheetId, unownTab);
-            string trainersTab = lines[14].Split(",")[0];
-            ParseTrainerNamesLookup(sheetId, trainersTab);
+            string favourGachaTab = lines[5].Split(",")[0];
+            ParseNpcTrainerList(sheetId, favourGachaTab);
+            string evoPlateTab = lines[6].Split(",")[0];
+            ParseEvoPlateList(sheetId, evoPlateTab);
+            string keyItemTab = lines[7].Split(",")[0];
+            ParseKeyItemList(sheetId, keyItemTab);
+            string npcArea = lines[8].Split(",")[0];
+            FillNpcData(sheetId, npcArea);
+            npcArea = lines[9].Split(",")[0]; // More npc data, split in the sheet to differentiate between famous and non
+            FillNpcData(sheetId, npcArea);
         }
         public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
         public Dictionary<string, Move> Moves = new Dictionary<string, Move>();
         public Dictionary<string, Ability> Abilities = new Dictionary<string, Ability>();
         public Dictionary<string, Pokemon> Dex = new Dictionary<string, Pokemon>();
-        public Dictionary<string, Item> ModItems = new Dictionary<string, Item>();
-        public Dictionary<string, Item> BattleItems = new Dictionary<string, Item>();
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> Enablers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
-        public Dictionary<(ElementType, string), HashSet<(ElementType, string)>> ForcedBuilds = new Dictionary<(ElementType, string), HashSet<(ElementType, string)>>();
-        public Dictionary<(ElementType, string), HashSet<(StatModifier, string)>> StatModifiers = new Dictionary<(ElementType, string), HashSet<(StatModifier, string)>>();
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>> MoveModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), Dictionary<MoveModifier, string>>>();
-        public Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>> WeightModifiers = new Dictionary<(ElementType, string), Dictionary<(ElementType, string), double>>();
-        public Dictionary<(ElementType, string), double> FlatIncreaseModifiers = new Dictionary<(ElementType, string), double>();
         public Dictionary<string, string> UnownLookup = new Dictionary<string, string>();
-        public Dictionary<string, TrainerRank> TrainerLookup = new Dictionary<string, TrainerRank>();
-        public HashSet<string> PokeBalls = new HashSet<string>();
+        public Dictionary<string, NpcTrainer> AllNpcTrainers = new Dictionary<string, NpcTrainer>();
+        public Dictionary<string, EvoPlate> EvoPlates = new Dictionary<string, EvoPlate>();
+        public Dictionary<string, KeyItem> KeyItems = new Dictionary<string, KeyItem>();
     }
 }

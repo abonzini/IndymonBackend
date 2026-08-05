@@ -25,6 +25,5 @@ namespace MechanicsData
         DRAGON,
         DARK,
         FAIRY,
-        STELLAR // Not a type but tera stuff IG
     }
 }

@@ -1,9 +1,4 @@
-﻿using GameData;
-using GameDataContainer;
-using MechanicsData;
-using MechanicsDataContainer;
-using Newtonsoft.Json;
-using Utilities;
+﻿using MechanicsDataContainer;
 
 namespace IndymonBackendProgram
 {
@@ -11,20 +6,33 @@ namespace IndymonBackendProgram
     {
         static void Main()
         {
-            // Things
-            TournamentManager tournamentManager = new TournamentManager();
-            ExplorationManager explorationManager = new ExplorationManager();
+            // Things (restore later)
+            //TournamentManager tournamentManager = new TournamentManager();
+            //ExplorationManager explorationManager = new ExplorationManager();
             // Parsing
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Indymon manager program ☺");
             Console.CursorVisible = false;
-            Console.WriteLine($"Folder where data is located?");
-            string directoryPath = Console.ReadLine();
-            // Begin with the mechanics back end
+            // Will explore backwards until mechanics data is found (useful). Save spreadsheet url only in mechanics back end, will parse from there. Single origin this time, will do all operations
             string MECHANICS_DATA_FILE = "mechanics_data.txt";
-            MechanicsDataContainers.GlobalMechanicsData.InitializeData(Path.Combine(directoryPath, MECHANICS_DATA_FILE));
-            // Then the trainer data back end
+            string directoryPath = Directory.GetCurrentDirectory();
+            Console.WriteLine($"Checking file in {directoryPath}");
+            string filePath = Path.Combine(directoryPath, MECHANICS_DATA_FILE);
+            while (!File.Exists(filePath))
+            {
+                if (directoryPath == null || directoryPath == "")
+                {
+                    throw new Exception("Backend file was not found in any previous directory");
+                }
+                directoryPath = Path.GetDirectoryName(directoryPath);
+                Console.WriteLine($"Checking file in {directoryPath}");
+                filePath = Path.Combine(directoryPath, MECHANICS_DATA_FILE);
+            }
+            Console.WriteLine($"Path found at {filePath}\n");
+            MechanicsDataContainers.GlobalMechanicsData.InitializeData(directoryPath, MECHANICS_DATA_FILE);
+
+            /*// Then the trainer data back end
             string DUNGEON_DATA_DIR = "dungeons";
             GameDataContainers.GlobalGameData.InitializeDungeonData(Path.Combine(directoryPath, DUNGEON_DATA_DIR));
             // Then the trainer data back end
@@ -269,6 +277,7 @@ namespace IndymonBackendProgram
                 }
                 Console.WriteLine("");
             } while (InputString.ToLower() != "q");
+            */
             Console.WriteLine("Session finished. Have a good day and don't forget to update spreadsheet!");
         }
         /// <summary>
