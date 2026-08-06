@@ -144,7 +144,11 @@ namespace MechanicsDataContainer
                 if (theAbility != "" && Abilities.TryGetValue(theAbility, out nextValidAbility)) thePokemon.Abilities.Add(nextValidAbility);
                 theAbility = fields[ABILITY_3_FIELD].Trim();
                 if (theAbility != "" && Abilities.TryGetValue(theAbility, out nextValidAbility)) thePokemon.Abilities.Add(nextValidAbility);
-                // Unowns used to have all abilities but we won't do that here
+                if (thePokemon.Name.ToLower().Contains("unown")) // Unown will also carryall other abilities
+                {
+                    char letter = (thePokemon.Name == "Unown") ? 'a' : thePokemon.Name.ToLower().Last();
+                    thePokemon.Abilities.UnionWith([.. Abilities.Values.Where(a => a.Name.ToLower().StartsWith(letter))]); // Add moves filtering by unown letter
+                }
                 // Prevos
                 string preevo = fields[PREEVO_FIELD].Trim();
                 if (preevo != "") // Mon has prevo
@@ -184,11 +188,11 @@ namespace MechanicsDataContainer
                             if (thePokemon.Name.ToLower().Contains("unown"))
                             {
                                 char letter = (thePokemon.Name == "Unown") ? 'a' : thePokemon.Name.ToLower().Last();
-                                thePokemon.Moveset.AddRange([.. Moves.Values.Where(m => m.Name.ToLower().StartsWith(letter))]); // Add moves filtering by unown letter
+                                thePokemon.Moveset.UnionWith([.. Moves.Values.Where(m => m.Name.ToLower().StartsWith(letter))]); // Add moves filtering by unown letter
                             }
                             else
                             {
-                                thePokemon.Moveset.AddRange([.. Moves.Values]); // Just add all
+                                thePokemon.Moveset.UnionWith([.. Moves.Values]); // Just add all
                             }
                             break; // Stop the rest because have all moves anyway lol
                         }

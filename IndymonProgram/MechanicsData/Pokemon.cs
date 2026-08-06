@@ -11,8 +11,8 @@
         public double[] Stats { get; set; } = new double[6]; // All stats, hopefully init to 0
         public double Weight { get; set; } = 0.0f;
         public double Height { get; set; } = 0.0f;
-        public List<Move> Moveset { get; set; } = new List<Move>();
-        public List<Ability> Abilities { get; set; } = new List<Ability>();
+        public HashSet<Move> Moveset { get; set; } = new HashSet<Move>();
+        public HashSet<Ability> Abilities { get; set; } = new HashSet<Ability>();
         public string ImageUrl { get; set; } = "";
         public override string ToString()
         {
