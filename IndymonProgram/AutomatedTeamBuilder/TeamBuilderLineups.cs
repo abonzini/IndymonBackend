@@ -326,7 +326,7 @@ namespace AutomatedTeamBuilder
             // If trainer defined a strict order, will add them in the order of team as stated, otherwise do mon>set item>favor
             if (trainer.AutoTeam) // If shuffling is allowed, all is shuffled then and picks prioritising item efficiency
             {
-                GeneralUtilities.ShuffleListDeterministic(usedBuild.TrainerOwnPokemon, rng);
+                GeneralUtilities.ShuffleList(usedBuild.TrainerOwnPokemon, rng);
                 for (int i = 0; i < usedBuild.TrainerOwnPokemon.Count && monsInTeam < nMons; i++) // Fill as much as possible from here until done or ran out of mons
                 {
                     TrainerPokemon chosenMon = usedBuild.TrainerOwnPokemon[i];
@@ -406,7 +406,7 @@ namespace AutomatedTeamBuilder
             // Should be al good here I guess, validate (no null spaces and allowed mon number) and reshuffle if auto team so the favour mon can be anywhere too
             finalBattleTeam = [.. finalBattleTeam.Where(m => m != null)];
             if (!acceptLessMons && finalBattleTeam.Count < nMons) throw new Exception("For some reason the final battle team didn't have enough mons!");
-            if (trainer.AutoTeam) GeneralUtilities.ShuffleListDeterministic(finalBattleTeam, rng); // One last shuffle to allow any mon in any position
+            if (trainer.AutoTeam) GeneralUtilities.ShuffleList(finalBattleTeam, rng); // One last shuffle to allow any mon in any position
             trainer.BattleTeam = finalBattleTeam; // Set this team for battle
             Console.WriteLine();//Empty line break
         }

@@ -20,6 +20,18 @@ namespace MechanicsDataContainer
             ParseMoves(nextFolder);
             nextFolder = Path.Combine(masterDirectory, MECHANICS_DATA_FOLDER, "abilities");
             ParseAbilities(nextFolder);
+            nextFolder = Path.Combine(masterDirectory, MECHANICS_DATA_FOLDER, "jewelry");
+            ParseJewelry(nextFolder);
+            nextFolder = Path.Combine(masterDirectory, MECHANICS_DATA_FOLDER, "held items");
+            ParseHeldItems(nextFolder);
+            nextFolder = Path.Combine(masterDirectory, MECHANICS_DATA_FOLDER, "natures");
+            ParseNatures(nextFolder);
+            nextFolder = Path.Combine(masterDirectory, MECHANICS_DATA_FOLDER, "poke balls");
+            ParsePokeBalls(nextFolder);
+            // Then the ones that are generated fully
+            GenerateGummies();
+            GenerateMints();
+            GenerateEssences();
             // Then, load the data from the google sheets
             string typechartTab = lines[1].Split(",")[0];
             ParseTypeChart(sheetId, typechartTab);
@@ -47,5 +59,12 @@ namespace MechanicsDataContainer
         public Dictionary<string, NpcTrainer> AllNpcTrainers = new Dictionary<string, NpcTrainer>();
         public Dictionary<string, EvoPlate> EvoPlates = new Dictionary<string, EvoPlate>();
         public Dictionary<string, KeyItem> KeyItems = new Dictionary<string, KeyItem>();
+        public Dictionary<string, Jewelry> Jewelry = new Dictionary<string, Jewelry>();
+        public Dictionary<string, Gummy> Gummies = new Dictionary<string, Gummy>();
+        public Dictionary<string, HeldItem> HeldItems = new Dictionary<string, HeldItem>();
+        public Dictionary<string, Nature> Natures = new Dictionary<string, Nature>();
+        public Dictionary<string, Mint> Mints = new Dictionary<string, Mint>();
+        public Dictionary<string, Essence> Essences = new Dictionary<string, Essence>();
+        public Dictionary<string, PokeBall> PokeBalls = new Dictionary<string, PokeBall>();
     }
 }

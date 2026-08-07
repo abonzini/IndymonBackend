@@ -26,6 +26,37 @@
         {
             return Name;
         }
+        public string GetGlossaryDescription()
+        {
+            string result = "";
+            switch (Effect)
+            {
+                case SandwichEffectType.ENEMY_NUMBER:
+                    result += "Increases the number of wild Pokemon in battles (and therefore the chance of getting drop items).";
+                    break;
+                case SandwichEffectType.POST_HEALING:
+                    result += "Heals your Pokemon at the end of every battle.";
+                    break;
+                case SandwichEffectType.ITEM_DROP:
+                    result += "When you get items after a battle, you get more.";
+                    break;
+                case SandwichEffectType.LEVEL:
+                    result += "Increases the level (and therefore stats) of your Pokemon during battles.";
+                    break;
+                case SandwichEffectType.SHINY_CHANCE:
+                    result += "Increases the chance of finding Shiny Pokemon.";
+                    break;
+                case SandwichEffectType.NONE:
+                default:
+                    return "";
+            }
+            if (Level > 1)
+            {
+                result += $"Effect is x{Level} times stronger.";
+            }
+            result += $"Lasts for {Duration} turns.";
+            return result;
+        }
         // Parser
         public static Sandwich Parse(string sandwichName)
         {

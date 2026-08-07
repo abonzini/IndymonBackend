@@ -1,38 +1,20 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
-namespace MechanicsData
+﻿namespace MechanicsData
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum Nature
+    public class Nature
     {
-        HARDY,
-        DOCILE,
-        BASHFUL,
-        QUIRKY,
-        SERIOUS,
-        LONELY,
-        ADAMANT,
-        NAUGHTY,
-        BRAVE,
-        BOLD,
-        IMPISH,
-        LAX,
-        RELAXED,
-        MODEST,
-        MILD,
-        RASH,
-        QUIET,
-        CALM,
-        GENTLE,
-        CAREFUL,
-        SASSY,
-        TIMID,
-        HASTY,
-        JOLLY,
-        NAIVE
+        public string Name { get; set; } = "";
+        public override string ToString()
+        {
+            return Name;
+        }
     }
-    public class PokemonNature
+    public class Mint
     {
+        public string Name = "";
+        public Nature AssociatedNature = null;
+        public override string ToString()
+        {
+            return $"{Name}";
+        }
     }
 }

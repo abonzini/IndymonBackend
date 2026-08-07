@@ -69,13 +69,73 @@ namespace MechanicsDataContainer
         /// <param name="folder">Path to base folder for all jsons</param>
         void ParseAbilities(string folder)
         {
-            Console.WriteLine("Parsing Moves");
+            Console.WriteLine("Parsing Abilities");
             Abilities.Clear();
             // Parse all json files
             foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
             {
                 // Will find the jsons, deserialize here, and then add to dictionary
                 //Abilities.Add(...);
+            }
+        }
+        /// <summary>
+        /// Parses the jewelry data found in json files
+        /// </summary>
+        /// <param name="folder">Path to base folder for all jsons</param>
+        void ParseJewelry(string folder)
+        {
+            Console.WriteLine("Parsing Jewelry");
+            Jewelry.Clear();
+            // Parse all json files
+            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
+            {
+                // Will find the jsons, deserialize here, and then add to dictionary
+                //Jewelry.Add(...);
+            }
+        }
+        /// <summary>
+        /// Parses the held item data found in json files
+        /// </summary>
+        /// <param name="folder">Path to base folder for all jsons</param>
+        void ParseHeldItems(string folder)
+        {
+            Console.WriteLine("Parsing Held Items");
+            HeldItems.Clear();
+            // Parse all json files
+            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
+            {
+                // Will find the jsons, deserialize here, and then add to dictionary
+                //Jewelry.Add(...);
+            }
+        }
+        /// <summary>
+        /// Parses the nature data found in json files
+        /// </summary>
+        /// <param name="folder">Path to base folder for all jsons</param>
+        void ParseNatures(string folder)
+        {
+            Console.WriteLine("Parsing Natures");
+            Natures.Clear();
+            // Parse all json files
+            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
+            {
+                // Will find the jsons, deserialize here, and then add to dictionary
+                //Jewelry.Add(...);
+            }
+        }
+        /// <summary>
+        /// Parses the pokeball data found in json files
+        /// </summary>
+        /// <param name="folder">Path to base folder for all jsons</param>
+        void ParsePokeBalls(string folder)
+        {
+            Console.WriteLine("Parsing Poke Balls");
+            PokeBalls.Clear();
+            // Parse all json files
+            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
+            {
+                // Will find the jsons, deserialize here, and then add to dictionary
+                //Jewelry.Add(...);
             }
         }
         /// <summary>
