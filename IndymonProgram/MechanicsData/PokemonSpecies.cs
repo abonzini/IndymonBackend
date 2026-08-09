@@ -1,13 +1,13 @@
 ﻿namespace MechanicsData
 {
-    public class Pokemon
+    public class PokemonSpecies
     {
         public string Name { get; set; } = "";
         public (PokemonType, PokemonType) Types { get; set; } = (PokemonType.NONE, PokemonType.NONE);
-        public Pokemon Prevo { get; set; } = null;
-        public List<Pokemon> Evos { get; set; } = new List<Pokemon>();
-        public Pokemon AlternativeOf { get; set; } = null;
-        public List<Pokemon> WildAlternatives { get; set; } = new List<Pokemon>();
+        public PokemonSpecies Prevo { get; set; } = null;
+        public List<PokemonSpecies> Evos { get; set; } = new List<PokemonSpecies>();
+        public PokemonSpecies AlternativeOf { get; set; } = null;
+        public List<PokemonSpecies> WildAlternatives { get; set; } = new List<PokemonSpecies>();
         public double[] Stats { get; set; } = new double[6]; // All stats, hopefully init to 0
         public double Weight { get; set; } = 0.0f;
         public double Height { get; set; } = 0.0f;

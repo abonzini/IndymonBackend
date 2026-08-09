@@ -26,7 +26,7 @@ namespace AutomatedTeamBuilder
         {
             if (mon.PokeBall == "Heavy Ball") return false; // Heavy ball mon never ever allowed
             if (AllConstraints.Count == 0) return true; // No constraints needed
-            Pokemon pokemonData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species]; // Obtain mon data
+            PokemonSpecies pokemonData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species]; // Obtain mon data
             // Obtain moveset and ability of mon
             List<Ability> monAbilities;
             if (mon.SetItem != null && mon.SetItem.AddedAbility != null)

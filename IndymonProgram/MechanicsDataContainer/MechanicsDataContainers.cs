@@ -50,11 +50,14 @@ namespace MechanicsDataContainer
             FillNpcData(sheetId, npcArea);
             npcArea = lines[9].Split(",")[0]; // More npc data, split in the sheet to differentiate between famous and non
             FillNpcData(sheetId, npcArea);
+            string boxMonArea = lines[10].Split(",")[0];
+            FillBoxedMonData(sheetId, boxMonArea);
         }
+        readonly Random _rng = new Random(Guid.NewGuid().GetHashCode()); // Aux rng
         public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
         public Dictionary<string, Move> Moves = new Dictionary<string, Move>();
         public Dictionary<string, Ability> Abilities = new Dictionary<string, Ability>();
-        public Dictionary<string, Pokemon> Dex = new Dictionary<string, Pokemon>();
+        public Dictionary<string, PokemonSpecies> Dex = new Dictionary<string, PokemonSpecies>();
         public Dictionary<string, string> UnownLookup = new Dictionary<string, string>();
         public Dictionary<string, NpcTrainer> AllNpcTrainers = new Dictionary<string, NpcTrainer>();
         public Dictionary<string, EvoPlate> EvoPlates = new Dictionary<string, EvoPlate>();
@@ -66,5 +69,8 @@ namespace MechanicsDataContainer
         public Dictionary<string, Mint> Mints = new Dictionary<string, Mint>();
         public Dictionary<string, Essence> Essences = new Dictionary<string, Essence>();
         public Dictionary<string, PokeBall> PokeBalls = new Dictionary<string, PokeBall>();
+        public Dictionary<string, Sandwich> SandwichLookup = new Dictionary<string, Sandwich>();
+        public Dictionary<string, MoveDisk> MoveDiskLookup = new Dictionary<string, MoveDisk>();
+        public Dictionary<string, PokemonEntity> BoxedMons = new Dictionary<string, PokemonEntity>();
     }
 }

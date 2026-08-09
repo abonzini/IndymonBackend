@@ -28,7 +28,7 @@ namespace AutomatedTeamBuilder
         /// <param name="pokemonFaced">All the pokemon that may be faced, to calculate types and stats</param>
         /// <param name="seed">Seed if the trainer set, to ensure consistency if saved</param>
         /// <param name="auto">Do automatically without asking</param>
-        public static void DefineTrainerSets(Trainer trainer, bool smart, HashSet<TeamArchetype> archetypes, Weather initialWeather, Terrain initialTerrain, Constraint buildConstraints, List<Pokemon> pokemonFaced, int seed = 0, bool auto = false)
+        public static void DefineTrainerSets(Trainer trainer, bool smart, HashSet<TeamArchetype> archetypes, Weather initialWeather, Terrain initialTerrain, Constraint buildConstraints, List<PokemonSpecies> pokemonFaced, int seed = 0, bool auto = false)
         {
             // Create a build ctx to start team build
             TeamBuildContext buildCtx = new TeamBuildContext
@@ -47,7 +47,7 @@ namespace AutomatedTeamBuilder
             if (pokemonFaced.Count > 0)
             {
                 // Initial pass, load all data
-                foreach (Pokemon facedMon in pokemonFaced)
+                foreach (PokemonSpecies facedMon in pokemonFaced)
                 {
                     buildCtx.OpponentsTypes.Add(facedMon.Types); // Add type combo (base) to list
                     for (int i = 0; i < 6; i++)
@@ -57,7 +57,7 @@ namespace AutomatedTeamBuilder
                     buildCtx.AverageOpponentWeight += facedMon.Weight / pokemonFaced.Count;
                 }
                 // Another pass for variance
-                foreach (Pokemon facedMon in pokemonFaced)
+                foreach (PokemonSpecies facedMon in pokemonFaced)
                 {
                     for (int i = 0; i < 6; i++)
                     {
@@ -104,7 +104,7 @@ namespace AutomatedTeamBuilder
                 mon.ChosenAbility = null;
                 mon.ChosenMoveset.Clear();
                 // Also get the mons ability and moveset here
-                Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
+                PokemonSpecies monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
                 // First thing is to check if mon has set item equipped, if so, add the move/ability already
                 if (mon.SetItem != null)
                 {

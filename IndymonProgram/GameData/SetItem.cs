@@ -43,7 +43,7 @@ namespace GameData
         {
             if (AlwaysAllowedItem) return true; // If its always allowed, then it's fine too
             // Otherwise need to make sure mon can learn every single thing
-            Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
+            PokemonSpecies monData = MechanicsDataContainers.GlobalMechanicsData.Dex[mon.Species];
             bool canEquip = true;
             if (AddedAbility != null)
             {

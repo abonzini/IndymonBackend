@@ -56,5 +56,39 @@ namespace MechanicsDataContainer
                 Essences.Add(newEssence.Name, newEssence);
             }
         }
+        /// <summary>
+        /// Generates a random blank pokemon that can be later used as the actual template, or kept random to simplify generation in case of first-time or wild mons
+        /// </summary>
+        /// <param name="Species"></param>
+        /// <param name="rng">The rng to be used to generate this mon</param>
+        /// <returns></returns>
+        PokemonEntity GenerateBlankPokemon(string Species, Random rng = null)
+        {
+            rng ??= _rng; // Use default rng if nothing present
+            PokemonEntity newPokemon = new PokemonEntity();
+            if (Species.Contains('★'))
+            {
+                newPokemon.IsShiny = true;
+                Species = Species.Split('★')[0].Trim(); // Get the actual species then
+            }
+            newPokemon.Species = Dex[Species];
+            newPokemon.PokeBall = PokeBalls["Poke Ball"]; // Poke Ball being the hardcoded default value of any Pokemon
+            // Random nature selection
+            List<Nature> natureList = [.. Natures.Values];
+            newPokemon.Nature = GeneralUtilities.GetRandomPick(natureList, rng);
+            // Move selection is random but do need to make sure the moves are not repeated
+            List<Move> monLearnset = [.. newPokemon.Species.Moveset];
+            newPokemon.Moves[0] = GeneralUtilities.GetRandomPick(monLearnset, rng);
+            monLearnset.Remove(newPokemon.Moves[0]); // TODO: This needs to be remade into damaging moves once we get enough data
+            if (monLearnset.Count > 0) newPokemon.Moves[1] = GeneralUtilities.GetRandomPick(monLearnset, rng); // Add only if there's still any, but no need to remove anythign afterwards
+            // Ability selection
+            List<Ability> monPossibleAbilities = [.. newPokemon.Species.Abilities];
+            GeneralUtilities.ShuffleList(monPossibleAbilities, rng); // Shuffle the order the mon gets the abilities
+            for (int i = 0; i < newPokemon.Abilities.Length && i < monPossibleAbilities.Count; i++) // Add as many abilities as possible as long as mon has space and abilities
+            {
+                newPokemon.Abilities[i] = monPossibleAbilities[i];
+            }
+            return newPokemon;
+        }
     }
 }

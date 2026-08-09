@@ -5,7 +5,7 @@
         public string Name = "";
         public TrainerRank TrainerRank = TrainerRank.UNRANKED;
         public bool FullyLoadedData = true;
-        public List<Pokemon> AvailablePokemon = new List<Pokemon>();
+        public List<PokemonSpecies> AvailablePokemon = new List<PokemonSpecies>();
         public List<string> AvailableItems = new List<string>();
         public override string ToString()
         {

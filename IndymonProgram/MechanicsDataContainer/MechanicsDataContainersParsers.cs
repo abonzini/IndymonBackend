@@ -1,4 +1,5 @@
 ﻿using MechanicsData;
+using Newtonsoft.Json;
 using Utilities;
 
 namespace MechanicsDataContainer
@@ -59,8 +60,8 @@ namespace MechanicsDataContainer
             // Parse all json files
             foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
             {
-                // Will find the jsons, deserialize here, and then add to dictionary
-                //Moves.Add(...);
+                Move nextMove = JsonConvert.DeserializeObject<Move>(File.ReadAllText(file));
+                Moves.Add(nextMove.Name, nextMove);
             }
         }
         /// <summary>
@@ -74,8 +75,8 @@ namespace MechanicsDataContainer
             // Parse all json files
             foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
             {
-                // Will find the jsons, deserialize here, and then add to dictionary
-                //Abilities.Add(...);
+                Ability nextAbility = JsonConvert.DeserializeObject<Ability>(File.ReadAllText(file));
+                Abilities.Add(nextAbility.Name, nextAbility);
             }
         }
         /// <summary>
@@ -89,8 +90,8 @@ namespace MechanicsDataContainer
             // Parse all json files
             foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
             {
-                // Will find the jsons, deserialize here, and then add to dictionary
-                //Jewelry.Add(...);
+                Jewelry nextJewelry = JsonConvert.DeserializeObject<Jewelry>(File.ReadAllText(file));
+                Jewelry.Add(nextJewelry.Name, nextJewelry);
             }
         }
         /// <summary>
@@ -104,8 +105,8 @@ namespace MechanicsDataContainer
             // Parse all json files
             foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
             {
-                // Will find the jsons, deserialize here, and then add to dictionary
-                //Jewelry.Add(...);
+                HeldItem nextHeldItem = JsonConvert.DeserializeObject<HeldItem>(File.ReadAllText(file));
+                HeldItems.Add(nextHeldItem.Name, nextHeldItem);
             }
         }
         /// <summary>
@@ -119,8 +120,8 @@ namespace MechanicsDataContainer
             // Parse all json files
             foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
             {
-                // Will find the jsons, deserialize here, and then add to dictionary
-                //Jewelry.Add(...);
+                Nature nextNature = JsonConvert.DeserializeObject<Nature>(File.ReadAllText(file));
+                Natures.Add(nextNature.Name, nextNature);
             }
         }
         /// <summary>
@@ -134,8 +135,8 @@ namespace MechanicsDataContainer
             // Parse all json files
             foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
             {
-                // Will find the jsons, deserialize here, and then add to dictionary
-                //Jewelry.Add(...);
+                PokeBall nextBall = JsonConvert.DeserializeObject<PokeBall>(File.ReadAllText(file));
+                PokeBalls.Add(nextBall.Name, nextBall);
             }
         }
         /// <summary>
@@ -157,7 +158,7 @@ namespace MechanicsDataContainer
             {
                 int indexUntilComma = pokemonLines[i].IndexOf(',');
                 string pokemonName = pokemonLines[i][..indexUntilComma]; // Get only mon name
-                Dex.Add(pokemonName, new Pokemon()); // Start with a default mon, just to add to list
+                Dex.Add(pokemonName, new PokemonSpecies()); // Start with a default mon, just to add to list
             }
             // Second pass, parse the actual mon data
             for (int i = 1; i < pokemonLines.Length; i++)
@@ -181,7 +182,7 @@ namespace MechanicsDataContainer
                 const int ALTERNATE_OF_FIELD = 16;
                 const int IMAGE_URL_FIELD = 17;
                 string nextPokemonName = fields[NAME_FIELD];
-                Pokemon thePokemon = Dex[nextPokemonName];
+                PokemonSpecies thePokemon = Dex[nextPokemonName];
                 thePokemon.Name = nextPokemonName;
                 PokemonType theType = Enum.Parse<PokemonType>(fields[TYPE_1_FIELD].Trim().ToUpper());
                 thePokemon.Types = (theType, thePokemon.Types.Item2);
@@ -213,7 +214,7 @@ namespace MechanicsDataContainer
                 string preevo = fields[PREEVO_FIELD].Trim();
                 if (preevo != "") // Mon has prevo
                 {
-                    Pokemon thePreevo = Dex[preevo];
+                    PokemonSpecies thePreevo = Dex[preevo];
                     thePokemon.Prevo = thePreevo; // Add each other
                     thePreevo.Evos.Add(thePokemon);
                 }
@@ -221,7 +222,7 @@ namespace MechanicsDataContainer
                 string alternateOf = fields[ALTERNATE_OF_FIELD].Trim();
                 if (alternateOf != "") // Mon has prevo
                 {
-                    Pokemon theBaseMon = Dex[alternateOf];
+                    PokemonSpecies theBaseMon = Dex[alternateOf];
                     thePokemon.AlternativeOf = theBaseMon; // Add each other
                     theBaseMon.WildAlternatives.Add(thePokemon);
                 }
@@ -230,12 +231,12 @@ namespace MechanicsDataContainer
             }
             // Next step, process the learnset
             string[] learnsetLines = learnsetCsv.Split('\n');
-            Dictionary<string, Pokemon> pokemonToCalculateStill = Dex.ToDictionary(e => e.Key, e => e.Value);
+            Dictionary<string, PokemonSpecies> pokemonToCalculateStill = Dex.ToDictionary(e => e.Key, e => e.Value);
             foreach (string learnsetLine in learnsetLines) // This one doesnt have labels
             {
                 string[] fields = learnsetLine.Split(","); // Csv
                 string pokemonName = fields[0]; // First field is the move
-                Pokemon thePokemon = pokemonToCalculateStill[pokemonName]; // Retrieve from DB, it HAS to be there
+                PokemonSpecies thePokemon = pokemonToCalculateStill[pokemonName]; // Retrieve from DB, it HAS to be there
                 for (int i = 1; i < fields.Length; i++) // Then the moves
                 {
                     string moveName = fields[i].Trim();
@@ -361,8 +362,8 @@ namespace MechanicsDataContainer
         /// <summary>
         /// Fills NPC data for existing NPCs given a place in the spreadseet
         /// </summary>
-        /// <param name="sheetId"></param>
-        /// <param name="sheetTab"></param>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
         void FillNpcData(string sheetId, string sheetTab)
         {
             Console.WriteLine("Filling NPC data");
@@ -403,6 +404,41 @@ namespace MechanicsDataContainer
                     }
                 }
                 theTrainer.FullyLoadedData = true; // Now all the trainer's data has been loaded
+            }
+        }
+        /// <summary>
+        /// Fills data of all boxed mons
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
+        void FillBoxedMonData(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Filling boxed mon data");
+            // Parse csv
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string[] lines = csv.Split("\n");
+
+            for (int line = 1; line < lines.Length; line++) // First line has legend so it's not needed
+            {
+                string[] fields = lines[line].Trim().Split(',');
+                string id = fields[0];
+                string species = fields[1];
+                PokemonEntity nextBoxedMon = GenerateBlankPokemon(species); // Generate a mon of this kind but make it have randomized values in case is the first instancing
+                nextBoxedMon.Nickname = fields[2];
+                nextBoxedMon.PokeBall = PokeBalls[fields[3]];
+                nextBoxedMon.Moves[0] = Moves[fields[4]];
+                nextBoxedMon.Moves[1] = Moves.GetValueOrDefault(fields[5]); // This one could technically be null if no second move
+                nextBoxedMon.Nature = Natures[fields[6]];
+                // Ability filling is weird, will just do one by one
+                if (Abilities.TryGetValue(fields[7], out Ability ability)) // If there's atleast one aility, means the abilities are not the random ones
+                {
+                    nextBoxedMon.Abilities = [null, null, null]; // Empty list
+                    nextBoxedMon.Abilities[0] = ability;
+                    // The other 2 abilities may or may not exist of course
+                    nextBoxedMon.Abilities[1] = Abilities.GetValueOrDefault(fields[8]);
+                    nextBoxedMon.Abilities[2] = Abilities.GetValueOrDefault(fields[9]);
+                }
+                BoxedMons.Add(id, nextBoxedMon);
             }
         }
     }

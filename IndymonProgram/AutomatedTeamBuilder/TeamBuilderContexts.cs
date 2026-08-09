@@ -131,7 +131,7 @@ namespace AutomatedTeamBuilder
                 ExtractArchetypeMods(archetype, result);
             }
             // All of these mods may have changed the pokemon itself (e.g. zen mode, pirouette, random shit, so only then we verify the mon and stuff)
-            Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[result.GetPokemonSpecies()];
+            PokemonSpecies monData = MechanicsDataContainers.GlobalMechanicsData.Dex[result.GetPokemonSpecies()];
             result.MonStats = monData.Stats;
             result.MonWeight = monData.Weight;
             result.PokemonTypes = monData.Types; // Set base type

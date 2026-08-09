@@ -115,7 +115,7 @@ namespace AutomatedTeamBuilder
         /// <param name="monCtx">Context where to add the mods</param>
         static void ExtractMonMods(PokemonBuildContext monCtx)
         {
-            Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[monCtx.GetPokemonSpecies()]; // Obtain species of mon
+            PokemonSpecies monData = MechanicsDataContainers.GlobalMechanicsData.Dex[monCtx.GetPokemonSpecies()]; // Obtain species of mon
             ExtractMods((ElementType.POKEMON, monCtx.BaseSpecies), monCtx); // Mon activates stuff
             // Types are weird because they're modified before, so the mon needs to extract the ones of the current type at the last moment
             if (monCtx.TeraType != PokemonType.NONE)

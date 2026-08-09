@@ -1,4 +1,4 @@
-﻿namespace GameData
+﻿namespace MechanicsData
 {
     public enum SandwichEffectType
     {
@@ -58,6 +58,11 @@
             return result;
         }
         // Parser
+        /// <summary>
+        /// Parses a sandwich by its name
+        /// </summary>
+        /// <param name="sandwichName">Name of sandwich to parse (contains all the data)</param>
+        /// <returns>The Parsed sandwich</returns>
         public static Sandwich Parse(string sandwichName)
         {
             Sandwich resultingSandwich = new Sandwich
@@ -106,21 +111,6 @@
             };
             // Sandwich finished parsing
             return resultingSandwich;
-        }
-        public static bool TryParse(string sandwichName, out Sandwich sandwich)
-        {
-            bool success;
-            sandwich = null;
-            try
-            {
-                sandwich = Parse(sandwichName);
-                success = true;
-            }
-            catch
-            {
-                success = false;
-            }
-            return success;
         }
     }
 }
