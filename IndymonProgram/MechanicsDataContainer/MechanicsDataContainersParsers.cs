@@ -426,18 +426,12 @@ namespace MechanicsDataContainer
                 PokemonEntity nextBoxedMon = GenerateBlankPokemon(species); // Generate a mon of this kind but make it have randomized values in case is the first instancing
                 nextBoxedMon.Nickname = fields[2];
                 nextBoxedMon.PokeBall = PokeBalls[fields[3]];
-                nextBoxedMon.Moves[0] = Moves[fields[4]];
-                nextBoxedMon.Moves[1] = Moves.GetValueOrDefault(fields[5]); // This one could technically be null if no second move
+                nextBoxedMon.Moves[0] = Moves.GetValueOrDefault(fields[4]);
+                nextBoxedMon.Moves[1] = Moves.GetValueOrDefault(fields[5]);
                 nextBoxedMon.Nature = Natures[fields[6]];
-                // Ability filling is weird, will just do one by one
-                if (Abilities.TryGetValue(fields[7], out Ability ability)) // If there's atleast one aility, means the abilities are not the random ones
-                {
-                    nextBoxedMon.Abilities = [null, null, null]; // Empty list
-                    nextBoxedMon.Abilities[0] = ability;
-                    // The other 2 abilities may or may not exist of course
-                    nextBoxedMon.Abilities[1] = Abilities.GetValueOrDefault(fields[8]);
-                    nextBoxedMon.Abilities[2] = Abilities.GetValueOrDefault(fields[9]);
-                }
+                nextBoxedMon.Abilities[0] = Abilities.GetValueOrDefault(fields[7]);
+                nextBoxedMon.Abilities[1] = Abilities.GetValueOrDefault(fields[8]);
+                nextBoxedMon.Abilities[2] = Abilities.GetValueOrDefault(fields[9]);
                 BoxedMons.Add(id, nextBoxedMon);
             }
         }
