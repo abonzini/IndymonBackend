@@ -450,7 +450,7 @@ namespace MechanicsDataContainer
 
             // Iterate for all trainers, keeping in mind the dimensions of row/col
             const int TRANER_CARD_WIDTH = 21; // Width is 20 but the margin to the right is considered the trainer's
-            const int TRANER_CARD_HEIGHT = 45; // Width is 44 (?) but the margin to the bottom is considered the trainer's
+            const int TRANER_CARD_HEIGHT = 45; // Height is 44 (?) but the margin to the bottom is considered the trainer's
             for (int i = 1; i < rows.Length; i += TRANER_CARD_HEIGHT) // Ignore the first row/col since these are just formatting spaces
             {
                 for (int j = 1; j < sampleCols.Length; j += TRANER_CARD_WIDTH)
@@ -484,9 +484,9 @@ namespace MechanicsDataContainer
                     // Next is the 2 macro-rows of Pokemon 5x2
                     const int POKEMON_WIDTH = 4;
                     const int POKEMON_HEIGHT = 10;
-                    for (int monX = 0; monX < 5; monX++)
+                    for (int monY = 0; monY < 2; monY++)
                     {
-                        for (int monY = 0; monY < 2; monY++)
+                        for (int monX = 0; monX < 5; monX++)
                         {
                             // Species line, contains species of mon, will instantiate a new Pokemon if there's a valid species
                             nextLine = rows[i + 5 + (monY * POKEMON_HEIGHT)].Trim().Split(',');
@@ -558,7 +558,7 @@ namespace MechanicsDataContainer
                                 newMon.HeldItemChosen = true;
                             }
                             // Finally, add mon
-                            newTrainer.TeamPokemon.Add(newMon);
+                            newTrainer.Pokemon.Add(newMon);
                         }
                     }
                     // Now begins all the boxes and things
