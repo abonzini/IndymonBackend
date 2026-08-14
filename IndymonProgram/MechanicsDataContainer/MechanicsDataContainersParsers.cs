@@ -502,7 +502,6 @@ namespace MechanicsDataContainer
                             monField = nextLine[j + 0 + (monX * POKEMON_WIDTH)]; // Pokeball
                             newMon.PokeBall = PokeBalls[monField];
                             monField = nextLine[j + 2 + (monX * POKEMON_WIDTH)]; // Nature
-                            monField = monField.Split("Nature")[0].Trim(); // Nature is the nature name without the word "nature"
                             newMon.Nature = Natures[monField];
                             // 2 Moves line
                             nextLine = rows[i + 7 + (monY * POKEMON_HEIGHT)].Trim().Split(',');
