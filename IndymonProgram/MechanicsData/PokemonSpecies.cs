@@ -2,18 +2,18 @@
 {
     public class PokemonSpecies
     {
-        public string Name { get; set; } = "";
-        public (PokemonType, PokemonType) Types { get; set; } = (PokemonType.NONE, PokemonType.NONE);
-        public PokemonSpecies Prevo { get; set; } = null;
-        public List<PokemonSpecies> Evos { get; set; } = new List<PokemonSpecies>();
-        public PokemonSpecies AlternativeOf { get; set; } = null;
-        public List<PokemonSpecies> WildAlternatives { get; set; } = new List<PokemonSpecies>();
-        public double[] Stats { get; set; } = new double[6]; // All stats, hopefully init to 0
-        public double Weight { get; set; } = 0.0f;
-        public double Height { get; set; } = 0.0f;
-        public HashSet<Move> Moveset { get; set; } = new HashSet<Move>();
-        public HashSet<Ability> Abilities { get; set; } = new HashSet<Ability>();
-        public string ImageUrl { get; set; } = "";
+        public string Name = "";
+        public (PokemonType, PokemonType) Types = (PokemonType.NONE, PokemonType.NONE);
+        public PokemonSpecies Prevo = null;
+        public List<PokemonSpecies> Evos = new List<PokemonSpecies>();
+        public PokemonSpecies AlternativeOf = null;
+        public List<PokemonSpecies> WildAlternatives = new List<PokemonSpecies>();
+        public double[] Stats = new double[6]; // All stats, hopefully init to 0
+        public double Weight = 0.0f;
+        public double Height = 0.0f;
+        public HashSet<Move> Moveset = new HashSet<Move>();
+        public HashSet<Ability> Abilities = new HashSet<Ability>();
+        public string ImageUrl = "";
         public override string ToString()
         {
             return Name;

@@ -52,8 +52,9 @@ namespace MechanicsDataContainer
             FillNpcData(sheetId, npcArea);
             string boxMonArea = lines[10].Split(",")[0];
             FillBoxedMonData(sheetId, boxMonArea);
+            string playerArea = lines[11].Split(",")[0];
+            FillPlayers(sheetId, playerArea);
         }
-        readonly Random _rng = new Random(Guid.NewGuid().GetHashCode()); // Aux rng
         public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
         public Dictionary<string, Move> Moves = new Dictionary<string, Move>();
         public Dictionary<string, Ability> Abilities = new Dictionary<string, Ability>();
@@ -72,5 +73,6 @@ namespace MechanicsDataContainer
         public Dictionary<string, Sandwich> SandwichLookup = new Dictionary<string, Sandwich>();
         public Dictionary<string, MoveDisk> MoveDiskLookup = new Dictionary<string, MoveDisk>();
         public Dictionary<string, PokemonEntity> BoxedMons = new Dictionary<string, PokemonEntity>();
+        public Dictionary<string, Trainer> Trainers = new Dictionary<string, Trainer>();
     }
 }

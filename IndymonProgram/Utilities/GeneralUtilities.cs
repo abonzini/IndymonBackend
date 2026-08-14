@@ -19,13 +19,12 @@ namespace Utilities
         /// <summary>
         /// General method to add an item to a dictionary
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="dict">Dictionary to add to</param>
         /// <param name="item">Item to add</param>
         /// <param name="count">How many to add</param>
-        /// <param name="eliminateIf0">If subtracting, and the result is less than 0, remove the thing</param>
+        /// <param name="maxKeys">How many uniquekeys this dict can have</param>
         /// <returns>The final count of the item</returns>
-        public static int AddtemToCountDictionary<T>(Dictionary<T, int> dict, T item, int count = 1, bool eliminateIf0 = false)
+        public static int AddtemToCountDictionary<T>(Dictionary<T, int> dict, T item, int count, int maxKeys = int.MaxValue)
         {
             int itemCount = count;
             if (!dict.TryAdd(item, count)) // Try to add if not exists already
@@ -33,7 +32,17 @@ namespace Utilities
                 itemCount = dict[item];
                 itemCount += count;
                 dict[item] = itemCount;
-                if (eliminateIf0 && itemCount <= 0) dict.Remove(item);
+                if (itemCount <= 0) // Remove the item if negative
+                {
+                    dict.Remove(item);
+                }
+            }
+            else
+            {
+                if (dict.Count > maxKeys) // The addition of this item caused a key overflow
+                {
+                    dict.Remove(item);
+                }
             }
             return itemCount;
         }

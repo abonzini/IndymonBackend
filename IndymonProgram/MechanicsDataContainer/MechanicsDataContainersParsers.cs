@@ -413,7 +413,7 @@ namespace MechanicsDataContainer
         /// <param name="sheetTab">Which tab has the data</param>
         void FillBoxedMonData(string sheetId, string sheetTab)
         {
-            Console.WriteLine("Filling boxed mon data");
+            Console.WriteLine("Filling Boxed Mon data");
             // Parse csv
             string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
             string[] lines = csv.Split("\n");
@@ -433,6 +433,211 @@ namespace MechanicsDataContainer
                 nextBoxedMon.Abilities[1] = Abilities.GetValueOrDefault(fields[8]);
                 nextBoxedMon.Abilities[2] = Abilities.GetValueOrDefault(fields[9]);
                 BoxedMons.Add(id, nextBoxedMon);
+            }
+        }
+        /// <summary>
+        /// Fills data of all player trainers
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
+        void FillPlayers(string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Filling Player Trainer data");
+            // Parse csv
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string[] rows = csv.Split("\n");
+            string[] sampleCols = rows[0].Trim().Split(","); // Just for some alignment and number check
+
+            // Iterate for all trainers, keeping in mind the dimensions of row/col
+            const int TRANER_CARD_WIDTH = 21; // Width is 20 but the margin to the right is considered the trainer's
+            const int TRANER_CARD_HEIGHT = 45; // Width is 44 (?) but the margin to the bottom is considered the trainer's
+            for (int i = 1; i < rows.Length; i += TRANER_CARD_HEIGHT) // Ignore the first row/col since these are just formatting spaces
+            {
+                for (int j = 1; j < sampleCols.Length; j += TRANER_CARD_WIDTH)
+                {
+                    // Standing on next trainer's trainer card (backend)
+                    // Row 1, name, data, some IMP and config
+                    string[] nextLine = rows[i + 0].Trim().Split(',');
+                    string name = nextLine[j + 2];
+                    if (name == "") continue; // If no name, trainer is empty, move to next card
+                    Trainer newTrainer = new Trainer
+                    {
+                        Name = name,
+                        PictureUrl = nextLine[j + 4],
+                        DiscordId = nextLine[j + 6],
+                        Imp = int.Parse(nextLine[j + 12]),
+                        AutoTeam = bool.Parse(nextLine[j + 19].ToLower())
+                    };
+                    // Row 2, just some extra config
+                    nextLine = rows[i + 1].Trim().Split(',');
+                    newTrainer.AutoMoveDisk = bool.Parse(nextLine[j + 15].ToLower());
+                    newTrainer.AutoHeldItem = bool.Parse(nextLine[j + 19].ToLower());
+                    // Row 3, jewelry and last config
+                    nextLine = rows[i + 2].Trim().Split(',');
+                    if (nextLine[j + 2] != "Empty Jewelry Slot") // Only empty slot is allowed as no jewelry to ensure assert on typos
+                    {
+                        newTrainer.EquippedJewelry = Jewelry[nextLine[j + 2]];
+                        newTrainer.EquippedJewelryUses = int.Parse(nextLine[j + 3]);
+                    }
+                    newTrainer.AutoGummy = bool.Parse(nextLine[j + 15].ToLower());
+                    newTrainer.AutoFavour = bool.Parse(nextLine[j + 19].ToLower());
+                    // Next is the 2 macro-rows of Pokemon 5x2
+                    const int POKEMON_WIDTH = 4;
+                    const int POKEMON_HEIGHT = 10;
+                    for (int monX = 0; monX < 5; monX++)
+                    {
+                        for (int monY = 0; monY < 2; monY++)
+                        {
+                            // Species line, contains species of mon, will instantiate a new Pokemon if there's a valid species
+                            nextLine = rows[i + 5 + (monY * POKEMON_HEIGHT)].Trim().Split(',');
+                            string monField = nextLine[j + 2 + (monX * POKEMON_WIDTH)]; // In this case, the species
+                            if (monField == "") continue;
+                            PokemonEntity newMon = GenerateBlankPokemon(monField);
+                            // Nickname line
+                            nextLine = rows[i + 4 + (monY * POKEMON_HEIGHT)].Trim().Split(',');
+                            monField = nextLine[j + 2 + (monX * POKEMON_WIDTH)]; // Nickname
+                            if (monField != "Nickname") newMon.Nickname = monField;
+                            // Pokeball + Nature Line
+                            nextLine = rows[i + 6 + (monY * POKEMON_HEIGHT)].Trim().Split(',');
+                            monField = nextLine[j + 0 + (monX * POKEMON_WIDTH)]; // Pokeball
+                            newMon.PokeBall = PokeBalls[monField];
+                            monField = nextLine[j + 2 + (monX * POKEMON_WIDTH)]; // Nature
+                            monField = monField.Split("Nature")[0].Trim(); // Nature is the nature name without the word "nature"
+                            newMon.Nature = Natures[monField];
+                            // 2 Moves line
+                            nextLine = rows[i + 7 + (monY * POKEMON_HEIGHT)].Trim().Split(',');
+                            monField = nextLine[j + 0 + (monX * POKEMON_WIDTH)]; // M1
+                            if (monField != "No Move") newMon.Moves[0] = Moves[monField];
+                            monField = nextLine[j + 2 + (monX * POKEMON_WIDTH)]; // M2
+                            if (monField != "No Move") newMon.Moves[1] = Moves[monField];
+                            // 2 Move Disk line
+                            nextLine = rows[i + 8 + (monY * POKEMON_HEIGHT)].Trim().Split(',');
+                            monField = nextLine[j + 0 + (monX * POKEMON_WIDTH)]; // Disk1
+                            if (monField != "No Move Disk")
+                            {
+                                newMon.MoveDisks[0] = GetMoveDisk(monField);
+                                newMon.MoveDisksChosen[0] = true;
+                            }
+                            monField = nextLine[j + 2 + (monX * POKEMON_WIDTH)]; // Disk2
+                            if (monField != "No Move Disk")
+                            {
+                                newMon.MoveDisks[1] = GetMoveDisk(monField);
+                                newMon.MoveDisksChosen[1] = true;
+                            }
+                            // Abilities line
+                            for (int abilityIndex = 0; abilityIndex < newMon.Abilities.Length; abilityIndex++)
+                            {
+                                nextLine = rows[i + 9 + abilityIndex + (monY * POKEMON_HEIGHT)].Trim().Split(',');
+                                monField = nextLine[j + 0 + (monX * POKEMON_WIDTH)]; // Gets the ability
+                                if (monField != "No Ability")
+                                {
+                                    newMon.Abilities[abilityIndex] = Abilities[monField];
+                                    monField = nextLine[j + 3 + (monX * POKEMON_WIDTH)]; // Check if ability is active
+                                    if (abilityIndex != 0)
+                                    {
+                                        // Non-first ability are active and consumed if gummy used
+                                        if (bool.Parse(monField.ToLower()))
+                                        {
+                                            newMon.AbilityActive[abilityIndex] = true;
+                                            newMon.GummyChosen[abilityIndex] = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // First one always active no gummy needed
+                                        newMon.AbilityActive[abilityIndex] = true;
+                                        newMon.GummyChosen[abilityIndex] = false;
+                                    }
+                                }
+                            }
+                            // Held item line
+                            nextLine = rows[i + 12 + (monY * POKEMON_HEIGHT)].Trim().Split(',');
+                            monField = nextLine[j + 0 + (monX * POKEMON_WIDTH)]; // Held Item
+                            if (monField != "Empty Item Slot")
+                            {
+                                newMon.HeldItem = HeldItems[monField];
+                                newMon.HeldItemChosen = true;
+                            }
+                            // Finally, add mon
+                            newTrainer.TeamPokemon.Add(newMon);
+                        }
+                    }
+                    // Now begins all the boxes and things
+                    void parseBagFields<T>(int row, Dictionary<T, int> dictToAdd, Dictionary<string, T> lookupSource)
+                    {
+                        string field;
+                        T item;
+                        int count;
+                        for (int y = 0; y < 2; y++) // 2 lines
+                        {
+                            int xInitialValue = y == 0 ? 2 : 0;
+                            nextLine = rows[i + row + y].Trim().Split(',');
+                            for (int x = xInitialValue; x < 10; x += 2) // 10 item+count "columns"
+                            {
+                                field = nextLine[j + x];
+                                if (field != "") // Theres an item in this bag
+                                {
+                                    item = lookupSource[field];
+                                    count = int.Parse(nextLine[j + x + 1]);
+                                    GeneralUtilities.AddtemToCountDictionary(dictToAdd, item, count, Trainer.MAX_NUMBER_BAG);
+                                }
+                            }
+                        }
+                    }
+                    parseBagFields(23, newTrainer.Gummies, Gummies); // Row 23, gummies
+                    parseBagFields(25, newTrainer.MoveDisks, MoveDiskLookup); // Row 25, move disk
+                    parseBagFields(27, newTrainer.HeldItems, HeldItems); // Row 27, held items
+                    parseBagFields(29, newTrainer.Mints, Mints); // Row 29, mints
+                    parseBagFields(31, newTrainer.EvoPlates, EvoPlates); // Row 31, evo plates
+                    parseBagFields(33, newTrainer.Essences, Essences); // Row 33, essences
+                    parseBagFields(35, newTrainer.KeyItems, KeyItems); // Row 35, key items
+                    parseBagFields(37, newTrainer.PokeBalls, PokeBalls); // Row 37, key items
+                    parseBagFields(41, newTrainer.Favours, AllNpcTrainers); // Row 41, favours
+                    // Some weird special ones, the sandwiches (order-important) and the boxed (the lookup is the key and not the value)
+                    { // 39, sandwiches
+                        string field;
+                        Sandwich sammy;
+                        for (int y = 0; y < 2; y++) // 2 lines
+                        {
+                            int xInitialValue = y == 0 ? 2 : 0;
+                            nextLine = rows[i + 39 + y].Trim().Split(',');
+                            for (int x = xInitialValue; x < 10; x += 2) // 10 item+count "columns"
+                            {
+                                field = nextLine[j + x];
+                                if (field != "" && newTrainer.Sandwiches.Count < Trainer.MAX_NUMBER_BAG) // Theres a sandwich and i have space
+                                {
+                                    sammy = GetSandwich(field);
+                                    newTrainer.Sandwiches.Add(sammy);
+                                }
+                            }
+                        }
+                    }
+                    { // 43, boxed mons
+                        string field;
+                        for (int y = 0; y < 2; y++) // 2 lines
+                        {
+                            int xInitialValue = y == 0 ? 2 : 0;
+                            nextLine = rows[i + 43 + y].Trim().Split(',');
+                            for (int x = xInitialValue; x < 10; x += 2) // 10 item+count "columns"
+                            {
+                                field = nextLine[j + x];
+                                if (field != "" && BoxedMons.Count < Trainer.MAX_NUMBER_BAG)
+                                {
+                                    if (BoxedMons.ContainsKey(field)) // Theres a mon with that id in the box and i have space
+                                    {
+                                        newTrainer.BoxedMons.Add(field);
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"{newTrainer.Name}'s box references a mon not in global box list");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // Finally, add trainer
+                    Trainers.Add(name, newTrainer);
+                }
             }
         }
     }
