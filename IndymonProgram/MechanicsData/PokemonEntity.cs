@@ -2,6 +2,7 @@
 {
     public class PokemonEntity
     {
+        public string Name = "";
         public PokemonSpecies Species = null;
         public string Nickname = "";
         public bool IsShiny = false;
@@ -19,11 +20,24 @@
         public bool Borrowed = false;
         public override string ToString()
         {
-            return (Nickname != "") ? $"{Nickname} ({Species})" : Species.Name;
+            return (Nickname != "") ? $"{Nickname} ({Name})" : Name;
         }
-        public string GetInformalName()
+        public string GetDescription()
         {
-            return (Nickname != "") ? Nickname : Species.Name;
+            // Glossary for pokemon will be used only for boxed mons so it'll need to explain more or less what the mon has it going for it.
+            string description = ToString() + " ";
+            description += $"{Nature.Name} Nature in a {PokeBall.Name}. ";
+            List<string> moves = [.. Moves.Where(m => m != null).Select(m => m.Name)];
+            if (moves.Count > 0)
+            {
+                description += $"MOVES: {string.Join(" + ", moves)}. ";
+            }
+            List<string> abilities = [.. Abilities.Where(a => a != null).Select(a => a.Name)];
+            if (abilities.Count > 0)
+            {
+                description += $"ABILITIES: {string.Join(" + ", abilities)}. ";
+            }
+            return description.Trim();
         }
     }
 }

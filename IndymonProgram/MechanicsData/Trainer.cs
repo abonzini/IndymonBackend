@@ -69,7 +69,7 @@ namespace MechanicsData
                                 // url + nickname
                                 1 => $"{thePokemon.Species.ImageUrl},,{((thePokemon.Nickname == "") ? "Nickname" : thePokemon.Nickname)},,",
                                 // Species descriptor
-                                2 => $",,{thePokemon.Species.Name}{(thePokemon.IsShiny ? "★" : "")},,",
+                                2 => $",,{thePokemon.Species.Name}{(thePokemon.IsShiny ? " ★" : "")},,",
                                 // Pokeball and nature
                                 3 => $"{thePokemon.PokeBall.Name},,{thePokemon.Nature.Name},,",
                                 // Moves

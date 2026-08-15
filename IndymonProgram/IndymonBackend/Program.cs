@@ -73,16 +73,21 @@ namespace IndymonBackendProgram
                         //GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
                         break;
                     case "1":
-                        //tournamentManager = new TournamentManager
-                        //{
-                        //    DirectoryPath = directoryPath
-                        //};
-                        //tournamentManager.GenerateNewTournament();
+                        SpreadsheetBuilderUtils.ExportGlossary(directoryPath);
+                        SpreadsheetBuilderUtils.ExportAllBoxedMons(directoryPath);
+                        SpreadsheetBuilderUtils.ExportCramTypes(directoryPath);
                         break;
-                    case "2":
-                        //tournamentManager.UpdateTournamentTeams();
-                        //tournamentManager.ExecuteTournament();
-                        break;
+                    //case "1":
+                    //tournamentManager = new TournamentManager
+                    //{
+                    //    DirectoryPath = directoryPath
+                    //};
+                    //tournamentManager.GenerateNewTournament();
+                    //break;
+                    //case "2":
+                    //tournamentManager.UpdateTournamentTeams();
+                    //tournamentManager.ExecuteTournament();
+                    //break;
                     case "3":
                         //tournamentManager.AnimateTournament();
                         //tournamentManager.UpdateTournamentTeams(true); // May need to redo team seeding if file was loaded (auto tho)
@@ -90,7 +95,7 @@ namespace IndymonBackendProgram
                         //Console.WriteLine("Writing tournament stats");
                         //GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
                         break;
-                    case "4":
+                    case "2":
                         foreach (Trainer trainer in MechanicsDataContainers.GlobalMechanicsData.Trainers.Values)
                         {
                             // Will quickly export all trainers csvs, useful for cleanup functions
@@ -290,15 +295,16 @@ namespace IndymonBackendProgram
                               //"1 - Generate a new tournament\n" +
                               //"2 - Update tournament participant's team sheets and input tournament data\n" +
                               //"3 - Finalize tournament. Animation + export new tournament data\n" +
-                                "4 - Export all players csv data\n" //+
-                                                                    //"5 - Generate exploration, choose place, player, etc\n" +
-                                                                    //"6 - Simulate current exploration\n" +
-                                                                    //"7 - Animate resolved exploration\n" +
-                                                                    //"8 - Draw from Favour Gacha\n" +
-                                                                    //"9 - Random 'Baby' Pokemon from trainer (Favor resolution)\n" +
-                                                                    //"10 - Random exploration rewards (tiered favor resolutions)\n" +
-                                                                    //"11 - Random exploration mons (for beginning of trainer's adventures)\n" +
-                                                                    //"12 - Test Dungeon Drawing"
+                                "1 - Export all updated generated spreadsheet elements (boxes, cram-o-matic, glossary)\n" +
+                                "2 - Export all players csv data\n"
+            //"5 - Generate exploration, choose place, player, etc\n" +
+            //"6 - Simulate current exploration\n" +
+            //"7 - Animate resolved exploration\n" +
+            //"8 - Draw from Favour Gacha\n" +
+            //"9 - Random 'Baby' Pokemon from trainer (Favor resolution)\n" +
+            //"10 - Random exploration rewards (tiered favor resolutions)\n" +
+            //"11 - Random exploration mons (for beginning of trainer's adventures)\n" +
+            //"12 - Test Dungeon Drawing"
             );
         }
     }

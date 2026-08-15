@@ -8,11 +8,8 @@
         // Data
         public string Name = "";
         public bool IsRandomMove = false;
+        public bool IsSacrificial = false;
         public Move AddedMove = null;
-        public override string ToString()
-        {
-            return Name;
-        }
         /// <summary>
         /// Parses a move disk given name, may be a Blank Disk or a disk associated with a move
         /// </summary>
@@ -28,6 +25,7 @@
             if (itemName == BLANK_DISK)
             {
                 resultingItem.IsRandomMove = true;
+                resultingItem.IsSacrificial = true;
             }
             else
             {
@@ -36,6 +34,32 @@
                 resultingItem.AddedMove = moveDb[moveName];
             }
             return resultingItem;
+        }
+        /// <summary>
+        /// Gets the human-readable description of an object, useful when assembling a glossary
+        /// </summary>
+        /// <returns>A description of the item</returns>
+        public string GetDescription()
+        {
+            string effect = "When equipped into a Pokemon's slot, this slot will be filled with ";
+            if (IsRandomMove)
+            {
+                effect = "a random move in the Pokemon's learnset (for the week).";
+            }
+            else
+            {
+                effect = $"the move {AddedMove.Name}.";
+            }
+            // Also, blank disk will be used as a sacrifice to avoid the waste of more important items
+            if (IsSacrificial)
+            {
+                effect += " Additionally, this item will be consumed in a player's inventory before any other move disks, so the player can keep their more valuable disks.";
+            }
+            return effect; // TODO: later on the json will contain a special field with this string, and will be printed here
+        }
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

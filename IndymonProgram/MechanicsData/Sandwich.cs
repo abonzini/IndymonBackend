@@ -18,15 +18,12 @@
         const string POST_HEALING_FLAVOUR = "Bitter";
         const string LEVEL_FLAVOUR = "Spicy";
         // Data
-        public string Name = "";
+        public string Name { get; set; } = "";
         public int Level = 0;
         public int Duration = 0;
         public SandwichEffectType Effect = SandwichEffectType.NONE;
-        public override string ToString()
-        {
-            return Name;
-        }
-        public string GetGlossaryDescription()
+        public PokemonType CramType = PokemonType.NONE;
+        public string GetDescription()
         {
             string result = "";
             switch (Effect)
@@ -52,9 +49,9 @@
             }
             if (Level > 1)
             {
-                result += $"Effect is x{Level} times stronger.";
+                result += $" Effect is x{Level} times stronger.";
             }
-            result += $"Lasts for {Duration} turns.";
+            result += $" Lasts for {Duration} turns.";
             return result;
         }
         // Parser
@@ -80,6 +77,15 @@
                 SHINY_CHANCE_FLAVOUR => SandwichEffectType.SHINY_CHANCE,
                 POST_HEALING_FLAVOUR => SandwichEffectType.POST_HEALING,
                 LEVEL_FLAVOUR => SandwichEffectType.LEVEL,
+                _ => throw new Exception($"Sandwich flavour {nameParts[0]} not implemented"),
+            };
+            resultingSandwich.CramType = nameParts[0] switch
+            {
+                ENEMY_NUMBER_FLAVOUR => PokemonType.BUG,
+                ITEM_DROP_FLAVOUR => PokemonType.GRASS,
+                SHINY_CHANCE_FLAVOUR => PokemonType.ROCK,
+                POST_HEALING_FLAVOUR => PokemonType.DARK,
+                LEVEL_FLAVOUR => PokemonType.FIRE,
                 _ => throw new Exception($"Sandwich flavour {nameParts[0]} not implemented"),
             };
             // Check level (roman numeral calculator lmao)
@@ -111,6 +117,10 @@
             };
             // Sandwich finished parsing
             return resultingSandwich;
+        }
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

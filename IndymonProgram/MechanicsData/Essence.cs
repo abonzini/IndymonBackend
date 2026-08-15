@@ -1,4 +1,6 @@
-﻿namespace MechanicsData
+﻿using Utilities;
+
+namespace MechanicsData
 {
     public class Essence
     {
@@ -6,7 +8,11 @@
         public PokemonType Type = PokemonType.NONE;
         public override string ToString()
         {
-            return $"{Name}";
+            return Name;
+        }
+        public string GetDescription()
+        {
+            return $"A {GeneralUtilities.ApaCapitalize(Type.ToString())}-type essence.";
         }
     }
 }

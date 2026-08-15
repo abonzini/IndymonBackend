@@ -350,11 +350,12 @@ namespace MechanicsDataContainer
             string[] lines = csv.Split("\n");
             for (int i = 1; i < lines.Length; i++) // Has a header so ignore first item
             {
-                string[] fields = lines[i].Split(","); // Csv
+                string[] fields = lines[i].Trim().Split(","); // Csv
                 KeyItem newItem = new KeyItem()
                 {
                     Name = fields[0],
                     CramType = Enum.Parse<PokemonType>(fields[1].Trim().ToUpper()),
+                    DescriptionString = fields[2]
                 };
                 KeyItems.Add(newItem.Name, newItem);
             }
@@ -426,12 +427,12 @@ namespace MechanicsDataContainer
                 PokemonEntity nextBoxedMon = GenerateBlankPokemon(species); // Generate a mon of this kind but make it have randomized values in case is the first instancing
                 nextBoxedMon.Nickname = fields[2];
                 nextBoxedMon.PokeBall = PokeBalls[fields[3]];
-                nextBoxedMon.Moves[0] = Moves.GetValueOrDefault(fields[4]);
-                nextBoxedMon.Moves[1] = Moves.GetValueOrDefault(fields[5]);
+                nextBoxedMon.Moves[0] = (fields[4] != "") ? Moves[fields[4]] : null;
+                nextBoxedMon.Moves[1] = (fields[5] != "") ? Moves[fields[5]] : null;
                 nextBoxedMon.Nature = Natures[fields[6]];
-                nextBoxedMon.Abilities[0] = Abilities.GetValueOrDefault(fields[7]);
-                nextBoxedMon.Abilities[1] = Abilities.GetValueOrDefault(fields[8]);
-                nextBoxedMon.Abilities[2] = Abilities.GetValueOrDefault(fields[9]);
+                nextBoxedMon.Abilities[0] = (fields[7] != "") ? Abilities[fields[7]] : null;
+                nextBoxedMon.Abilities[1] = (fields[8] != "") ? Abilities[fields[8]] : null;
+                nextBoxedMon.Abilities[2] = (fields[9] != "") ? Abilities[fields[9]] : null;
                 BoxedMons.Add(id, nextBoxedMon);
             }
         }

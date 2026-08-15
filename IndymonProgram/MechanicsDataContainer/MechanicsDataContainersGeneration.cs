@@ -63,7 +63,10 @@ namespace MechanicsDataContainer
         /// <returns></returns>
         PokemonEntity GenerateBlankPokemon(string Species)
         {
-            PokemonEntity newPokemon = new PokemonEntity();
+            PokemonEntity newPokemon = new PokemonEntity
+            {
+                Name = Species
+            };
             if (Species.Contains('★'))
             {
                 newPokemon.IsShiny = true;
