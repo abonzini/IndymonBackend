@@ -1,13 +1,12 @@
 S3 Complete rework:
 
 TODO:
-- Cleanup of unneccessary elements in code (including battle statistics)
-- Start from scratch in mechanics containers, load excel-based elements in mechanics from a single spreadsheet
-- Item type ENUM, mechanics data depth
-
-- Elements that have JSON mechanics will be filled later, nothing we can really do at this time
-- Refill trainer data (add corresponding fields) -> Currently mons don't have their move/ability/item fields, keep it easy
-- Exporting of trainer data
+- Set basic gameplay sim in place, input and output
+- Create a basic sim that can be called, in order to replace bot and beyond, input/output classes to instantiate a game, 5v5 max with teams and spawn methods
+- Restore and upgrade tournament and later on exploration with some more automations, can adjust spreadsheet too
+    - Tourn: Great simplification but also a rewriting of verifier and teambuild needs
+    - Expl: Some big changes in item handling and expl mechanics
+- Cleanup of unneccessary elements in code (including battle statistics) and old stuff
 
 AI GENERATED NATURE AI (revise steal, delete):
 The 5 Neutral Natures (Balanced / Unpredictable)
