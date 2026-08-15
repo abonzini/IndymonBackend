@@ -71,6 +71,10 @@
             }
             return effect; // TODO: later on the json will contain a special field with this string, and will be printed here
         }
+        public PokemonType GetCramType()
+        {
+            return Type == PokemonType.NONE ? PokemonType.NORMAL : Type;
+        }
         public override string ToString()
         {
             return Name;

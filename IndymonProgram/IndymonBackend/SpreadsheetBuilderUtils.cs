@@ -92,7 +92,7 @@ namespace IndymonBackendProgram
             appendAll(MechanicsDataContainers.GlobalMechanicsData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.KeyItems.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.Mints.Select(kvp => $"{kvp.Key},{PokemonType.GRASS}")); // All mints are grass idk
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{(kvp.Value.Type)}")); // Type of move
+            appendAll(MechanicsDataContainers.GlobalMechanicsData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetCramType()}")); // Type of move
             appendAll(MechanicsDataContainers.GlobalMechanicsData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
             // File complete, save
