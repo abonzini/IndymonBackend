@@ -48,7 +48,7 @@
             }
             else
             {
-                effect += $"{AddedMove.Name}: {AddedMove.GetDescription()}";
+                effect += $"{AddedMove.Name}: {AddedMove.Description}";
             }
             // Also, blank disk will be used as a sacrifice to avoid the waste of more important items
             if (IsSacrificial)

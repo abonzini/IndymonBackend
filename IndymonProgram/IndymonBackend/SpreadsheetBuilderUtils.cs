@@ -21,17 +21,18 @@ namespace IndymonBackendProgram
                 }
             }
             // Add all elements that need a glossary
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Abilities.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(MechanicsDataContainers.GlobalMechanicsData.Abilities.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.Essences.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.EvoPlates.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.Gummies.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(MechanicsDataContainers.GlobalMechanicsData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(MechanicsDataContainers.GlobalMechanicsData.Jewelries.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.KeyItems.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.Mints.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Moves.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(MechanicsDataContainers.GlobalMechanicsData.Moves.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Natures.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(MechanicsDataContainers.GlobalMechanicsData.Natures.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(MechanicsDataContainers.GlobalMechanicsData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
             appendAll(MechanicsDataContainers.GlobalMechanicsData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             // Only put the box mons that are still boxed
             foreach (Trainer trainer in MechanicsDataContainers.GlobalMechanicsData.Trainers.Values)

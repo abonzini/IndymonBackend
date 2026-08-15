@@ -1,5 +1,4 @@
 ﻿using MechanicsData;
-using Newtonsoft.Json;
 using Utilities;
 
 namespace MechanicsDataContainer
@@ -47,96 +46,6 @@ namespace MechanicsDataContainer
                         DefensiveTypeChart[nextType].Add(whatType, multiplier); // Add the multiplier
                     }
                 }
-            }
-        }
-        /// <summary>
-        /// Parses the move data found in json files
-        /// </summary>
-        /// <param name="folder">Path to base folder for all jsons</param>
-        void ParseMoves(string folder)
-        {
-            Console.WriteLine("Parsing Moves");
-            Moves.Clear();
-            // Parse all json files
-            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
-            {
-                Move nextMove = JsonConvert.DeserializeObject<Move>(File.ReadAllText(file));
-                Moves.Add(nextMove.Name, nextMove);
-            }
-        }
-        /// <summary>
-        /// Parses the ability data found in json files
-        /// </summary>
-        /// <param name="folder">Path to base folder for all jsons</param>
-        void ParseAbilities(string folder)
-        {
-            Console.WriteLine("Parsing Abilities");
-            Abilities.Clear();
-            // Parse all json files
-            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
-            {
-                Ability nextAbility = JsonConvert.DeserializeObject<Ability>(File.ReadAllText(file));
-                Abilities.Add(nextAbility.Name, nextAbility);
-            }
-        }
-        /// <summary>
-        /// Parses the jewelry data found in json files
-        /// </summary>
-        /// <param name="folder">Path to base folder for all jsons</param>
-        void ParseJewelry(string folder)
-        {
-            Console.WriteLine("Parsing Jewelry");
-            Jewelry.Clear();
-            // Parse all json files
-            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
-            {
-                Jewelry nextJewelry = JsonConvert.DeserializeObject<Jewelry>(File.ReadAllText(file));
-                Jewelry.Add(nextJewelry.Name, nextJewelry);
-            }
-        }
-        /// <summary>
-        /// Parses the held item data found in json files
-        /// </summary>
-        /// <param name="folder">Path to base folder for all jsons</param>
-        void ParseHeldItems(string folder)
-        {
-            Console.WriteLine("Parsing Held Items");
-            HeldItems.Clear();
-            // Parse all json files
-            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
-            {
-                HeldItem nextHeldItem = JsonConvert.DeserializeObject<HeldItem>(File.ReadAllText(file));
-                HeldItems.Add(nextHeldItem.Name, nextHeldItem);
-            }
-        }
-        /// <summary>
-        /// Parses the nature data found in json files
-        /// </summary>
-        /// <param name="folder">Path to base folder for all jsons</param>
-        void ParseNatures(string folder)
-        {
-            Console.WriteLine("Parsing Natures");
-            Natures.Clear();
-            // Parse all json files
-            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
-            {
-                Nature nextNature = JsonConvert.DeserializeObject<Nature>(File.ReadAllText(file));
-                Natures.Add(nextNature.Name, nextNature);
-            }
-        }
-        /// <summary>
-        /// Parses the pokeball data found in json files
-        /// </summary>
-        /// <param name="folder">Path to base folder for all jsons</param>
-        void ParsePokeBalls(string folder)
-        {
-            Console.WriteLine("Parsing Poke Balls");
-            PokeBalls.Clear();
-            // Parse all json files
-            foreach (string file in Directory.EnumerateFiles(folder, "*.json"))
-            {
-                PokeBall nextBall = JsonConvert.DeserializeObject<PokeBall>(File.ReadAllText(file));
-                PokeBalls.Add(nextBall.Name, nextBall);
             }
         }
         /// <summary>
@@ -479,7 +388,7 @@ namespace MechanicsDataContainer
                     nextLine = rows[i + 2].Trim().Split(',');
                     if (nextLine[j + 2] != "Empty Jewelry Slot") // Only empty slot is allowed as no jewelry to ensure assert on typos
                     {
-                        newTrainer.EquippedJewelry = Jewelry[nextLine[j + 2]];
+                        newTrainer.EquippedJewelry = Jewelries[nextLine[j + 2]];
                         newTrainer.EquippedJewelryUses = int.Parse(nextLine[j + 3]);
                     }
                     newTrainer.AutoGummy = bool.Parse(nextLine[j + 15].ToLower());
