@@ -30,7 +30,7 @@
             else
             {
                 // Checks move then
-                string moveName = itemName.Split(MOVE_DISK_TEXT)[0]; // Keep the first part (before disk?)
+                string moveName = itemName.Split(MOVE_DISK_TEXT)[0].Trim(); // Keep the first part (before disk?)
                 resultingItem.AddedMove = moveDb[moveName];
             }
             return resultingItem;
@@ -44,11 +44,11 @@
             string effect = "When equipped into a Pokemon's slot, this slot will be filled with ";
             if (IsRandomMove)
             {
-                effect = "a random move in the Pokemon's learnset (for the week).";
+                effect += "a random move in the Pokemon's learnset (for the week).";
             }
             else
             {
-                effect = $"the move {AddedMove.Name}.";
+                effect += $"{AddedMove.Name}: {AddedMove.GetDescription()}";
             }
             // Also, blank disk will be used as a sacrifice to avoid the waste of more important items
             if (IsSacrificial)

@@ -400,6 +400,8 @@ namespace MechanicsDataContainer
                         string nextItem = itemLines[j];
                         if (nextItem != "")
                         {
+                            ItemType itemType = GetItemType(nextItem);
+                            // TODO: If item type == unknown should throw, but not right now because not all items are defined yet
                             theTrainer.AvailableItems.Add(nextItem);
                         }
                     }

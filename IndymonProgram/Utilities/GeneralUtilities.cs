@@ -35,6 +35,7 @@ namespace Utilities
                 if (itemCount <= 0) // Remove the item if negative
                 {
                     dict.Remove(item);
+                    itemCount = 0;
                 }
             }
             else
@@ -42,6 +43,7 @@ namespace Utilities
                 if (dict.Count > maxKeys) // The addition of this item caused a key overflow
                 {
                     dict.Remove(item);
+                    itemCount = 0;
                 }
             }
             return itemCount;

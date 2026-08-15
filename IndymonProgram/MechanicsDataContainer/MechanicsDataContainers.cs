@@ -46,6 +46,7 @@ namespace MechanicsDataContainer
             ParseEvoPlateList(sheetId, evoPlateTab);
             string keyItemTab = lines[7].Split(",")[0];
             ParseKeyItemList(sheetId, keyItemTab);
+            // After items, can do trainer and Pokemon
             string npcArea = lines[8].Split(",")[0];
             FillNpcData(sheetId, npcArea);
             npcArea = lines[9].Split(",")[0]; // More npc data, split in the sheet to differentiate between famous and non
