@@ -12,9 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gameplay", "MechanicsData\Gameplay.csproj", "{7BFE40E0-523D-4EC6-96B5-04752B800443}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameplayElements", "MechanicsData\GameplayElements.csproj", "{7BFE40E0-523D-4EC6-96B5-04752B800443}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechanicsDataContainer", "MechanicsDataContainer\MechanicsDataContainer.csproj", "{FB7A20ED-4F71-578E-CD96-028B53632E0A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameplayDataContainer", "MechanicsDataContainer\GameplayDataContainer.csproj", "{FB7A20ED-4F71-578E-CD96-028B53632E0A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameData", "GameData\GameData.csproj", "{D6592491-AE09-4AE8-A32B-8061DDBCDB29}"
 EndProject
