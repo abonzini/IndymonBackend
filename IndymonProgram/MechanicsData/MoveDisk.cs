@@ -8,6 +8,7 @@
         // Data
         public string Name = "";
         public bool IsRandomMove = false;
+        public PokemonType Type = PokemonType.NONE;
         public bool IsSacrificial = false;
         public Move AddedMove = null;
         /// <summary>
@@ -29,9 +30,17 @@
             }
             else
             {
-                // Checks move then
-                string moveName = itemName.Split(MOVE_DISK_TEXT)[0].Trim(); // Keep the first part (before disk?)
-                resultingItem.AddedMove = moveDb[moveName];
+                // Checks if it's a move or a tpye one
+                string diskPrefix = itemName.Split(MOVE_DISK_TEXT)[0].Trim(); // Keep the first part (before disk?)
+                if (Enum.TryParse(diskPrefix.ToUpper(), out resultingItem.Type)) // Check if it's a type (e.g. Fire Disk)
+                {
+                    resultingItem.IsRandomMove = true;
+                }
+                else
+                {
+                    resultingItem.AddedMove = moveDb[diskPrefix];
+                    resultingItem.Type = resultingItem.AddedMove.Type;
+                }
             }
             return resultingItem;
         }
@@ -44,7 +53,12 @@
             string effect = "When equipped into a Pokemon's slot, this slot will be filled with ";
             if (IsRandomMove)
             {
-                effect += "a random move in the Pokemon's learnset (for the week).";
+                effect += "a random ";
+                if (Type != PokemonType.NONE)
+                {
+                    effect += $"{Utilities.GeneralUtilities.ApaCapitalize(Type.ToString())}-type ";
+                }
+                effect += "move in the Pokemon's learnset (for the week).";
             }
             else
             {
