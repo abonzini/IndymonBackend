@@ -1,4 +1,4 @@
-﻿namespace MechanicsData
+﻿namespace Gameplay.GameplayElements
 {
     public class PokemonEntity
     {
@@ -20,7 +20,7 @@
         public bool Borrowed = false;
         public override string ToString()
         {
-            return (Nickname != "") ? $"{Nickname} ({Name})" : Name;
+            return Nickname != "" ? $"{Nickname} ({Name})" : Name;
         }
         public string GetDescription()
         {

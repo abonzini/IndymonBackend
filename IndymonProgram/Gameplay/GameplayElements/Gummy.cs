@@ -1,6 +1,6 @@
 ﻿using Utilities;
 
-namespace MechanicsData
+namespace Gameplay.GameplayElements
 {
     public class Gummy
     {

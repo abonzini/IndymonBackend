@@ -13,8 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\GameDataContainer\GameDataContainer.csproj" />
     <ProjectReference Include="..\GameData\GameData.csproj" />
-    <ProjectReference Include="..\MechanicsDataContainer\GameplayDataContainer.csproj" />
-    <ProjectReference Include="..\MechanicsData\GameplayElements.csproj" />
+    <ProjectReference Include="..\MechanicsData\Gameplay.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace MechanicsDataContainer
+﻿namespace Gameplay.GameplayElementsContainer
 {
     public enum ItemType
     {
@@ -16,7 +16,7 @@
         SANDWICH,
         POKEMON
     }
-    public partial class MechanicsDataContainers
+    public partial class GameplayElementsContainer
     {
         /// <summary>
         /// Given an item name, query everything until the item type is found, useful to pull from correct lookup and put it in the correct bag

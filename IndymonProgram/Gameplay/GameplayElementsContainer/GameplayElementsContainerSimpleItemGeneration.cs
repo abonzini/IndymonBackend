@@ -1,9 +1,9 @@
-﻿using MechanicsData;
+﻿using Gameplay.GameplayElements;
 using Utilities;
 
-namespace MechanicsDataContainer
+namespace Gameplay.GameplayElementsContainer
 {
-    public partial class MechanicsDataContainers
+    public partial class GameplayElementsContainer
     {
         /// <summary>
         /// Generates all gummies given they're "Type" Gummy

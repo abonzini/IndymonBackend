@@ -18,8 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MechanicsDataContainer\GameplayDataContainer.csproj" />
-    <ProjectReference Include="..\MechanicsData\GameplayElements.csproj" />
+    <ProjectReference Include="..\Gameplay\Gameplay.csproj" />
   </ItemGroup>
 
 </Project>

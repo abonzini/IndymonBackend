@@ -7,6 +7,7 @@ TODO:
     - Tourn: Great simplification but also a rewriting of verifier and teambuild needs
     - Expl: Some big changes in item handling and expl mechanics
 - Cleanup of unneccessary elements in code (including battle statistics) and old stuff
+- Cleanup: Ensure mechanics data with that name is not there anymore
 
 AI GENERATED NATURE AI (revise steal, delete):
 The 5 Neutral Natures (Balanced / Unpredictable)

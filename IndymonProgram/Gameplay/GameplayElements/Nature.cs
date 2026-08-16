@@ -1,4 +1,4 @@
-﻿namespace MechanicsData
+﻿namespace Gameplay.GameplayElements
 {
     public class Mint
     {

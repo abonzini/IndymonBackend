@@ -1,5 +1,4 @@
-﻿using MechanicsData;
-using MechanicsDataContainer;
+﻿using MechanicsDataContainer;
 
 namespace AutomatedTeamBuilder
 {

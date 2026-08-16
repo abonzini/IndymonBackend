@@ -1,5 +1,5 @@
-﻿using MechanicsData;
-using MechanicsDataContainer;
+﻿using Gameplay.GameplayElements;
+using Gameplay.GameplayElementsContainer;
 
 namespace IndymonBackendProgram
 {
@@ -31,7 +31,7 @@ namespace IndymonBackendProgram
                 filePath = Path.Combine(directoryPath, MECHANICS_DATA_FILE);
             }
             Console.WriteLine($"Path found at {filePath}\n");
-            MechanicsDataContainers.GlobalMechanicsData.InitializeData(directoryPath, MECHANICS_DATA_FILE);
+            GameplayElementsContainer.GlobalData.InitializeData(directoryPath, MECHANICS_DATA_FILE);
 
             /*// Then the trainer data back end
             string DUNGEON_DATA_DIR = "dungeons";
@@ -96,7 +96,7 @@ namespace IndymonBackendProgram
                         //GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
                         break;
                     case "2":
-                        foreach (Trainer trainer in MechanicsDataContainers.GlobalMechanicsData.Trainers.Values)
+                        foreach (Trainer trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
                         {
                             // Will quickly export all trainers csvs, useful for cleanup functions
                             trainer.SaveTrainerCsv(directoryPath);
@@ -121,11 +121,11 @@ namespace IndymonBackendProgram
                         //    List<string> trainerBag = [];
                         //    if (Enum.TryParse(Console.ReadLine().ToUpper(), out TrainerRank rank))
                         //    {
-                        //        trainerBag = [.. MechanicsDataContainers.GlobalMechanicsData.TrainerLookup.Where(i => i.Value == rank).Select(i => i.Key)]; // Get keys of trainers filter'd by rank
+                        //        trainerBag = [.. GameplayElementsContainer.GlobalMechanicsData.TrainerLookup.Where(i => i.Value == rank).Select(i => i.Key)]; // Get keys of trainers filter'd by rank
                         //    }
                         //    else
                         //    {
-                        //        trainerBag = [.. MechanicsDataContainers.GlobalMechanicsData.TrainerLookup.Select(i => i.Key)]; // Use the whole pool
+                        //        trainerBag = [.. GameplayElementsContainer.GlobalMechanicsData.TrainerLookup.Select(i => i.Key)]; // Use the whole pool
                         //    }
                         //    Console.WriteLine("How many pulls?");
                         //    int pulls = int.Parse(Console.ReadLine());
@@ -142,7 +142,7 @@ namespace IndymonBackendProgram
                         //    else if (GameDataContainers.GlobalGameData.NpcData.TryGetValue(trainerName, out trainer)) { }
                         //    else throw new Exception("Trainer didn't exist");
                         //    TrainerPokemon chosenMon = GeneralUtilities.GetRandomPick(trainer.PartyPokemon);
-                        //    Pokemon monData = MechanicsDataContainers.GlobalMechanicsData.Dex[chosenMon.Species];
+                        //    Pokemon monData = GameplayElementsContainer.GlobalMechanicsData.Dex[chosenMon.Species];
                         //    while (monData.Prevo != null) // Go deep into beginning of line
                         //    {
                         //        monData = monData.Prevo;
@@ -200,13 +200,13 @@ namespace IndymonBackendProgram
                         //    switch (diskPlateOrImp)
                         //    {
                         //        case 0: // Disk
-                        //            string chosenMove = GeneralUtilities.GetRandomPick(MechanicsDataContainers.GlobalMechanicsData.Moves.Keys.ToList());
+                        //            string chosenMove = GeneralUtilities.GetRandomPick(GameplayElementsContainer.GlobalMechanicsData.Moves.Keys.ToList());
                         //            string diskName = $"{chosenMove} {SetItem.ADVANCED_DISK}"; // Create the advanced disk
                         //            newPrizes.AddReward(diskName, 1);
                         //            Console.WriteLine($"Obtained {diskName}");
                         //            break;
                         //        case 1: // Plate
-                        //            List<string> platesList = [.. MechanicsDataContainers.GlobalMechanicsData.BattleItems.Keys.Where(i => i.ToLower().Contains("plate"))];
+                        //            List<string> platesList = [.. GameplayElementsContainer.GlobalMechanicsData.BattleItems.Keys.Where(i => i.ToLower().Contains("plate"))];
                         //            string chosenPlate = GeneralUtilities.GetRandomPick(platesList);
                         //            newPrizes.AddReward(chosenPlate, 1);
                         //            Console.WriteLine($"Obtained {chosenPlate}");

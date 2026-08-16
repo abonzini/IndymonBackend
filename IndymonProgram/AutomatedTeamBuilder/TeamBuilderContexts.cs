@@ -1,6 +1,5 @@
 ﻿using GameData;
 using MathNet.Numerics.Distributions;
-using MechanicsData;
 using MechanicsDataContainer;
 using Utilities;
 

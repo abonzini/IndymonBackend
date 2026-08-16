@@ -1,8 +1,8 @@
-﻿using MechanicsData;
+﻿using Gameplay.GameplayElements;
 
-namespace MechanicsDataContainer
+namespace Gameplay.GameplayElementsContainer
 {
-    public partial class MechanicsDataContainers
+    public partial class GameplayElementsContainer
     {
         /// <summary>
         /// Loads the move data found in json files

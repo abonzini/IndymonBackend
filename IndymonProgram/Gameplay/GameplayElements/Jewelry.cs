@@ -1,12 +1,10 @@
-﻿namespace MechanicsData
+﻿namespace Gameplay.GameplayElements
 {
-    public class PokeBall
+    public class Jewelry
     {
         // Properties
         public string Name = "";
-        public PokemonType CramType = PokemonType.NONE;
         public string Description = "";
-
         public override string ToString()
         {
             return Name;
@@ -17,12 +15,12 @@
         // Use as: OnGetDamageModifier = delegate (Move move) { return 2; } when defining new instances
 
         // Massive list of all of them and their effects (less friendly than storing in Json but allow for complex behaviours)
-        public static IEnumerable<PokeBall> GetAllPokeballs()
+        public static IEnumerable<Jewelry> GetAllJewelry()
         {
-            yield return new PokeBall()
+            yield return new Jewelry()
             {
-                Name = "Poke Ball",
-                Description = "Ball description"
+                Name = "Amulet Coin",
+                Description = "Jewelry Description"
             };
         }
     }

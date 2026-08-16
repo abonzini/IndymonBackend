@@ -1,10 +1,10 @@
-﻿using MechanicsData;
+﻿using Gameplay.GameplayElements;
 
-namespace MechanicsDataContainer
+namespace Gameplay.GameplayElementsContainer
 {
-    public partial class MechanicsDataContainers
+    public partial class GameplayElementsContainer
     {
-        public static MechanicsDataContainers GlobalMechanicsData { get; set; } = new MechanicsDataContainers();
+        public static GameplayElementsContainer GlobalData { get; set; } = new GameplayElementsContainer();
         /// <summary>
         /// Initializes data
         /// </summary>

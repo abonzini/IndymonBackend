@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace MechanicsData
+namespace Gameplay.GameplayElements
 {
     public class Trainer
     {
@@ -67,7 +67,7 @@ namespace MechanicsData
                                 // First, the types for each Pokemon, type is mentioned twice if monotype
                                 0 => $"{(thePokemon.Species.Types.Item1 != PokemonType.NONE ? thePokemon.Species.Types.Item1 : thePokemon.Species.Types.Item2)},,{(thePokemon.Species.Types.Item2 != PokemonType.NONE ? thePokemon.Species.Types.Item2 : thePokemon.Species.Types.Item1)},,",
                                 // url + nickname
-                                1 => $"{thePokemon.Species.ImageUrl},,{((thePokemon.Nickname == "") ? "Nickname" : thePokemon.Nickname)},,",
+                                1 => $"{thePokemon.Species.ImageUrl},,{(thePokemon.Nickname == "" ? "Nickname" : thePokemon.Nickname)},,",
                                 // Species descriptor
                                 2 => $",,{thePokemon.Species.Name}{(thePokemon.IsShiny ? " ★" : "")},,",
                                 // Pokeball and nature

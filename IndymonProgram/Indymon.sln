@@ -12,10 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameplayElements", "MechanicsData\GameplayElements.csproj", "{7BFE40E0-523D-4EC6-96B5-04752B800443}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameplayDataContainer", "MechanicsDataContainer\GameplayDataContainer.csproj", "{FB7A20ED-4F71-578E-CD96-028B53632E0A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameData", "GameData\GameData.csproj", "{D6592491-AE09-4AE8-A32B-8061DDBCDB29}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameDataContainer", "GameDataContainer\GameDataContainer.csproj", "{780CB291-BE6F-421A-AAB2-1CEE16651BD6}"
@@ -23,6 +19,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "Utilities\Utilities.csproj", "{E6C45427-C620-4710-B7F2-BC31FC636262}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomatedTeamBuilder", "AutomatedTeamBuilder\AutomatedTeamBuilder.csproj", "{FE5C5FB3-7B73-4BE3-AF2F-16DEECAFBBEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gameplay", "Gameplay\Gameplay.csproj", "{AB06BC6D-4F74-50CA-4DD7-541EBBF9B34C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,14 +36,6 @@ Global
 		{B3D26ACF-1CC6-470B-BEB7-B103F1A56D27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3D26ACF-1CC6-470B-BEB7-B103F1A56D27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3D26ACF-1CC6-470B-BEB7-B103F1A56D27}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7BFE40E0-523D-4EC6-96B5-04752B800443}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7BFE40E0-523D-4EC6-96B5-04752B800443}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7BFE40E0-523D-4EC6-96B5-04752B800443}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7BFE40E0-523D-4EC6-96B5-04752B800443}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FB7A20ED-4F71-578E-CD96-028B53632E0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FB7A20ED-4F71-578E-CD96-028B53632E0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FB7A20ED-4F71-578E-CD96-028B53632E0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FB7A20ED-4F71-578E-CD96-028B53632E0A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D6592491-AE09-4AE8-A32B-8061DDBCDB29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D6592491-AE09-4AE8-A32B-8061DDBCDB29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6592491-AE09-4AE8-A32B-8061DDBCDB29}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -62,6 +52,10 @@ Global
 		{FE5C5FB3-7B73-4BE3-AF2F-16DEECAFBBEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE5C5FB3-7B73-4BE3-AF2F-16DEECAFBBEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE5C5FB3-7B73-4BE3-AF2F-16DEECAFBBEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB06BC6D-4F74-50CA-4DD7-541EBBF9B34C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB06BC6D-4F74-50CA-4DD7-541EBBF9B34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB06BC6D-4F74-50CA-4DD7-541EBBF9B34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB06BC6D-4F74-50CA-4DD7-541EBBF9B34C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

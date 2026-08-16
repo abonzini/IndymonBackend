@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace MechanicsData
+namespace Gameplay.GameplayElements
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum PokemonType

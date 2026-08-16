@@ -1,5 +1,5 @@
-﻿using MechanicsData;
-using MechanicsDataContainer;
+﻿using Gameplay.GameplayElements;
+using Gameplay.GameplayElementsContainer;
 using System.Text;
 
 namespace IndymonBackendProgram
@@ -21,25 +21,25 @@ namespace IndymonBackendProgram
                 }
             }
             // Add all elements that need a glossary
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Abilities.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Essences.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.EvoPlates.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Gummies.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Jewelries.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.KeyItems.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Mints.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Moves.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Natures.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(GameplayElementsContainer.GlobalData.Abilities.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.Essences.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(GameplayElementsContainer.GlobalData.EvoPlates.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(GameplayElementsContainer.GlobalData.Gummies.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(GameplayElementsContainer.GlobalData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.Jewelries.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.KeyItems.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(GameplayElementsContainer.GlobalData.Mints.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(GameplayElementsContainer.GlobalData.Moves.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(GameplayElementsContainer.GlobalData.Natures.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             // Only put the box mons that are still boxed
-            foreach (Trainer trainer in MechanicsDataContainers.GlobalMechanicsData.Trainers.Values)
+            foreach (Trainer trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
             {
                 foreach (string boxedMonName in trainer.BoxedMons)
                 {
-                    PokemonEntity boxedMon = MechanicsDataContainers.GlobalMechanicsData.BoxedMons[boxedMonName];
+                    PokemonEntity boxedMon = GameplayElementsContainer.GlobalData.BoxedMons[boxedMonName];
                     fileBuilder.AppendLine($"{boxedMonName},{boxedMon.GetDescription()}");
                 }
             }
@@ -53,11 +53,11 @@ namespace IndymonBackendProgram
         public static void ExportAllBoxedMons(string directoryPath)
         {
             StringBuilder fileBuilder = new StringBuilder();
-            foreach (Trainer trainer in MechanicsDataContainers.GlobalMechanicsData.Trainers.Values)
+            foreach (Trainer trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
             {
                 foreach (string boxedMonName in trainer.BoxedMons)
                 {
-                    PokemonEntity boxedMon = MechanicsDataContainers.GlobalMechanicsData.BoxedMons[boxedMonName];
+                    PokemonEntity boxedMon = GameplayElementsContainer.GlobalData.BoxedMons[boxedMonName];
                     fileBuilder.Append($"{boxedMonName},");
                     fileBuilder.Append($"{boxedMon.Name},");
                     fileBuilder.Append($"{boxedMon.Nickname},");
@@ -86,15 +86,15 @@ namespace IndymonBackendProgram
                 }
             }
             // Add all elements that need a glossary
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Essences.Select(kvp => $"{kvp.Key},{kvp.Value.Type}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.EvoPlates.Select(kvp => $"{kvp.Key},{kvp.Value.Type}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Gummies.Select(kvp => $"{kvp.Key},{kvp.Value.Type}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.KeyItems.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.Mints.Select(kvp => $"{kvp.Key},{PokemonType.GRASS}")); // All mints are grass idk
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetCramType()}")); // Type of move
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
-            appendAll(MechanicsDataContainers.GlobalMechanicsData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
+            appendAll(GameplayElementsContainer.GlobalData.Essences.Select(kvp => $"{kvp.Key},{kvp.Value.Type}"));
+            appendAll(GameplayElementsContainer.GlobalData.EvoPlates.Select(kvp => $"{kvp.Key},{kvp.Value.Type}"));
+            appendAll(GameplayElementsContainer.GlobalData.Gummies.Select(kvp => $"{kvp.Key},{kvp.Value.Type}"));
+            appendAll(GameplayElementsContainer.GlobalData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
+            appendAll(GameplayElementsContainer.GlobalData.KeyItems.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
+            appendAll(GameplayElementsContainer.GlobalData.Mints.Select(kvp => $"{kvp.Key},{PokemonType.GRASS}")); // All mints are grass idk
+            appendAll(GameplayElementsContainer.GlobalData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetCramType()}")); // Type of move
+            appendAll(GameplayElementsContainer.GlobalData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
+            appendAll(GameplayElementsContainer.GlobalData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
             // File complete, save
             File.WriteAllText(Path.Combine(directoryPath, $".cram"), fileBuilder.ToString());
         }

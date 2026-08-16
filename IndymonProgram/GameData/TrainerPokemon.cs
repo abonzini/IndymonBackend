@@ -1,7 +1,4 @@
-﻿using MechanicsData;
-using MechanicsDataContainer;
-
-namespace GameData
+﻿namespace GameData
 {
     public class TrainerPokemon
     {

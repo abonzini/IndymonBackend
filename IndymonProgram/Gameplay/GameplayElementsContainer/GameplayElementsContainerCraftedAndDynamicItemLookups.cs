@@ -1,8 +1,8 @@
-﻿using MechanicsData;
+﻿using Gameplay.GameplayElements;
 
-namespace MechanicsDataContainer
+namespace Gameplay.GameplayElementsContainer
 {
-    public partial class MechanicsDataContainers
+    public partial class GameplayElementsContainer
     {
         /// <summary>
         /// Gets the move disk, tries to generate and add into lookup if didnt exist beforehand

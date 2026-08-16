@@ -1,5 +1,4 @@
 ﻿using GameData;
-using MechanicsData;
 using MechanicsDataContainer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
