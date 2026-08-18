@@ -1,12 +1,11 @@
 ﻿namespace Gameplay.GameplayElements
 {
-    public class MoveDisk
+    public class MoveDisk : GameplayElement
     {
         // Consts
         public const string BLANK_DISK = "Blank Disk";
         public const string MOVE_DISK_TEXT = "Disk";
         // Data
-        public string Name = "";
         public bool IsRandomMove = false;
         public PokemonType Type = PokemonType.NONE;
         public bool IsSacrificial = false;
@@ -48,7 +47,7 @@
         /// Gets the human-readable description of an object, useful when assembling a glossary
         /// </summary>
         /// <returns>A description of the item</returns>
-        public string GetDescription()
+        public override string GetDescription()
         {
             string effect = "When equipped into a Pokemon's slot, this slot will be filled with ";
             if (IsRandomMove)
@@ -62,7 +61,7 @@
             }
             else
             {
-                effect += $"{AddedMove.Name}: {AddedMove.Description}";
+                effect += $"{AddedMove.Name}: {AddedMove.GetDescription()}";
             }
             // Also, blank disk will be used as a sacrifice to avoid the waste of more important items
             if (IsSacrificial)

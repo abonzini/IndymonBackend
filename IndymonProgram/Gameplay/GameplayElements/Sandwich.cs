@@ -9,7 +9,7 @@
         POST_HEALING,
         LEVEL
     }
-    public class Sandwich
+    public class Sandwich : GameplayElement
     {
         // Const
         const string ENEMY_NUMBER_FLAVOUR = "Sweet";
@@ -18,12 +18,11 @@
         const string POST_HEALING_FLAVOUR = "Bitter";
         const string LEVEL_FLAVOUR = "Spicy";
         // Data
-        public string Name { get; set; } = "";
         public int Level = 0;
         public int Duration = 0;
         public SandwichEffectType Effect = SandwichEffectType.NONE;
         public PokemonType CramType = PokemonType.NONE;
-        public string GetDescription()
+        public override string GetDescription()
         {
             string result = "";
             switch (Effect)

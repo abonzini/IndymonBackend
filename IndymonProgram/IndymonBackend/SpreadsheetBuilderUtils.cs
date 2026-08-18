@@ -21,18 +21,18 @@ namespace IndymonBackendProgram
                 }
             }
             // Add all elements that need a glossary
-            appendAll(GameplayElementsContainer.GlobalData.Abilities.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.Abilities.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(GameplayElementsContainer.GlobalData.Essences.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(GameplayElementsContainer.GlobalData.EvoPlates.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(GameplayElementsContainer.GlobalData.Gummies.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
-            appendAll(GameplayElementsContainer.GlobalData.Jewelries.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(GameplayElementsContainer.GlobalData.Jewelries.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(GameplayElementsContainer.GlobalData.KeyItems.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(GameplayElementsContainer.GlobalData.Mints.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.Moves.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.Moves.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(GameplayElementsContainer.GlobalData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.Natures.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
-            appendAll(GameplayElementsContainer.GlobalData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.Description}"));
+            appendAll(GameplayElementsContainer.GlobalData.Natures.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            appendAll(GameplayElementsContainer.GlobalData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(GameplayElementsContainer.GlobalData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             // Only put the box mons that are still boxed
             foreach (Trainer trainer in GameplayElementsContainer.GlobalData.Trainers.Values)

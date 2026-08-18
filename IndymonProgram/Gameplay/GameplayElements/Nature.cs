@@ -1,46 +1,29 @@
 ﻿namespace Gameplay.GameplayElements
 {
-    public class Mint
+    public class Mint : GameplayElement
     {
-        public string Name = "";
         public Nature AssociatedNature = null;
-        public string GetDescription()
+        public override string GetDescription()
         {
             string description = $"Permanently changes a Pokemon's nature to {AssociatedNature.Name}: ";
-            description += AssociatedNature.Description;
+            description += AssociatedNature.GetDescription();
             return description;
         }
-        public override string ToString()
-        {
-            return Name;
-        }
     }
-    public class Nature
+    public class Nature : SimulationElement
     {
-        // Properties
-        public string Name = "";
-        public string Description = "";
-        public override string ToString()
-        {
-            return Name;
-        }
-
-        // The hooks, e.g. :
-        //public Func<Move, float> OnGetDamageModifier { get; set; } = delegate (Move move) { return 1; };
-        // Use as: OnGetDamageModifier = delegate (Move move) { return 2; } when defining new instances
-
         // Massive list of all of them and their effects (less friendly than storing in Json but allow for complex behaviours)
         public static IEnumerable<Nature> GetAllNatures()
         {
             yield return new Nature()
             {
                 Name = "Jolly",
-                Description = "Nature description"
+                _description = "Nature description"
             };
             yield return new Nature()
             {
                 Name = "Hardy",
-                Description = "Nature description"
+                _description = "Nature description"
             };
         }
     }

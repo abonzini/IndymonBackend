@@ -2,15 +2,14 @@
 
 namespace Gameplay.GameplayElements
 {
-    public class Gummy
+    public class Gummy : GameplayElement
     {
-        public string Name = "";
         public PokemonType Type = PokemonType.NONE;
         public override string ToString()
         {
             return Name;
         }
-        public string GetDescription()
+        public override string GetDescription()
         {
             return $"A {GeneralUtilities.ApaCapitalize(Type.ToString())}-type gummy.";
         }

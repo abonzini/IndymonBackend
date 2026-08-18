@@ -1,7 +1,4 @@
-﻿using GameData;
-using MechanicsDataContainer;
-
-namespace AutomatedTeamBuilder
+﻿namespace AutomatedTeamBuilder
 {
     public static partial class TeamBuilder
     {

@@ -1,8 +1,7 @@
 ﻿namespace Gameplay.GameplayElements
 {
-    public class PokemonEntity
+    public class PokemonEntity : GameplayElement
     {
-        public string Name = "";
         public PokemonSpecies Species = null;
         public string Nickname = "";
         public bool IsShiny = false;
@@ -22,7 +21,7 @@
         {
             return Nickname != "" ? $"{Nickname} ({Name})" : Name;
         }
-        public string GetDescription()
+        public override string GetDescription()
         {
             // Glossary for pokemon will be used only for boxed mons so it'll need to explain more or less what the mon has it going for it.
             string description = ToString() + " ";

@@ -1,6 +1,4 @@
-﻿using GameData;
-using MathNet.Numerics.Distributions;
-using MechanicsDataContainer;
+﻿using MathNet.Numerics.Distributions;
 using Utilities;
 
 namespace AutomatedTeamBuilder

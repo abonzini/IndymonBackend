@@ -260,12 +260,7 @@ namespace Gameplay.GameplayElementsContainer
             for (int i = 1; i < lines.Length; i++) // Has a header so ignore first item
             {
                 string[] fields = lines[i].Trim().Split(","); // Csv
-                KeyItem newItem = new KeyItem()
-                {
-                    Name = fields[0],
-                    CramType = Enum.Parse<PokemonType>(fields[1].Trim().ToUpper()),
-                    DescriptionString = fields[2]
-                };
+                KeyItem newItem = new KeyItem(fields[0], Enum.Parse<PokemonType>(fields[1].Trim().ToUpper()), fields[2]);
                 KeyItems.Add(newItem.Name, newItem);
             }
         }
