@@ -11,10 +11,6 @@ namespace Gameplay.GameplayElements
         public string DiscordId = "";
         public int Imp = 0;
         public bool AutoTeam = false;
-        public bool AutoMoveDisk = false;
-        public bool AutoHeldItem = false;
-        public bool AutoFavour = false;
-        public bool AutoGummy = false;
         public Jewelry EquippedJewelry = null;
         public int EquippedJewelryUses = 0;
         public List<PokemonEntity> Pokemon = new List<PokemonEntity>();
@@ -41,11 +37,9 @@ namespace Gameplay.GameplayElements
         {
             StringBuilder fileBuilder = new StringBuilder();
             // Line 1, trainer meta data and one toggle
-            fileBuilder.AppendLine($",,{Name},,{PictureUrl},,{DiscordId},,,,,,{Imp},,,,Auto Team,,,{AutoTeam.ToString().ToUpper()},");
-            // Line 2, quite empty, just some toggles
-            fileBuilder.AppendLine($",,,,,,,,,,,,Auto Move Disks,,,{AutoMoveDisk.ToString().ToUpper()},Auto Held Item,,,{AutoHeldItem.ToString().ToUpper()},");
-            // Line 3 is similar to 2 with jewelry too
-            fileBuilder.AppendLine($",,{(EquippedJewelry != null ? EquippedJewelry.Name : "Empty Jewelry Slot")},,,,,,,,,{(EquippedJewelry != null ? EquippedJewelryUses : "-")},Auto Gummy,,,{AutoGummy.ToString().ToUpper()},Auto Favour,,,{AutoFavour.ToString().ToUpper()},");
+            fileBuilder.AppendLine($",,{Name},,{PictureUrl},,{DiscordId},,,,,,{Imp},,,,Randomize Lineup,,,{AutoTeam.ToString().ToUpper()},");
+            // Line 2, quite empty, just jewelry
+            fileBuilder.AppendLine($",,,,,,,,,,,,{(EquippedJewelry != null ? EquippedJewelry.Name : "Empty Jewelry Slot")},,,,,,,{(EquippedJewelry != null ? EquippedJewelryUses : "-")},");
             for (int pokemonRow = 0; pokemonRow < 2; pokemonRow++) // 2 Rows of pokemon
             {
                 int pokemonSlotBase = pokemonRow * 5; // Calculate the base of the pokemon that is first in the row
