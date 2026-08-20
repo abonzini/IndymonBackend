@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace GameDataContainer
+namespace IndymonBackendProgram
 {
     public class MessageLogger
     {

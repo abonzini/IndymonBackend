@@ -12,7 +12,6 @@
         public Ability[] Abilities = [null, null, null]; // Abilities is always a 3-element list
         public bool[] AbilityActive = [true, false, false];
         public HeldItem HeldItem = null;
-        public bool Borrowed = false;
         public override string ToString()
         {
             return Nickname != "" ? $"{Nickname} ({Name})" : Name;

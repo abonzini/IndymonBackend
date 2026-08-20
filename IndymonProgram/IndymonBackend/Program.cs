@@ -1,5 +1,6 @@
 ﻿using Gameplay.GameplayElements;
 using Gameplay.GameplayElementsContainer;
+using Newtonsoft.Json;
 
 namespace IndymonBackendProgram
 {
@@ -8,7 +9,7 @@ namespace IndymonBackendProgram
         static void Main()
         {
             // Things (restore later)
-            //TournamentManager tournamentManager = new TournamentManager();
+            TournamentManager tournamentManager = new TournamentManager();
             //ExplorationManager explorationManager = new ExplorationManager();
             // Parsing
             Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -33,15 +34,12 @@ namespace IndymonBackendProgram
             Console.WriteLine($"Path found at {filePath}\n");
             GameplayElementsContainer.GlobalData.InitializeData(directoryPath, MECHANICS_DATA_FILE);
 
-            /*// Then the trainer data back end
-            string DUNGEON_DATA_DIR = "dungeons";
-            GameDataContainers.GlobalGameData.InitializeDungeonData(Path.Combine(directoryPath, DUNGEON_DATA_DIR));
             // Then the trainer data back end
-            string GAME_DATA_FILE = "game_data.txt";
-            GameDataContainers.GlobalGameData.InitializeTrainerData(Path.Combine(directoryPath, GAME_DATA_FILE));
+            //string DUNGEON_DATA_DIR = "dungeons";
+            //GameDataContainers.GlobalGameData.InitializeDungeonData(Path.Combine(directoryPath, DUNGEON_DATA_DIR));
             // Finally, proper data of possible ongoing sims
             string TOURNAMENT_JSON_FILE = "current_tournament.json";
-            string EXPLORATION_JSON_FILE = "current_exploration.json";
+            //string EXPLORATION_JSON_FILE = "current_exploration.json";
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
@@ -51,10 +49,10 @@ namespace IndymonBackendProgram
             {
                 tournamentManager = JsonConvert.DeserializeObject<TournamentManager>(File.ReadAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE)), jsonSettings);
             }
-            if (Path.Exists(Path.Combine(directoryPath, EXPLORATION_JSON_FILE)))
-            {
-                explorationManager = JsonConvert.DeserializeObject<ExplorationManager>(File.ReadAllText(Path.Combine(directoryPath, EXPLORATION_JSON_FILE)), jsonSettings);
-            }*/
+            //if (Path.Exists(Path.Combine(directoryPath, EXPLORATION_JSON_FILE)))
+            //{
+            //    explorationManager = JsonConvert.DeserializeObject<ExplorationManager>(File.ReadAllText(Path.Combine(directoryPath, EXPLORATION_JSON_FILE)), jsonSettings);
+            //}
             // Beginning of indymon program
             string InputString;
             do
@@ -66,41 +64,31 @@ namespace IndymonBackendProgram
                 switch (InputString)
                 {
                     case "0":
-                        //Console.WriteLine("Serializing jsons");
-                        //File.WriteAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE), JsonConvert.SerializeObject(tournamentManager, jsonSettings));
+                        Console.WriteLine("Serializing jsons");
+                        File.WriteAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE), JsonConvert.SerializeObject(tournamentManager, jsonSettings));
                         //File.WriteAllText(Path.Combine(directoryPath, EXPLORATION_JSON_FILE), JsonConvert.SerializeObject(explorationManager, jsonSettings));
-                        //Console.WriteLine("Writing tournament stats");
-                        //GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
                         break;
                     case "1":
                         SpreadsheetBuilderUtils.ExportGlossary(directoryPath);
                         SpreadsheetBuilderUtils.ExportAllBoxedMons(directoryPath);
                         SpreadsheetBuilderUtils.ExportCramTypes(directoryPath);
                         break;
-                    //case "1":
-                    //tournamentManager = new TournamentManager
-                    //{
-                    //    DirectoryPath = directoryPath
-                    //};
-                    //tournamentManager.GenerateNewTournament();
-                    //break;
-                    //case "2":
-                    //tournamentManager.UpdateTournamentTeams();
-                    //tournamentManager.ExecuteTournament();
-                    //break;
-                    case "3":
-                        //tournamentManager.AnimateTournament();
-                        //tournamentManager.UpdateTournamentTeams(true); // May need to redo team seeding if file was loaded (auto tho)
-                        //tournamentManager.FinaliseTournament();
-                        //Console.WriteLine("Writing tournament stats");
-                        //GameDataContainers.GlobalGameData.SaveBattleStats(directoryPath, "tourn_stats.csv");
-                        break;
                     case "2":
-                        foreach (Trainer trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
+                        foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
                         {
                             // Will quickly export all trainers csvs, useful for cleanup functions
                             trainer.SaveTrainerCsv(directoryPath);
                         }
+                        break;
+                    case "3":
+                        tournamentManager = new TournamentManager
+                        {
+                            DirectoryPath = directoryPath
+                        };
+                        tournamentManager.GenerateNewTournament();
+                        break;
+                    case "4":
+                        tournamentManager.ExecuteTournament();
                         break;
                     case "5":
                         //explorationManager = new ExplorationManager
@@ -291,12 +279,12 @@ namespace IndymonBackendProgram
         static void MainMenuInstructions()
         {
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(//"0 - Save current tourn/expl data\n" +
-                              //"1 - Generate a new tournament\n" +
-                              //"2 - Update tournament participant's team sheets and input tournament data\n" +
-                              //"3 - Finalize tournament. Animation + export new tournament data\n" +
-                                "1 - Export all updated generated spreadsheet elements (boxes, cram-o-matic, glossary)\n" +
-                                "2 - Export all players csv data\n"
+            Console.WriteLine(
+                "0 - Save current tourn/expl data\n" +
+                "1 - Export all updated generated spreadsheet elements (boxes, cram-o-matic, glossary)\n" +
+                "2 - Export all players csv data\n" +
+                "3 - Generate a new tournament\n" +
+                "4 - Execute initialized tournament\n"
             //"5 - Generate exploration, choose place, player, etc\n" +
             //"6 - Simulate current exploration\n" +
             //"7 - Animate resolved exploration\n" +

@@ -49,6 +49,7 @@ namespace Gameplay.GameplayElementsContainer
             string playerArea = lines[11].Split(",")[0];
             FillPlayers(sheetId, playerArea);
         }
+        public Random CommonRng = new Random(Guid.NewGuid().GetHashCode());
         public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
         public Dictionary<string, Move> Moves = new Dictionary<string, Move>();
         public Dictionary<string, Ability> Abilities = new Dictionary<string, Ability>();
@@ -67,6 +68,6 @@ namespace Gameplay.GameplayElementsContainer
         public Dictionary<string, Sandwich> SandwichLookup = new Dictionary<string, Sandwich>();
         public Dictionary<string, MoveDisk> MoveDiskLookup = new Dictionary<string, MoveDisk>();
         public Dictionary<string, PokemonEntity> BoxedMons = new Dictionary<string, PokemonEntity>();
-        public Dictionary<string, Trainer> Trainers = new Dictionary<string, Trainer>();
+        public Dictionary<string, TrainerEntity> Trainers = new Dictionary<string, TrainerEntity>();
     }
 }

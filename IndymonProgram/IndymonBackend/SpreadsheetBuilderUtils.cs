@@ -35,7 +35,7 @@ namespace IndymonBackendProgram
             appendAll(GameplayElementsContainer.GlobalData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             appendAll(GameplayElementsContainer.GlobalData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
             // Only put the box mons that are still boxed
-            foreach (Trainer trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
+            foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
             {
                 foreach (string boxedMonName in trainer.BoxedMons)
                 {
@@ -53,7 +53,7 @@ namespace IndymonBackendProgram
         public static void ExportAllBoxedMons(string directoryPath)
         {
             StringBuilder fileBuilder = new StringBuilder();
-            foreach (Trainer trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
+            foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
             {
                 foreach (string boxedMonName in trainer.BoxedMons)
                 {

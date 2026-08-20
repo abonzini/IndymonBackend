@@ -1,10 +1,7 @@
-﻿using AutomatedTeamBuilder;
-using GameData;
-using GameDataContainer;
-using MechanicsData;
-using MechanicsDataContainer;
-using ShowdownBot;
-using System.Text;
+﻿using Gameplay.GameEngine;
+using Gameplay.GameplayElements;
+using Gameplay.GameplayElementsContainer;
+using GameSimulator;
 using Utilities;
 
 namespace IndymonBackendProgram
@@ -18,6 +15,7 @@ namespace IndymonBackendProgram
         /// </summary>
         public void GenerateNewTournament()
         {
+            Random rng = GameplayElementsContainer.GlobalData.CommonRng; // Need to use rng for the seed and the sort
             Console.WriteLine("Creation of a new tournament. Which type of tournament? [elim, king, group]");
             string inputString;
             bool validSelection = false;
@@ -43,136 +41,109 @@ namespace IndymonBackendProgram
                         break;
                 }
             } while (!validSelection);
+            OngoingTournament.RngSeed = rng.Next();
             Console.WriteLine("How many players will participate?");
-            OngoingTournament.NPlayers = int.Parse(Console.ReadLine());
-            Console.WriteLine("How many pokemon each team?");
-            OngoingTournament.NMons = int.Parse(Console.ReadLine());
-            OngoingTournament.RequestAdditionalInfo(); // Request tournament-specific info (if needed)
-            // Finally, player selection, pre-filter trainers whether they can participate in this event
-            List<Trainer> trainers = [];
-            foreach (Trainer trainer in GameDataContainers.GlobalGameData.TrainerData.Values)
+            int nPlayers = int.Parse(Console.ReadLine());
+            OngoingTournament.RequestAdditionalInfo(nPlayers); // Request tournament-specific info (if needed)
+            // Finally, player selection, pre-filter trainers whether they can participate in this event (also all the npcs)
+            List<TrainerEntity> trainers = [];
+            List<NpcTrainer> validNpcs = [.. GameplayElementsContainer.GlobalData.AllNpcTrainers.Values.Where(n => ValidLineupGenerator.GetNpcSpeciesSets(n, GameplayElementsContainer.TOURNAMENT_NMONS, OngoingTournament.Constraints, false).Count > 0)];
+            foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
             {
-                bool acceptLessMons = OngoingTournament.CommonFavourMons.Count > 0; // If there's a common favour trainer, then it's ok that trainers may have less valid mons than allowed
-                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(trainer, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, acceptLessMons);
-                StringBuilder messageBuilder = new StringBuilder();
-                messageBuilder.AppendLine($"{trainer.Name} <@{trainer.DiscordNumber}>:");
-                foreach (PossibleTeamBuild build in possibleBuilds)
-                {
-                    messageBuilder.AppendLine("Option:");
-                    messageBuilder.AppendLine($"- Trainer could bring these mons: {string.Join(", ", build.TrainerOwnPokemon.Select(m => m.Species))}");
-                    foreach (KeyValuePair<SetItem, List<TrainerPokemon>> kvp in build.TrainerOwnPokemonUsingSetItem)
-                    {
-                        messageBuilder.AppendLine($"- Trainer could also equip {kvp.Key.Name} to these mons: {string.Join(", ", kvp.Value.Select(m => m.Species))}");
-                    }
-                    foreach (KeyValuePair<Trainer, List<TrainerPokemon>> kvp in build.FavourPokemon)
-                    {
-                        messageBuilder.AppendLine($"- Trainer could also use favour from {kvp.Key.Name} to borrow mons: {string.Join(", ", kvp.Value.Select(m => m.Species))}");
-                    }
-                    Console.WriteLine(messageBuilder.ToString());
-                }
+                List<List<PokemonSpecies>> possibleBuilds = ValidLineupGenerator.GetTrainersSpeciesSets(trainer, GameplayElementsContainer.TOURNAMENT_NMONS, OngoingTournament.Constraints, false); // Always 3 mons, these battles are 3v3 for the foreseeable future
                 if (possibleBuilds.Count > 0)
                 {
+                    foreach (List<PokemonSpecies> build in possibleBuilds)
+                    {
+                        Console.WriteLine($"{trainer.Name} <@{trainer.DiscordId}>: {string.Join(", ", build.Select(p => p.Name))}");
+                    }
                     trainers.Add(trainer);
                 }
                 else
                 {
-                    Console.WriteLine($"{trainer.Name} <@{trainer.DiscordNumber}>:\n- Trainer doesn't have a sufficient combination of Pokemon, Set Items and Favours for this requirement. May be able to do favour gacha, capture something, or do some other trick if wants to participate.\n");
+                    Console.WriteLine($"{trainer.Name} <@{trainer.DiscordId}>: Not enough Pokemon that satisfy requirements");
                 }
             }
-            Console.WriteLine("If any trainer needs more info (e.g. which moves are valid for each mon, or if there's any way to complete the team (catching something, doing a favour gacha), let me know and we'll find whether there's some way of getting you in this event.");
-            List<Trainer> npcs = [.. GameDataContainers.GlobalGameData.NpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
-            List<Trainer> namedNpcs = [.. GameDataContainers.GlobalGameData.FamousNpcData.Values.Where(t => TeamBuilder.GetTrainersPossibleBuilds(t, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false).Count > 0)];
-            List<Trainer> currentChosenTrainers = null;
-            int remainingPlayersNeeded = OngoingTournament.NPlayers;
-            bool randomizeFill = false;
-            while (remainingPlayersNeeded > 0) // Will do addition loop until all players are selected
+            // Time to add players
+            int remainingPlayersNeeded = nPlayers;
+            OngoingTournament.ParticipantSeedAndMonSeed.Clear();
+            while (OngoingTournament.ParticipantSeedAndMonSeed.Count < nPlayers) // Will do addition loop until all players are selected
             {
-                List<Trainer> nextTrainers = []; // Next trainers to add
-                if (currentChosenTrainers == null)
+                Console.WriteLine($"Choose next trainer(s) to add, or put a trainer rank to fill with a random Npc. No input will fill a random NPC of any rank.\n{string.Join(", ", Enum.GetValues<TrainerRank>())}\n{string.Join(", ", [.. trainers.Select(t => t.Name)])}");
+                string trainerString = Console.ReadLine();
+                foreach (string trainerChoice in trainerString.Split(","))
                 {
-                    Console.WriteLine("Which group of trainers to load? 1-Players, 2-NPCs, 3-Named NPCs. 4-Fill with random NPCs 5-Fill with random Famous NPCs");
-                    inputString = Console.ReadLine().ToLower();
-                    switch (inputString)
+                    string nextName = trainerChoice.Trim();
+                    if (trainers.Any(t => t.Name == nextName)) // Is trainer a player?
                     {
-                        case "1":
-                            currentChosenTrainers = trainers;
-                            break;
-                        case "2":
-                            currentChosenTrainers = npcs;
-                            break;
-                        case "3":
-                            currentChosenTrainers = namedNpcs;
-                            break;
-                        case "4":
-                            currentChosenTrainers = npcs;
-                            randomizeFill = true;
-                            break;
-                        case "5":
-                            currentChosenTrainers = namedNpcs;
-                            randomizeFill = true;
-                            break;
-                        default:
-                            break;
+                        TrainerEntity trainer = trainers.Where(t => t.Name == nextName).First();
+                        trainers.Remove(trainer);
+                        Console.WriteLine($"{trainerString} added");
                     }
-                }
-                if (randomizeFill)
-                {
-                    if (currentChosenTrainers.Count > 0)
+                    else if (Enum.TryParse(nextName, out TrainerRank desiredRank)) // Then, see if filtered by rank
                     {
-                        nextTrainers = [GeneralUtilities.GetRandomPick(currentChosenTrainers)]; // Will pick one of them
+                        NpcTrainer npc = GeneralUtilities.GetRandomPick([.. validNpcs.Where(n => n.TrainerRank == desiredRank)], rng);
+                        validNpcs.Remove(npc);
+                        trainerString = npc.Name;
+                        Console.WriteLine($"{trainerString} added");
                     }
-                    else
+                    else // Finally, get any random npc then
                     {
-                        currentChosenTrainers = null;
-                        randomizeFill = false; // Have to end randomized fill
+                        NpcTrainer npc = GeneralUtilities.GetRandomPick(validNpcs, rng);
+                        validNpcs.Remove(npc);
+                        trainerString = npc.Name;
+                        Console.WriteLine($"{trainerString} added");
                     }
-                }
-                else
-                {
-                    Console.WriteLine($"Choose next trainer(s) to add. Or nothing to go back {string.Join(", ", [.. currentChosenTrainers.Select(t => t.Name)])}");
-                    string trainerChoice = Console.ReadLine();
-                    if (trainerChoice != "")
-                    {
-                        // A valid trainer was chosen
-                        string[] choices = trainerChoice.Split(',');
-                        foreach (string choice in choices)
-                        {
-                            nextTrainers.Add(currentChosenTrainers.Where(t => t.Name.ToLower() == choice.Trim().ToLower()).First());
-                        }
-                    }
-                    else
-                    {
-                        currentChosenTrainers = null;
-                    }
-                }
-                if (nextTrainers.Count > 0)
-                {
-                    currentChosenTrainers.RemoveAll(t => nextTrainers.Contains(t));
-                    remainingPlayersNeeded -= nextTrainers.Count;
-                    foreach (Trainer nextTrainer in nextTrainers)
-                    {
-                        OngoingTournament.ParticipantsWithRandomSeed.Add((nextTrainer.Name, GeneralUtilities.GetRandomNumber()));
-                        Console.WriteLine($"{nextTrainer.Name} added");
-                    }
+                    OngoingTournament.ParticipantSeedAndMonSeed.Add((trainerString, rng.Next(), rng.Next())); // Add the trainer and its future rng seed
                 }
             }
         }
         /// <summary>
-        /// Updates the tournament teams, meaning a team randomization and updating team sheets if needed
+        /// Starts the tourn proper, will ask for input of scores
         /// </summary>
-        /// <param name="auto">Whether set building is done auto without expeting verification</param>
-        public void UpdateTournamentTeams(bool auto = false)
+        public void ExecuteTournament()
         {
-            GameDataContainers.GlobalGameData.CurrentEventMessage.Clear(); // This is a new event, so I will clear whatever thet was there before
+            OngoingTournament.UpdateTeams();
+            OngoingTournament.SimulateTournament();
+            OngoingTournament.FinaliseTournament(DirectoryPath);
+        }
+    }
+    public class TournamentMatch()
+    {
+        public int Player1Index;
+        public int Player2Index;
+        public bool IsBye = false;
+        public int Score1 = 0;
+        public int Score2 = 0;
+        public int Winner;
+        public override string ToString()
+        {
+            return $"#{Player1Index} {Score1}-{Score2} #{Player2Index}";
+        }
+    }
+    public abstract class Tournament
+    {
+        public int RngSeed { get; set; } = 0;
+        protected Random _rng;
+        public List<Constraint> Constraints { get; set; } = new List<Constraint>();
+        public List<(string, int, int)> ParticipantSeedAndMonSeed { get; set; } = new List<(string, int, int)>(); // Participants, team seed, and pokemon seed base
+        readonly List<TrainerEntity> _participants = new List<TrainerEntity>();
+        readonly MessageLogger _tournamentMessage = new MessageLogger();
+        /// <summary>
+        /// Updates all the participants, generates NPC, randomizes teams if needed
+        /// </summary>
+        public void UpdateTeams()
+        {
+            _tournamentMessage.Clear(); // This is a new event, so I will clear whatever thet was there before
             // First, shuffle the participants (use seed if needed)
-            List<(string, int)> seeds = new List<(string, int)>();
+            List<(string, int, int)> seedSlots = new List<(string, int, int)>();
             Console.WriteLine("Want to add specific seeding? y/N");
             string seedInput = Console.ReadLine();
             if (seedInput.Trim().ToLower() == "y") // One last seeding step
             {
-                List<(string, int)> seedOptions = [.. OngoingTournament.ParticipantsWithRandomSeed];
+                List<(string, int, int)> seedOptions = [.. ParticipantSeedAndMonSeed];
                 bool seedingFinished = false;
-                while (!seedingFinished && seeds.Count < OngoingTournament.ParticipantsWithRandomSeed.Count) // Continue seeding until finished or all players seeded
+                while (!seedingFinished && seedSlots.Count < ParticipantSeedAndMonSeed.Count) // Continue seeding until finished or all players seeded
                 {
                     Console.WriteLine("Choose next seed, or anything if finished seeding:");
                     for (int i = 0; i < seedOptions.Count; i++)
@@ -181,7 +152,7 @@ namespace IndymonBackendProgram
                     }
                     if (int.TryParse(Console.ReadLine(), out int seedChoice)) // If user chose one...
                     {
-                        seeds.Add(seedOptions[seedChoice - 1]);
+                        seedSlots.Add(seedOptions[seedChoice - 1]);
                         seedOptions.RemoveAt(seedChoice - 1);
                     }
                     else // Finish here
@@ -190,352 +161,216 @@ namespace IndymonBackendProgram
                     }
                 }
             }
-            OngoingTournament.ShuffleWithSeeds(seeds);
-            // Ok not bad, next step is to update participant team sheet if needed
-            foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // First, choose all trainer mons
+            ShuffleWithSeeds(seedSlots); // Tournament-specific seed shuffling so that highest seed is at an advantage
+            // Next step is to obtain the actual trainer data, generate NPCs and shuffle team if this is needed
+            foreach ((string, int, int) participantData in ParticipantSeedAndMonSeed) // First, choose all trainers, obtain their corresponding entity
             {
-                string participantName = participantData.Item1;
-                // Try to find the participant in the place where located
-                Trainer participant = IndymonUtilities.GetTrainerByName(participantName);
-
-                Trainer CommonFavourTrainer = null;
-                if (OngoingTournament.CommonFavourMons.Count > 0) // If trainers will borrow mons from a pool too...
-                {
-                    CommonFavourTrainer = new Trainer()
-                    {
-                        Name = "CommonTrainer"
-                    };
-                    for (int i = 0; i < OngoingTournament.CommonFavourMons.Count; i++)
-                    {
-                        bool isShiny = (GeneralUtilities.GetRandomNumber(50) == 0); // Will be shiny if i get a 0 dice roll
-                        TrainerPokemon nextPokemonInTeam = new TrainerPokemon()
-                        {
-                            Species = OngoingTournament.CommonFavourMons[i],
-                            IsShiny = isShiny
-                        };
-                        CommonFavourTrainer.PartyPokemon.Add(nextPokemonInTeam); // Add mon
-                    }
-
-                    GeneralUtilities.AddtemToCountDictionary(participant.Favours, CommonFavourTrainer, 99); // Add 99 of these favours
-                }
-                // Indymon S2 addition, confirm sets now does the smart teambuild
-                List<PossibleTeamBuild> possibleBuilds = TeamBuilder.GetTrainersPossibleBuilds(participant, OngoingTournament.NMons, OngoingTournament.TeamBuildConstrainOptions, false); // Get all of the possible sets that would satisfy this
-                TeamBuilder.AssembleTrainersBattleTeam(participant, OngoingTournament.NMons, possibleBuilds, false, participantData.Item2, CommonFavourTrainer); // Chooses one of the sets, prepares the mons
-                if (OngoingTournament.CommonFavourMons.Count > 0) // If trainers have borrowed mons from a pool...
-                {
-                    GeneralUtilities.AddtemToCountDictionary(participant.Favours, CommonFavourTrainer, -99, true); // Remove the given favours
-                }
-            }
-            StringBuilder teamsheetsString = new StringBuilder();
-            foreach ((string, int) participantData in OngoingTournament.ParticipantsWithRandomSeed) // Then, build for each trainer
-            {
-                // Consider that this involves building against every opp
                 string participantName = participantData.Item1;
                 int participantSeed = participantData.Item2;
-                // Try to find the participant in the place where located
-                Trainer participant = IndymonUtilities.GetTrainerByName(participantName);
-                List<Pokemon> enemyMons = new List<Pokemon>();
-                foreach ((string, int) oppData in OngoingTournament.ParticipantsWithRandomSeed) // Find all opps
+                Random trainerRng = new Random(participantSeed);
+                if (GameplayElementsContainer.GlobalData.Trainers.TryGetValue(participantName, out TrainerEntity nextTrainerEntity))
                 {
-                    if (participantData == oppData) continue; // Won't build against myself
-                    Trainer opp = IndymonUtilities.GetTrainerByName(oppData.Item1);
-                    foreach (TrainerPokemon oppMon in opp.BattleTeam)
+                    // Trainer is a player, need to add, and randomize team shuffle if auto-team (lazy way)
+                    if (nextTrainerEntity.AutoTeam)
                     {
-                        enemyMons.Add(MechanicsDataContainers.GlobalMechanicsData.Dex[oppMon.Species]); // Add mon to faced mons
+                        GeneralUtilities.ShuffleList(nextTrainerEntity.Pokemon, trainerRng);
+                    }
+                    _participants.Add(nextTrainerEntity); // Regardless, add trainer
+                }
+                else
+                {
+                    // Trainer is definitely an NPC then, we'll create a placehodler entity (use all mons here because they're filtered by the constraints after
+                    nextTrainerEntity = GameplayElementsContainer.GlobalData.CreateNpcEntity(participantName, int.MaxValue, participantSeed, GameplayElementsContainer.NPC_ITEM_CHANCE, new List<string>()); // The list itself doesnt matter in this case
+                    _participants.Add(nextTrainerEntity); // Regardless, add trainer
+                }
+                // Finally, need to reshuffle trainer's internal team so that the valid N mons are in front
+                List<List<PokemonSpecies>> possibleBuilds = ValidLineupGenerator.GetTrainersSpeciesSets(nextTrainerEntity, GameplayElementsContainer.TOURNAMENT_NMONS, Constraints, false); // Always 3 mons, these battles are 3v3 for the foreseeable future
+                List<PokemonSpecies> chosenBuild;
+                if (possibleBuilds.Count == 1) // If only one build, no need to go crazy
+                {
+                    chosenBuild = possibleBuilds[0];
+                }
+                else if (nextTrainerEntity.AutoTeam)
+                {
+                    // In this case, the build is chosen at random
+                    chosenBuild = GeneralUtilities.GetRandomPick(possibleBuilds, trainerRng);
+                }
+                else
+                {
+                    // This is a weird one, because it means we need to manually choose according to what the trainer has chosen
+                    // (Fortunately this is only in monotype)
+                    Console.WriteLine($"Trainer {nextTrainerEntity.Name} has many valid mon lineups available for this tournament (current mon order is {string.Join(", ", nextTrainerEntity.Pokemon.Select(p => p.Name))})");
+                    for (int i = 0; i < possibleBuilds.Count; i++)
+                    {
+                        Console.WriteLine($"{i}: {string.Join(", ", possibleBuilds[i].Select(p => p.Name))}");
+                    }
+                    Console.WriteLine("Choose?");
+                    chosenBuild = possibleBuilds[int.Parse(Console.ReadLine())];
+                }
+                // And finally finally, need to place the mons in order from top to bottom until they satisfy the order that first, the mons present in the build, and then the others
+                // Bubble up algorithm so that all valids are bubbled up while preserving order
+                int arrayBase = 0;// Where to put the valid Pokemon into, this masks all indices < arrayBase from being shuffled again as they'd be valid ones
+                for (int i = 0; i < nextTrainerEntity.Pokemon.Count && arrayBase < GameplayElementsContainer.TOURNAMENT_NMONS; i++)
+                {
+                    if (chosenBuild.Contains(nextTrainerEntity.Pokemon[i].Species)) // This pokemon is an allowed species for the build
+                    {
+                        // Swap with next invalid mon
+                        (nextTrainerEntity.Pokemon[i], nextTrainerEntity.Pokemon[arrayBase]) = (nextTrainerEntity.Pokemon[arrayBase], nextTrainerEntity.Pokemon[i]);
+                        arrayBase++;
                     }
                 }
-                // Define sets for this trainer. Smart build, no archetypes included at beginning. Build with constraints and enemy mons in mind. Use seed.
-                TeamBuilder.DefineTrainerSets(participant, true, [], Weather.NONE, Terrain.NONE, OngoingTournament.BaseConstraint, enemyMons, participantSeed, auto);
-                teamsheetsString.AppendLine($"{participantName}:");
-                foreach (TrainerPokemon mon in participant.BattleTeam)
-                {
-                    teamsheetsString.AppendLine($"- {mon.PrintSet()}");
-                }
-                string setsPath = Path.Combine(DirectoryPath, "SETS.txt");
-                File.WriteAllText(setsPath, teamsheetsString.ToString());
             }
+            // This trainer list should be aligned with the seed one and never shuffled again
         }
-        /// <summary>
-        /// Starts the tourn proper, will ask for input of scores
-        /// </summary>
-        public void ExecuteTournament()
-        {
-            OngoingTournament.PlayTournament();
-        }
-        public void AnimateTournament()
-        {
-            // First, animate tournament
-            Console.WriteLine("Animate? Y/n");
-            string input = Console.ReadLine();
-            if (input.ToLower() != "n")
-            {
-                OngoingTournament.AnimateTournament();
-            }
-        }
-        /// <summary>
-        /// Does the final team update
-        /// </summary>
-        public void FinaliseTournament()
-        {
-            // Also, ask the tournament to update the sheets
-            OngoingTournament.UpdateLeaderboard();
-            // Also, need to update the items and sheets for participants
-            const int SALARY = 2; // Trainers now get paid for playing
-            foreach (string participant in OngoingTournament.ParticipantsWithRandomSeed.Select(t => t.Item1))
-            {
-                if (GameDataContainers.GlobalGameData.TrainerData.TryGetValue(participant, out Trainer trainer)) // Only interesting in players, not npcs
-                {
-                    trainer.Imp += SALARY;
-                    IndymonUtilities.ConsumeTrainersItems(trainer); // Trainer does a round of consuming item
-                    string trainerFilePath = Path.Combine(DirectoryPath, $"{participant.ToUpper().Replace(" ", "").Replace("?", "")}.trainer");
-                    trainer.SaveTrainerCsv(trainerFilePath);
-                }
-            }
-            // Finally, the tournament string needs to be assembled with the remaining stuff
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.Clear();
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
-                "<Text indicating who organised the tournament and which week>"
-            );
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
-                $"A total of {OngoingTournament.ParticipantsWithRandomSeed.Count} trainers participated on this event."
-            );
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
-                $"Video: URL"
-            );
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine();
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
-                $"- Congrats to the winner, ||WINNER||, who has won <1ST PRIZE>!"
-            );
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
-                $"- Congratulations also to the runner-up, ||2NDPLACE||, who has won <2ND PRIZE>"
-            );
-            GameDataContainers.GlobalGameData.CurrentEventMessage.EventText.AppendLine(
-                $"- All other players have received <CONSOLATION> as a thanks for participating"
-            );
-            string filePath = Path.Combine(DirectoryPath, "TOURNAMENT.txt");
-            GameDataContainers.GlobalGameData.CurrentEventMessage.SaveToFile(filePath);
-        }
-    }
-    public class TournamentMatch()
-    {
-        public string Player1 { get; set; } = "";
-        public string Player2 { get; set; } = "";
-        public bool IsBye { get; set; } = false;
-        public int Score1 { get; set; } = 0;
-        public int Score2 { get; set; } = 0;
-        public string Winner { get; set; } = "";
-        public int DrawHelper1 { get; set; } = 0; // For the bracket drawing
-        public int DrawHelper2 { get; set; } = 0;
-        public override string ToString()
-        {
-            return $"{Player1} ({Score1}-{Score2}) {Player2}";
-        }
-    }
-    public abstract class Tournament
-    {
-        public Constraint BaseConstraint { get; set; } = new Constraint();
-        public List<Constraint> TeamBuildConstrainOptions { get; set; } = new List<Constraint>();
-        public List<string> CommonFavourMons { get; set; } = new List<string>();
-        public int NPlayers { get; set; } = 0;
-        public int NMons { get; set; } = 3;
-        public List<(string, int)> ParticipantsWithRandomSeed { get; set; } = new List<(string, int)>(); // Participants and teambuild seed
         /// <summary>
         /// Duting tournament init, asks for extra info if needed
         /// </summary>
-        public abstract void RequestAdditionalInfo();
+        public abstract void RequestAdditionalInfo(int nPlayers);
         /// <summary>
         /// From a tournament, it shuffles players, but also has a list of top seeds (from best to worst) if needed in some tournament
         /// </summary>
         /// <param name="seeds">Seed list to be used in tournament</param>
-        public abstract void ShuffleWithSeeds(List<(string, int)> seeds);
+        public abstract void ShuffleWithSeeds(List<(string, int, int)> seeds);
         /// <summary>
-        /// Will play the tournament, organising the bracket and asking for results or simulating it
+        /// Will play the tournament, uses new game sim and may export video outright
         /// </summary>
-        public abstract void PlayTournament();
+        public abstract void SimulateTournament();
         /// <summary>
-        /// Performs tournament animation once complete
+        /// Will return the position of participant, i.e. if first, second, third, etc
         /// </summary>
-        public abstract void AnimateTournament();
+        /// <param name="participantId">Which pariticpant id to check</param>
+        /// <returns>Participant place</returns>
+        public abstract int GetParticipantPlace(int participantId);
         /// <summary>
-        /// Asks tournament to update leaderboard according to match history
+        /// Deals with tournament post, manages prizes, message, trainer items, etc
         /// </summary>
-        public abstract void UpdateLeaderboard();
+        public void FinaliseTournament(string directoryBase)
+        {
+            // Ask for prizes
+            static (string, int) GetSplitStrCount()
+            {
+                string[] split = Console.ReadLine().Split("x");
+                if (split.Length == 1 || !int.TryParse(split[1], out int count)) count = 1;
+                return (split[0].Trim(), count);
+            }
+            Console.WriteLine("What's the first prize here?");
+            (string, int) firstPrize = GetSplitStrCount();
+            string winner = "";
+            Console.WriteLine("What's the second prize here?");
+            (string, int) secondPrize = GetSplitStrCount();
+            string runner = "";
+            Console.WriteLine("What's the consolation prize here?");
+            (string, int) consolationPrize = GetSplitStrCount();
+            // Need to update the items and sheets for participants
+            // First, salary
+            for (int i = 0; i < _participants.Count; i++)
+            {
+                TrainerEntity participant = _participants[i];
+                // Prize calc
+                int place = GetParticipantPlace(i);
+                (string, int) prize;
+                if (place == 1)
+                {
+                    prize = firstPrize;
+                    winner = participant.Name;
+                }
+                else if (place == 2)
+                {
+                    prize = secondPrize;
+                    runner = participant.Name;
+                }
+                else
+                {
+                    prize = consolationPrize;
+                }
+                if (!GameplayElementsContainer.GlobalData.Trainers.ContainsKey(participant.Name))
+                {
+                    continue; // No need to do the other bs if the trainer is an NPC...
+                }
+                // Ok apply everything item wise
+                GameplayElementsContainer.ConsumeTrainersItems(participant, GameplayElementsContainer.TOURNAMENT_NMONS); // Consume all items for all mons first (may free some space in the bag after all)
+                bool prizeSuccesful = GameplayElementsContainer.GlobalData.GivePrizeToTrainer(prize.Item1, participant, prize.Item2);
+                GameplayElementsContainer.GlobalData.GivePrizeToTrainer($"1 IMP", participant, GameplayElementsContainer.TRAINER_SALARY);
+                string warningString = GameplayElementsContainer.GetTrainerInventoryWarning(participant);
+                if (warningString != "")
+                {
+                    if (!prizeSuccesful)
+                    {
+                        warningString += $" In this instance, your {prize.Item1} reward has been discarded.";
+                    }
+                    _tournamentMessage.PostEventText.AppendLine($"- <@{participant.DiscordId}>: ||{warningString}||");
+                }
+                participant.SaveTrainerCsv(directoryBase);
+            }
+            // Finally, the tournament string needs to be assembled with the remaining stuff
+            _tournamentMessage.EventText.Clear();
+            _tournamentMessage.EventText.AppendLine("<Text indicating who organised the tournament and which week>");
+            _tournamentMessage.EventText.AppendLine($"A total of {ParticipantSeedAndMonSeed.Count} trainers participated on this event.");
+            _tournamentMessage.EventText.AppendLine();
+            string prizeString = firstPrize.Item1 + ((firstPrize.Item2 > 1) ? $" x{firstPrize.Item2}" : "");
+            _tournamentMessage.EventText.AppendLine($"- Congrats to the winner, ||{winner}||, who has won {prizeString}!");
+            prizeString = secondPrize.Item1 + ((secondPrize.Item2 > 1) ? $" x{secondPrize.Item2}" : "");
+            _tournamentMessage.EventText.AppendLine($"- Congratulations also to the runner-up, ||{runner}||, who has won {prizeString}");
+            prizeString = consolationPrize.Item1 + ((consolationPrize.Item2 > 1) ? $" x{consolationPrize.Item2}" : "");
+            _tournamentMessage.EventText.AppendLine($"- All other players have received {prizeString} as a thanks for participating");
+            string filePath = Path.Combine(directoryBase, "TOURNAMENT.txt");
+            _tournamentMessage.SaveToFile(filePath);
+        }
         /// <summary>
-        /// Resolves a match, including the possibility of creating a bot battle, or manual score input. This sometimes writes into console current cursor.
+        /// Resolves a match using game engine
         /// </summary>
         /// <param name="match">Match to evaluate</param>
-        /// <returns>True if match succesfully concluded, false otherwise</returns>
-        public static bool ResolveMatch(TournamentMatch match)
+        public void ResolveMatch(TournamentMatch match)
         {
             if (match.IsBye)
             {
-                match.Winner = match.Player1;
+                match.Winner = match.Player1Index;
+                TrainerEntity player1 = _participants[match.Player1Index];
+                Console.Write($"{player1.Name} gets a bye");
             }
             else
             {
-                (int cursorX, int cursorY) = Console.GetCursorPosition(); // Just in case I need to write in same place
-                string scoreString = Console.ReadLine();
-                if (scoreString.ToLower() == "q") // If q, just stop here we'll need to restart after
+                // Create trainer instances, put in there all the data needed to initialize the battle, wait for the output class, which is used to populate fields
+                // Usage of new system to create the battle (here there'll be crazier team stuff if it's a more special tourn)
+                // Create trainer instances, opposed teams, 3 mons max, apply pokemon seed (may go into method if starts to happen a lot)
+                TrainerEntity player1 = _participants[match.Player1Index];
+                int monSeed = ParticipantSeedAndMonSeed[match.Player1Index].Item3;
+                Random pokemonRng = new Random(monSeed);
+                TrainerInstance trainer1 = new TrainerInstance()
                 {
-                    return false;
-                }
-                else if (scoreString.ToLower() == "b") // If b, do battle bots
+                    Name = player1.Name,
+                    Team = 1,
+                    Side = (Side)1,
+                    MaxMonsInField = GameplayElementsContainer.TOURNAMENT_NMONS,
+                    MaxMonsUsed = GameplayElementsContainer.TOURNAMENT_NMONS,
+                    ActiveJewelry = player1.EquippedJewelry,
+                    PokemonInTeam = [.. player1.Pokemon.Select(p => SimulatorHandler.InstancePokemon(p, pokemonRng))]
+                };
+                TrainerEntity player2 = _participants[match.Player2Index];
+                monSeed = ParticipantSeedAndMonSeed[match.Player2Index].Item3;
+                pokemonRng = new Random(monSeed);
+                TrainerInstance trainer2 = new TrainerInstance()
                 {
-                    Trainer p1 = IndymonUtilities.GetTrainerByName(match.Player1);
-                    p1.RestoreAll();
-                    Trainer p2 = IndymonUtilities.GetTrainerByName(match.Player2);
-                    p2.RestoreAll();
-                    string challengeString = "gen9customgame";
-                    (match.Score1, match.Score2) = BotBattle.SimulateBotBattle(p1, p2, challengeString);
-                    Console.SetCursorPosition(cursorX, cursorY);
-                    Console.Write($"{match.Score1}-{match.Score2} GET THE REPLAY");
-                }
-                else
-                {
-                    string[] scores = scoreString.Split('-');
-                    match.Score1 = int.Parse(scores[0]);
-                    match.Score2 = int.Parse(scores[1]);
-                }
+                    Name = player2.Name,
+                    Team = 2,
+                    Side = (Side)2,
+                    MaxMonsInField = GameplayElementsContainer.TOURNAMENT_NMONS,
+                    MaxMonsUsed = GameplayElementsContainer.TOURNAMENT_NMONS,
+                    ActiveJewelry = player2.EquippedJewelry,
+                    PokemonInTeam = [.. player2.Pokemon.Select(p => SimulatorHandler.InstancePokemon(p, pokemonRng))]
+                };
+                // Execute battle now
+                GameOutcome outcome = SimulatorHandler.SimulateGame([trainer1, trainer2], _rng);
                 // Determine winner
-                if (match.Score1 > match.Score2)
+                if (outcome.WinningTeam == 1)
                 {
-                    match.Winner = match.Player1;
+                    match.Winner = match.Player1Index;
                 }
                 else
                 {
-                    match.Winner = match.Player2;
+                    match.Winner = match.Player2Index;
                 }
             }
-            return true;
-        }
-        /// <summary>
-        /// Register all participant's tournament played count, also adds them if not there before
-        /// </summary>
-        /// <param name="leaderboard">Leaderboard to add</param>
-        /// <param name="backend">Backend for data</param>
-        protected void RegisterTournamentParticipation()
-        {
-            foreach ((string, int) participant in ParticipantsWithRandomSeed)
-            {
-                List<PlayerAndStats> participantLocation = null;
-                BattleStats leaderboard = GameDataContainers.GlobalGameData.BattleStats;
-                if (GameDataContainers.GlobalGameData.TrainerData.ContainsKey(participant.Item1)) participantLocation = leaderboard.PlayerStats; // Is it a trainer?
-                else if (GameDataContainers.GlobalGameData.NpcData.ContainsKey(participant.Item1)) participantLocation = leaderboard.NpcStats; // Is it NPC?
-                else { } // Never mind then (leave null)
-                if (participantLocation != null) // Add participant if relevant
-                {
-                    PlayerAndStats playerStats = participantLocation.FirstOrDefault(p => (p.Name == participant.Item1)); // Get data for player
-                    if (playerStats == null) // Player wasn't there, need to add
-                    {
-                        PlayerAndStats newPlayer = new PlayerAndStats()
-                        {
-                            Name = participant.Item1,
-                            TournamentsPlayed = 1,
-                            Deaths = 0,
-                            Kills = 0,
-                            TournamentWins = 0,
-                            EachMuWr = new Dictionary<string, IndividualMu>()
-                        };
-                        participantLocation.Add(newPlayer);
-                    }
-                    else
-                    {
-                        playerStats.TournamentsPlayed++;
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Processes the standings for a match
-        /// </summary>
-        /// <param name="match">The match</param>
-        /// <param name="leaderboard">Leaderboard to update</param>
-        /// <param name="backend">Backend for extra data</param>
-        protected void ProcessMatchStandings(TournamentMatch match)
-        {
-            BattleStats leaderboard = GameDataContainers.GlobalGameData.BattleStats;
-            // Try to find where P1 is
-            List<PlayerAndStats> p1Location = null;
-            if (GameDataContainers.GlobalGameData.TrainerData.ContainsKey(match.Player1)) p1Location = leaderboard.PlayerStats; // Is it a trainer?
-            else if (GameDataContainers.GlobalGameData.NpcData.ContainsKey(match.Player1)) p1Location = leaderboard.NpcStats; // Is it NPC?
-            else { } // Never mind then
-            List<PlayerAndStats> p2Location = null;
-            if (!match.IsBye) // If there's actually a p2...
-            {
-                if (GameDataContainers.GlobalGameData.TrainerData.ContainsKey(match.Player2)) p2Location = leaderboard.PlayerStats; // Is it a trainer?
-                else if (GameDataContainers.GlobalGameData.NpcData.ContainsKey(match.Player2)) p2Location = leaderboard.NpcStats; // Is it NPC?
-                else { } // Never mind then
-            }
-            // After that is done, guaranteed everything is in place, just update each match stats individually
-            if (!match.IsBye) // A bye doesn't have additional stats as no one fought anyone
-            {
-                // These 2 should exist unless they're not players or npc
-                PlayerAndStats p1Stats = p1Location?.First(p => (p.Name == match.Player1));
-                PlayerAndStats p2Stats = p2Location?.First(p => (p.Name == match.Player2));
-                // How many mons each player killed
-                int p1Kills = (NMons - match.Score2);
-                int p2Kills = (NMons - match.Score1);
-                // Update all remaining stats
-                if (p1Stats != null)
-                {
-                    p1Stats.GamesPlayed++;
-                    p1Stats.Kills += p1Kills;
-                    p1Stats.Deaths += p2Kills;
-                    if (!p1Stats.EachMuWr.TryGetValue(match.Player2, out IndividualMu mu))
-                    {
-                        mu = new IndividualMu();
-                        p1Stats.EachMuWr.Add(match.Player2, mu);
-                    }
-                    bool playerWon = (match.Winner.Trim().ToLower() == p1Stats.Name.Trim().ToLower());
-                    if (playerWon)
-                    {
-                        p1Stats.GamesWon++;
-                        mu.Wins++;
-                    }
-                    else
-                    {
-                        mu.Losses++;
-                    }
-                }
-                if (p2Stats != null)
-                {
-                    p2Stats.GamesPlayed++;
-                    p2Stats.Kills += p2Kills;
-                    p2Stats.Deaths += p1Kills;
-                    if (!p2Stats.EachMuWr.TryGetValue(match.Player1, out IndividualMu mu))
-                    {
-                        mu = new IndividualMu();
-                        p2Stats.EachMuWr.Add(match.Player1, mu);
-                    }
-                    bool playerWon = (match.Winner.Trim().ToLower() == p2Stats.Name.Trim().ToLower());
-                    if (playerWon)
-                    {
-                        p2Stats.GamesWon++;
-                        mu.Wins++;
-                    }
-                    else
-                    {
-                        mu.Losses++;
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Sets tournament winner
-        /// </summary>
-        /// <param name="winner">Who won</param>
-        /// <param name="leaderboard">Leaderboard to update</param>
-        /// <param name="backend">Backend for extra data</param>
-        protected static void SetTournamentWinner(string winnerName)
-        {
-            BattleStats leaderboard = GameDataContainers.GlobalGameData.BattleStats;
-            List<PlayerAndStats> winnerLocation = null;
-            if (GameDataContainers.GlobalGameData.TrainerData.ContainsKey(winnerName)) winnerLocation = leaderboard.PlayerStats; // Is it a trainer?
-            else if (GameDataContainers.GlobalGameData.NpcData.ContainsKey(winnerName)) winnerLocation = leaderboard.NpcStats; // Is it NPC?
-            else { } // Never mind then
-            PlayerAndStats winnerStats = winnerLocation?.FirstOrDefault(p => (p.Name == winnerName));
-            if (winnerStats != null) winnerStats.TournamentWins++;
         }
         /// <summary>
         /// Checks if certain tournaments are monotype or not
@@ -543,71 +378,52 @@ namespace IndymonBackendProgram
         protected void AskSpecialRulesets()
         {
             // Ones that add to the build constraints
-            Console.WriteLine("Choose special rules [monotype, dancer, ultra, bullet, lc]");
+            Console.WriteLine("Choose special rules [monotype, lc]");
             string response = Console.ReadLine();
-            if (response.Trim().ToLower() == "dancer")
-            {
-                // Either a dance move or dancer ability
-                BaseConstraint.AllConstraints = [(ElementType.EFFECT_FLAGS, "DANCE"), (ElementType.ABILITY, "Dancer")];
-                BaseConstraint.Operation = ConstraintOperation.OR;
-                TeamBuildConstrainOptions = [BaseConstraint];
-            }
-            else if (response.Trim().ToLower() == "bullet")
-            {
-                // Either a ball move or bulletproof
-                BaseConstraint.AllConstraints = [(ElementType.EFFECT_FLAGS, "BALL"), (ElementType.ABILITY, "Bulletproof")];
-                BaseConstraint.Operation = ConstraintOperation.OR;
-                TeamBuildConstrainOptions = [BaseConstraint];
-            }
-            else if (response.Trim().ToLower() == "lc")
+            if (response.Trim().ToLower() == "lc")
             {
                 // Ensure mon has evo and hasnt evolved
-                BaseConstraint.AllConstraints = [(ElementType.POKEMON_HAS_PREVO, "FALSE"), (ElementType.POKEMON_HAS_EVO, "TRUE")];
-                BaseConstraint.Operation = ConstraintOperation.AND;
-                TeamBuildConstrainOptions = [BaseConstraint];
+                Constraint onlyConstraint = new Constraint()
+                {
+                    AllConstraints = [(ConstraintType.POKEMON_HAS_PREVO, "FALSE"), (ConstraintType.POKEMON_HAS_EVO, "TRUE")],
+                    Operation = ConstraintOperation.AND
+                };
+                Constraints = [onlyConstraint];
             }
             else if (response.Trim().ToLower() == "monotype")
             {
                 foreach (PokemonType type in Enum.GetValues<PokemonType>())
                 {
-                    if (type == PokemonType.NONE || type == PokemonType.STELLAR) continue; // Skip these
+                    if (type == PokemonType.NONE) continue; // Skip these
                     Constraint nextTypeConstraint = new Constraint
                     {
-                        AllConstraints = [(ElementType.POKEMON_TYPE, type.ToString())],
+                        AllConstraints = [(ConstraintType.POKEMON_TYPE, type.ToString())],
                         Operation = ConstraintOperation.OR
                     };
-                    TeamBuildConstrainOptions.Add(nextTypeConstraint);
-                    BaseConstraint = new Constraint(); // No additional base constraints here
+                    Constraints.Add(nextTypeConstraint);
                 }
-            }
-            else if (response.Trim().ToLower() == "ultra")
-            {
-                CommonFavourMons = ["Nihilego", "Buzzwole", "Pheromosa", "Xurkitree", "Celesteela", "Kartana", "Guzzlord", "Naganadel", "Stakataka", "Blacephalon",
-                    "Great Tusk", "Scream Tail", "Brute Bonnet", "Flutter Mane", "Slither Wing", "Sandy Shocks", "Roaring Moon", "Walking Wake", "Gouging Fire", "Raging Bolt",
-                    "Iron Treads", "Iron Bundle", "Iron Hands", "Iron Jugulis", "Iron Moth", "Iron Thorns", "Iron Valiant", "Iron Leaves", "Iron Boulder", "Iron Crown"
-                ]; // List of Pokemon borrowed here
-                // The rest of tourn continues without specific constraints
-                BaseConstraint.AllConstraints = [];
-                TeamBuildConstrainOptions = [BaseConstraint];
             }
             else // Normal tournament, empty constraint
             {
-                BaseConstraint.AllConstraints = [];
-                TeamBuildConstrainOptions = [BaseConstraint];
+                Constraint onlyConstraint = new Constraint()
+                {
+                    AllConstraints = [],
+                };
+                Constraints = [onlyConstraint];
             }
         }
     }
     /// <summary>
     /// This class exists because 2 different types of tournament have brackets
     /// </summary>
-    public static class PlayoffBrackerHelper
+    public static class PlayoffBracketHelper
     {
         /// <summary>
         /// Gets an internal list of seed order to check which player fights which
         /// </summary>
         /// <param name="nPlayers">How many players total, create the smallest possible seed order list</param>
         /// <returns></returns>
-        static int[] GetSeedOrderForTournament(int nPlayers)
+        public static int[] GetSeedOrderForTournament(int nPlayers)
         {
             // First, assemble a list of seeds, for all players get seed order from that to the closest power of 2
             int closestPowerOf2 = 1;
@@ -642,91 +458,41 @@ namespace IndymonBackendProgram
             return seedOrder;
         }
         /// <summary>
-        /// Resolves the brackets
+        /// Resolves the brackets, to be called as part of SimulateTournament
         /// </summary>
-        /// <returns>A finalized (?) list of matches for each round</returns>>
-        public static List<List<TournamentMatch>> ResolveMatches(List<(string, int)> participantList)
+        /// <param name="firstRoundMatches">The matches for the first round</param>
+        /// <param name="ongoingTournament">The ongoing tournament (to see the data)</param>
+        /// <returns>The list of matches for all rounds and maybe also animation rendering?</returns>>
+        public static List<List<TournamentMatch>> ResolveMatches(List<TournamentMatch> firstRoundMatches, Tournament ongoingTournament)
         {
-            int nPlayers = participantList.Count;
-            int[] seedOrder = GetSeedOrderForTournament(nPlayers); // Gets the seed order to use for this bracket
-            // Begin play
-            Console.CursorVisible = true;
             List<List<TournamentMatch>> roundHistory = new List<List<TournamentMatch>>();
             // Ok will start doing the matchups, first round
-            List<TournamentMatch> thisRound = new List<TournamentMatch>();
-            // Need to find seed by seed, and the ones that are higher than the number of player involve a bye
-            // Due to how algorithm was created, p1 will always be valid
-            int drawHelper = 0; // Where next player will be drawn
-            for (int i = 0; i < seedOrder.Length; i += 2) // Go in pairs
-            {
-                TournamentMatch thisMatch = new TournamentMatch();
-                // Find both players
-                int p1Index = seedOrder[i];
-                int p2Index = seedOrder[i + 1];
-                thisMatch.Player1 = participantList[p1Index].Item1;
-                thisMatch.DrawHelper1 = drawHelper * 2; // Go to the next even (leave a space between names)
-                drawHelper++; // Draw next
-                if (p2Index < nPlayers) // Meaning the next seed MU is valid
-                {
-                    thisMatch.Player2 = participantList[p2Index].Item1; // Got the second player
-                    thisMatch.IsBye = false;
-                    thisMatch.DrawHelper2 = drawHelper * 2;
-                    drawHelper++;
-                }
-                else // Otherwise it's a bye
-                {
-                    thisMatch.IsBye = true;
-                }
-                thisRound.Add(thisMatch);
-            }
+            List<TournamentMatch> thisRound = firstRoundMatches;
             roundHistory.Add(thisRound);
-            // This is the part that loads a tournament, visually it prints all matches and prompts user one by one
             bool finished = false;
+            // Begin doing all rounds
+            Console.Clear();
             while (!finished)
             {
                 List<TournamentMatch> currentRound = roundHistory.Last();
                 List<TournamentMatch> nextRound = new List<TournamentMatch>();
                 int playerProcessed = 0;
-                Console.Clear();
-                Console.WriteLine("Insert scores for each match. q to stop input temporarily. b FOR ROBOTS");
-                int consoleEndPosition = currentRound.Count + 1; // Where the cursor will be after data entry
-                int maxStringLength = 0;
-                foreach (TournamentMatch match in currentRound) // Print all rounds first (so that they can be simulated if needed
-                {
-                    string matchString;
-                    if (match.IsBye)
-                    {
-                        matchString = $"{match.Player1} gets a bye";
-                    }
-                    else
-                    {
-                        matchString = $"{match.Player1} v {match.Player2}";
-                    }
-                    maxStringLength = Math.Max(maxStringLength, matchString.Length);
-                    Console.WriteLine(matchString);
-                }
                 for (int i = 0; i < currentRound.Count; i++)
                 {
                     TournamentMatch match = currentRound[i];
-                    Console.SetCursorPosition(maxStringLength + 1, i + 1); // Put the cursor on the right, and starting from 1 (to avoid message string)
-                    if (!Tournament.ResolveMatch(match)) // Do the match, if not succesful (e.g. aborted), then we stop here
-                    {
-                        return roundHistory; // Whatever idc won't happen
-                    }
+                    ongoingTournament.ResolveMatch(match); // Do the match. It'll contain winner data
                     if ((playerProcessed % 2) == 0) // Even players, first of the next match
                     {
                         TournamentMatch nextMatch = new TournamentMatch
                         {
-                            Player1 = match.Winner,
-                            DrawHelper1 = match.IsBye ? match.DrawHelper1 : CalculateMidPoint(match.DrawHelper1, match.DrawHelper2) // Bye continues in same place, bracket goes to midpoint
+                            Player1Index = match.Winner,
                         };
                         nextRound.Add(nextMatch);
                     }
                     else // It's the player 2
                     {
                         TournamentMatch nextMatch = nextRound.Last();
-                        nextMatch.Player2 = match.Winner;
-                        nextMatch.DrawHelper2 = match.IsBye ? match.DrawHelper1 : CalculateMidPoint(match.DrawHelper1, match.DrawHelper2); // Bye continues in same place, bracket goes to midpoint
+                        nextMatch.Player2Index = match.Winner;
                     }
                     playerProcessed++;
                 }
@@ -734,7 +500,6 @@ namespace IndymonBackendProgram
                 if (currentRound.Count == 1) // If all's finished (either manually or because this was the last round)
                 {
                     finished = true;
-                    Console.SetCursorPosition(0, consoleEndPosition); // Sets the console in the right place
                     Console.WriteLine($"Tournament data entry done");
                 }
                 else
@@ -742,270 +507,125 @@ namespace IndymonBackendProgram
                     roundHistory.Add(nextRound); // Adds the next round to the pile
                 }
             }
-            Console.CursorVisible = false;
             return roundHistory;
-        }
-        // Internal draw helpers
-        const double DRAW_RYTHM_PERIOD = 1.0f;
-        const double BLINK_TOGGLE_PERIOD = 0.5f;
-        const int NUMBER_OF_BLINKS = 3;
-        /// <summary>
-        /// Animates the tournament bracket
-        /// </summary>
-        /// <param name="rounds">Brackets with results</param>
-        public static void AnimateBracketTournament(List<List<TournamentMatch>> rounds)
-        {
-            List<int> maxNameLengthThisRound = new List<int>();
-            foreach (List<TournamentMatch> nextRound in rounds)
-            {
-                int maxNameLength = 0;
-                foreach (TournamentMatch match in nextRound)
-                {
-                    maxNameLength = Math.Max(maxNameLength, match.Player1.Length);
-                    if (!match.IsBye) maxNameLength = Math.Max(maxNameLength, match.Player2.Length);
-                }
-                maxNameLengthThisRound.Add(maxNameLength); // Got the one for this round
-            }
-            // Need to resize console so this fits
-            int minXSize = maxNameLengthThisRound.Sum() + (3 * rounds.Count); // Need to fit names and brackets with spaces around
-            int minYSize = rounds.First().Select(m => int.Max(m.DrawHelper1, m.DrawHelper2)).Max(); // Possibly finds the biggest number in the draw helpers
-            while ((Console.WindowHeight < minYSize) || (Console.WindowWidth < minXSize))
-            {
-                Console.WriteLine($"Console has to have atleast dimensions X:{minXSize} Y: {minYSize}");
-                Console.WriteLine($"Current X:{Console.WindowWidth} Y: {Console.WindowHeight}");
-                Console.ReadLine();
-            }
-            // Then, perform a tournament animation
-            Console.Clear();
-            int round, cursorXbase = 0;
-            for (round = 0; round < rounds.Count; round++) // Check each round
-            {
-                List<TournamentMatch> matchesThisRound = rounds[round];
-                if (round == 0) // In first round, need to place players beforehand
-                {
-                    foreach (TournamentMatch match in matchesThisRound) // First, draw all names in the right position
-                    {
-                        Console.SetCursorPosition(cursorXbase, match.DrawHelper1); // First player always there
-                        Console.Write(match.Player1);
-                        if (!match.IsBye)
-                        {
-                            Console.SetCursorPosition(cursorXbase, match.DrawHelper2); // Also draw p2 if there's any
-                            Console.Write(match.Player2);
-                        }
-                    }
-                }
-                // OK now the brackets...
-                foreach (TournamentMatch match in matchesThisRound)
-                {
-                    if (match.IsBye)
-                    {
-                        Thread.Sleep((int)(DRAW_RYTHM_PERIOD * 1000)); // Wait and then draw the single line right
-                        Console.SetCursorPosition(cursorXbase + maxNameLengthThisRound[round] + 1, match.DrawHelper1); // Put it after name
-                        Console.Write($"─");
-                        Console.SetCursorPosition(cursorXbase + maxNameLengthThisRound[round] + 3, match.DrawHelper1); // Need to place the winner in next round
-                    }
-                    else
-                    {
-                        // Need to draw and re-draw the bracket...
-                        if (BLINK_TOGGLE_PERIOD < DRAW_RYTHM_PERIOD)
-                        {
-                            Thread.Sleep((int)((DRAW_RYTHM_PERIOD - BLINK_TOGGLE_PERIOD) * 1000)); // For visual rythm consistnecy
-                        }
-                        for (int blink = 0; blink < NUMBER_OF_BLINKS; blink++)
-                        {
-                            Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Wait and then draw the bracket, on and off
-                            DrawBracket(match.DrawHelper1, match.DrawHelper2, cursorXbase + maxNameLengthThisRound[round] + 1, true);
-                            Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Wait and then draw the bracket, on and off
-                            DrawBracket(match.DrawHelper1, match.DrawHelper2, cursorXbase + maxNameLengthThisRound[round] + 1, false);
-                        }
-                        Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Wait and then draw the bracket, on and off
-                        DrawBracket(match.DrawHelper1, match.DrawHelper2, cursorXbase + maxNameLengthThisRound[round] + 1, true);
-                        // And then after blink just put the score between
-                        Console.SetCursorPosition(cursorXbase, CalculateMidPoint(match.DrawHelper1, match.DrawHelper2)); // Put it after name
-                        if (BLINK_TOGGLE_PERIOD < DRAW_RYTHM_PERIOD)
-                        {
-                            Thread.Sleep((int)((DRAW_RYTHM_PERIOD - BLINK_TOGGLE_PERIOD) * 1000)); // For visual rythm consistnecy
-                        }
-                        Console.Write($"({match.Score1}-{match.Score2})");
-                        Console.SetCursorPosition(cursorXbase + maxNameLengthThisRound[round] + 3, CalculateMidPoint(match.DrawHelper1, match.DrawHelper2)); // Need to place the winner in next round
-                    }
-                    Console.Write(match.Winner);
-                }
-                cursorXbase += maxNameLengthThisRound[round] + 3; // Next cursor x base
-            }
-            Console.ReadLine();
-            Console.Clear();
-            // And that should be it?!
-        }
-        /// <summary>
-        /// Draws a bracket in console, always vertical
-        /// </summary>
-        /// <param name="beginningY">Where bracket begins Y</param>
-        /// <param name="endY">Where bracket ends Y</param>
-        /// <param name="x">X position of bracker</param>
-        /// <param name="show">Whether to show or to hide</param>
-        static void DrawBracket(int beginningY, int endY, int x, bool show)
-        {
-            int midpoint = CalculateMidPoint(beginningY, endY);
-            // Walk char by char drawing accordingly
-            for (int y = beginningY; y <= endY; y++)
-            {
-                Console.SetCursorPosition(x, y); // Next position
-                if (!show)
-                {
-                    Console.CursorLeft++;
-                    Console.Write("\b "); // Overwrite with space??
-                }
-                else if (y == beginningY)
-                {
-                    Console.Write("┐");
-                }
-                else if (y == endY)
-                {
-                    Console.Write("┘");
-                }
-                else if (y == midpoint)
-                {
-                    Console.Write("├");
-                }
-                else
-                {
-                    Console.Write("│");
-                }
-            }
-        }
-        /// <summary>
-        /// Calculates midpoint for bracket calculation. in a function to keep consistent
-        /// </summary>
-        /// <param name="line1">Where bracket begins</param>
-        /// <param name="line2">Where bracket ends</param>
-        /// <returns>The location of midpoint</returns>
-        static int CalculateMidPoint(int line1, int line2)
-        {
-            int average = (line1 + line2);
-            bool integer = (average % 2) == 0;
-            average /= 2;
-            if (!integer) average++; // Move to the next odd number if middle is even (a good bracket should fall in odd numbers)
-            return average;
         }
     }
     public class ElimTournament : Tournament
     {
-        public List<List<TournamentMatch>> RoundHistory { get; set; }
+        public List<List<TournamentMatch>> RoundHistory; // To be used at the end
         // Seed helper
-        public override void RequestAdditionalInfo()
+        public override void RequestAdditionalInfo(int nPlayers)
         {
             AskSpecialRulesets();
         }
-        public override void ShuffleWithSeeds(List<(string, int)> Seeds)
+        public override void ShuffleWithSeeds(List<(string, int, int)> Seeds)
         {
-            // Shuffle everything
-            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed);
+            // Shuffle everything, afterwards if there's some top seeds they'll be put on top after
+            _rng = new Random(RngSeed);
+            GeneralUtilities.ShuffleList(ParticipantSeedAndMonSeed, _rng);
             // Seeding at this stage will involve putting the best first, bracket helper will put them in place after
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
-                int currentIndex = ParticipantsWithRandomSeed.IndexOf(Seeds[seed]); // Find where seed is currently
+                int currentIndex = ParticipantSeedAndMonSeed.IndexOf(Seeds[seed]); // Find where seed is currently
                 // Perform switch
                 if (currentIndex != seed)
                 {
-                    (ParticipantsWithRandomSeed[currentIndex], ParticipantsWithRandomSeed[seed]) = (ParticipantsWithRandomSeed[seed], ParticipantsWithRandomSeed[currentIndex]); // Swap
+                    (ParticipantSeedAndMonSeed[currentIndex], ParticipantSeedAndMonSeed[seed]) = (ParticipantSeedAndMonSeed[seed], ParticipantSeedAndMonSeed[currentIndex]); // Swap
                 }
             }
         }
-        public override void PlayTournament()
+        public override void SimulateTournament()
         {
-            RoundHistory = PlayoffBrackerHelper.ResolveMatches(ParticipantsWithRandomSeed);
-        }
-        public override void AnimateTournament()
-        {
-            PlayoffBrackerHelper.AnimateBracketTournament(RoundHistory);
-        }
-        public override void UpdateLeaderboard()
-        {
-            RegisterTournamentParticipation(); // First, make sure all players who participated have their tournament # increased
-            for (int round = 0; round < RoundHistory.Count; round++) // Check round by round
+            int nPlayers = ParticipantSeedAndMonSeed.Count;
+            int[] seedOrder = PlayoffBracketHelper.GetSeedOrderForTournament(nPlayers); // Gets the seed order to use for this bracket
+            // Assemble first round
+            List<TournamentMatch> firstRound = new List<TournamentMatch>();
+            // Need to find seed by seed, and the ones that are higher than the number of player involve a bye
+            // Due to how algorithm was created, p1 will always be valid
+            for (int i = 0; i < seedOrder.Length; i += 2) // Go in pairs
             {
-                List<TournamentMatch> matchesThisRound = RoundHistory[round]; // Get matches for this round
-                foreach (TournamentMatch match in matchesThisRound) // Need to gather the matches to calculate each match stat
+                TournamentMatch thisMatch = new TournamentMatch();
+                // Find both players
+                int p1Index = seedOrder[i];
+                int p2Index = seedOrder[i + 1];
+                thisMatch.Player1Index = p1Index;
+                if (p2Index < nPlayers) // Meaning the next seed MU is valid
                 {
-                    ProcessMatchStandings(match);
+                    thisMatch.Player2Index = p2Index; // Got the second player
+                    thisMatch.IsBye = false;
                 }
+                else // Otherwise it's a bye
+                {
+                    thisMatch.IsBye = true;
+                }
+                firstRound.Add(thisMatch);
             }
-            // Ok! finally need the winner
-            string winnerName = RoundHistory.Last().Last().Winner; // Last winner of last match of last round is tournament winner
-            SetTournamentWinner(winnerName);
+            Console.Clear();
+            RoundHistory = PlayoffBracketHelper.ResolveMatches(firstRound, this); // Ask the helper to work with this tournament
+        }
+        public override int GetParticipantPlace(int participantId)
+        {
+            TournamentMatch final = RoundHistory.Last().Last();
+            int result;
+            if (final.Winner == participantId) result = 1; // If won final, 1st
+            else if (final.Player1Index == participantId || final.Player2Index == participantId) result = 2; // Otherwise but fought final?
+            else result = 3; // No additional calc of >2 place until this is needed
+            return result;
         }
     }
     public class KingOfTheHillTournament : Tournament
     {
-        // Internal draw helpers
-        const double DRAW_RYTHM_PERIOD = 1.0f;
-        const double BLINK_TOGGLE_PERIOD = 0.5f;
-        const int NUMBER_OF_BLINKS = 3;
-        public List<TournamentMatch> MatchHistory { get; set; }
-        public override void RequestAdditionalInfo()
+        public List<TournamentMatch> MatchHistory;
+        public override void RequestAdditionalInfo(int nPlayers)
         {
             AskSpecialRulesets();
         }
-        public override void ShuffleWithSeeds(List<(string, int)> Seeds)
+        public override void ShuffleWithSeeds(List<(string, int, int)> Seeds)
         {
-            // Shuffle everything
-            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed);
+            // Shuffle everything, afterwards if there's some top seeds they'll be put on top after
+            _rng = new Random(RngSeed);
+            GeneralUtilities.ShuffleList(ParticipantSeedAndMonSeed, _rng);
             // Seeding in KOH means putting the best in the bottom
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
-                int currentIndex = ParticipantsWithRandomSeed.IndexOf(Seeds[seed]); // Find where seed is currently
-                int targetIndex = ParticipantsWithRandomSeed.Count - 1 - seed; // Bottom up
+                int currentIndex = ParticipantSeedAndMonSeed.IndexOf(Seeds[seed]); // Find where seed is currently
+                int targetIndex = ParticipantSeedAndMonSeed.Count - 1 - seed; // Bottom up
                 // Perform switch
                 if (currentIndex != targetIndex)
                 {
-                    (ParticipantsWithRandomSeed[currentIndex], ParticipantsWithRandomSeed[targetIndex]) = (ParticipantsWithRandomSeed[targetIndex], ParticipantsWithRandomSeed[currentIndex]); // Swap
+                    (ParticipantSeedAndMonSeed[currentIndex], ParticipantSeedAndMonSeed[targetIndex]) = (ParticipantSeedAndMonSeed[targetIndex], ParticipantSeedAndMonSeed[currentIndex]); // Swap
                 }
             }
         }
-        public override void PlayTournament()
+        public override void SimulateTournament()
         {
-            Console.CursorVisible = true;
             MatchHistory = new List<TournamentMatch>();
+            // First vs second player
             TournamentMatch firstMatch = new TournamentMatch
             {
-                Player1 = ParticipantsWithRandomSeed[0].Item1 // First person is first player
+                Player1Index = 0
             };
-            if (ParticipantsWithRandomSeed.Count > 1) // One would assume...
+            if (ParticipantSeedAndMonSeed.Count > 1) // One would assume...
             {
-                firstMatch.Player2 = ParticipantsWithRandomSeed[1].Item1; // Add the 2nd
+                firstMatch.Player2Index = 1;
             }
             else
             {
                 firstMatch.IsBye = true;
             }
             MatchHistory.Add(firstMatch);
-            // This is the part that loads the tournament, visually it prints all matches and prompts user one by one
+            // Begins here
             Console.Clear();
-            Console.WriteLine("Insert scores for each match. 0 if you want it randomized, q to stop input temporarily. b FOR ROBOTS");
-            int consoleEndPosition = ParticipantsWithRandomSeed.Count + 1; // Where the cursor will be after data entry (there's n matches total)
-            int maxStringLength = 0;
-            foreach ((string, int) participant in ParticipantsWithRandomSeed) // Matchups are not known, so just assume max v max is the text
-            {
-                maxStringLength = Math.Max(maxStringLength, (2 * participant.Item1.Length) + 3); // Need to fit "p1 v p1"
-            }
             bool finished = false;
             while (!finished) // In this case, it'll be battle by battle, each decided by the winner of previous
             {
                 int matchNumber = MatchHistory.Count;
                 TournamentMatch match = MatchHistory.Last(); // Gets last (current) match
-                Console.SetCursorPosition(0, MatchHistory.Count);
-                Console.Write($"{match.Player1} v {match.Player2}");
-                Console.SetCursorPosition(maxStringLength, MatchHistory.Count); // Put the cursor on the right, able to fit "p1 v p1" with p1 the longest possible player name
-                if (!ResolveMatch(match))
-                {
-                    return;
-                }
+                ResolveMatch(match); // Do the match. It'll contain winner data
                 // Check end condition
-                if (matchNumber >= (ParticipantsWithRandomSeed.Count - 1)) // This signifies end of tournament
+                if (matchNumber >= (ParticipantSeedAndMonSeed.Count - 1)) // This signifies end of tournament
                 {
                     finished = true;
-                    Console.SetCursorPosition(0, consoleEndPosition); // Sets the console in the right place
                     Console.WriteLine($"Tournament data entry done");
                 }
                 else // Next match then
@@ -1013,86 +633,23 @@ namespace IndymonBackendProgram
                     TournamentMatch nextMatch = new TournamentMatch();
                     MatchHistory.Add(nextMatch); // Add to pile
                     // Winner will advance in the same pos as they were
-                    bool winnerWas1 = (match.Winner == match.Player1);
-                    nextMatch.Player1 = winnerWas1 ? match.Winner : ParticipantsWithRandomSeed[MatchHistory.Count].Item1;
-                    nextMatch.Player2 = winnerWas1 ? ParticipantsWithRandomSeed[MatchHistory.Count].Item1 : match.Winner;
+                    bool winnerWas1 = (match.Winner == match.Player1Index);
+                    nextMatch.Player1Index = winnerWas1 ? match.Winner : MatchHistory.Count;
+                    nextMatch.Player2Index = winnerWas1 ? MatchHistory.Count : match.Winner;
                 }
             }
-            Console.CursorVisible = false;
         }
-        public override void AnimateTournament()
+        public override int GetParticipantPlace(int participantId)
         {
-            // Find person with the longest name
-            int nameLength = 0;
-            foreach ((string, int) participant in ParticipantsWithRandomSeed)
+            int i;
+            for (i = 0; i <= MatchHistory.Count; i++) // Go matches with 1-index so that i is the prospective place
             {
-                nameLength = Math.Max(nameLength, participant.Item1.Length); // Need to fit "p1 v p1" so keep in mind
-            }
-            // Need to resize console so this fits
-            int minXSize = (2 * nameLength) + 3; // Need to fit number of matches
-            int minYSize = MatchHistory.Count; // Need to fit names
-            while ((Console.WindowHeight < minYSize) || (Console.WindowWidth < minXSize))
-            {
-                Console.WriteLine($"Console has to have atleast dimensions X:{minXSize} Y: {minYSize}");
-                Console.WriteLine($"Current X:{Console.WindowWidth} Y: {Console.WindowHeight}");
-                Console.ReadLine();
-            }
-            // Then, perform a tournament animation
-            Console.Clear();
-            string emptyName = new string(' ', nameLength);
-            string emptyLine = new string(' ', (2 * nameLength) + 3);
-            for (int line = 0; line < MatchHistory.Count; line++) // Each match is a line
-            {
-                TournamentMatch match = MatchHistory[line];
-                string player1String = match.Player1.PadRight(nameLength);
-                string player2String = match.Player2.PadRight(nameLength);
-                string matchString = $"{player1String} v {player2String}";
-                string resultString = (match.Winner == match.Player1) ? $"{emptyName} v {player2String}" : $"{player1String} v {emptyName}";
-                // Print Line by Line
-                for (int blink = 0; blink < NUMBER_OF_BLINKS; blink++) // Blink the next match
+                if (MatchHistory[MatchHistory.Count - i - 1].Winner == participantId)
                 {
-                    Console.SetCursorPosition(0, line);
-                    Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000));
-                    Console.Write(matchString);
-                    Console.SetCursorPosition(0, line);
-                    Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000));
-                    Console.Write(emptyLine);
-                }
-                Thread.Sleep((int)(BLINK_TOGGLE_PERIOD * 1000)); // Show it one last time, also show score
-                Console.SetCursorPosition(0, line);
-                Console.Write(matchString);
-                Console.SetCursorPosition(matchString.Length + 1, line);
-                Console.Write($"({match.Score1}-{match.Score2})");
-                Thread.Sleep((int)(2 * BLINK_TOGGLE_PERIOD * 1000)); // Remove the winner, will move down
-                Console.SetCursorPosition(0, line);
-                Console.Write(emptyLine);
-                Console.SetCursorPosition(0, line);
-                Console.Write(resultString);
-                Thread.Sleep((int)(2 * BLINK_TOGGLE_PERIOD * 1000)); // Remove the winner, will move down
-                if (line >= MatchHistory.Count - 1) // The final
-                {
-                    Console.SetCursorPosition(0, line + 1);
-                    string finalString = (match.Winner == match.Player1) ? $"{player1String}   {emptyName}" : $"{emptyName}   {player2String}";
-                    Console.Write(finalString);
-                    Console.SetCursorPosition(matchString.Length + 1, line + 1);
-                    Console.Write($"WINNER");
+                    break;
                 }
             }
-            Console.ReadLine();
-            Console.Clear();
-            // And that should be it?!
-        }
-        public override void UpdateLeaderboard()
-        {
-            RegisterTournamentParticipation(); // First, make sure all players who participated have their tournament # increased
-            // Now, need to gather the matches to calculate each match stat
-            foreach (TournamentMatch match in MatchHistory)
-            {
-                ProcessMatchStandings(match);
-            }
-            // Ok! finally need the winner
-            string winnerName = MatchHistory.Last().Winner; // Winner of last match is tournament winner
-            SetTournamentWinner(winnerName);
+            return i + 1;
         }
     }
     public class GroupStageTournament : Tournament
@@ -1104,26 +661,25 @@ namespace IndymonBackendProgram
         public int MatchesPerWeek { get; set; }
         public int NMathesTotalPerGroup { get; set; }
         public int PlayoffPerGroup { get; set; }
-        public string[,] Groups { get; set; } = null;
+        public int[,] Groups { get; set; } = null;
         public List<List<List<TournamentMatch>>> GroupMatches { get; set; } // Will go by weeks (list), each week will contain all groups with all matches due that week for that group
         // For the playoff stage
-        public List<(string, int)> PlayoffParticipantsWithUnusedInt { get; set; } // Participants and teambuild seed
         public List<List<TournamentMatch>> PlayoffMatches { get; set; }
-        public override void RequestAdditionalInfo()
+        public override void RequestAdditionalInfo(int nPlayers)
         {
             AskSpecialRulesets();
             // Then group specific
             Console.WriteLine("How many players each group?");
             PlayersPerGroup = int.Parse(Console.ReadLine());
-            if ((NPlayers % PlayersPerGroup) != 0)
+            if ((nPlayers % PlayersPerGroup) != 0)
             {
                 throw new Exception("Can't evenly distribute in groups");
             }
             else
             {
-                NGroups = NPlayers / PlayersPerGroup;
+                NGroups = nPlayers / PlayersPerGroup;
             }
-            Groups = new string[NGroups, PlayersPerGroup]; // Group contains all participants
+            Groups = new int[NGroups, PlayersPerGroup]; // Group contains all participants
             // Calculate the rest of things
             MatchesPerWeek = PlayersPerGroup / 2; // Most that can be played is /2 as all players are playing at the same time
             NMathesTotalPerGroup = ((PlayersPerGroup * PlayersPerGroup) - PlayersPerGroup) / 2; // How many matches total will be played in all groups
@@ -1131,25 +687,25 @@ namespace IndymonBackendProgram
             Console.WriteLine("How many players make playoffs each group?");
             PlayoffPerGroup = int.Parse(Console.ReadLine());
         }
-        public override void ShuffleWithSeeds(List<(string, int)> Seeds)
+        public override void ShuffleWithSeeds(List<(string, int, int)> Seeds)
         {
-            // Shuffle everything
-            GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed);
+            // Shuffle everything, afterwards if there's some top seeds they'll be put on top after
+            _rng = new Random(RngSeed);
             // Seeding will involve putting the best first
             for (int seed = 0; seed < Seeds.Count; seed++) // Seed by seed
             {
-                int currentIndex = ParticipantsWithRandomSeed.IndexOf(Seeds[seed]); // Find where seed is currently
+                int currentIndex = ParticipantSeedAndMonSeed.IndexOf(Seeds[seed]); // Find where seed is currently
                 // Perform switch
                 if (currentIndex != seed)
                 {
-                    (ParticipantsWithRandomSeed[currentIndex], ParticipantsWithRandomSeed[seed]) = (ParticipantsWithRandomSeed[seed], ParticipantsWithRandomSeed[currentIndex]); // Swap
+                    (ParticipantSeedAndMonSeed[currentIndex], ParticipantSeedAndMonSeed[seed]) = (ParticipantSeedAndMonSeed[seed], ParticipantSeedAndMonSeed[currentIndex]); // Swap
                 }
             }
             // Another shuffle to shuffle "pots" of players, players will be segregated by skill tiers and distributed
             for (int tier = 0; tier < PlayersPerGroup; tier++)
             {
                 int pot = tier * NGroups; // Next pot is the next n players
-                GeneralUtilities.ShuffleList(ParticipantsWithRandomSeed, pot, NGroups);
+                GeneralUtilities.ShuffleList(ParticipantSeedAndMonSeed, pot, NGroups, _rng);
             }
             // Finally, place in each position of group
             int participant = 0;
@@ -1157,20 +713,19 @@ namespace IndymonBackendProgram
             {
                 for (int group = 0; group < NGroups; group++)
                 {
-                    Groups[group, level] = ParticipantsWithRandomSeed[participant].Item1;
+                    Groups[group, level] = participant;
                     participant++;
                 }
             }
         }
-        public override void PlayTournament()
+        public override void SimulateTournament()
         {
-            Console.CursorVisible = true;
             // Start with group stage
             // Admin, players score involves n million per n matches won, and added to it is the differential
-            Dictionary<string, int> playerScores = new Dictionary<string, int>(); // Will save player scores, so that they can be sorted at the end
-            foreach (string name in ParticipantsWithRandomSeed.Select(p => p.Item1)) // All players init with a score of 0
+            Dictionary<int, int> playerScores = new Dictionary<int, int>(); // Will save player scores, so that they can be sorted at the end
+            for (int i = 0; i < ParticipantSeedAndMonSeed.Count; i++) // All players init with a score of 0
             {
-                playerScores[name] = 0;
+                playerScores[i] = 0;
             }
             // Actual game
             GroupMatches = new List<List<List<TournamentMatch>>>();
@@ -1181,53 +736,30 @@ namespace IndymonBackendProgram
             }
             GroupMatches.Add(matchesInGroupsThisWeek); // Added week 0
             // This is the part that loads a tournament, visually it prints all matches and prompts user one by one
+            Console.Clear();
             bool finished = false;
             while (!finished)
             {
                 int week = GroupMatches.Count;
                 List<List<TournamentMatch>> currentWeek = GroupMatches.Last(); // Got the current week
-                Console.Clear();
-                Console.WriteLine("Insert scores for each match. 0 if you want it randomized, q to stop input temporarily. b FOR ROBOTS");
-                int consoleEndPosition = (NGroups * MatchesPerWeek) + 1; // Where the cursor will be after data entry
-                int maxStringLength = 0;
-                foreach ((string, int) participant in ParticipantsWithRandomSeed) // Matchups are not known, so just assume max v max is the text
-                {
-                    maxStringLength = Math.Max(maxStringLength, (2 * participant.Item1.Length) + 3); // Need to fit "p1 v p1"
-                }
-                int line = 1;
                 foreach (List<TournamentMatch> matchesThisGroup in currentWeek)
                 {
-                    foreach (TournamentMatch match in matchesThisGroup) // Print all rounds first (so that they can be simulated if needed
+                    foreach (TournamentMatch match in matchesThisGroup)
                     {
-                        Console.SetCursorPosition(0, line);
-                        if (match.IsBye)
-                        {
-                            Console.Write($"{match.Player1} gets a bye");
-                        }
-                        else
-                        {
-                            Console.Write($"{match.Player1} v {match.Player2}");
-                        }
-                        Console.SetCursorPosition(maxStringLength + 1, line); // Put the cursor on the right, and starting from 1 (to avoid message string)
-                        if (!ResolveMatch(match))
-                        {
-                            return;
-                        }
+                        ResolveMatch(match); // Do the match. It'll contain winner data
                         if (!match.IsBye)
                         {
-                            playerScores[match.Player1] += match.Score1 - match.Score2;
-                            playerScores[match.Player2] += match.Score2 - match.Score1;
+                            playerScores[match.Player1Index] += match.Score1 - match.Score2;
+                            playerScores[match.Player2Index] += match.Score2 - match.Score1;
                             playerScores[match.Winner] += 1000000; // Each win is worth a million so it sorts by win first
                         }
-                        line++;
                     }
                 }
                 // Finally, now here's the next round, unless tournament was finished
                 if (week >= NWeeks) // If this was the final week...
                 {
                     finished = true;
-                    Console.SetCursorPosition(0, consoleEndPosition); // Sets the console in the right place
-                    Console.WriteLine($"Tournament data entry done");
+                    Console.WriteLine($"Group stage done");
                 }
                 else // Need to add the next week
                 {
@@ -1240,25 +772,45 @@ namespace IndymonBackendProgram
                 }
             }
             // Ok, group stage is over, now need to get the first n players of each group!
-            PlayoffParticipantsWithUnusedInt = new List<(string, int)>();
+            List<int> playoffsPlayers = new List<int>();
             for (int i = 0; i < NGroups; i++)
             {
-                List<(string, int)> playerAndRank = new List<(string, int)>();
+                List<(int, int)> playerAndRank = new List<(int, int)>();
                 for (int j = 0; j < PlayersPerGroup; j++)
                 {
-                    (string, int) playerScore = (Groups[i, j], playerScores[Groups[i, j]]); // Get player and its score
+                    (int, int) playerScore = (Groups[i, j], playerScores[Groups[i, j]]); // Get player and its score
                     playerAndRank.Add(playerScore);
                 }
                 // Once all players, just sort and pick first n
                 playerAndRank = [.. playerAndRank.OrderByDescending(p => p.Item2).ThenByDescending(p => p.Item1)];
                 for (int j = 0; j < PlayoffPerGroup; j++)
                 {
-                    PlayoffParticipantsWithUnusedInt.Add(playerAndRank[j]); // Only string is used, not the int
+                    playoffsPlayers.Add(playerAndRank[j].Item1); // Add the players in this order
                 }
             }
+            // Now there's N players who made playoffs, and they're already ordered/seeded
+            List<TournamentMatch> playoffsFirstMatch = new List<TournamentMatch>();
+            int[] seedOrder = PlayoffBracketHelper.GetSeedOrderForTournament(playoffsPlayers.Count); // Gets the seed order to use for this bracket
+            for (int i = 0; i < seedOrder.Length; i += 2) // Go in pairs
+            {
+                TournamentMatch thisMatch = new TournamentMatch();
+                // Find both players
+                int p1Index = seedOrder[i];
+                int p2Index = seedOrder[i + 1];
+                thisMatch.Player1Index = p1Index;
+                if (p2Index < playoffsPlayers.Count) // Meaning the next seed MU is valid
+                {
+                    thisMatch.Player1Index = p2Index; // Got the second player
+                    thisMatch.IsBye = false;
+                }
+                else // Otherwise it's a bye
+                {
+                    thisMatch.IsBye = true;
+                }
+                playoffsFirstMatch.Add(thisMatch);
+            }
             // Finally, sim playoff stage now (generic bracker maker)
-            PlayoffMatches = PlayoffBrackerHelper.ResolveMatches(PlayoffParticipantsWithUnusedInt);
-            Console.CursorVisible = false;
+            PlayoffMatches = PlayoffBracketHelper.ResolveMatches(playoffsFirstMatch, this);
         }
         /// <summary>
         /// Will return the next set of matches for a specific week in a specific group
@@ -1285,133 +837,22 @@ namespace IndymonBackendProgram
                     TournamentMatch match = new TournamentMatch()
                     {
                         IsBye = false, // Never a bye, always pairs
-                        Player1 = Groups[group, p1Index], // And get players
-                        Player2 = Groups[group, p2Index]
+                        Player1Index = Groups[group, p1Index], // And get players
+                        Player2Index = Groups[group, p2Index]
                     };
                     schedule.Add(match);
                 }
             }
             return schedule;
         }
-        public class GroupStanding
+        public override int GetParticipantPlace(int participantId)
         {
-            public string Name;
-            public int Wins = 0;
-            public int Diff = 0;
-            public override string ToString()
-            {
-                return $"{Name}, {Wins}W ({Diff})";
-            }
-        }
-        public override void AnimateTournament()
-        {
-            // Find person with the longest name
-            int groupTextLength = "group 000".Length; // Minimum size needs to fit header and 999 (!) groups
-            groupTextLength += 8; // To fit --- {} ---
-            int matchUpLength = 0;
-            foreach ((string, int) participant in ParticipantsWithRandomSeed)
-            {
-                matchUpLength = Math.Max(matchUpLength, (2 * (participant.Item1.Length)) + " v ".Length);
-                groupTextLength = Math.Max(groupTextLength, matchUpLength + " (0-0)".Length); // Need to fit "p1 v p1 (X-X)"
-            }
-            // Need to resize console so this fits
-            int minXSize = groupTextLength; // Ensure enough X space
-            int minYSize = NGroups * (NMathesTotalPerGroup + 1); // Will do all weeks vertically
-            while ((Console.WindowHeight < minYSize) || (Console.WindowWidth < minXSize))
-            {
-                Console.WriteLine($"Console has to have atleast dimensions X:{minXSize} Y: {minYSize}");
-                Console.WriteLine($"Current X:{Console.WindowWidth} Y: {Console.WindowHeight}");
-                Console.ReadLine();
-            }
-            // Then, perform a tournament animation
-            Console.Clear();
-            for (int group = 0; group < NGroups; group++) // First print the headers
-            {
-                Console.SetCursorPosition(0, group * (NMathesTotalPerGroup + 1));
-                Console.Write($"--- Group {group + 1} ---");
-            }
-            Thread.Sleep((int)(1000)); // Wait and then draw results
-            // Just print, theres no animation here, won't be showcased as is
-            // Also load group data
-            List<Dictionary<string, GroupStanding>> groupResults = new List<Dictionary<string, GroupStanding>>(); // All players for all groups
-            for (int i = 0; i < NGroups; i++) { groupResults.Add(new Dictionary<string, GroupStanding>()); } // Prepare all groups
-            for (int week = 0; week < NWeeks; week++)
-            {
-                List<List<TournamentMatch>> matchesThisWeek = GroupMatches[week];
-                for (int group = 0; group < NGroups; group++) // get every group
-                {
-                    int localY = (group * (NMathesTotalPerGroup + 1)) + (week * MatchesPerWeek) + 1;
-                    List<TournamentMatch> matchesThisGroup = matchesThisWeek[group];
-                    foreach (TournamentMatch match in matchesThisGroup)
-                    {
-                        Console.SetCursorPosition(0, localY);
-                        Console.Write($"{match.Player1} v {match.Player2}");
-                        Thread.Sleep((int)(1000)); // Wait and then draw results
-                        Console.SetCursorPosition(0, localY);
-                        Console.Write($"{match.Player1} v {match.Player2} ({match.Score1}-{match.Score2})");
-                        Thread.Sleep((int)(1000));
-                        localY++;
-                        // Add match stats to relevant group member, create player if not exists
-                        if (!groupResults[group].ContainsKey(match.Player1)) groupResults[group].Add(match.Player1, new GroupStanding() { Name = match.Player1 });
-                        if (!groupResults[group].ContainsKey(match.Player2)) groupResults[group].Add(match.Player2, new GroupStanding() { Name = match.Player2 });
-                        groupResults[group][match.Player1].Diff += match.Score1 - match.Score2;
-                        groupResults[group][match.Player2].Diff += match.Score2 - match.Score1;
-                        groupResults[group][match.Winner].Wins++;
-                    }
-                }
-            }
-            Thread.Sleep((int)(5000));
-            Console.Clear();
-            // Finally print who won each group in order
-            Console.Write("FINAL GROUP STANDINGS (in order)");
-            for (int group = 0; group < NGroups; group++)
-            {
-                int localY = (group * (PlayersPerGroup + 1)) + 1;
-                List<GroupStanding> sortedStandings = [.. groupResults[group].Values.ToList().OrderByDescending(p => p.Wins).ThenByDescending(p => p.Diff).ThenBy(p => p.Name)];
-                Console.SetCursorPosition(0, localY);
-                Console.Write($"--- Group {group + 1} ---");
-                localY++;
-                foreach (GroupStanding standing in sortedStandings)
-                {
-                    Console.SetCursorPosition(0, localY);
-                    Console.Write(standing.ToString());
-                    localY++;
-                }
-                Thread.Sleep((int)(1500));
-
-            }
-            Console.ReadLine();
-            Console.Clear();
-            // Then do the same for brackets
-            PlayoffBrackerHelper.AnimateBracketTournament(PlayoffMatches);
-            // And that should be it?!
-        }
-        public override void UpdateLeaderboard()
-        {
-            RegisterTournamentParticipation(); // First, make sure all players who participated have their tournament # increased
-            // Now, need to gather the matches to calculate each match stat
-            foreach (List<List<TournamentMatch>> weekResults in GroupMatches)
-            {
-                foreach (List<TournamentMatch> groupResults in weekResults)
-                {
-                    foreach (TournamentMatch match in groupResults)
-                    {
-                        ProcessMatchStandings(match);
-                    }
-                }
-            }
-            // Continue in playoffs
-            for (int round = 0; round < PlayoffMatches.Count; round++) // Check playoff round by round
-            {
-                List<TournamentMatch> matchesThisRound = PlayoffMatches[round]; // Get matches for this round
-                foreach (TournamentMatch match in matchesThisRound) // Need to gather the matches to calculate each match stat
-                {
-                    ProcessMatchStandings(match);
-                }
-            }
-            // Ok! finally need the winner
-            string winnerName = PlayoffMatches.Last().Last().Winner; // Last winner of last match of last round is tournament winner
-            SetTournamentWinner(winnerName);
+            TournamentMatch final = PlayoffMatches.Last().Last();
+            int result;
+            if (final.Winner == participantId) result = 1; // If won final, 1st
+            else if (final.Player1Index == participantId || final.Player2Index == participantId) result = 2; // Otherwise but fought final?
+            else result = 3; // No additional calc of >2 place until this is needed
+            return result;
         }
     }
 }

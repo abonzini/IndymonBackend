@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Gameplay\Gameplay.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>
 
 </Project>

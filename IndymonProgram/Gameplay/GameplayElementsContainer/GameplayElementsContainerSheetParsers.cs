@@ -25,7 +25,7 @@ namespace Gameplay.GameplayElementsContainer
                 {
                     foreach (string field in fields)
                     {
-                        if (Enum.TryParse<PokemonType>(field.Trim().ToUpper(), out PokemonType type))
+                        if (Enum.TryParse(field.Trim().ToUpper(), out PokemonType type))
                         {
                             columnTags.Add(type);
                         }
@@ -367,7 +367,7 @@ namespace Gameplay.GameplayElementsContainer
                     string[] nextLine = rows[i + 0].Trim().Split(',');
                     string name = nextLine[j + 2];
                     if (name == "") continue; // If no name, trainer is empty, move to next card
-                    Trainer newTrainer = new Trainer
+                    TrainerEntity newTrainer = new TrainerEntity
                     {
                         Name = name,
                         PictureUrl = nextLine[j + 4],
@@ -474,7 +474,7 @@ namespace Gameplay.GameplayElementsContainer
                                 {
                                     item = lookupSource[field];
                                     count = int.Parse(nextLine[j + x + 1]);
-                                    GeneralUtilities.AddtemToCountDictionary(dictToAdd, item, count, Trainer.MAX_NUMBER_BAG);
+                                    GeneralUtilities.AddtemToCountDictionary(dictToAdd, item, count, TrainerEntity.MAX_NUMBER_BAG);
                                 }
                             }
                         }
@@ -499,7 +499,7 @@ namespace Gameplay.GameplayElementsContainer
                             for (int x = xInitialValue; x < 10; x += 2) // 10 item+count "columns"
                             {
                                 field = nextLine[j + x];
-                                if (field != "" && newTrainer.Sandwiches.Count < Trainer.MAX_NUMBER_BAG) // Theres a sandwich and i have space
+                                if (field != "" && newTrainer.Sandwiches.Count < TrainerEntity.MAX_NUMBER_BAG) // Theres a sandwich and i have space
                                 {
                                     sammy = GetSandwich(field);
                                     newTrainer.Sandwiches.Add(sammy);
@@ -516,7 +516,7 @@ namespace Gameplay.GameplayElementsContainer
                             for (int x = xInitialValue; x < 10; x += 2) // 10 item+count "columns"
                             {
                                 field = nextLine[j + x];
-                                if (field != "" && BoxedMons.Count < Trainer.MAX_NUMBER_BAG)
+                                if (field != "" && BoxedMons.Count < TrainerEntity.MAX_NUMBER_BAG)
                                 {
                                     if (BoxedMons.ContainsKey(field)) // Theres a mon with that id in the box and i have space
                                     {

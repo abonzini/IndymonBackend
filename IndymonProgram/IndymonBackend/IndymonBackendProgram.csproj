@@ -10,7 +10,6 @@
   <ItemGroup>
     <Compile Remove="ExplorationManager.cs" />
     <Compile Remove="IndymonUtilities.cs" />
-    <Compile Remove="TournamentManager.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,7 +2,7 @@
 
 namespace Gameplay.GameplayElements
 {
-    public class Trainer
+    public class TrainerEntity
     {
         public const int MAX_NUMBER_POKEMON = 10;
         public const int MAX_NUMBER_BAG = 19; // Any bag/box/ has 20 items but the first is the label
