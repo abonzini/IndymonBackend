@@ -69,7 +69,14 @@ namespace Gameplay.GameplayElementsContainer
                             newTrainer.EquippedJewelryUses = 1;
                             break;
                         case ItemType.MOVE_DISK:
-                            newMon.MoveDisks[0] = GetMoveDisk(itemChosen); // It'll only be able to equip one otherwise so just add it in that slot
+                            if (newMon.MoveDisks[0] == null)
+                            {
+                                newMon.MoveDisks[0] = GetMoveDisk(itemChosen);
+                            }
+                            else
+                            {
+                                newMon.MoveDisks[1] = GetMoveDisk(itemChosen); // Override slot 2 if already has some move disk
+                            }
                             break;
                         case ItemType.MINT:
                             newMon.Nature = Mints[itemChosen].AssociatedNature;
