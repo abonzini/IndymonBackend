@@ -1,13 +1,13 @@
 S3 Complete rework:
 
 TODO:
-- Set basic gameplay sim in place, input and output
-- Create a basic sim that can be called, in order to replace bot and beyond, input/output classes to instantiate a game, 5v5 max with teams and spawn methods
-- Restore and upgrade tournament and later on exploration with some more automations, can adjust spreadsheet too
-    - Tourn: Great simplification but also a rewriting of verifier and teambuild needs
     - Expl: Some big changes in item handling and expl mechanics
 - Cleanup of unneccessary elements in code (including battle statistics) and old stuff
 - Cleanup: Ensure mechanics data with that name is not there anymore
+- For game proper: tile proj:
+1-1-2
+With top end in 2-1-1-2 with top at 2
+And LR at 2-1-1-(1) that las tone could be 2 but would look a bit extra. LR Fits with top of new tile. Tentative size for now is a 31x24 which fits really well with 24x24 PMDO tiles 
 
 AI GENERATED NATURE AI (revise steal, delete):
 The 5 Neutral Natures (Balanced / Unpredictable)
