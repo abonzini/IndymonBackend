@@ -106,6 +106,7 @@ namespace Gameplay.GameplayElementsContainer
                     {
                         PokemonEntity newMon = new PokemonEntity()
                         {
+                            Name = prizeName,
                             Species = Dex[prizeName],
                             PokeBall = PokeBalls["Poke Ball"], // Pokeball unless specified otherwise
                             IsShiny = CommonRng.Next(0, SHINY_CHANCE) == 0

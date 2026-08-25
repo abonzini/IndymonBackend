@@ -24,7 +24,7 @@ namespace Gameplay.GameplayElementsContainer
         /// <param name="npcTrainer">Name of Npc to init</param>
         /// <param name="nMons">Number of mons to give this NPC</param>
         /// <param name="rngSeed">Seed to be used for making NPC team</param>
-        /// <param name="itemEquipChance">Chance of using each of the npc's item on a mon</param>
+        /// <param name="itemEquipChance">Chance of using each of the npc's item on a mon. If chance > 1 can roll multiple times!</param>
         /// <param name="usedItems">Output of the items that have been used in this design (for exploration droprate), list WILL be modified</param>
         /// <returns>An instantiated trainer entity to use in battles and such. usedItems list will be also filled</returns>
         public TrainerEntity CreateNpcEntity(NpcTrainer npcTrainer, int nMons, int rngSeed, double itemEquipChance, List<string> usedItems)
@@ -38,55 +38,67 @@ namespace Gameplay.GameplayElementsContainer
                 Name = npcTrainer.Name,
                 AutoTeam = true
             };
-            List<PokemonSpecies> allSpecies = [.. npcTrainer.AvailablePokemon]; // Copy as it'll be shuffled#
+            List<PokemonSpecies> allSpecies = [.. npcTrainer.AvailablePokemon]; // Copy as it'll be shuffled
             GeneralUtilities.ShuffleList(allSpecies, npcRng);
             for (int i = 0; i < nMons && i < allSpecies.Count; i++) // Add species until no more to add
             {
+                PokemonSpecies chosenSpecies = allSpecies[i];
+                // Fetch alternatives of the mon to get all variations
+                if (chosenSpecies.WildAlternatives.Count != 0) // Pokemon has wild alternatives, and thus any of this could be used in its place
+                {
+                    chosenSpecies = GeneralUtilities.GetRandomPick([.. chosenSpecies.WildAlternatives], npcRng);
+                }
                 PokemonEntity newMon = new PokemonEntity()
                 {
-                    Name = allSpecies[i].Name,
-                    Species = allSpecies[i],
+                    Name = chosenSpecies.Name,
+                    Species = chosenSpecies,
                     PokeBall = PokeBalls["Poke Ball"], // All npc mons have a pokeball unless specified otherwise
                     IsShiny = npcRng.Next(0, SHINY_CHANCE) == 0
                 };
                 RandomizePokemon(newMon, npcRng); // Randomize the rest for this mon
-                // Now, the fun part, if an item is to be assigned to this mon, do a roll and equip where corresponds
-                if (npcTrainer.AvailableItems.Count > 0 && npcRng.NextDouble() < itemEquipChance)
+                // Now, the fun part, if an item is to be assigned to this mon, do a roll and equip where corresponds, only one of each item type ok?
+                while (itemEquipChance > 0)
                 {
-                    // An item will be chosen
-                    string itemChosen = GeneralUtilities.GetRandomPick(npcTrainer.AvailableItems, npcRng);
-                    usedItems.Add(itemChosen);
-                    switch (GetItemType(itemChosen))
+                    List<string> availableItems = [.. npcTrainer.AvailableItems];
+                    if (availableItems.Count > 0 && npcRng.NextDouble() < itemEquipChance)
                     {
-                        case ItemType.GUMMY:
-                            EquipGummyToPokemon(newMon, Gummies[itemChosen], 1); // Equip gummy if possible, randomly into slot 1 if tiebreaks
-                            break;
-                        case ItemType.HELD_ITEM:
-                            newMon.HeldItem = HeldItems[itemChosen];
-                            break;
-                        case ItemType.JEWELRY:
-                            newTrainer.EquippedJewelry = Jewelries[itemChosen]; // This one is funny because it equips to the trainer
-                            newTrainer.EquippedJewelryUses = 1;
-                            break;
-                        case ItemType.MOVE_DISK:
-                            if (newMon.MoveDisks[0] == null)
-                            {
-                                newMon.MoveDisks[0] = GetMoveDisk(itemChosen);
-                            }
-                            else
-                            {
-                                newMon.MoveDisks[1] = GetMoveDisk(itemChosen); // Override slot 2 if already has some move disk
-                            }
-                            break;
-                        case ItemType.MINT:
-                            newMon.Nature = Mints[itemChosen].AssociatedNature;
-                            break;
-                        case ItemType.POKE_BALL:
-                            newMon.PokeBall = PokeBalls[itemChosen];
-                            break;
-                        default:
-                            break; // Item can't be equipped in this way to an npc
+                        // An item will be chosen
+                        string itemChosen = GeneralUtilities.GetRandomPick(availableItems, npcRng);
+                        usedItems.Add(itemChosen);
+                        availableItems.Remove(itemChosen);
+                        switch (GetItemType(itemChosen))
+                        {
+                            case ItemType.GUMMY:
+                                EquipGummyToPokemon(newMon, Gummies[itemChosen], 1); // Equip gummy if possible, randomly into slot 1 if tiebreaks
+                                break;
+                            case ItemType.HELD_ITEM:
+                                newMon.HeldItem = HeldItems[itemChosen];
+                                break;
+                            case ItemType.JEWELRY:
+                                newTrainer.EquippedJewelry = Jewelries[itemChosen]; // This one is funny because it equips to the trainer
+                                newTrainer.EquippedJewelryUses = 1;
+                                break;
+                            case ItemType.MOVE_DISK:
+                                if (newMon.MoveDisks[0] == null)
+                                {
+                                    newMon.MoveDisks[0] = GetMoveDisk(itemChosen);
+                                }
+                                else
+                                {
+                                    newMon.MoveDisks[1] = GetMoveDisk(itemChosen); // Override slot 2 if already has some move disk
+                                }
+                                break;
+                            case ItemType.MINT:
+                                newMon.Nature = Mints[itemChosen].AssociatedNature;
+                                break;
+                            case ItemType.POKE_BALL:
+                                newMon.PokeBall = PokeBalls[itemChosen];
+                                break;
+                            default:
+                                break; // Item can't be equipped in this way to an npc
+                        }
                     }
+                    itemEquipChance -= 1; // Roll done, next one
                 }
                 newTrainer.Pokemon.Add(newMon);
             }

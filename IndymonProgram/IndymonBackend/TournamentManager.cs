@@ -47,10 +47,10 @@ namespace IndymonBackendProgram
             OngoingTournament.RequestAdditionalInfo(nPlayers); // Request tournament-specific info (if needed)
             // Finally, player selection, pre-filter trainers whether they can participate in this event (also all the npcs)
             List<TrainerEntity> trainers = [];
-            List<NpcTrainer> validNpcs = [.. GameplayElementsContainer.GlobalData.AllNpcTrainers.Values.Where(n => ValidLineupGenerator.GetNpcSpeciesSets(n, GameplayElementsContainer.TOURNAMENT_NMONS, OngoingTournament.Constraints, false).Count > 0)];
+            List<NpcTrainer> validNpcs = [.. GameplayElementsContainer.GlobalData.AllNpcTrainers.Values.Where(n => ValidLineupGenerator.GetNpcSpeciesSets(n, GameplayElementsContainer.DEFAULT_BATTLE_NMONS, OngoingTournament.Constraints, false).Count > 0)];
             foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
             {
-                List<List<PokemonSpecies>> possibleBuilds = ValidLineupGenerator.GetTrainersSpeciesSets(trainer, GameplayElementsContainer.TOURNAMENT_NMONS, OngoingTournament.Constraints, false); // Always 3 mons, these battles are 3v3 for the foreseeable future
+                List<List<PokemonSpecies>> possibleBuilds = ValidLineupGenerator.GetTrainersSpeciesSets(trainer, GameplayElementsContainer.DEFAULT_BATTLE_NMONS, OngoingTournament.Constraints, false); // Always 3 mons, these battles are 3v3 for the foreseeable future
                 if (possibleBuilds.Count > 0)
                 {
                     foreach (List<PokemonSpecies> build in possibleBuilds)
@@ -184,7 +184,7 @@ namespace IndymonBackendProgram
                     _participants.Add(nextTrainerEntity); // Regardless, add trainer
                 }
                 // Finally, need to reshuffle trainer's internal team so that the valid N mons are in front
-                List<List<PokemonSpecies>> possibleBuilds = ValidLineupGenerator.GetTrainersSpeciesSets(nextTrainerEntity, GameplayElementsContainer.TOURNAMENT_NMONS, Constraints, false); // Always 3 mons, these battles are 3v3 for the foreseeable future
+                List<List<PokemonSpecies>> possibleBuilds = ValidLineupGenerator.GetTrainersSpeciesSets(nextTrainerEntity, GameplayElementsContainer.DEFAULT_BATTLE_NMONS, Constraints, false); // Always 3 mons, these battles are 3v3 for the foreseeable future
                 List<PokemonSpecies> chosenBuild;
                 if (possibleBuilds.Count == 1) // If only one build, no need to go crazy
                 {
@@ -210,7 +210,7 @@ namespace IndymonBackendProgram
                 // And finally finally, need to place the mons in order from top to bottom until they satisfy the order that first, the mons present in the build, and then the others
                 // Bubble up algorithm so that all valids are bubbled up while preserving order
                 int arrayBase = 0;// Where to put the valid Pokemon into, this masks all indices < arrayBase from being shuffled again as they'd be valid ones
-                for (int i = 0; i < nextTrainerEntity.Pokemon.Count && arrayBase < GameplayElementsContainer.TOURNAMENT_NMONS; i++)
+                for (int i = 0; i < nextTrainerEntity.Pokemon.Count && arrayBase < GameplayElementsContainer.DEFAULT_BATTLE_NMONS; i++)
                 {
                     if (chosenBuild.Contains(nextTrainerEntity.Pokemon[i].Species)) // This pokemon is an allowed species for the build
                     {
@@ -288,7 +288,7 @@ namespace IndymonBackendProgram
                     continue; // No need to do the other bs if the trainer is an NPC...
                 }
                 // Ok apply everything item wise
-                GameplayElementsContainer.ConsumeTrainersItems(participant, GameplayElementsContainer.TOURNAMENT_NMONS); // Consume all items for all mons first (may free some space in the bag after all)
+                GameplayElementsContainer.ConsumeTrainersItems(participant, GameplayElementsContainer.DEFAULT_BATTLE_NMONS); // Consume all items for all mons first (may free some space in the bag after all)
                 bool prizeSuccesful = GameplayElementsContainer.GlobalData.GivePrizeToTrainer(prize.Item1, participant, prize.Item2);
                 GameplayElementsContainer.GlobalData.GivePrizeToTrainer($"1 IMP", participant, GameplayElementsContainer.TRAINER_SALARY);
                 string warningString = GameplayElementsContainer.GetTrainerInventoryWarning(participant);
@@ -339,10 +339,9 @@ namespace IndymonBackendProgram
                 TrainerInstance trainer1 = new TrainerInstance()
                 {
                     Name = player1.Name,
-                    Team = 1,
-                    Side = (Side)1,
-                    MaxMonsInField = GameplayElementsContainer.TOURNAMENT_NMONS,
-                    MaxMonsUsed = GameplayElementsContainer.TOURNAMENT_NMONS,
+                    Team = (Side)1,
+                    MaxMonsInField = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
+                    MaxMonsUsed = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
                     ActiveJewelry = player1.EquippedJewelry,
                     PokemonInTeam = [.. player1.Pokemon.Select(p => SimulatorHandler.InstancePokemon(p, pokemonRng))]
                 };
@@ -352,17 +351,16 @@ namespace IndymonBackendProgram
                 TrainerInstance trainer2 = new TrainerInstance()
                 {
                     Name = player2.Name,
-                    Team = 2,
-                    Side = (Side)2,
-                    MaxMonsInField = GameplayElementsContainer.TOURNAMENT_NMONS,
-                    MaxMonsUsed = GameplayElementsContainer.TOURNAMENT_NMONS,
+                    Team = (Side)2,
+                    MaxMonsInField = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
+                    MaxMonsUsed = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
                     ActiveJewelry = player2.EquippedJewelry,
                     PokemonInTeam = [.. player2.Pokemon.Select(p => SimulatorHandler.InstancePokemon(p, pokemonRng))]
                 };
                 // Execute battle now
                 GameOutcome outcome = SimulatorHandler.SimulateGame([trainer1, trainer2], _rng);
                 // Determine winner
-                if (outcome.WinningTeam == 1)
+                if (outcome.WinningTeam == (Side)1)
                 {
                     match.Winner = match.Player1Index;
                 }

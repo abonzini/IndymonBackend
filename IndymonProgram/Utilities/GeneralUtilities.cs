@@ -110,6 +110,29 @@ namespace Utilities
             return list[GetRandomNumber(list.Count, rng)];
         }
         /// <summary>
+        /// Returns an index of a list. The list contains the weights so that chance is weighted towards bigger indices. No need to be normalized
+        /// </summary>
+        /// <param name="weights">List of weight</param>
+        /// <returns>A random index within the list</returns>
+        public static int GetRandomWeightedIndex(List<double> weights, Random rng)
+        {
+            // Calculate picks now
+            double totalSum = weights.Sum();
+            // Once processed, I'll get a random number, uniform within sum
+            double hit = totalSum * rng.NextDouble();
+            // Finally, search for which element is the winner, one by one
+            totalSum = 0;
+            for (int i = 0; i < weights.Count; i++)
+            {
+                if (weights[i] + totalSum >= hit)
+                {
+                    return i;
+                }
+                totalSum += weights[i];
+            }
+            throw new Exception("Impossible chance reached");
+        }
+        /// <summary>
         /// Gets a random element from a dictionary
         /// </summary>
         /// <param name="dict">The dictionary</param>

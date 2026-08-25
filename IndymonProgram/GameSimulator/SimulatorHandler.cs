@@ -7,7 +7,7 @@ namespace GameSimulator
     public static class SimulatorHandler
     {
         /// <summary>
-        /// Simulates a full game, given a list of trainers. Edits the trainer and pokemon instances during the simulation to return hp, etc
+        /// Simulates a full game, given a list of trainers. Edits the trainer and pokemon instances during the simulation to return current hp, etc
         /// </summary>
         /// <param name="trainers">Trainers who'll participate in the fight</param>
         /// <param name="rng">The rng for this game (determinism!)</param>
@@ -16,8 +16,8 @@ namespace GameSimulator
         public static GameOutcome SimulateGame(List<TrainerInstance> trainers, Random rng)
         {
             // Random winner idk
-            HashSet<int> participatingTeams = [.. trainers.Select(t => t.Team)];
-            int winningTeam = GeneralUtilities.GetRandomPick([.. participatingTeams], rng);
+            HashSet<Side> participatingTeams = [.. trainers.Select(t => t.Team)];
+            Side winningTeam = GeneralUtilities.GetRandomPick([.. participatingTeams], rng);
             List<TrainerInstance> winningTrainers = [.. trainers.Where(p => p.Team == winningTeam)];
             return new GameOutcome()
             {
@@ -30,10 +30,13 @@ namespace GameSimulator
         /// </summary>
         /// <param name="pokemon">Pokemon to instance</param>
         /// <param name="rng">The Rng to define the rest of this mon's things</param>
-        /// <returns></returns>
+        /// <returns>The generated Pokemon instance ready for game</returns>
         public static PokemonInstance InstancePokemon(PokemonEntity pokemon, Random rng)
         {
-            return new PokemonInstance();
+            return new PokemonInstance()
+            {
+                Name = pokemon.ToString(), // Print it with nickname w.e.
+            };
         }
     }
 }

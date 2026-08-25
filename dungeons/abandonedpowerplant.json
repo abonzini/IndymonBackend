@@ -1,365 +1,458 @@
 {
   "Name": "Abandoned Power Plant",
-  "EventAnchorX": -1,
-  "EventAnchorY": 0,
-  "Events": [
+  "Description1": "An abandoned man-made power plant. Now teeming with electric and other artificial Pokemon.",
+  "Description2": "This place is the main source of Blank Disks, as well as other electric and man-made items.",
+  "PossibleWeathers": [
     {
-      "EventType": "TREASURE",
-      "PreEventString": "In the recycle bin, you see a perfectly functional $1 inside.",
-      "PostEventString": "You pick it up and continue on your way.",
-      "EventLook": "□",
-      "EventFg": "White",
-      "EventBg": "Black"
+      "Name": "None",
+      "Description": "No particular weather in this dungeon.",
+      "Chance": 0.5
     },
     {
-      "EventType": "ALPHA",
-      "PreEventString": "In the middle of a room, a raging $1 is thrashing around.",
-      "PostEventString": "After the power overloading it dissipates, the Pokemon calmly leaves away, leaving $1 behind.",
-      "EventLook": "☻",
-      "EventFg": "White",
-      "EventBg": "Black"
+      "Name": "Flooded",
+      "Description": "The Power Plant is partly flooded this week. Expect water all over the floor.",
+      "Chance": 0.45
     },
     {
-      "EventType": "EVO",
-      "PreEventString": "Inside of a glass panel, a purple evolution crystal is connected to a number of cables. It whispers: YE WHO SEEK AWAKENING, LET US BEGIN.",
-      "PostEventString": "It's time to move on.",
-      "EventLook": "✦",
-      "EventFg": "Magenta",
-      "EventBg": "Black"
+      "Name": "High Voltage Arcs",
+      "Description": "There's a constant discharge of electricty around the Plant that may hit Pokemon.",
+      "Chance": 0.45
     },
     {
-      "EventType": "HEAL",
-      "PreEventString": "You find an old first-aid kit.",
-      "PostEventString": "Your Pokemon have recovered some health.",
-      "EventLook": "▫",
-      "EventFg": "Red",
-      "EventBg": "Black"
-    },
-    {
-      "EventType": "CURE",
-      "PreEventString": "You find an old first-aid kit.",
-      "PostEventString": "Your Pokemon have recovered from their status conditions.",
-      "EventLook": "▫",
-      "EventFg": "Red",
-      "EventBg": "Black"
-    },
-    {
-      "EventType": "JOINER",
-      "PreEventString": "A young $1 appears in front of you and starts flexing. It's showing off!",
-      "PostEventString": "It decides to follow you, show you what it's made of.",
-      "EventLook": "☻",
-      "EventFg": "White",
-      "EventBg": "Black"
-    },
-    {
-      "EventType": "DAMAGE_TRAP",
-      "PreEventString": "You walk on top of a decrepit catwalk.",
-      "PostEventString": "It obviously was a terrible idea! You and your Pokemon have sustained a bit of damage.",
-      "EventLook": "▦",
-      "EventFg": "Gray",
-      "EventBg": "Black"
-    },
-    {
-      "EventType": "STATUS_TRAP",
-      "PreEventString": "You arrive to an area that is partly flooded.",
-      "PostEventString": "Unfortunately, a live wire is touching the water! $1 is electrocuted!",
-      "SpecialParams": "par",
-      "EventLook": "▒",
-      "EventFg": "Blue",
-      "EventBg": "Black"
-    },
-    {
-      "EventType": "NPC_BATTLE",
-      "PreEventString": "$1 is in the Abandoned Plant, as lost as you are. 'The only thing to do now is to battle!' They heal your pokemon to full health.",
-      "PostEventString": "$1 goes home defeated. You continue onwards.",
-      "EventLook": "☺",
-      "EventFg": "White",
-      "EventBg": "Black"
-    },
-    {
-      "EventType": "IMP_GAIN",
-      "PreEventString": "You find an old Automatic ATM machine on a wall.",
-      "PostEventString": "Surprisingly, it still has $1 inside.",
-      "EventLook": "▯",
-      "EventFg": "White",
-      "EventBg": "DarkGray"
-    },
-    {
-      "EventType": "PARADOX",
-      "PreEventString": "You find some Team Paradox members carrying a crate full of blank disks. You are extremely suspicious of them.",
-      "PostEventString": "They give you $1 as a bribe to look away.",
-      "EventLook": "P",
-      "EventFg": "Magenta",
-      "EventBg": "Black"
+      "Name": "Ion Deluge",
+      "Description": "The air is Ionized and smells funny. All Normal-type attacks become Electric-type.",
+      "Chance": 0.1
     }
   ],
-  "PokemonEachFloor": [
-    [
-      "Magnemite",
-      "Grimer",
-      "Grimer-Alola",
-      "Voltorb",
-      "Koffing",
-      "Elekid",
-      "Plusle",
-      "Minun",
-      "Beldum",
-      "Tynamo",
-      "Klink",
-      "Dedenne",
-      "Toxel",
-      "Pincurchin",
-      "Tadbulb",
-      "Varoom"
-    ],
-    [
-      "Magneton",
-      "Muk",
-      "Electrode",
-      "Weezing",
-      "Electabuzz",
-      "Metang",
-      "Pachirisu",
-      "Rotom",
-      "Emolga",
-      "Eelektrik",
-      "Stunfisk",
-      "Stunfisk-Galar",
-      "Klang",
-      "Charjabug",
-      "Togedemaru"
-    ],
-    [
-      "Magnezone",
-      "Muk-Alola",
-      "Weezing-Galar",
-      "Electivire",
-      "Metagross",
-      "Eelektross",
-      "Klinklang",
-      "Vikavolt",
-      "Xurkitree",
-      "Toxtricity",
-      "Toxtricity-Low-Key",
-      "Morpeko",
-      "Bellibolt",
-      "Revavroom"
-    ],
-    [
-      "Regieleki"
-    ]
-  ],
-  "CommonItems": [
+  "GeneralItemDropChance": 0.3,
+  "CommonDrops": [
     {
       "Name": "Shuca Berry",
+      "Min": 2,
+      "Max": 3
+    },
+    {
+      "Name": "Blank Disk",
+      "Min": 3,
+      "Max": 5
+    },
+    {
+      "Name": "Blank Disk",
+      "Min": 3,
+      "Max": 5
+    },
+    {
+      "Name": "Blank Disk",
+      "Min": 3,
+      "Max": 5
+    },
+    {
+      "Name": "Blank Disk",
+      "Min": 3,
+      "Max": 5
+    },
+    {
+      "Name": "Blank Disk",
+      "Min": 3,
+      "Max": 5
+    },
+    {
+      "Name": "Electric Disk",
       "Min": 1,
-      "Max": 2
+      "Max": 3
     },
     {
-      "Name": "Blank Disk",
+      "Name": "Electric Gummy",
+      "Min": 1,
+      "Max": 3
+    },
+    {
+      "Name": "Electric Essence",
       "Min": 3,
       "Max": 5
     },
     {
-      "Name": "Blank Disk",
-      "Min": 3,
-      "Max": 5
+      "Name": "Electric Shard",
+      "Min": 1,
+      "Max": 3
     },
     {
-      "Name": "Blank Disk",
-      "Min": 3,
-      "Max": 5
-    },
+      "Name": "Electric Gem",
+      "Min": 1,
+      "Max": 3
+    }
+  ],
+  "RareDrops": [
     {
-      "Name": "Blank Disk",
-      "Min": 3,
-      "Max": 5
+      "Name": "Zap Plate",
+      "Min": 1,
+      "Max": 1
     },
     {
       "Name": "Magnet",
       "Min": 1,
-      "Max": 2
-    },
-    {
-      "Name": "Power Herb",
-      "Min": 1,
-      "Max": 2
-    },
-    {
-      "Name": "Electric Seed",
-      "Min": 1,
-      "Max": 2
-    },
-    {
-      "Name": "Terrain Extender",
-      "Min": 1,
-      "Max": 2
-    },
-    {
-      "Name": "Electirizer",
-      "Min": 1,
-      "Max": 2
+      "Max": 3
     },
     {
       "Name": "Cell Battery",
       "Min": 1,
-      "Max": 2
-    }
-  ],
-  "RareItems": [
-    {
-      "Name": "Thunder Stone",
-      "Min": 1,
-      "Max": 1
-    },
-    {
-      "Name": "Fire Stone",
-      "Min": 1,
-      "Max": 1
-    },
-    {
-      "Name": "Electirizer",
-      "Min": 2,
-      "Max": 4
-    },
-    {
-      "Name": "Cell Battery",
-      "Min": 2,
-      "Max": 4
-    },
-    {
-      "Name": "Wide Lens",
-      "Min": 2,
-      "Max": 4
-    },
-    {
-      "Name": "Zoom Lens",
-      "Min": 2,
-      "Max": 4
+      "Max": 3
     },
     {
       "Name": "Eject Button",
-      "Min": 2,
-      "Max": 4
+      "Min": 1,
+      "Max": 3
     },
     {
       "Name": "Eject Pack",
-      "Min": 2,
-      "Max": 4
+      "Min": 1,
+      "Max": 3
     }
   ],
-  "BossItem": {
-    "Name": "Titan Plate 1",
-    "Min": 1,
-    "Max": 1
-  },
-  "RoomShortcuts": [
+  "Floors": [
     {
-      "Conditions": [
+      "WeatherMons": {
+        "ALL": [
+          "Magnemite",
+          "Voltorb",
+          "Elekid",
+          "Mareep",
+          "Plusle",
+          "Minun",
+          "Joltik",
+          "Klink",
+          "Grubbin",
+          "Varoom",
+          "Yamper"
+        ],
+        "None": [
+          "Voltorb-Alola",
+          "Koffing",
+          "Whismur",
+          "Electrike",
+          "Drifloon",
+          "Wattrel"
+        ],
+        "Flooded": [
+          "Grimer",
+          "Grimer-Alola",
+          "Chinchou",
+          "Tynamo"
+        ],
+        "High Voltage Arcs": [
+          "Pichu",
+          "Geodude-Alola",
+          "Shinx",
+          "Pawmi"
+        ],
+        "Ion Deluge": [
+          "Eevee",
+          "Porygon",
+          "Beldum"
+        ]
+      },
+      "BossEncounters": [
         {
-          "ConditionType": "TYPE",
-          "Which": [
-            "Ground"
-          ]
+          "Type": "BOSS",
+          "PreEncounterString": "You have disturbed a nest belonging to a mother $1. She'll do the best to defend it's babies.",
+          "PostEncounterString": "$1 has calmed down and is hiding with their babies. You proceed forward.",
+          "Note": "The idea of this one is a mon of current floor, slightly stronger (15% except speed) equipped, with 2 babies",
+          "EncounterStatMult": [
+            1.15,
+            1.15,
+            1.15,
+            1.15,
+            1.15,
+            1
+          ],
+          "BossType": "CURRENT_FLOOR",
+          "BossEquipType": "NONE",
+          "NormalEnemyType": "BOSS_PREVOS",
+          "NormalEquipType": "NONE",
+          "EncounterMaxSimultaneousEnemyMons": 3,
+          "EncounterEnemyNumber": 3,
+          "PrizeType": "NONE"
         },
         {
-          "ConditionType": "ABILITY",
-          "Which": [
-            "Volt Absorb",
-            "Motor Drive",
-            "Lightning Rod"
-          ]
+          "Type": "BOSS",
+          "PreEncounterString": "You have crossed eyes with an angry $1. Apparently it's the boss of this parts, and you're in their territory!.",
+          "PostEncounterString": "$1 runs away scared, it seems you're the Power Plant Boss now.",
+          "Note": "Monster house inspired, there's a big boss from next floor with buddies from first floor, and the buddies keep coming",
+          "EncounterStatMult": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "BossType": "NEXT_FLOOR",
+          "BossEquipType": "ALL_ITEM_POOLS",
+          "BossEquipChance": 1.5,
+          "NormalEnemyType": "CURRENT_FLOOR",
+          "NormalEquipType": "COMMON_ITEM_POOL",
+          "NormalEquipChance": 0.3,
+          "EncounterMaxSimultaneousEnemyMons": 3,
+          "EncounterEnemyNumber": 20,
+          "PrizeType": "NONE"
         }
-      ],
-      "Clue": "This is a high voltage area. Electric arcs all over. You'll need help from a Pokemon that is not affected by this electricity.",
-      "Resolution": "Your $1 neutralizes the electricity. The team can now pass safely.",
-      "RoomNumber": 0,
-      "RoomDestination": 5
+      ]
     },
     {
-      "Conditions": [
+      "WeatherMons": {
+        "ALL": [
+          "Magneton",
+          "Electrode",
+          "Electabuzz",
+          "Pachirisu",
+          "Rotom",
+          "Emolga",
+          "Klang",
+          "Charjabug",
+          "Boltund"
+        ],
+        "None": [
+          "Electrode-Alola",
+          "Weezing",
+          "Flaafy",
+          "Loudred",
+          "Manectric",
+          "Drifblim",
+          "Helioptile",
+          "Morpeko"
+        ],
+        "Flooded": [
+          "Muk",
+          "Lanturn",
+          "Wormadam-Trash",
+          "Eelektrik",
+          "Stunfisk",
+          "Toxel",
+          "Pincurchin",
+          "Tadbulb"
+        ],
+        "High Voltage Arcs": [
+          "Pikachu",
+          "Graveler-Alola",
+          "Luxio",
+          "Togedemaru",
+          "Pawmo"
+        ],
+        "Ion Deluge": [
+          "Porygon2",
+          "Metang"
+        ]
+      },
+      "BossEncounters": [
         {
-          "ConditionType": "MOVE",
-          "Which": [
-            "Signal Beam",
-            "Heat Wave",
-            "Shock Wave",
-            "Sludge Wave",
-            "Thunder Wave",
-            "Wave Crash",
-            "Vacuum Wave",
-            "Thousand Waves",
-            "Psywave"
-          ]
+          "Type": "BOSS",
+          "PreEncounterString": "You have arrived to a huge room. An enormous $1 is in the middle, suffering. It seems the great energies of this place have overloaded it and it's out of control.",
+          "PostEncounterString": "$1 releases all of it's energy and recovers. It's extremely thankful.",
+          "Note": "Inspired on deepest trench mutant mon. This mon is huge, resistant and slow, it's a survival fight. TODO: Will be in high voltage always, open field and try to add the 'giant' tag for impact",
+          "EncounterStatMult": [
+            4,
+            1.3,
+            1,
+            1.3,
+            1,
+            0.5
+          ],
+          "BossType": "CURRENT_FLOOR",
+          "BossEquipType": "NONE",
+          "NormalEnemyType": "NONE",
+          "NormalEquipType": "NONE",
+          "EncounterMaxSimultaneousEnemyMons": 1,
+          "EncounterEnemyNumber": 0,
+          "PrizeType": "BOSS"
         },
         {
-          "ConditionType": "ITEM",
-          "Which": [
-            "Wave Incense"
-          ]
+          "Type": "BOSS",
+          "PreEncounterString": "You have crossed eyes with an angry $1. Apparently it's the boss of this parts, and you're in their territory!.",
+          "PostEncounterString": "$1 runs away scared, it seems you're the Power Plant Boss now.",
+          "Note": "Monster house inspired, there's a big boss from next floor with buddies from first floor, and the buddies keep coming",
+          "EncounterStatMult": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "BossType": "NEXT_FLOOR",
+          "BossEquipType": "ALL_ITEM_POOLS",
+          "BossEquipChance": 1.5,
+          "NormalEnemyType": "CURRENT_FLOOR",
+          "NormalEquipType": "COMMON_ITEM_POOL",
+          "NormalEquipChance": 0.3,
+          "EncounterMaxSimultaneousEnemyMons": 3,
+          "EncounterEnemyNumber": 20,
+          "PrizeType": "NONE"
         }
-      ],
-      "Clue": "There's an electric security gate. You think a strong enough WAVE or SIGNAL may override the security system.",
-      "Resolution": "Your $1 overwhelms the security system. The hatch opens...",
-      "RoomNumber": 5,
-      "RoomDestination": 10
+      ]
+    },
+    {
+      "WeatherMons": {
+        "ALL": [
+          "Magnezone",
+          "Electivire",
+          "Galvantula",
+          "Klingklang",
+          "Dedenne",
+          "Vikavolt",
+          "Revavroom"
+        ],
+        "None": [
+          "Weezing-Alola",
+          "Ampharos",
+          "Exploud",
+          "Heliolisk",
+          "Kilowattrel"
+        ],
+        "Flooded": [
+          "Muk-Alola",
+          "Eelektross",
+          "Stunfisk-Galar",
+          "Toxtricity",
+          "Bellibolt"
+        ],
+        "High Voltage Arcs": [
+          "Raichu",
+          "Raichu-Alola",
+          "Golem-Alola",
+          "Luxray",
+          "Pawmot"
+        ],
+        "Ion Deluge": [
+          "Jolteon",
+          "Porygon-Z",
+          "Metagross",
+          "Xurkitree"
+        ]
+      },
+      "BossEncounters": [
+        {
+          "Type": "BOSS",
+          "PreEncounterString": "You reach the power plant's generator. The energy in this room is out of control. In the center, absorbing most of the energy a titan made of pure electricity. Before you can react, it starts moving all over the place...",
+          "PostEventString": "As you defeat the titan, the whole power plant starts to make a deafening noise. Parts start moving and the Power Plant starts sparking. Better leave ASAP.",
+          "Note": "Regieleki with with either/and Deluge + Arcs. Make regieleki faster and fight a bit longer. Regieleki will be by itself",
+          "EncounterStatMult": [
+            2,
+            1,
+            1,
+            1,
+            1,
+            1.5
+          ],
+          "BossType": "SPECIFIC_POKEMON",
+          "Params": [
+            "Regieleki",
+            "Titan Plate 1"
+          ],
+          "BossEquipType": "ALL_ITEM_POOLS",
+          "BossEquipChance": 3.5,
+          "NormalEnemyType": "NONE",
+          "NormalEquipType": "NONE",
+          "EncounterMaxSimultaneousEnemyMons": 1,
+          "EncounterEnemyNumber": 0,
+          "PrizeType": "SPECIFIC_ITEM"
+        }
+      ]
     }
   ],
-  "DungeonShortcut": {
-    "Conditions": [],
-    "Clue": "You have reached deep into the power plant. The air smells weird, and it feels eerily deserted in here.",
-    "Resolution": "",
-    "RoomNumber": 10,
-    "RoomDestination": 10
-  },
-  "WildMonsEvent": {
-    "EventType": "POKEMON_BATTLE",
-    "PreEventString": "Suddenly, wild Pokemon attack!",
-    "PostEventString": "You won the battle and obtained multiple items that the wild Pokemon were holding ($1).",
-    "EventLook": "☻",
-    "EventFg": "White",
-    "EventBg": "Black"
-  },
-  "BossEvent": {
-    "EventType": "BOSS",
-    "PreEventString": "You reach the power plant's generator. The energy in this room is out of control. In the center, absorbing most of the energy a titan made of pure electricity. Before you can react, it starts moving all over the place...",
-    "PostEventString": "As you defeat the titan, the whole power plant starts to make a deafening noise. Parts start moving. Your actions here have are changing the world.",
-    "EventLook": "⏧",
-    "EventFg": "Yellow",
-    "EventBg": "DarkCyan",
-    "OffsetAnchorX": 1,
-    "OffsetAnchorY": -1
-  },
-  "CampingEvent": {
-    "EventType": "CAMPING",
-    "PreEventString": "You find an old lunch table. The perfect place for a picnic.",
-    "PostEventString": "But now it's time to move on...",
-    "EventLook": "■",
-    "EventFg": "DarkYellow",
-    "EventBg": "Black"
-  },
-  "PreBossEvent": {
-    "EventType": "REGIELEKI"
-  },
-  "PostBossEvent": {
-    "EventType": "PLOT_CLUE",
-    "PreEventString": "All the legendary titans were first created in the image of Regigigas.",
-    "PostEventString": "From the moment they were born, a great task fell in their hands...",
-    "EventLook": "☗",
-    "EventFg": "Gray",
-    "EventBg": "DarkGray",
-    "OffsetAnchorX": 1,
-    "OffsetAnchorY": -1
-  },
-  "CustomShowdownRules": [
-    "Continuous Electric Terrain Mod"
-  ],
-  "DungeonArchetypes": [
-    "EXPLORATION",
-    "BACKGROUND_TERRAIN"
-  ],
-  "DungeonWeather": "NONE",
-  "DungeonTerrain": "ELECTRIC",
-  "NextDungeon": "",
-  "NextDungeonShortcut": ""
+  "EncounterPool": [
+    {
+      "Type": "TREASURE",
+      "PreEncounterString": "In the recycle bin, you see a perfectly functional $1 inside.",
+      "PostEncounterString": "You pick it up and continue on your way.",
+      "PrizeType": "RARE_ITEM_POOL"
+    },
+    {
+      "Type": "GUARDED_TREASURE",
+      "Note": "Just a mon from next floor but has an item equipped which it'll use during the fight",
+      "PreEventString": "In the middle of a room, you find a $2, but it's being guarded by a $1.",
+      "PostEventString": "$1 runs away, you have taken its $2.",
+      "BossType": "NEXT_FLOOR",
+      "BossEquipType": "RARE_ITEM_POOL",
+      "BossEquipChance": 1,
+      "EncounterMaxSimultaneousEnemyMons": 1,
+      "EncounterEnemyNumber": 0,
+      "PrizeType": "EQUIPPED_ITEMS"
+    },
+    {
+      "Type": "EVO",
+      "PreEventString": "Inside of a glass panel, a purple evolution crystal is connected to a number of cables. It whispers: YE WHO SEEK AWAKENING, LET US BEGIN.",
+      "PostEventString": "It's time to move on."
+    },
+    {
+      "Type": "HP_HEAL",
+      "PreEventString": "You find an old first-aid kit.",
+      "PostEventString": "Your Pokemon have recovered some health."
+    },
+    {
+      "Type": "FULL_RESTORE",
+      "PreEventString": "You find an old first-aid kit, but it only has enough medicine for a single Pokemon.",
+      "PostEventString": "You decide to apply it to $1, which is now fully recovered.",
+      "BaseWeight": 0.5
+    },
+    {
+      "Type": "REVIVE",
+      "PreEventString": "You reach a room with a lot of electrified cables hanging.",
+      "PostEventString": "A pair of cables shocks $1, who suddenly springs back to life!",
+      "BaseWeight": 0.1
+    },
+    {
+      "Type": "STATUS_CURE",
+      "PreEventString": "You find an old first-aid kit.",
+      "PostEventString": "Your Pokemon have recovered from their status conditions."
+    },
+    {
+      "Type": "JOINER",
+      "PreEventString": "A young $1 appears in front of you and starts flexing. It's showing off!",
+      "PostEventString": "It decides to follow you, show you what it's made of."
+    },
+    {
+      "Type": "DAMAGE_TRAP",
+      "PreEventString": "You walk on top of a decrepit catwalk.",
+      "PostEventString": "It obviously was a terrible idea! You and your Pokemon have sustained a bit of damage."
+    },
+    {
+      "Type": "STATUS_TRAP",
+      "PreEventString": "You arrive to an area that is partly flooded.",
+      "PostEventString": "Unfortunately, a live wire is touching the water! $1 is electrocuted and is now paralyzed!",
+      "Params": [
+        "PARALYSIS"
+      ]
+    },
+    {
+      "Type": "KILL_TRAP",
+      "PreEventString": "You reach a room with a lot of electrified cables hanging.",
+      "PostEventString": "A pair of cables shocks $1, who gets immediately vaporized",
+      "BaseWeight": 0.1
+    },
+    {
+      "Type": "NPC_BATTLE",
+      "PreEventString": "$1 is in the Abandoned Plant, as lost as you are. 'The only thing to do now is to battle!', they say",
+      "PostEventString": "$1 goes home defeated. You continue onwards."
+    },
+    {
+      "Type": "IMP_GAIN",
+      "PreEventString": "You find an old Automatic ATM machine on a wall.",
+      "PostEventString": "Surprisingly, it still has $1 inside."
+    },
+    {
+      "Type": "PARADOX",
+      "PreEventString": "You find some Team Paradox members carrying a crate full of blank disks. You are extremely suspicious of them.",
+      "PostEventString": "They give you $1 as a bribe to look away."
+    },
+    {
+      "Type": "CAMPING",
+      "PreEventString": "You find an old lunch table. The perfect place for a picnic.",
+      "PostEventString": "But now it's time to move on..."
+    },
+    {
+      "Type": "SANDWICH",
+      "PreEventString": "You find Arven in a mess hall, he's just making some sandwiches.",
+      "PostEventString": "He shares a $1 with you, so you can try it next time you have a chance."
+    }
+  ]
 }

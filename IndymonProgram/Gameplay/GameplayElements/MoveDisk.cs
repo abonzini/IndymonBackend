@@ -29,7 +29,7 @@
             }
             else
             {
-                // Checks if it's a move or a tpye one
+                // Checks if it's a move or a type one
                 string diskPrefix = itemName.Split(MOVE_DISK_TEXT)[0].Trim(); // Keep the first part (before disk?)
                 if (Enum.TryParse(diskPrefix.ToUpper(), out resultingItem.Type)) // Check if it's a type (e.g. Fire Disk)
                 {

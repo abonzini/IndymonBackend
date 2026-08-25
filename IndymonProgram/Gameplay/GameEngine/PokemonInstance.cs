@@ -5,6 +5,7 @@
     /// </summary>
     public class PokemonInstance
     {
-        // TODO Fill with all the stuff (team, forme, etc)
+        public string Name = "";
+        public double HpPercent = 1;
     }
 }

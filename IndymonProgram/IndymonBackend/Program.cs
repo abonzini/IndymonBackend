@@ -63,6 +63,20 @@ namespace IndymonBackendProgram
                 InputString = Console.ReadLine();
                 switch (InputString)
                 {
+                    case "-1":
+                        // Not used often, probably only for the beginning
+                        foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
+                        {
+                            foreach (PokemonEntity mon in trainer.Pokemon)
+                            {
+                                GameplayElementsContainer.GlobalData.RandomizePokemon(mon, GameplayElementsContainer.GlobalData.CommonRng);
+                            }
+                        }
+                        foreach (PokemonEntity mon in GameplayElementsContainer.GlobalData.BoxedMons.Values)
+                        {
+                            GameplayElementsContainer.GlobalData.RandomizePokemon(mon, GameplayElementsContainer.GlobalData.CommonRng);
+                        }
+                        break;
                     case "0":
                         Console.WriteLine("Serializing jsons");
                         File.WriteAllText(Path.Combine(directoryPath, TOURNAMENT_JSON_FILE), JsonConvert.SerializeObject(tournamentManager, jsonSettings));
@@ -280,8 +294,9 @@ namespace IndymonBackendProgram
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(
+                "-1 - DANGER ZONE: Randomizes every mon in every team including boxes\n" +
                 "0 - Save current tourn/expl data\n" +
-                "1 - Export all updated generated spreadsheet elements (boxes, cram-o-matic, glossary)\n" +
+                "1 - Export all updated generated spreadsheet elements (boxes, cram-o-matic, glossary, updated dungeon diffs)\n" +
                 "2 - Export all players csv data\n" +
                 "3 - Generate a new tournament\n" +
                 "4 - Execute initialized tournament\n"

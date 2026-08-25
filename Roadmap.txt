@@ -1,6 +1,9 @@
 S3 Complete rework:
 
 TODO:
+    - Import/export of dungeon mixed with spreadsaheet
+    - Export and randomizing of dungeon stuff
+    - Finally, huge dungeon rework, leave space for anim and use new battle thing
     - Expl: Some big changes in item handling and expl mechanics
 - Cleanup of unneccessary elements in code (including battle statistics) and old stuff
 - Cleanup: Ensure mechanics data with that name is not there anymore
