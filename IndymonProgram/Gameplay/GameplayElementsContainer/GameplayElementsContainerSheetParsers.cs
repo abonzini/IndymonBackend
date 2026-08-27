@@ -246,25 +246,6 @@ namespace Gameplay.GameplayElementsContainer
             }
         }
         /// <summary>
-        /// Gets the list of key items
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseKeyItemList(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Key Items");
-            KeyItems.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            string[] lines = csv.Split("\n");
-            for (int i = 1; i < lines.Length; i++) // Has a header so ignore first item
-            {
-                string[] fields = lines[i].Trim().Split(","); // Csv
-                KeyItem newItem = new KeyItem(fields[0], Enum.Parse<PokemonType>(fields[1].Trim().ToUpper()), fields[2]);
-                KeyItems.Add(newItem.Name, newItem);
-            }
-        }
-        /// <summary>
         /// Fills NPC data for existing NPCs given a place in the spreadseet
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>

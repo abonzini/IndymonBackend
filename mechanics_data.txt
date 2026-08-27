@@ -4,8 +4,6 @@
 300373479, learnsets
 1091010951, unown stuff
 1445189885, full list of all npcs ingame
-8770060, Evo Plates
-1210775289, Key Items
 1435701641, generated unranked NPCs
 442150683, generated "famous" NPCs
 1217375825, boxed mons data

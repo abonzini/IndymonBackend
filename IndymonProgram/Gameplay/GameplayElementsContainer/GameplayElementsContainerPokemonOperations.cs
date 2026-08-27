@@ -6,6 +6,25 @@ namespace Gameplay.GameplayElementsContainer
     public partial class GameplayElementsContainer
     {
         /// <summary>
+        /// Generates a random blank pokemon that can be later used as a template
+        /// </summary>
+        /// <param name="Species"></param>
+        /// <returns></returns>
+        PokemonEntity GenerateBlankPokemon(string Species)
+        {
+            PokemonEntity newPokemon = new PokemonEntity
+            {
+                Name = Species
+            };
+            if (Species.Contains('★'))
+            {
+                newPokemon.IsShiny = true;
+                Species = Species.Split('★')[0].Trim(); // Get the actual species then
+            }
+            newPokemon.Species = Dex[Species];
+            return newPokemon;
+        }
+        /// <summary>
         /// Full randomization of a Pokemon's battle stats and the sort, for the beginning of new games or when catching/fighting npcs
         /// </summary>
         /// <param name="mon">Mon to fully randomize (only battle stuff!)</param>

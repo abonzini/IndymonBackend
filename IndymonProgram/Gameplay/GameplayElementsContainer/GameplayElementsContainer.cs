@@ -14,17 +14,18 @@ namespace Gameplay.GameplayElementsContainer
         {
             string[] lines = File.ReadAllLines(Path.Combine(masterDirectory, mechanicsFilePath));
             string sheetId = lines[0].Split(",")[0]; // Obtained google sheets
-            // Firstly, find Moves, Abilities, and all other core gameplay elements that are found in json, important as the game won't contain all, so only the ones in json actually exist
+            // Find all code-defined objects
             LoadMoves();
             LoadAbilities();
             LoadJewelry();
             LoadHeldItems();
             LoadNatures();
             LoadPokeBalls();
-            // Then the ones that are generated fully
-            GenerateGummies();
-            GenerateMints();
-            GenerateEssences();
+            LoadEvoPlates();
+            LoadGummies();
+            LoadKeyItems();
+            LoadEssences();
+            LoadMints();
             // Then, load the data from the google sheets
             string typechartTab = lines[1].Split(",")[0];
             ParseTypeChart(sheetId, typechartTab);
@@ -35,18 +36,14 @@ namespace Gameplay.GameplayElementsContainer
             ParseUnownLookup(sheetId, unownTab);
             string favourGachaTab = lines[5].Split(",")[0];
             ParseNpcTrainerList(sheetId, favourGachaTab);
-            string evoPlateTab = lines[6].Split(",")[0];
-            ParseEvoPlateList(sheetId, evoPlateTab);
-            string keyItemTab = lines[7].Split(",")[0];
-            ParseKeyItemList(sheetId, keyItemTab);
             // After items, can do trainer and Pokemon
-            string npcArea = lines[8].Split(",")[0];
+            string npcArea = lines[6].Split(",")[0];
             FillNpcData(sheetId, npcArea);
-            npcArea = lines[9].Split(",")[0]; // More npc data, split in the sheet to differentiate between famous and non
+            npcArea = lines[7].Split(",")[0]; // More npc data, split in the sheet to differentiate between famous and non
             FillNpcData(sheetId, npcArea);
-            string boxMonArea = lines[10].Split(",")[0];
+            string boxMonArea = lines[8].Split(",")[0];
             FillBoxedMonData(sheetId, boxMonArea);
-            string playerArea = lines[11].Split(",")[0];
+            string playerArea = lines[9].Split(",")[0];
             FillPlayers(sheetId, playerArea);
         }
         public Random CommonRng = new Random(Guid.NewGuid().GetHashCode());

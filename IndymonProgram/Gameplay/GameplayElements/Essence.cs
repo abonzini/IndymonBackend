@@ -5,9 +5,18 @@ namespace Gameplay.GameplayElements
     public class Essence : GameplayElement
     {
         public PokemonType Type = PokemonType.NONE;
-        public override string GetDescription()
+        public static IEnumerable<Essence> GetAllEssences()
         {
-            return $"A {GeneralUtilities.ApaCapitalize(Type.ToString())}-type essence.";
+            foreach (PokemonType type in Enum.GetValues(typeof(PokemonType)))
+            {
+                if (type == PokemonType.NONE) continue;
+                yield return new Essence()
+                {
+                    Name = $"{GeneralUtilities.ApaCapitalize(type.ToString())} Essence",
+                    Type = type,
+                    _description = $"A {GeneralUtilities.ApaCapitalize(type.ToString())}-type essence."
+                };
+            }
         }
     }
 }

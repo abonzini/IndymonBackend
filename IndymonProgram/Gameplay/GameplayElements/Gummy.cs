@@ -9,9 +9,18 @@ namespace Gameplay.GameplayElements
         {
             return Name;
         }
-        public override string GetDescription()
+        public static IEnumerable<Gummy> GetAllGummies()
         {
-            return $"A {GeneralUtilities.ApaCapitalize(Type.ToString())}-type gummy.";
+            foreach (PokemonType type in Enum.GetValues(typeof(PokemonType)))
+            {
+                if (type == PokemonType.NONE) continue;
+                yield return new Gummy()
+                {
+                    Name = $"{GeneralUtilities.ApaCapitalize(type.ToString())} Gummy",
+                    Type = type,
+                    _description = $"A {GeneralUtilities.ApaCapitalize(type.ToString())}-type gummy."
+                };
+            }
         }
     }
 }
