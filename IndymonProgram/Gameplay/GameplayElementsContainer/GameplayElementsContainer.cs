@@ -1,4 +1,5 @@
-﻿using Gameplay.GameplayElements;
+﻿using Gameplay.GameEngine;
+using Gameplay.GameplayElements;
 
 namespace Gameplay.GameplayElementsContainer
 {
@@ -49,6 +50,7 @@ namespace Gameplay.GameplayElementsContainer
             string dungeonTab = lines[10].Split(",")[0];
             ParseDungeonData(masterDirectory, sheetId, dungeonTab);
         }
+        public DebugLevel CurrentDebugLevel = DebugLevel.NONE;
         public Random CommonRng = new Random(Guid.NewGuid().GetHashCode());
         public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
         public Dictionary<string, Move> Moves = new Dictionary<string, Move>();

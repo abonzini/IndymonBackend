@@ -326,7 +326,7 @@ namespace IndymonBackendProgram
             {
                 match.Winner = match.Player1Index;
                 TrainerEntity player1 = _participants[match.Player1Index];
-                Console.Write($"{player1.Name} gets a bye");
+                Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.Write($"{player1.Name} gets a bye"));
             }
             else
             {
@@ -358,7 +358,9 @@ namespace IndymonBackendProgram
                     PokemonInTeam = [.. player2.Pokemon.Select(p => SimulatorHandler.InstancePokemon(p, pokemonRng))]
                 };
                 // Execute battle now
+                Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.Write($"Pre {player1.Name} vs {player2.Name}"));
                 GameOutcome outcome = SimulatorHandler.SimulateGame([trainer1, trainer2], _rng);
+                Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.Write($"Post {player1.Name} vs {player2.Name}")); // TODO: Add a bit more info about scores and stuff once actually applied
                 // Determine winner
                 if (outcome.WinningTeam == (Side)1)
                 {

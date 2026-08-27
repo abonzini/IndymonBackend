@@ -1,4 +1,5 @@
-﻿using Gameplay.GameplayElements;
+﻿using Gameplay.GameEngine;
+using Gameplay.GameplayElements;
 using Gameplay.GameplayElementsContainer;
 using Newtonsoft.Json;
 
@@ -63,6 +64,12 @@ namespace IndymonBackendProgram
                 InputString = Console.ReadLine();
                 switch (InputString)
                 {
+                    case "-2":
+                        Console.Write($"Which debug level?");
+                        foreach (DebugLevel dbl in Enum.GetValues(typeof(DebugLevel))) { Console.Write($"{dbl.ToString()} "); }
+                        Console.WriteLine();
+                        GameplayElementsContainer.GlobalData.CurrentDebugLevel = Enum.Parse<DebugLevel>(Console.ReadLine());
+                        break;
                     case "-1":
                         // Not used often, probably only for the beginning
                         foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
@@ -295,6 +302,7 @@ namespace IndymonBackendProgram
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(
+                "-2 - Change current debug level\n" +
                 "-1 - DANGER ZONE: Randomizes every mon in every team including boxes\n" +
                 "0 - Save current tourn/expl data\n" +
                 "1 - Export all updated generated spreadsheet elements (boxes, cram-o-matic, glossary, updated dungeon diffs)\n" +
