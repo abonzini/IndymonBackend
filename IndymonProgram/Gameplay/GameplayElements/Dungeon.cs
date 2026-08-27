@@ -35,12 +35,20 @@ namespace Gameplay.GameplayElements
         public string Name { get; set; }
         public string Description { get; set; }
         public double Chance { get; set; }
+        public override string ToString()
+        {
+            return $"{Name} ({Chance * 100}%)";
+        }
     }
     public class ItemDrops
     {
         public string Name { get; set; }
         public int Min { get; set; }
         public int Max { get; set; }
+        public override string ToString()
+        {
+            return $"{Name} ({Min}-{Max})";
+        }
     }
     [JsonConverter(typeof(StringEnumConverter))]
     /// Defines for a specific sripted encounter, which type it is
@@ -88,6 +96,10 @@ namespace Gameplay.GameplayElements
         public int EncounterEnemyNumber { get; set; } = 0; /// How many enemies to add to this (Will be always 1 boss)
         public EncounterItemType PrizeType { get; set; } = EncounterItemType.NONE; /// The prize you get if the result was good
         public double BaseWeight { get; set; } = 1; /// Weight of event to be compared with others, to create "rare" events
+        public override string ToString()
+        {
+            return Type.ToString();
+        }
     }
     public class Floor
     {
@@ -107,5 +119,9 @@ namespace Gameplay.GameplayElements
         public List<ItemDrops> RareDrops { get; set; }
         public List<Floor> Floors { get; set; }
         public List<Encounter> EncounterPool { get; set; }
+        public override string ToString()
+        {
+            return $"{Name}";
+        }
     }
 }

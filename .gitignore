@@ -66,5 +66,6 @@ current_*.json
 *.gloss
 *.box
 *.cram
+*.dung
 SETS.txt
 TOURNAMENT.txt

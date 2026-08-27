@@ -45,6 +45,9 @@ namespace Gameplay.GameplayElementsContainer
             FillBoxedMonData(sheetId, boxMonArea);
             string playerArea = lines[9].Split(",")[0];
             FillPlayers(sheetId, playerArea);
+            // Dungeon data is weird because it's hybrid
+            string dungeonTab = lines[10].Split(",")[0];
+            ParseDungeonData(masterDirectory, sheetId, dungeonTab);
         }
         public Random CommonRng = new Random(Guid.NewGuid().GetHashCode());
         public Dictionary<PokemonType, Dictionary<PokemonType, double>> DefensiveTypeChart = new Dictionary<PokemonType, Dictionary<PokemonType, double>>();
@@ -66,5 +69,6 @@ namespace Gameplay.GameplayElementsContainer
         public Dictionary<string, MoveDisk> MoveDiskLookup = new Dictionary<string, MoveDisk>();
         public Dictionary<string, PokemonEntity> BoxedMons = new Dictionary<string, PokemonEntity>();
         public Dictionary<string, TrainerEntity> Trainers = new Dictionary<string, TrainerEntity>();
+        public Dictionary<string, Dungeon> Dungeons = new Dictionary<string, Dungeon>();
     }
 }

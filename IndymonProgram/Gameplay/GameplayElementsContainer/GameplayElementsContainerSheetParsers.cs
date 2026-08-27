@@ -1,4 +1,5 @@
 ﻿using Gameplay.GameplayElements;
+using Newtonsoft.Json;
 using Utilities;
 
 namespace Gameplay.GameplayElementsContainer
@@ -514,6 +515,36 @@ namespace Gameplay.GameplayElementsContainer
                     // Finally, add trainer
                     Trainers.Add(name, newTrainer);
                 }
+            }
+        }
+        /// <summary>
+        /// Parses the dungeon data, both the mechanics side locally + their current state in the sheet
+        /// </summary>
+        /// <param name="sheetId">Sheet to google sheets</param>
+        /// <param name="sheetTab">Which tab has the data</param>
+        void ParseDungeonData(string directory, string sheetId, string sheetTab)
+        {
+            Console.WriteLine("Extracting dungeon mechanics data");
+            Dungeons.Clear();
+            // Extract all jsons
+            string dungeonFolder = Path.Combine(directory, "dungeons");
+            foreach (string file in Directory.EnumerateFiles(dungeonFolder, "*.json"))
+            {
+                Dungeon nextDungeon = JsonConvert.DeserializeObject<Dungeon>(File.ReadAllText(file));
+                Dungeons.Add(nextDungeon.Name, nextDungeon);
+            }
+            // Then, Parse sheets csv for the current present dungeon data
+            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
+            string[] lines = csv.Split("\n");
+            const int DUNGEON_HEIGHT = 10; // This is, excluding the margin above
+            for (int i = 1; i < lines.Length; i += DUNGEON_HEIGHT) // Go one by one
+            {
+                // Temp info is exclusively in the first line so we good
+                string[] fields = lines[i].Split(',');
+                Dungeon foundDungeon = Dungeons[fields[1]]; // Get dungeon by name
+                foundDungeon.Difficulty = fields[7].Length; // Number of stars (or any characters) is the diff
+                string weatherString = fields[9].Trim();
+                foundDungeon.CurrentWeather = foundDungeon.PossibleWeathers.Where(w => w.Name == weatherString).FirstOrDefault();
             }
         }
     }

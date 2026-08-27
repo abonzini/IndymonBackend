@@ -11,12 +11,12 @@
     {
       "Name": "Flooded",
       "Description": "The Power Plant is partly flooded this week. Expect water all over the floor.",
-      "Chance": 0.45
+      "Chance": 0.20
     },
     {
       "Name": "High Voltage Arcs",
       "Description": "There's a constant discharge of electricty around the Plant that may hit Pokemon.",
-      "Chance": 0.45
+      "Chance": 0.20
     },
     {
       "Name": "Ion Deluge",
@@ -130,20 +130,22 @@
           "Koffing",
           "Whismur",
           "Electrike",
-          "Drifloon",
-          "Wattrel"
+          "Drifloon"
         ],
         "Flooded": [
           "Grimer",
           "Grimer-Alola",
           "Chinchou",
-          "Tynamo"
+          "Tynamo",
+          "Wattrel",
+          "Tadbulb"
         ],
         "High Voltage Arcs": [
           "Pichu",
           "Geodude-Alola",
           "Shinx",
-          "Pawmi"
+          "Pawmi",
+          "Toxel"
         ],
         "Ion Deluge": [
           "Eevee",
@@ -212,6 +214,7 @@
           "Boltund"
         ],
         "None": [
+          "Wormadam-Trash",
           "Electrode-Alola",
           "Weezing",
           "Flaafy",
@@ -224,12 +227,9 @@
         "Flooded": [
           "Muk",
           "Lanturn",
-          "Wormadam-Trash",
           "Eelektrik",
           "Stunfisk",
-          "Toxel",
-          "Pincurchin",
-          "Tadbulb"
+          "Pincurchin"
         ],
         "High Voltage Arcs": [
           "Pikachu",
@@ -305,20 +305,20 @@
           "Weezing-Alola",
           "Ampharos",
           "Exploud",
-          "Heliolisk",
-          "Kilowattrel"
+          "Heliolisk"
         ],
         "Flooded": [
           "Muk-Alola",
           "Eelektross",
           "Stunfisk-Galar",
-          "Toxtricity",
-          "Bellibolt"
+          "Bellibolt",
+          "Kilowattrel"
         ],
         "High Voltage Arcs": [
           "Raichu",
           "Raichu-Alola",
           "Golem-Alola",
+          "Toxtricity",
           "Luxray",
           "Pawmot"
         ],
@@ -440,7 +440,7 @@
       "PostEventString": "Surprisingly, it still has $1 inside."
     },
     {
-      "Type": "PARADOX",
+      "Type": "MOVE_DISK",
       "PreEventString": "You find some Team Paradox members carrying a crate full of blank disks. You are extremely suspicious of them.",
       "PostEventString": "They give you $1 as a bribe to look away."
     },

@@ -83,6 +83,7 @@ namespace IndymonBackendProgram
                         //File.WriteAllText(Path.Combine(directoryPath, EXPLORATION_JSON_FILE), JsonConvert.SerializeObject(explorationManager, jsonSettings));
                         break;
                     case "1":
+                        SpreadsheetBuilderUtils.RollAndExportDungeons(directoryPath);
                         SpreadsheetBuilderUtils.ExportGlossary(directoryPath);
                         SpreadsheetBuilderUtils.ExportAllBoxedMons(directoryPath);
                         SpreadsheetBuilderUtils.ExportCramTypes(directoryPath);

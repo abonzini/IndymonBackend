@@ -10,6 +10,7 @@
             yield return new PokeBall()
             {
                 Name = "Poke Ball",
+                CramType = PokemonType.NORMAL,
                 _description = "Ball description"
             };
         }
