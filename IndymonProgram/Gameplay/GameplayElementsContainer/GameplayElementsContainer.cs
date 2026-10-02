@@ -27,6 +27,8 @@ namespace Gameplay.GameplayElementsContainer
             LoadKeyItems();
             LoadEssences();
             LoadMints();
+            LoadWeathers();
+            LoadNonVolatileStatus();
             // Then, load the data from the google sheets
             string typechartTab = lines[1].Split(",")[0];
             ParseTypeChart(sheetId, typechartTab);
@@ -72,5 +74,7 @@ namespace Gameplay.GameplayElementsContainer
         public Dictionary<string, PokemonEntity> BoxedMons = new Dictionary<string, PokemonEntity>();
         public Dictionary<string, TrainerEntity> Trainers = new Dictionary<string, TrainerEntity>();
         public Dictionary<string, Dungeon> Dungeons = new Dictionary<string, Dungeon>();
+        public Dictionary<string, Weather> Weathers = new Dictionary<string, Weather>();
+        public Dictionary<string, NonVolatileStatus> NvStatuses = new Dictionary<string, NonVolatileStatus>();
     }
 }

@@ -12,11 +12,11 @@ namespace Gameplay.GameplayElementsContainer
         /// <param name="nMons">Number of mons to give this NPC</param>
         /// <param name="rngSeed">Seed to be used for making NPC team</param>
         /// <param name="itemEquipChance">Chance of using each of the npc's item on a mon</param>
-        /// <param name="usedItems">Output of the items that have been used in this design (for exploration droprate), list WILL be modified</param>
+        /// <param name="usedItemsOut">Output of the items that have been used in this design (for exploration droprate), list WILL be modified</param>
         /// <returns>An instantiated trainer entity to use in battles and such. usedItems list will be also filled</returns>
-        public TrainerEntity CreateNpcEntity(string npcId, int nMons, int rngSeed, double itemEquipChance, List<string> usedItems)
+        public TrainerEntity CreateNpcEntity(string npcId, int nMons, int rngSeed, double itemEquipChance, List<string> usedItemsOut)
         {
-            return CreateNpcEntity(AllNpcTrainers[npcId], nMons, rngSeed, itemEquipChance, usedItems);
+            return CreateNpcEntity(AllNpcTrainers[npcId], nMons, rngSeed, itemEquipChance, usedItemsOut);
         }
         /// <summary>
         /// Given an npc name, create a trainer instance (temporary) to be used for NPC battles (e.g. wild Pokemon)
@@ -24,14 +24,14 @@ namespace Gameplay.GameplayElementsContainer
         /// <param name="npcTrainer">Name of Npc to init</param>
         /// <param name="nMons">Number of mons to give this NPC</param>
         /// <param name="rngSeed">Seed to be used for making NPC team</param>
-        /// <param name="itemEquipChance">Chance of using each of the npc's item on a mon. If chance > 1 can roll multiple times!</param>
-        /// <param name="usedItems">Output of the items that have been used in this design (for exploration droprate), list WILL be modified</param>
+        /// <param name="monItemChance">Chance of using each of the npc's item on a mon. If chance > 1 can roll multiple times!</param>
+        /// <param name="usedItemsOut">Output of the items that have been used in this design (for exploration droprate), list WILL be modified</param>
         /// <returns>An instantiated trainer entity to use in battles and such. usedItems list will be also filled</returns>
-        public TrainerEntity CreateNpcEntity(NpcTrainer npcTrainer, int nMons, int rngSeed, double itemEquipChance, List<string> usedItems)
+        public TrainerEntity CreateNpcEntity(NpcTrainer npcTrainer, int nMons, int rngSeed, double itemChance, List<string> usedItemsOut)
         {
             if (!npcTrainer.FullyLoadedData) throw new Exception("Randomizing a trainer that has no data!");
             Random npcRng = new Random(rngSeed);
-            usedItems.Clear();
+            usedItemsOut.Clear();
             // Ok generate the trainer then
             TrainerEntity newTrainer = new TrainerEntity()
             {
@@ -57,14 +57,15 @@ namespace Gameplay.GameplayElementsContainer
                 };
                 RandomizePokemon(newMon, npcRng); // Randomize the rest for this mon
                 // Now, the fun part, if an item is to be assigned to this mon, do a roll and equip where corresponds, only one of each item type ok?
-                while (itemEquipChance > 0)
+                double monItemChance = itemChance;
+                while (monItemChance > 0)
                 {
                     List<string> availableItems = [.. npcTrainer.AvailableItems];
-                    if (availableItems.Count > 0 && npcRng.NextDouble() < itemEquipChance)
+                    if (availableItems.Count > 0 && npcRng.NextDouble() < monItemChance)
                     {
                         // An item will be chosen
                         string itemChosen = GeneralUtilities.GetRandomPick(availableItems, npcRng);
-                        usedItems.Add(itemChosen);
+                        usedItemsOut.Add(itemChosen);
                         availableItems.Remove(itemChosen);
                         switch (GetItemType(itemChosen))
                         {
@@ -98,7 +99,7 @@ namespace Gameplay.GameplayElementsContainer
                                 break; // Item can't be equipped in this way to an npc
                         }
                     }
-                    itemEquipChance -= 1; // Roll done, next one
+                    monItemChance -= 1; // Roll done, next one
                 }
                 newTrainer.Pokemon.Add(newMon);
             }

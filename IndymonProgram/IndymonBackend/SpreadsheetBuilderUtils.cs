@@ -132,7 +132,7 @@ namespace IndymonBackendProgram
                     fileBuilder.AppendLine($"Floor {i + 1},{string.Join(",", nextElements.ToList().Order())}");
                 }
                 // Boss, this has the potential of breaking HARD if params 0/1 are not the boss anymore
-                fileBuilder.AppendLine($"Floor 3 Boss,{nextDungeon.Floors[2].BossEncounters[0].Params[0]},Reward,{nextDungeon.Floors[2].BossEncounters[0].Params[1]}");
+                fileBuilder.AppendLine($"Floor 3 Boss,{nextDungeon.FinalBossEncounter.Params[0]},Reward,{nextDungeon.FinalBossEncounter.Params[1]}");
                 fileBuilder.AppendLine();
             }
             File.WriteAllText(Path.Combine(directoryPath, $".dung"), fileBuilder.ToString());

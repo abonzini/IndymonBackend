@@ -60,7 +60,12 @@ namespace Gameplay.GameplayElements
                 CramType = PokemonType.STEEL,
                 _description = $"Can be used to craft Jewelry."
             };
-
+            yield return new KeyItem()
+            {
+                Name = $"Exploration Ticket",
+                CramType = PokemonType.FAIRY,
+                _description = $"At any time during the week, can go on an exploration to any place of choice.This exploration doesn't count as your weekly action."
+            };
         }
     }
 }

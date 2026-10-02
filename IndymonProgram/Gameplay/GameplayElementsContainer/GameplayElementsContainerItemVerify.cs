@@ -111,6 +111,7 @@ namespace Gameplay.GameplayElementsContainer
                             PokeBall = PokeBalls["Poke Ball"], // Pokeball unless specified otherwise
                             IsShiny = CommonRng.Next(0, SHINY_CHANCE) == 0
                         };
+                        RandomizePokemon(newMon, CommonRng);
                         if (trainer.Pokemon.Count < TrainerEntity.MAX_NUMBER_POKEMON) // Add to party if there's space
                         {
                             trainer.Pokemon.Add(newMon);
@@ -164,7 +165,7 @@ namespace Gameplay.GameplayElementsContainer
                 default:
                     throw new Exception($"Item {prizeName} not recognized as valid item");
             }
-            return count > 0;
+            return auxCount > 0;
         }
     }
 }

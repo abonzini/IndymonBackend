@@ -141,5 +141,23 @@ namespace Gameplay.GameplayElementsContainer
                 Mints.Add(newMint.Name, newMint);
             }
         }
+        void LoadWeathers()
+        {
+            Console.WriteLine("Loading Weathers");
+            Weathers.Clear();
+            foreach (Weather weather in Weather.GetAllWeathers())
+            {
+                Weathers.Add(weather.Name, weather);
+            }
+        }
+        void LoadNonVolatileStatus()
+        {
+            Console.WriteLine("Loading Non Volatile Status");
+            NvStatuses.Clear();
+            foreach (NonVolatileStatus nvs in NonVolatileStatus.GetAllNonVolatileStatus())
+            {
+                NvStatuses.Add(nvs.Name, nvs);
+            }
+        }
     }
 }

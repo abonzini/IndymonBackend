@@ -7,7 +7,8 @@ namespace Gameplay.GameEngine
     /// </summary>
     public enum Side
     {
-        FIELD, /// Team units will spawn randomly in the field (e.g. wild mons)
+        NONE, /// Unused unless as a param
+        FIELD, /// Field units are free for all
         BOTTOM,
         TOP,
         LEFT,

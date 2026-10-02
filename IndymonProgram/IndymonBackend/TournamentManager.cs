@@ -80,6 +80,12 @@ namespace IndymonBackendProgram
                         trainers.Remove(trainer);
                         Console.WriteLine($"{trainerString} added");
                     }
+                    else if (validNpcs.Any(t => t.Name == nextName)) // Is trainer a player?
+                    {
+                        NpcTrainer npc = validNpcs.Where(t => t.Name == nextName).First();
+                        validNpcs.Remove(npc);
+                        Console.WriteLine($"{trainerString} added");
+                    }
                     else if (Enum.TryParse(nextName, out TrainerRank desiredRank)) // Then, see if filtered by rank
                     {
                         NpcTrainer npc = GeneralUtilities.GetRandomPick([.. validNpcs.Where(n => n.TrainerRank == desiredRank)], rng);

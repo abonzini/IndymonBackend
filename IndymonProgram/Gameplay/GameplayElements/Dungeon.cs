@@ -30,7 +30,7 @@ namespace Gameplay.GameplayElements
         IMP_GAIN, /// Gives IMP
         SANDWICH /// Gives Sandwich
     }
-    public class Weather
+    public class WeatherForecast
     {
         public string Name { get; set; }
         public string Description { get; set; }
@@ -83,7 +83,8 @@ namespace Gameplay.GameplayElements
         public EncounterType Type { get; set; } = EncounterType.UNKNOWN; /// What type of encounter it is (good for scoring and for illustrating)
         // For strings, $X uses the corresponding string param
         public string PreEncounterString { get; set; } = ""; /// String that shows in beginning of encounter
-        public string PostEncounterString { get; set; } = ""; /// String that shows in end of encounter (if dungeon is not over)
+        public string EncounterSuccessString { get; set; } = ""; /// String that shows in end of encounter (if event was succesful)
+        public string EncounterFailureString { get; set; } = ""; /// String that shows in end of encounter (if event unsuccesful)
         public List<string> Params { get; set; } = []; /// Params in order of how they're used, really depends on the event type, documented on the switch case of dungeon exec
         public double[] BossStatMult { get; set; } = [1, 1, 1, 1, 1, 1]; /// Additional stat mult for encounter (only for boss if boss fight)
         public EncounterEnemyType BossType { get; set; } = EncounterEnemyType.NONE; /// If encounter will have a boss, which type of encounter it is
@@ -97,7 +98,7 @@ namespace Gameplay.GameplayElements
         public int EncounterEnemyNumber { get; set; } = 0; /// How many enemies to add to this (Boss not counted)
         public EncounterItemType PrizeType { get; set; } = EncounterItemType.NONE; /// The prize you get if the result was good
         public double BaseWeight { get; set; } = 1; /// Weight of event to be compared with others, to create "rare" events
-        public List<Weather> WeatherOverride { get; set; } = [];
+        public List<WeatherForecast> WeatherOverride { get; set; } = [];
         public override string ToString()
         {
             return Type.ToString();
@@ -106,7 +107,6 @@ namespace Gameplay.GameplayElements
     public class Floor
     {
         public Dictionary<string, HashSet<string>> WeatherMons { get; set; } /// Contains which mons are found for each weather (key). There's an ALL keyword with mons that appear in all weathers
-        public List<Encounter> BossEncounters { get; set; } /// The possible specific boss encounters for this floor
     }
     public class Dungeon
     {
@@ -114,13 +114,16 @@ namespace Gameplay.GameplayElements
         public string Description1 { get; set; }
         public string Description2 { get; set; }
         public int Difficulty { get; set; }
-        public List<Weather> PossibleWeathers { get; set; }
-        public Weather CurrentWeather { get; set; }
+        public List<WeatherForecast> PossibleWeathers { get; set; }
+        public WeatherForecast CurrentWeather { get; set; }
         public double GeneralItemDropChance { get; set; }
         public List<ItemDrops> CommonDrops { get; set; }
         public List<ItemDrops> RareDrops { get; set; }
         public List<Floor> Floors { get; set; }
         public List<Encounter> EncounterPool { get; set; }
+        public List<Encounter> BossEncounters { get; set; }
+        public Encounter FinalBossEncounter { get; set; }
+
         public override string ToString()
         {
             return $"{Name}";

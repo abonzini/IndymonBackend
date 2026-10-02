@@ -1,5 +1,16 @@
-﻿namespace Gameplay.GameEngine
+﻿using Gameplay.GameplayElements;
+
+namespace Gameplay.GameEngine
 {
+    /// <summary>
+    /// Whtether mon can participate in battle
+    /// </summary>
+    public enum BattleAvailability
+    {
+        NORMAL,
+        BUSY,
+        FAINT,
+    }
     /// <summary>
     /// An instance of a pokemon in the simulator
     /// </summary>
@@ -7,5 +18,7 @@
     {
         public string Name = "";
         public double HpPercent = 1;
+        public NonVolatileStatus NonVolatileStatus = null;
+        public BattleAvailability Availability = BattleAvailability.NORMAL;
     }
 }
