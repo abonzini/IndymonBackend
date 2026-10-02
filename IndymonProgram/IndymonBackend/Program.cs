@@ -64,9 +64,23 @@ namespace IndymonBackendProgram
                 InputString = Console.ReadLine();
                 switch (InputString)
                 {
+                    case "-3":
+                        // Not used often, probably only when new elements are added
+                        foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
+                        {
+                            foreach (PokemonEntity mon in trainer.Pokemon)
+                            {
+                                GameplayElementsContainer.UpdatePokemon(mon, GameplayElementsContainer.GlobalData.CommonRng);
+                            }
+                        }
+                        foreach (PokemonEntity mon in GameplayElementsContainer.GlobalData.BoxedMons.Values)
+                        {
+                            GameplayElementsContainer.UpdatePokemon(mon, GameplayElementsContainer.GlobalData.CommonRng);
+                        }
+                        break;
                     case "-2":
                         Console.Write($"Which debug level?");
-                        foreach (DebugLevel dbl in Enum.GetValues(typeof(DebugLevel))) { Console.Write($"{dbl.ToString()} "); }
+                        foreach (DebugLevel dbl in Enum.GetValues(typeof(DebugLevel))) { Console.Write($"{dbl} "); }
                         Console.WriteLine();
                         GameplayElementsContainer.GlobalData.CurrentDebugLevel = Enum.Parse<DebugLevel>(Console.ReadLine());
                         break;
@@ -302,6 +316,7 @@ namespace IndymonBackendProgram
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(
+                "-3 - Does a pass in the current set of trainer's mons, adds additional abilities/moves if they were added later on\n" +
                 "-2 - Change current debug level\n" +
                 "-1 - DANGER ZONE: Randomizes every mon in every team including boxes\n" +
                 "0 - Save current tourn/expl data\n" +

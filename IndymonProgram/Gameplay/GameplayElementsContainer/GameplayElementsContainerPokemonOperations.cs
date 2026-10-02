@@ -77,6 +77,38 @@ namespace Gameplay.GameplayElementsContainer
                 }
             }
         }
+        /// <summary>
+        /// Updates a specific pokemon, to add adittional moves/abilities when possible if new ones added
+        /// </summary>
+        /// <param name="mon">Mon to update</param>
+        /// <param name="rng">Rng to use when shuffling</param>
+        public static void UpdatePokemon(PokemonEntity mon, Random rng)
+        {
+            // Similar but need to remove the ones mon already has
+            List<Move> availableMoves = [.. mon.Species.Moveset.Except(mon.Moves)];
+            List<Move> availableStabs = [.. availableMoves.Except(mon.Moves)]; // TODO Can only find stabs once moves have more info ofc
+            // Move 1 is always a stab (if available)
+            if (mon.Moves[0] == null) // If mon has no move 0 yet, add a stab if possible
+            {
+                if (availableStabs.Count > 0) mon.Moves[0] = GeneralUtilities.GetRandomPick(availableStabs, rng);
+                if (mon.Moves[0] != null) availableMoves.Remove(mon.Moves[0]); // Remove from list, to reroll move 2
+            }
+            // Reroll move 2
+            if (mon.Moves[1] == null)
+            {
+                if (availableMoves.Count > 0) mon.Moves[1] = GeneralUtilities.GetRandomPick(availableMoves, rng);
+            }
+            // Then abilities, simpler
+            List<Ability> availableAbilities = [.. mon.Species.Abilities.Except(mon.Abilities)];
+            GeneralUtilities.ShuffleList(availableAbilities, rng); // Shuffle it
+            for (int i = 0; i < mon.Abilities.Length && i < availableAbilities.Count; i++) // Add as many as possible into null slots
+            {
+                if (mon.Abilities[i] == null)
+                {
+                    mon.Abilities[i] = availableAbilities[i];
+                }
+            }
+        }
     }
 }
 
