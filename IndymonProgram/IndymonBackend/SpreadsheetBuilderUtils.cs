@@ -13,44 +13,38 @@ namespace IndymonBackendProgram
         /// <param name="directoryPath">Path where saved</param>
         public static void ExportGlossary(string directoryPath)
         {
-            StringBuilder fileBuilder = new StringBuilder();
-            void appendAll(IEnumerable<string> list)
-            {
-                foreach (string str in list)
-                {
-                    fileBuilder.AppendLine(str);
-                }
-            }
+            Dictionary<string, string> glossary = new Dictionary<string, string>();
             // Add all elements that need a glossary
-            appendAll(GameplayElementsContainer.GlobalData.Abilities.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.Essences.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.EvoPlates.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.Gummies.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.Jewelries.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.KeyItems.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.Mints.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.Moves.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.Natures.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
-            appendAll(GameplayElementsContainer.GlobalData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetDescription()}"));
+            GameplayElementsContainer.GlobalData.Abilities.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.Essences.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.EvoPlates.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.Gummies.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.HeldItems.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.Jewelries.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.KeyItems.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.Mints.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.Moves.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.MoveDiskLookup.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.Natures.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.PokeBalls.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
+            GameplayElementsContainer.GlobalData.SandwichLookup.ToList().ForEach(x => glossary[x.Key] = x.Value.GetDescription());
             // Only put the box mons that are still boxed
             foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
             {
                 foreach (string boxedMonName in trainer.BoxedMons)
                 {
                     PokemonEntity boxedMon = GameplayElementsContainer.GlobalData.BoxedMons[boxedMonName];
-                    fileBuilder.AppendLine($"{boxedMonName},{boxedMon.GetDescription()}");
+                    glossary[boxedMonName] = boxedMon.GetDescription();
                 }
             }
             // Put current dungeon weathers
             foreach (Dungeon dung in GameplayElementsContainer.GlobalData.Dungeons.Values)
             {
-                fileBuilder.AppendLine($"{dung.CurrentWeather.Name},{dung.CurrentWeather.Description}");
+                glossary[dung.CurrentWeather.Name] = dung.CurrentWeather.Description;
             }
             // File complete, save
-            File.WriteAllText(Path.Combine(directoryPath, $".gloss"), fileBuilder.ToString());
+            List<string> glossarySorted = [.. glossary.Select(x => $"{x.Key},{x.Value}").Order()];
+            File.WriteAllLines(Path.Combine(directoryPath, $".gloss"), glossarySorted);
         }
         /// <summary>
         /// Exports all boxed mons but iterates through trainers to remove abandoned/unboxed mons
@@ -83,26 +77,20 @@ namespace IndymonBackendProgram
         /// <param name="directoryPath">Path where saved</param>
         public static void ExportCramTypes(string directoryPath)
         {
-            StringBuilder fileBuilder = new StringBuilder();
-            void appendAll(IEnumerable<string> list)
-            {
-                foreach (string str in list)
-                {
-                    fileBuilder.AppendLine(str);
-                }
-            }
+            Dictionary<string, PokemonType> cramDict = new Dictionary<string, PokemonType>();
             // Add all elements that need a glossary
-            appendAll(GameplayElementsContainer.GlobalData.Essences.Select(kvp => $"{kvp.Key},{kvp.Value.Type}"));
-            appendAll(GameplayElementsContainer.GlobalData.EvoPlates.Select(kvp => $"{kvp.Key},{kvp.Value.Type}"));
-            appendAll(GameplayElementsContainer.GlobalData.Gummies.Select(kvp => $"{kvp.Key},{kvp.Value.Type}"));
-            appendAll(GameplayElementsContainer.GlobalData.HeldItems.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
-            appendAll(GameplayElementsContainer.GlobalData.KeyItems.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
-            appendAll(GameplayElementsContainer.GlobalData.Mints.Select(kvp => $"{kvp.Key},{PokemonType.GRASS}")); // All mints are grass idk
-            appendAll(GameplayElementsContainer.GlobalData.MoveDiskLookup.Select(kvp => $"{kvp.Key},{kvp.Value.GetCramType()}")); // Type of move
-            appendAll(GameplayElementsContainer.GlobalData.PokeBalls.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
-            appendAll(GameplayElementsContainer.GlobalData.SandwichLookup.Select(kvp => $"{kvp.Key},{kvp.Value.CramType}"));
+            GameplayElementsContainer.GlobalData.Essences.ToList().ForEach(x => cramDict[x.Key] = x.Value.Type);
+            GameplayElementsContainer.GlobalData.EvoPlates.ToList().ForEach(x => cramDict[x.Key] = x.Value.Type);
+            GameplayElementsContainer.GlobalData.Gummies.ToList().ForEach(x => cramDict[x.Key] = x.Value.Type);
+            GameplayElementsContainer.GlobalData.HeldItems.ToList().ForEach(x => cramDict[x.Key] = x.Value.CramType);
+            GameplayElementsContainer.GlobalData.KeyItems.ToList().ForEach(x => cramDict[x.Key] = x.Value.CramType);
+            GameplayElementsContainer.GlobalData.Mints.ToList().ForEach(x => cramDict[x.Key] = PokemonType.GRASS); // All mints are grass idk
+            GameplayElementsContainer.GlobalData.MoveDiskLookup.ToList().ForEach(x => cramDict[x.Key] = x.Value.GetCramType()); // Type of move
+            GameplayElementsContainer.GlobalData.PokeBalls.ToList().ForEach(x => cramDict[x.Key] = x.Value.CramType);
+            GameplayElementsContainer.GlobalData.SandwichLookup.ToList().ForEach(x => cramDict[x.Key] = x.Value.CramType);
             // File complete, save
-            File.WriteAllText(Path.Combine(directoryPath, $".cram"), fileBuilder.ToString());
+            List<string> dictSorted = [.. cramDict.Select(x => $"{x.Key},{x.Value}").Order()];
+            File.WriteAllLines(Path.Combine(directoryPath, $".cram"), dictSorted);
         }
         /// <summary>
         /// Rerolls all dungeons diff and weather, and then exports them in alphabetical order to the spreadsheet with all the data
