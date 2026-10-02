@@ -20,5 +20,6 @@ namespace Gameplay.GameEngine
         public double HpPercent = 1;
         public NonVolatileStatus NonVolatileStatus = null;
         public BattleAvailability Availability = BattleAvailability.NORMAL;
+        public bool IsBoss = true; /// If boss, the whole team loses if mon is knocked out
     }
 }

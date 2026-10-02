@@ -1,10 +1,13 @@
 ﻿using Gameplay.GameplayElements;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Gameplay.GameEngine
 {
     /// <summary>
     /// Defines the side of a trainer, where their mons will spawn
     /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum Side
     {
         NONE, /// Unused unless as a param
