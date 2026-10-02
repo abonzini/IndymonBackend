@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <Compile Remove="ExplorationManager.cs" />
-    <Compile Remove="IndymonUtilities.cs" />
   </ItemGroup>
 
   <ItemGroup>

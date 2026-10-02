@@ -339,11 +339,11 @@ namespace IndymonBackendProgram
                 TrainerInstance trainer1 = new TrainerInstance()
                 {
                     Name = player1.Name,
-                    Team = (Side)1,
+                    Team = Side.BOTTOM,
                     MaxMonsInField = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
                     MaxMonsUsed = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
                     ActiveJewelry = player1.EquippedJewelry,
-                    PokemonInTeam = [.. player1.Pokemon.Select(p => SimulatorHandler.InstancePokemon(p, pokemonRng))]
+                    PokemonInTeam = [.. player1.Pokemon.Select(p => SimulatorHandler.InstancePokemon(p, new Random(pokemonRng.Next())))]
                 };
                 TrainerEntity player2 = _participants[match.Player2Index];
                 monSeed = ParticipantSeedAndMonSeed[match.Player2Index].Item3;
@@ -351,18 +351,18 @@ namespace IndymonBackendProgram
                 TrainerInstance trainer2 = new TrainerInstance()
                 {
                     Name = player2.Name,
-                    Team = (Side)2,
+                    Team = Side.TOP,
                     MaxMonsInField = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
                     MaxMonsUsed = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
                     ActiveJewelry = player2.EquippedJewelry,
-                    PokemonInTeam = [.. player2.Pokemon.Select(p => SimulatorHandler.InstancePokemon(p, pokemonRng))]
+                    PokemonInTeam = [.. player2.Pokemon.Select(p => SimulatorHandler.InstancePokemon(p, new Random(pokemonRng.Next())))]
                 };
                 // Execute battle now
                 Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.Write($"Pre {player1.Name} vs {player2.Name}"));
-                GameOutcome outcome = SimulatorHandler.SimulateGame([trainer1, trainer2], _rng);
+                GameOutcome outcome = SimulatorHandler.SimulateGame([trainer1, trainer2], new GameParameters(), _rng); // Simulates a game with standard battle rules (default gameparams)
                 Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.Write($"Post {player1.Name} vs {player2.Name}")); // TODO: Add a bit more info about scores and stuff once actually applied
                 // Determine winner
-                if (outcome.WinningTeam == (Side)1)
+                if (outcome.WinningTeam == Side.BOTTOM)
                 {
                     match.Winner = match.Player1Index;
                 }

@@ -158,8 +158,8 @@
           "Type": "BOSS",
           "PreEncounterString": "You have disturbed a nest belonging to a mother $1. She'll do the best to defend it's babies.",
           "PostEncounterString": "$1 has calmed down and is hiding with their babies. You proceed forward.",
-          "Note": "The idea of this one is a mon of current floor, slightly stronger (15% except speed) equipped, with 2 babies",
-          "EncounterStatMult": [
+          "Note": "The idea of this one is a mon of current floor, slightly stronger (15% except speed) equipped, with 2 babies (weaker)",
+          "BossStatMult": [
             1.15,
             1.15,
             1.15,
@@ -169,18 +169,47 @@
           ],
           "BossType": "CURRENT_FLOOR",
           "BossEquipType": "NONE",
+          "NormalEnemyStatMult": [
+            0.6,
+            0.6,
+            0.6,
+            0.6,
+            0.6,
+            1
+          ],
           "NormalEnemyType": "BOSS_PREVOS",
           "NormalEquipType": "NONE",
           "EncounterMaxSimultaneousEnemyMons": 3,
-          "EncounterEnemyNumber": 3,
+          "EncounterEnemyNumber": 2,
           "PrizeType": "NONE"
         },
         {
           "Type": "BOSS",
-          "PreEncounterString": "You have crossed eyes with an angry $1. Apparently it's the boss of this parts, and you're in their territory!.",
+          "PreEncounterString": "You have arrived to a huge room. An enormous $1 is in the middle, suffering. It seems the great energies of this place have overloaded it and it's out of control.",
+          "PostEncounterString": "$1 releases all of it's energy and recovers. It's extremely thankful.",
+          "Note": "Inspired on deepest trench mutant mon. This mon is huge, resistant and slow, it's a survival fight. TODO: Will be in high voltage always, open field and try to add the 'giant' tag for impact",
+          "BossStatMult": [
+            4,
+            1.3,
+            1,
+            1.3,
+            1,
+            0.5
+          ],
+          "BossType": "CURRENT_FLOOR",
+          "BossEquipType": "NONE",
+          "NormalEnemyType": "NONE",
+          "NormalEquipType": "NONE",
+          "EncounterMaxSimultaneousEnemyMons": 1,
+          "EncounterEnemyNumber": 0,
+          "PrizeType": "BOSS"
+        },
+        {
+          "Type": "BOSS",
+          "PreEncounterString": "You have crossed eyes with an angry $1. Apparently it's the boss of this floor, and you're in their territory!.",
           "PostEncounterString": "$1 runs away scared, it seems you're the Power Plant Boss now.",
           "Note": "Monster house inspired, there's a big boss from next floor with buddies from first floor, and the buddies keep coming",
-          "EncounterStatMult": [
+          "BossStatMult": [
             1,
             1,
             1,
@@ -191,6 +220,14 @@
           "BossType": "NEXT_FLOOR",
           "BossEquipType": "ALL_ITEM_POOLS",
           "BossEquipChance": 1.5,
+          "NormalEnemyStatMult": [
+            0.6,
+            0.6,
+            0.6,
+            0.6,
+            0.6,
+            1
+          ],
           "NormalEnemyType": "CURRENT_FLOOR",
           "NormalEquipType": "COMMON_ITEM_POOL",
           "NormalEquipChance": 0.3,
@@ -246,10 +283,39 @@
       "BossEncounters": [
         {
           "Type": "BOSS",
+          "PreEncounterString": "You have disturbed a nest belonging to a mother $1. She'll do the best to defend it's babies.",
+          "PostEncounterString": "$1 has calmed down and is hiding with their babies. You proceed forward.",
+          "Note": "The idea of this one is a mon of current floor, slightly stronger (15% except speed) equipped, with 2 babies (weaker)",
+          "BossStatMult": [
+            1.15,
+            1.15,
+            1.15,
+            1.15,
+            1.15,
+            1
+          ],
+          "BossType": "CURRENT_FLOOR",
+          "BossEquipType": "NONE",
+          "NormalEnemyStatMult": [
+            0.6,
+            0.6,
+            0.6,
+            0.6,
+            0.6,
+            1
+          ],
+          "NormalEnemyType": "BOSS_PREVOS",
+          "NormalEquipType": "NONE",
+          "EncounterMaxSimultaneousEnemyMons": 3,
+          "EncounterEnemyNumber": 2,
+          "PrizeType": "NONE"
+        },
+        {
+          "Type": "BOSS",
           "PreEncounterString": "You have arrived to a huge room. An enormous $1 is in the middle, suffering. It seems the great energies of this place have overloaded it and it's out of control.",
           "PostEncounterString": "$1 releases all of it's energy and recovers. It's extremely thankful.",
           "Note": "Inspired on deepest trench mutant mon. This mon is huge, resistant and slow, it's a survival fight. TODO: Will be in high voltage always, open field and try to add the 'giant' tag for impact",
-          "EncounterStatMult": [
+          "BossStatMult": [
             4,
             1.3,
             1,
@@ -267,10 +333,10 @@
         },
         {
           "Type": "BOSS",
-          "PreEncounterString": "You have crossed eyes with an angry $1. Apparently it's the boss of this parts, and you're in their territory!.",
+          "PreEncounterString": "You have crossed eyes with an angry $1. Apparently it's the boss of this floor, and you're in their territory!.",
           "PostEncounterString": "$1 runs away scared, it seems you're the Power Plant Boss now.",
           "Note": "Monster house inspired, there's a big boss from next floor with buddies from first floor, and the buddies keep coming",
-          "EncounterStatMult": [
+          "BossStatMult": [
             1,
             1,
             1,
@@ -281,6 +347,14 @@
           "BossType": "NEXT_FLOOR",
           "BossEquipType": "ALL_ITEM_POOLS",
           "BossEquipChance": 1.5,
+          "NormalEnemyStatMult": [
+            0.6,
+            0.6,
+            0.6,
+            0.6,
+            0.6,
+            1
+          ],
           "NormalEnemyType": "CURRENT_FLOOR",
           "NormalEquipType": "COMMON_ITEM_POOL",
           "NormalEquipChance": 0.3,
@@ -335,7 +409,7 @@
           "PreEncounterString": "You reach the power plant's generator. The energy in this room is out of control. In the center, absorbing most of the energy a titan made of pure electricity. Before you can react, it starts moving all over the place...",
           "PostEventString": "As you defeat the titan, the whole power plant starts to make a deafening noise. Parts start moving and the Power Plant starts sparking. Better leave ASAP.",
           "Note": "Regieleki with with either/and Deluge + Arcs. Make regieleki faster and fight a bit longer. Regieleki will be by itself",
-          "EncounterStatMult": [
+          "BossStatMult": [
             2,
             1,
             1,
@@ -354,6 +428,18 @@
           "NormalEquipType": "NONE",
           "EncounterMaxSimultaneousEnemyMons": 1,
           "EncounterEnemyNumber": 0,
+          "WeatherOverride": [
+            {
+              "Name": "High Voltage Arcs",
+              "Description": "There's a constant discharge of electricty around the Plant that may hit Pokemon.",
+              "Chance": 0.5
+            },
+            {
+              "Name": "Ion Deluge",
+              "Description": "The air is Ionized and smells funny. All Normal-type attacks become Electric-type.",
+              "Chance": 0.5
+            }
+          ],
           "PrizeType": "SPECIFIC_ITEM"
         }
       ]

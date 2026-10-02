@@ -5,8 +5,7 @@
     /// </summary>
     public class GameOutcome
     {
-        public Side WinningTeam = 0; /// Which side won
-        public List<TrainerInstance> WinningTrainers = new List<TrainerInstance>(); // All the trainers who won this game
+        public Side WinningTeam = Side.FIELD; /// Which side won
         // TODO also work on redering event queue
     }
 }

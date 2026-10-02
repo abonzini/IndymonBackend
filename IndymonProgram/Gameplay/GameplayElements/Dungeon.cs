@@ -85,17 +85,19 @@ namespace Gameplay.GameplayElements
         public string PreEncounterString { get; set; } = ""; /// String that shows in beginning of encounter
         public string PostEncounterString { get; set; } = ""; /// String that shows in end of encounter (if dungeon is not over)
         public List<string> Params { get; set; } = []; /// Params in order of how they're used, really depends on the event type, documented on the switch case of dungeon exec
-        public double[] EncounterStatMult { get; set; } = [1, 1, 1, 1, 1, 1]; /// Additional stat mult for encounter (only for boss if boss fight)
+        public double[] BossStatMult { get; set; } = [1, 1, 1, 1, 1, 1]; /// Additional stat mult for encounter (only for boss if boss fight)
         public EncounterEnemyType BossType { get; set; } = EncounterEnemyType.NONE; /// If encounter will have a boss, which type of encounter it is
         public EncounterItemType BossEquipType { get; set; } = EncounterItemType.NONE; /// If boss encounter, check what type of item the boss can equip
         public double BossEquipChance { get; set; } = 0; /// And if so, whats the base equip chance
+        public double[] NormalEnemyStatMult { get; set; } = [1, 1, 1, 1, 1, 1]; /// Additional stat mult for normal enemies
         public EncounterEnemyType NormalEnemyType { get; set; } = EncounterEnemyType.NONE; /// If boss encounter not none, may have followers, if so, which kind?
         public EncounterItemType NormalEquipType { get; set; } = EncounterItemType.NONE; /// If encounter, check what type of item the mons can equip
         public double NormalEquipChance { get; set; } = 0; /// And if so, whats the base equip chance
         public int EncounterMaxSimultaneousEnemyMons { get; set; } = GameplayElementsContainer.GameplayElementsContainer.DEFAULT_BATTLE_NMONS; /// How many enemies will appear at the same time on one side of the battle
-        public int EncounterEnemyNumber { get; set; } = 0; /// How many enemies to add to this (Will be always 1 boss)
+        public int EncounterEnemyNumber { get; set; } = 0; /// How many enemies to add to this (Boss not counted)
         public EncounterItemType PrizeType { get; set; } = EncounterItemType.NONE; /// The prize you get if the result was good
         public double BaseWeight { get; set; } = 1; /// Weight of event to be compared with others, to create "rare" events
+        public List<Weather> WeatherOverride { get; set; } = [];
         public override string ToString()
         {
             return Type.ToString();
