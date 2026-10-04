@@ -218,6 +218,7 @@ namespace Gameplay.GameplayElementsContainer
                 {
                     Name = fields[0],
                     TrainerRank = Enum.Parse<TrainerRank>(fields[1]),
+                    PictureUrl = fields[2],
                     FullyLoadedData = false // Not yet, this is in another tab
                 };
                 AllNpcTrainers.Add(newTrainer.Name, newTrainer);
