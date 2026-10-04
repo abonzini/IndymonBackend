@@ -396,7 +396,9 @@
     "EncounterSuccessString": "As you defeat the titan, the whole power plant starts to make a deafening noise. Parts start moving and the Power Plant starts sparking. Better leave ASAP.",
     "EncounterFailureString": "The energies in this place are running out of control. It is no longer safe to remain here.",
     "Note": "Regieleki with with either/and Deluge + Arcs. Make regieleki faster and fight a bit longer. Regieleki will be by itself",
-    "Is1Boss": true,
+    "Enemy1Parameters": [
+      "BOSS"
+    ],
     "Enemy1StatMult": [
       3,
       1,
@@ -439,7 +441,9 @@
       "EncounterSuccessString": "$1 has calmed down and is now hiding with their babies. You proceed forward.",
       "EncounterFailureString": "Momma $1 is out of control. If you approach her or any of her children, things are going to go south very fast!",
       "Note": "The idea of this one is a mon of current floor, slightly stronger (15% except speed) equipped, with 2 babies (weaker)",
-      "Is1Boss": true,
+      "Enemy1Parameters": [
+        "BOSS"
+      ],
       "Enemy1Side": "TOP",
       "Enemy1Number": 1,
       "Enemy1StatMult": [
@@ -474,7 +478,9 @@
       "EncounterSuccessString": "$1 releases all of it's energy and recovers. It's extremely thankful.",
       "EncounterFailureString": "The energies that $1 absorbed are too much. It's terrible to leave this creature suffering, but there's nothing else you can do...",
       "Note": "Inspired on deepest trench mutant mon. This mon is huge, resistant and slow, it's a survival fight. Will be in high voltage always, open field and try to add the 'giant' tag for impact",
-      "Is1Boss": true,
+      "Enemy1Parameters": [
+        "BOSS"
+      ],
       "Enemy1Side": "TOP",
       "Enemy1Number": 0,
       "Enemy1StatMult": [
@@ -506,7 +512,9 @@
       "EncounterSuccessString": "$1 runs away scared, it seems you're the Power Plant Boss now.",
       "EncounterFailureString": "Now you see why $1 is the boss around these parts. Better leave before you make it angrier...",
       "Note": "Monster house inspired, there's a big boss from next floor with buddies from first floor, and the buddies keep coming",
-      "Is1Boss": true,
+      "Enemy1Parameters": [
+        "BOSS"
+      ],
       "Enemy1Side": "TOP",
       "Enemy1Number": 1,
       "Enemy1StatMult": [

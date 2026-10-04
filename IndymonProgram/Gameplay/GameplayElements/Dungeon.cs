@@ -101,7 +101,7 @@ namespace Gameplay.GameplayElements
         public List<WeatherForecast> WeatherOverride { get; set; } = [];
         // For battle events, there's Enemy1 and Enemy2, this allows for both Boss + Followers (1 and 2 respectively) or 2 separate group of enemies in some fights
         public Side Enemy1Side { get; set; } = Side.TOP; // By default, enemy and all in same team
-        public bool Is1Boss { get; set; } = false; // Making it a boss means the game is over when it dies without defeating the rest
+        public HashSet<AdditionalPokemonParameter> Enemy1Parameters { get; set; } = [];
         public double[] Enemy1StatMult { get; set; } = [1, 1, 1, 1, 1, 1];
         public EncounterEnemyType Enemy1Type { get; set; } = EncounterEnemyType.NONE;
         public EncounterItemType Enemy1EquipType { get; set; } = EncounterItemType.NONE;
