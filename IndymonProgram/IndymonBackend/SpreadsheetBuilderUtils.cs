@@ -129,7 +129,7 @@ namespace IndymonBackendProgram
                 {
                     nextElements = [.. nextDungeon.Floors[f].WeatherMons["ALL"]];
                     nextElements.UnionWith([.. nextDungeon.Floors[f].WeatherMons[nextDungeon.CurrentWeather.Name]]);
-                    fileBuilder.AppendLine($"Floor {i + 1},{string.Join(",", nextElements.ToList().Order())}");
+                    fileBuilder.AppendLine($"Floor {f + 1},{string.Join(",", nextElements.ToList().Order())}");
                 }
                 // Boss, this has the potential of breaking HARD if params 0/1 are not the boss anymore
                 fileBuilder.AppendLine($"Floor 3 Boss,{nextDungeon.FinalBossEncounter.Params[0]},Reward,{nextDungeon.FinalBossEncounter.Params[1]}");

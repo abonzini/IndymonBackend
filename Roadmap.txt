@@ -1,8 +1,32 @@
 S3 Complete rework:
 
+New scheme with many many basic elements (6 dungeons (regi)) and typical items in all (3 types per). Common items in all become:
+- Gummies
+- Gems
+- Resist Berry
+- Essence(s)
+- Shard(s)
+- Blank Disks ig
+With rare items being:
+- Evo Plates
+- Special related items
+- Disk of their type
+
+E.g. for each dungeon (3 Type)
+Commons: 3 gummies, 3 gems, 3 rberries, 3 shards, 3 essences + blank disks (15+1)
+Rares: 3 evo plates, 3 disks, 3-5 items (9-11 ish)
+
+New dungeons are:
+Abandoned Power Plant   - ElePoiSte     - Regieleki (titan plate 1)
+Gem Tunnel              - FirGroRock    - Regrock   (titan plate 2)
+Cursed Forest           - BugGhoGra     - Registeel (titan plate 3)
+Sky Castle              - DraIcePsy     - Regidrago (ttian plate 4)
+White Monastery         - DarkFigFly    - Regice    (titan plate 5)
+Rub-a-Dub pond          - FaiNorWat     - Regigigas (titan plate 6)
+
 TODO:
-    - Import/export of dungeon mixed with spreadsaheet
-    - Export and randomizing of dungeon stuff
+    - With this in mind, redo dungeon (APP) and trainer(s) Brock + NPCs, shops
+        - Shards consume 5 items
     - Finally, huge dungeon rework, leave space for anim and use new battle thing
     - Expl: Some big changes in item handling and expl mechanics
 - Cleanup of unneccessary elements in code (including battle statistics) and old stuff

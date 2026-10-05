@@ -37,6 +37,8 @@ namespace Gameplay.GameplayElementsContainer
             if (Essences.ContainsKey(itemName)) resultingType = ItemType.ESSENCE;
             else if (EvoPlates.ContainsKey(itemName)) resultingType = ItemType.EVO_PLATE;
             else if (Gummies.ContainsKey(itemName)) resultingType = ItemType.GUMMY;
+            else if (KeyItems.ContainsKey(itemName)) resultingType = ItemType.KEY_ITEM;
+            else if (Jewelries.ContainsKey(itemName)) resultingType = ItemType.JEWELRY;
             else if (HeldItems.ContainsKey(itemName)) resultingType = ItemType.HELD_ITEM;
             else if (GetMoveDisk(itemName) != null) resultingType = ItemType.MOVE_DISK;
             else if (Mints.ContainsKey(itemName)) resultingType = ItemType.MINT;

@@ -288,7 +288,11 @@ namespace Gameplay.GameplayElementsContainer
                         if (nextItem != "")
                         {
                             ItemType itemType = GetItemType(nextItem);
-                            // TODO: If item type == unknown should throw, but not right now because not all items are defined yet
+                            if (itemType == ItemType.UNKNOWN)
+                            {
+                                Console.WriteLine($"\t{nextItem} unknown"); // TODO: Will be replaced by an exception
+                                //throw new Exception("Trainer has an unknown item type!");
+                            }
                             theTrainer.AvailableItems.Add(nextItem);
                         }
                     }

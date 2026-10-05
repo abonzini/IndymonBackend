@@ -43,14 +43,14 @@ namespace Gameplay.GameplayElements
                 };
             }
             // The 5 titan plates
-            List<PokemonType> titanPlateTypes = [PokemonType.ELECTRIC, PokemonType.ROCK, PokemonType.STEEL, PokemonType.DRAGON, PokemonType.ICE];
+            List<PokemonType> titanPlateTypes = [PokemonType.ELECTRIC, PokemonType.ROCK, PokemonType.STEEL, PokemonType.DRAGON, PokemonType.ICE, PokemonType.NORMAL];
             for (int i = 0; i < titanPlateTypes.Count; i++)
             {
                 yield return new KeyItem()
                 {
                     Name = $"Titan Plate {i + 1}",
                     CramType = titanPlateTypes[i],
-                    _description = $"Collect all Titan plates 1-5 to unlock a special event."
+                    _description = $"Collect all Titan plates 1-{titanPlateTypes.Count} to unlock a special event."
                 };
             }
             // Standalone key items
