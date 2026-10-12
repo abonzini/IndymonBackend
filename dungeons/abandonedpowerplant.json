@@ -4,12 +4,12 @@
     "Description2": "Explorers will find many Electric/Poison/Steel-type Pokemon here.",
     "PossibleWeathers": [
         {
-            "Name": "None",
+            "Name": "No Weather",
             "Description": "No particular weather in this dungeon.",
             "Chance": 0.5
         },
         {
-            "Name": "Flooded",
+            "Name": "Flood",
             "Description": "The Power Plant is partly flooded this week. Expect water all over the floor.",
             "Chance": 0.20
         },
@@ -195,7 +195,7 @@
                     "Varoom",
                     "Yamper"
                 ],
-                "None": [
+                "No Weather": [
                     "Voltorb-Alola",
                     "Koffing",
                     "Whismur",
@@ -206,7 +206,7 @@
                     "Salandit",
                     "Shroodle"
                 ],
-                "Flooded": [
+                "Flood": [
                     "Grimer",
                     "Grimer-Alola",
                     "Chinchou",
@@ -244,7 +244,7 @@
                     "Charjabug",
                     "Boltund"
                 ],
-                "None": [
+                "No Weather": [
                     "Wormadam-Trash",
                     "Electrode-Alola",
                     "Weezing",
@@ -257,7 +257,7 @@
                     "Morpeko",
                     "Grafaiai"
                 ],
-                "Flooded": [
+                "Flood": [
                     "Muk",
                     "Lanturn",
                     "Qwilfish-Hisui",
@@ -293,7 +293,7 @@
                     "Vikavolt",
                     "Revavroom"
                 ],
-                "None": [
+                "No Weather": [
                     "Weezing-Alola",
                     "Ampharos",
                     "Exploud",
@@ -301,7 +301,7 @@
                     "Heliolisk",
                     "Salazzle"
                 ],
-                "Flooded": [
+                "Flood": [
                     "Muk-Alola",
                     "Clodsire",
                     "Eelektross",
@@ -388,7 +388,7 @@
             "Category": "REFRESH",
             "PreEventString": "You find an old first-aid kit.",
             "EncounterSuccessString": "Your Pokemon have recovered from their status conditions.",
-            "EncounterFailureString": "None of your Pokemon are injured, you leve it there just in case anyone else needs it."
+            "EncounterFailureString": "None of your Pokemon are injured, you leave it there just in case anyone else needs it."
         },
         {
             "Type": "JOINER",

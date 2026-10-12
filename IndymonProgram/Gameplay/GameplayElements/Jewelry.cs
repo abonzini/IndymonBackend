@@ -23,6 +23,16 @@ namespace Gameplay.GameplayElements
                     Name = $"{GeneralUtilities.ApaCapitalize(type.ToString())} Pendant",
                     _description = $"All {typeString}-type Pokemon in the field gain a 10% boost to their stats for each {typeString}-type Pokemon in the field."
                 };
+                yield return new Jewelry()
+                {
+                    Name = $"{GeneralUtilities.ApaCapitalize(type.ToString())} Earrings",
+                    _description = $"All {typeString}-type Pokemon in the field gain a 15% boost to their Defense and Special Defense."
+                };
+                yield return new Jewelry()
+                {
+                    Name = $"{GeneralUtilities.ApaCapitalize(type.ToString())} Ring",
+                    _description = $"All {typeString}-type Pokemon in the field gain a 15% boost to their Attack and Special Attack."
+                };
             }
         }
     }

@@ -108,6 +108,24 @@ namespace IndymonBackendProgram
                         SpreadsheetBuilderUtils.ExportGlossary(directoryPath);
                         SpreadsheetBuilderUtils.ExportAllBoxedMons(directoryPath);
                         SpreadsheetBuilderUtils.ExportCramTypes(directoryPath);
+                        // Message generation
+                        MessageLogger finalMessage = new MessageLogger();
+                        Console.WriteLine("Name of next event?");
+                        string nextEvent = Console.ReadLine();
+                        finalMessage.EventTitle = "## And that's it!";
+                        finalMessage.EventText.AppendLine($"Next week, the {nextEvent} will be hosted.");
+                        Console.WriteLine("Add extra explanation or nothing if blank");
+                        finalMessage.EventText.AppendLine(Console.ReadLine());
+                        finalMessage.EventText.AppendLine();
+                        finalMessage.EventText.AppendLine("For those interested, this is the weather report for all the dungeons this week:");
+                        foreach (Dungeon dung in GameplayElementsContainer.GlobalData.Dungeons.Values.OrderBy(d => d.Name))
+                        {
+                            finalMessage.EventText.AppendLine($"- The {dung.Name} is currently experiencing {dung.CurrentWeather.Name} ({dung.CurrentWeather.Description}). Additionally, the danger level forecasted for next week is {new string('★', dung.Difficulty)}");
+                        }
+                        finalMessage.EventText.AppendLine("Do keep in mind that, the higher the Danger Level of a dungeon, the stronger and more dangerous the wild Pokemon are!");
+                        finalMessage.EventText.AppendLine();
+                        finalMessage.EventText.AppendLine($"Good luck trainers, as usual, you have until Thursday 11:59 PM to submit any weekly action, by default, trainers will go to the {nextEvent} event, or assigned to a random exploration if ineligible.");
+                        finalMessage.SaveToFile(Path.Combine(directoryPath, "ENDING.txt"));
                         break;
                     case "2":
                         foreach (TrainerEntity trainer in GameplayElementsContainer.GlobalData.Trainers.Values)
