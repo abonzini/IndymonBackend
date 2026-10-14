@@ -186,7 +186,7 @@ namespace IndymonBackendProgram
                 else
                 {
                     // Trainer is definitely an NPC then, we'll create a placehodler entity (use all mons here because they're filtered by the constraints after
-                    nextTrainerEntity = GameplayElementsContainer.GlobalData.CreateNpcEntity(participantName, int.MaxValue, participantSeed, GameplayElementsContainer.NPC_ITEM_CHANCE, new List<string>()); // The list itself doesnt matter in this case
+                    nextTrainerEntity = GameplayElementsContainer.GlobalData.CreateNpcEntity(participantName, int.MaxValue, participantSeed, GameplayElementsContainer.NPC_ITEM_CHANCE, GameplayElementsContainer.SHINY_CHANCE, new List<string>()); // The list itself doesnt matter in this case
                     _participants.Add(nextTrainerEntity); // Regardless, add trainer
                 }
                 // Finally, need to reshuffle trainer's internal team so that the valid N mons are in front
@@ -297,6 +297,7 @@ namespace IndymonBackendProgram
                 GameplayElementsContainer.ConsumeTrainersItems(participant, GameplayElementsContainer.DEFAULT_BATTLE_NMONS); // Consume all items for all mons first (may free some space in the bag after all)
                 bool prizeSuccesful = GameplayElementsContainer.GlobalData.GivePrizeToTrainer(prize.Item1, participant, prize.Item2);
                 GameplayElementsContainer.GlobalData.GivePrizeToTrainer($"1 IMP", participant, GameplayElementsContainer.TRAINER_SALARY);
+                GameplayElementsContainer.ConsumeTrainersJewelry(participant); // Needs to be done after due to amulet coin
                 string warningString = GameplayElementsContainer.GetTrainerInventoryWarning(participant);
                 if (warningString != "")
                 {

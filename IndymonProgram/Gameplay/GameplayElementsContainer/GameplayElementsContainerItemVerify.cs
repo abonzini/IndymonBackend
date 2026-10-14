@@ -63,10 +63,17 @@ namespace Gameplay.GameplayElementsContainer
         public bool GivePrizeToTrainer(string prizeName, TrainerEntity trainer, int count = 1)
         {
             int auxCount = 0;
+            bool shinyPrize = false; // If somehow prize has a star (shiny mon)
+            if (prizeName.Contains('★'))
+            {
+                shinyPrize = true;
+                prizeName = prizeName.Split('★')[0].Trim(); // Get the actual word then
+            }
             switch (GetItemType(prizeName))
             {
                 case ItemType.IMP:
-                    auxCount = trainer.Imp += count * int.Parse(prizeName.ToLower().Split("imp")[0]);
+                    int impMultiplier = (trainer.EquippedJewelry?.Name == "Amulet Coin") ? AMULET_COIN_IMP_MULT : 1;
+                    auxCount = trainer.Imp += impMultiplier * count * int.Parse(prizeName.ToLower().Split("imp")[0]);
                     break;
                 case ItemType.ESSENCE:
                     auxCount = GeneralUtilities.AddtemToCountDictionary(trainer.Essences, Essences[prizeName], count, TrainerEntity.MAX_NUMBER_BAG);
@@ -111,7 +118,7 @@ namespace Gameplay.GameplayElementsContainer
                             Name = prizeName,
                             Species = Dex[prizeName],
                             PokeBall = PokeBalls["Poke Ball"], // Pokeball unless specified otherwise
-                            IsShiny = CommonRng.Next(0, SHINY_CHANCE) == 0
+                            IsShiny = shinyPrize
                         };
                         RandomizePokemon(newMon, CommonRng);
                         if (trainer.Pokemon.Count < TrainerEntity.MAX_NUMBER_POKEMON) // Add to party if there's space

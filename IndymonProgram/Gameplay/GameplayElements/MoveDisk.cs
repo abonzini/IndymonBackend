@@ -16,7 +16,7 @@
         /// <param name="itemName">Name of item to parse (contains all the data)</param>
         /// <param name="moveDb">Place where to look up moves</param>
         /// <returns>The Parsed move</returns>
-        public static MoveDisk Parse(string itemName, Dictionary<string, Move> moveDb)
+        internal static MoveDisk Parse(string itemName, Dictionary<string, Move> moveDb)
         {
             MoveDisk resultingItem = new MoveDisk
             {

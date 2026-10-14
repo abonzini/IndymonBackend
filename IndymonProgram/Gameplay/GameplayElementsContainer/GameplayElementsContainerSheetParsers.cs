@@ -83,14 +83,15 @@ namespace Gameplay.GameplayElementsContainer
                 const int SPATK_FIELD = 6;
                 const int SPDEF_FIELD = 7;
                 const int SPEED_FIELD = 8;
-                const int WEIGHT_FIELD = 10;
-                const int HEIGHT_FIELD = 11;
-                const int ABILITY_1_FIELD = 12;
-                const int ABILITY_2_FIELD = 13;
-                const int ABILITY_3_FIELD = 14;
-                const int PREEVO_FIELD = 15;
-                const int ALTERNATE_OF_FIELD = 16;
-                const int IMAGE_URL_FIELD = 17;
+                const int RANK_FIELD = 10;
+                const int WEIGHT_FIELD = 11;
+                const int HEIGHT_FIELD = 12;
+                const int ABILITY_1_FIELD = 13;
+                const int ABILITY_2_FIELD = 14;
+                const int ABILITY_3_FIELD = 15;
+                const int PREEVO_FIELD = 16;
+                const int ALTERNATE_OF_FIELD = 17;
+                const int IMAGE_URL_FIELD = 18;
                 string nextPokemonName = fields[NAME_FIELD];
                 PokemonSpecies thePokemon = Dex[nextPokemonName];
                 thePokemon.Name = nextPokemonName;
@@ -106,6 +107,7 @@ namespace Gameplay.GameplayElementsContainer
                 double SpecialDefense = int.Parse(fields[SPDEF_FIELD]);
                 double Speed = int.Parse(fields[SPEED_FIELD]);
                 thePokemon.Stats = [Hp, Attack, Defense, SpecialAttack, SpecialDefense, Speed];
+                thePokemon.Rank = int.Parse(fields[RANK_FIELD]);
                 thePokemon.Weight = double.Parse(fields[WEIGHT_FIELD]);
                 thePokemon.Height = double.Parse(fields[HEIGHT_FIELD]);
                 // Ability

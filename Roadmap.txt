@@ -26,10 +26,10 @@ Rub-a-Dub pond          - FaiNorWat     - Regigigas (titan plate 6)
 
 TODO:
     - With this in mind, redo dungeon (APP) and trainer(s) Brock + NPCs, shops
-        - Shards consume 5 items
+        - Shards consumes 5 items
+        - or 3 for the others Ig
     - Finally, huge dungeon rework, leave space for anim and use new battle thing
     - Expl: Some big changes in item handling and expl mechanics
-- Cleanup of unneccessary elements in code (including battle statistics) and old stuff
 - Cleanup: Ensure mechanics data with that name is not there anymore
 - For game proper: tile proj:
 1-1-2
@@ -125,3 +125,8 @@ Post-Charge: Targets the enemy that dealt the most recent damage or the one dire
 Careful
 While Charging: Scans the grid, actively pathing around hazards, traps, or bottlenecked areas to stay safe.
 Post-Charge: Double-checks target validity; only fires if the target is safely within range and line-of-sight is completely clear.
+
+- Anim:
+    - RendererState will be a common instance when generating something to render, choose base path and file name, current frame (and fps? I.e. all relevant info and resolutions)
+    - IndividualRenderers which all inherit. They have an internal state and are given actions, either action one by one, or a queue of actions, maybe will be each renderer it's own thing
+    - A tourn or expl then starts doing bracket/maze and updating, until battle begins, then transition out and start with a battle renderer, one that takes queue

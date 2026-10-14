@@ -2,6 +2,7 @@
 {
     public enum TrainerRank
     {
+        WILD_MONS, // For PvE exploration fights
         UNRANKED,
         GYM,
         ELITE4,

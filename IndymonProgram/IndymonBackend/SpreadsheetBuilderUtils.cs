@@ -103,7 +103,7 @@ namespace IndymonBackendProgram
             List<int> difficulties = [];
             while (difficulties.Count < orderedDungeons.Count) // Fill to at least the number of dungeons
             {
-                List<int> nextDiffSet = [1, 2, 3, 4, 5]; // 5 Difficulties total
+                List<int> nextDiffSet = [1, 2, 3, 4, 5, 6]; // 6 Difficulties total
                 GeneralUtilities.ShuffleList(nextDiffSet, GameplayElementsContainer.GlobalData.CommonRng); // Shuffle it
                 difficulties.AddRange(nextDiffSet); // Append to diff, this way the diff is random but each level is guaranteed
             }
@@ -125,11 +125,12 @@ namespace IndymonBackendProgram
                 nextElements = [.. nextDungeon.RareDrops.Select(c => c.Name)];
                 fileBuilder.AppendLine($"Rare Items,{string.Join(",", nextElements.ToList().Order())}");
                 // Then check pokemon, considering weather is important
-                for (int f = 0; f < nextDungeon.Floors.Count; f++)
+                nextElements = [.. nextDungeon.WeatherMons["ALL"]];
+                nextElements.UnionWith([.. nextDungeon.WeatherMons[nextDungeon.CurrentWeather.Name]]);
+                for (int f = 0; f < GameplayElementsContainer.DUNGEON_NUM_FLOORS; f++)
                 {
-                    nextElements = [.. nextDungeon.Floors[f].WeatherMons["ALL"]];
-                    nextElements.UnionWith([.. nextDungeon.Floors[f].WeatherMons[nextDungeon.CurrentWeather.Name]]);
-                    fileBuilder.AppendLine($"Floor {f + 1},{string.Join(",", nextElements.ToList().Order())}");
+                    // This floor will only have mons of its corresponding rank
+                    fileBuilder.AppendLine($"Floor {f + 1},{string.Join(",", nextElements.Where(m => GameplayElementsContainer.GlobalData.Dex[m].Rank == f + 1).ToList().Order())}");
                 }
                 // Boss, this has the potential of breaking HARD if params 0/1 are not the boss anymore
                 fileBuilder.AppendLine($"Floor 3 Boss,{nextDungeon.FinalBossEncounter.Params[0]},Reward,{nextDungeon.FinalBossEncounter.Params[1]}");

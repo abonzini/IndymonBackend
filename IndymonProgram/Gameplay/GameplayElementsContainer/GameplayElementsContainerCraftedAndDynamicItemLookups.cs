@@ -48,5 +48,9 @@ namespace Gameplay.GameplayElementsContainer
             }
             return sando;
         }
+        public Sandwich GetSandwichByEffect(SandwichEffectType effect, int lvl, int duration)
+        {
+            return GetSandwich(Sandwich.CreateName(effect, lvl, duration));
+        }
     }
 }

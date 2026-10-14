@@ -14,9 +14,9 @@ namespace Gameplay.GameplayElementsContainer
         /// <param name="itemEquipChance">Chance of using each of the npc's item on a mon</param>
         /// <param name="usedItemsOut">Output of the items that have been used in this design (for exploration droprate), list WILL be modified</param>
         /// <returns>An instantiated trainer entity to use in battles and such. usedItems list will be also filled</returns>
-        public TrainerEntity CreateNpcEntity(string npcId, int nMons, int rngSeed, double itemEquipChance, List<string> usedItemsOut)
+        public TrainerEntity CreateNpcEntity(string npcId, int nMons, int rngSeed, double itemEquipChance, int shinyChance, List<string> usedItemsOut)
         {
-            return CreateNpcEntity(AllNpcTrainers[npcId], nMons, rngSeed, itemEquipChance, usedItemsOut);
+            return CreateNpcEntity(AllNpcTrainers[npcId], nMons, rngSeed, itemEquipChance, shinyChance, usedItemsOut);
         }
         /// <summary>
         /// Given an npc name, create a trainer instance (temporary) to be used for NPC battles (e.g. wild Pokemon)
@@ -27,7 +27,7 @@ namespace Gameplay.GameplayElementsContainer
         /// <param name="monItemChance">Chance of using each of the npc's item on a mon. If chance > 1 can roll multiple times!</param>
         /// <param name="usedItemsOut">Output of the items that have been used in this design (for exploration droprate), list WILL be modified</param>
         /// <returns>An instantiated trainer entity to use in battles and such. usedItems list will be also filled</returns>
-        public TrainerEntity CreateNpcEntity(NpcTrainer npcTrainer, int nMons, int rngSeed, double itemChance, List<string> usedItemsOut)
+        public TrainerEntity CreateNpcEntity(NpcTrainer npcTrainer, int nMons, int rngSeed, double itemChance, int shinyChance, List<string> usedItemsOut)
         {
             if (!npcTrainer.FullyLoadedData) throw new Exception("Randomizing a trainer that has no data!");
             Random npcRng = new Random(rngSeed);
@@ -53,7 +53,7 @@ namespace Gameplay.GameplayElementsContainer
                     Name = chosenSpecies.Name,
                     Species = chosenSpecies,
                     PokeBall = PokeBalls["Poke Ball"], // All npc mons have a pokeball unless specified otherwise
-                    IsShiny = npcRng.Next(0, SHINY_CHANCE) == 0
+                    IsShiny = npcRng.Next(0, shinyChance) == 0
                 };
                 RandomizePokemon(newMon, npcRng); // Randomize the rest for this mon
                 // Now, the fun part, if an item is to be assigned to this mon, do a roll and equip where corresponds, only one of each item type ok?
@@ -112,13 +112,7 @@ namespace Gameplay.GameplayElementsContainer
         /// <param name="nMons">Mons whose items will be consumed (as not all would've participated in battle</param>
         public static void ConsumeTrainersItems(TrainerEntity trainer, int nMons = int.MaxValue)
         {
-            // Verify if jewelry ran out
-            trainer.EquippedJewelryUses--;
-            if (trainer.EquippedJewelryUses <= 0)
-            {
-                trainer.EquippedJewelry = null;
-            }
-            // Then, verify mon items
+            // Verify mon items
             for (int i = 0; i < trainer.Pokemon.Count && i < nMons; i++)
             {
                 PokemonEntity mon = trainer.Pokemon[i];
@@ -178,6 +172,22 @@ namespace Gameplay.GameplayElementsContainer
                             mon.MoveDisks[j] = null;
                         }
                     }
+                }
+            }
+        }
+        /// <summary>
+        /// Consumes an use of trainer's jewelry
+        /// </summary>
+        /// <param name="trainer">Trainer to check jewelry</param>
+        public static void ConsumeTrainersJewelry(TrainerEntity trainer)
+        {
+            if (trainer.EquippedJewelry != null)
+            {
+                // Verify if jewelry ran out
+                trainer.EquippedJewelryUses--;
+                if (trainer.EquippedJewelryUses <= 0)
+                {
+                    trainer.EquippedJewelry = null;
                 }
             }
         }

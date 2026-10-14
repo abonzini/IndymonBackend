@@ -9,7 +9,7 @@ namespace Gameplay.GameEngine
     /// </summary>
     public enum BattleAvailability
     {
-        NORMAL,
+        READY,
         BUSY,
         FAINT,
     }
@@ -26,8 +26,11 @@ namespace Gameplay.GameEngine
     {
         public string Name = "";
         public double HpPercent = 1;
+        public bool IsShiny = false;
         public List<NonVolatileStatus> NonVolatileStatusConditions = [];
         public HashSet<AdditionalPokemonParameter> AdditionalParameters = [];
-        public BattleAvailability Availability = BattleAvailability.NORMAL;
+        public BattleAvailability Availability = BattleAvailability.READY;
+        public double[] BaseStatMult = [1, 1, 1, 1, 1, 1];
+        public double[] VolatileStatMult = [1, 1, 1, 1, 1, 1];
     }
 }

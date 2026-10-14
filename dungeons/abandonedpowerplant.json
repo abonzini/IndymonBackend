@@ -179,157 +179,125 @@
             "Max": 3
         }
     ],
-    "Floors": [
-        {
-            "WeatherMons": {
-                "ALL": [
-                    "Magnemite",
-                    "Voltorb",
-                    "Elekid",
-                    "Mareep",
-                    "Plusle",
-                    "Minun",
-                    "Joltik",
-                    "Klink",
-                    "Grubbin",
-                    "Varoom",
-                    "Yamper"
-                ],
-                "No Weather": [
-                    "Voltorb-Alola",
-                    "Koffing",
-                    "Whismur",
-                    "Electrike",
-                    "Gulpin",
-                    "Drifloon",
-                    "Trubbish",
-                    "Salandit",
-                    "Shroodle"
-                ],
-                "Flood": [
-                    "Grimer",
-                    "Grimer-Alola",
-                    "Chinchou",
-                    "Wooper-Paldea",
-                    "Tynamo",
-                    "Skrelp",
-                    "Wattrel",
-                    "Tadbulb"
-                ],
-                "High Voltage Arcs": [
-                    "Pichu",
-                    "Geodude-Alola",
-                    "Shinx",
-                    "Pawmi",
-                    "Toxel"
-                ],
-                "Ion Deluge": [
-                    "Eevee",
-                    "Porygon",
-                    "Beldum",
-                    "Blitzle",
-                    "Tinkatink"
-                ]
-            }
-        },
-        {
-            "WeatherMons": {
-                "ALL": [
-                    "Magneton",
-                    "Electrode",
-                    "Electabuzz",
-                    "Rotom",
-                    "Emolga",
-                    "Klang",
-                    "Charjabug",
-                    "Boltund"
-                ],
-                "No Weather": [
-                    "Wormadam-Trash",
-                    "Electrode-Alola",
-                    "Weezing",
-                    "Flaafy",
-                    "Loudred",
-                    "Manectric",
-                    "Swalot",
-                    "Drifblim",
-                    "Helioptile",
-                    "Morpeko",
-                    "Grafaiai"
-                ],
-                "Flood": [
-                    "Muk",
-                    "Lanturn",
-                    "Qwilfish-Hisui",
-                    "Eelektrik",
-                    "Stunfisk",
-                    "Pincurchin"
-                ],
-                "High Voltage Arcs": [
-                    "Pikachu",
-                    "Graveler-Alola",
-                    "Luxio",
-                    "Togedemaru",
-                    "Pawmo"
-                ],
-                "Ion Deluge": [
-                    "Porygon2",
-                    "Metang",
-                    "Pachirisu",
-                    "Zebstrika",
-                    "Duraludon",
-                    "Tinkatuff"
-                ]
-            }
-        },
-        {
-            "WeatherMons": {
-                "ALL": [
-                    "Magnezone",
-                    "Electivire",
-                    "Galvantula",
-                    "Klingklang",
-                    "Dedenne",
-                    "Vikavolt",
-                    "Revavroom"
-                ],
-                "No Weather": [
-                    "Weezing-Alola",
-                    "Ampharos",
-                    "Exploud",
-                    "Garbodor",
-                    "Heliolisk",
-                    "Salazzle"
-                ],
-                "Flood": [
-                    "Muk-Alola",
-                    "Clodsire",
-                    "Eelektross",
-                    "Stunfisk-Galar",
-                    "Dragalge",
-                    "Bellibolt",
-                    "Kilowattrel",
-                    "Overqwill"
-                ],
-                "High Voltage Arcs": [
-                    "Raichu",
-                    "Raichu-Alola",
-                    "Golem-Alola",
-                    "Toxtricity",
-                    "Luxray",
-                    "Pawmot"
-                ],
-                "Ion Deluge": [
-                    "Jolteon",
-                    "Porygon-Z",
-                    "Metagross",
-                    "Klefki",
-                    "Archaludon",
-                    "Tinkaton"
-                ]
-            }
-        }
-    ],
+    "WeatherMons": {
+        "ALL": [
+            "Magnemite",
+            "Voltorb",
+            "Elekid",
+            "Mareep",
+            "Plusle",
+            "Minun",
+            "Joltik",
+            "Klink",
+            "Grubbin",
+            "Varoom",
+            "Yamper",
+            "Magneton",
+            "Electrode",
+            "Electabuzz",
+            "Rotom",
+            "Emolga",
+            "Klang",
+            "Charjabug",
+            "Boltund",
+            "Magnezone",
+            "Electivire",
+            "Galvantula",
+            "Klinklang",
+            "Dedenne",
+            "Vikavolt",
+            "Revavroom"
+        ],
+        "No Weather": [
+            "Voltorb-Hisui",
+            "Koffing",
+            "Whismur",
+            "Electrike",
+            "Gulpin",
+            "Drifloon",
+            "Trubbish",
+            "Salandit",
+            "Shroodle",
+            "Wormadam-Trash",
+            "Electrode-Hisui",
+            "Weezing",
+            "Flaafy",
+            "Loudred",
+            "Manectric",
+            "Swalot",
+            "Drifblim",
+            "Helioptile",
+            "Morpeko",
+            "Grafaiai",
+            "Weezing-Galar",
+            "Ampharos",
+            "Exploud",
+            "Garbodor",
+            "Heliolisk",
+            "Salazzle"
+        ],
+        "Flood": [
+            "Grimer",
+            "Grimer-Alola",
+            "Chinchou",
+            "Wooper-Paldea",
+            "Tynamo",
+            "Skrelp",
+            "Wattrel",
+            "Tadbulb",
+            "Muk",
+            "Lanturn",
+            "Qwilfish-Hisui",
+            "Eelektrik",
+            "Stunfisk",
+            "Pincurchin",
+            "Muk-Alola",
+            "Clodsire",
+            "Eelektross",
+            "Stunfisk-Galar",
+            "Dragalge",
+            "Bellibolt",
+            "Kilowattrel",
+            "Overqwil"
+        ],
+        "High Voltage Arcs": [
+            "Pichu",
+            "Geodude-Alola",
+            "Shinx",
+            "Pawmi",
+            "Toxel",
+            "Pikachu",
+            "Graveler-Alola",
+            "Luxio",
+            "Togedemaru",
+            "Pawmo",
+            "Raichu",
+            "Raichu-Alola",
+            "Golem-Alola",
+            "Toxtricity",
+            "Luxray",
+            "Pawmot"
+        ],
+        "Ion Deluge": [
+            "Eevee",
+            "Porygon",
+            "Beldum",
+            "Blitzle",
+            "Tinkatink",
+            "Porygon2",
+            "Metang",
+            "Pachirisu",
+            "Zebstrika",
+            "Duraludon",
+            "Tinkatuff",
+            "Jolteon",
+            "Porygon-Z",
+            "Metagross",
+            "Klefki",
+            "Archaludon",
+            "Tinkaton"
+        ]
+    },
     "EncounterPool": [
         {
             "Type": "TREASURE",
@@ -458,7 +426,7 @@
             "EncounterFailureString": "Arven is such a beginner! A real explorer always has a whole bag full of Sandwiches, gotta go!"
         },
         {
-            "Type": "POKEMON_BATTLE",
+            "Type": "SCRIPTED_BATTLE",
             "Category": "DANGER",
             "Note": "Homage to the magnemite vs grimer episode",
             "PreEventString": "Suddenly. you're caught in the crossfire in a war for territory between two species of Pokemon that reside in the power plant.",
@@ -477,11 +445,11 @@
             "Enemy2EquipType": "NONE",
             "Enemy2Number": 7,
             "EncounterMaxSimultaneousEnemyMons": 7,
-            "PrizeType": "EQUIPPED_ITEMS"
+            "PrizeType": "NONE"
         }
     ],
     "FinalBossEncounter": {
-        "Type": "POKEMON_BATTLE",
+        "Type": "SCRIPTED_BATTLE",
         "Category": "SCRIPTED",
         "PreEncounterString": "You reach the power plant's generator. The energy in this room is out of control. In the center, absorbing most of the energy a titan made of pure electricity. Before you can react, it starts moving all over the place...",
         "EncounterSuccessString": "As you defeat the titan, the whole power plant starts to make a deafening noise. Parts start moving and the Power Plant starts sparking. Better leave ASAP.",
@@ -526,7 +494,7 @@
     },
     "BossEncounters": [
         {
-            "Type": "POKEMON_BATTLE",
+            "Type": "SCRIPTED_BATTLE",
             "Category": "SCRIPTED",
             "PreEncounterString": "You have disturbed a nest belonging to a mother $1. She'll do the best to defend it's babies.",
             "EncounterSuccessString": "$1 has calmed down and is now hiding with their babies. You proceed forward.",
@@ -563,7 +531,7 @@
             "PrizeType": "NONE"
         },
         {
-            "Type": "POKEMON_BATTLE",
+            "Type": "SCRIPTED_BATTLE",
             "Category": "SCRIPTED",
             "PreEncounterString": "You have arrived to a huge room. An enormous $1 is in the middle, suffering. It seems the great energies of this place have overloaded it and it's out of control.",
             "EncounterSuccessString": "$1 releases all of it's energy and recovers. It's extremely thankful.",
@@ -597,7 +565,7 @@
             ]
         },
         {
-            "Type": "POKEMON_BATTLE",
+            "Type": "SCRIPTED_BATTLE",
             "Category": "SCRIPTED",
             "PreEncounterString": "You have crossed eyes with an angry $1. Apparently it's the boss of this floor, and you're in their territory!.",
             "EncounterSuccessString": "$1 runs away scared, it seems you're the Power Plant Boss now.",

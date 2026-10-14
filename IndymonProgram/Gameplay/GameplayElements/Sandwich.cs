@@ -7,7 +7,7 @@
         ITEM_DROP,
         SHINY_CHANCE,
         POST_HEALING,
-        LEVEL
+        STAT_MULT
     }
     public class Sandwich : GameplayElement
     {
@@ -16,7 +16,7 @@
         const string ITEM_DROP_FLAVOUR = "Sour";
         const string SHINY_CHANCE_FLAVOUR = "Salty";
         const string POST_HEALING_FLAVOUR = "Bitter";
-        const string LEVEL_FLAVOUR = "Spicy";
+        const string STAT_MULT_FLAVOUR = "Spicy";
         // Data
         public int Level = 0;
         public int Duration = 0;
@@ -36,8 +36,8 @@
                 case SandwichEffectType.ITEM_DROP:
                     result += "When you get items after a battle, you get more.";
                     break;
-                case SandwichEffectType.LEVEL:
-                    result += "Increases the level (and therefore stats) of your Pokemon during battles.";
+                case SandwichEffectType.STAT_MULT:
+                    result += "Increases the stat multiplier of your Pokemon during battles.";
                     break;
                 case SandwichEffectType.SHINY_CHANCE:
                     result += "Increases the chance of finding Shiny Pokemon.";
@@ -53,13 +53,46 @@
             result += $" Lasts for {Duration} turns.";
             return result;
         }
+        // Generator
+        internal static string CreateName(SandwichEffectType effect, int lvl, int duration)
+        {
+            string sandwichName = effect switch
+            {
+                SandwichEffectType.ENEMY_NUMBER => ENEMY_NUMBER_FLAVOUR,
+                SandwichEffectType.ITEM_DROP => ITEM_DROP_FLAVOUR,
+                SandwichEffectType.SHINY_CHANCE => SHINY_CHANCE_FLAVOUR,
+                SandwichEffectType.POST_HEALING => POST_HEALING_FLAVOUR,
+                SandwichEffectType.STAT_MULT => STAT_MULT_FLAVOUR,
+                _ => throw new Exception("Not a recognized sandwich type")
+            };
+            sandwichName += " ";
+            while (lvl > 0)
+            {
+                if (lvl >= 10) { sandwichName += "X"; lvl -= 10; }
+                else if (lvl == 9) { sandwichName += "IX"; lvl -= 9; }
+                else if (lvl >= 5) { sandwichName += "V"; lvl -= 5; }
+                else if (lvl == 4) { sandwichName += "IV"; lvl -= 4; }
+                else { sandwichName += "I"; lvl--; }
+            }
+            sandwichName += " " + duration switch
+            {
+                1 => "Single",
+                2 => "Double",
+                3 => "Triple",
+                4 => "Quadruple",
+                5 => "Quintuple",
+                _ => throw new Exception($"Unhandled sandwich duration {duration}")
+            };
+            sandwichName += " Sandwich";
+            return sandwichName; // Return this name to be called
+        }
         // Parser
         /// <summary>
         /// Parses a sandwich by its name
         /// </summary>
         /// <param name="sandwichName">Name of sandwich to parse (contains all the data)</param>
         /// <returns>The Parsed sandwich</returns>
-        public static Sandwich Parse(string sandwichName)
+        internal static Sandwich Parse(string sandwichName)
         {
             Sandwich resultingSandwich = new Sandwich
             {
@@ -75,7 +108,7 @@
                 ITEM_DROP_FLAVOUR => SandwichEffectType.ITEM_DROP,
                 SHINY_CHANCE_FLAVOUR => SandwichEffectType.SHINY_CHANCE,
                 POST_HEALING_FLAVOUR => SandwichEffectType.POST_HEALING,
-                LEVEL_FLAVOUR => SandwichEffectType.LEVEL,
+                STAT_MULT_FLAVOUR => SandwichEffectType.STAT_MULT,
                 _ => throw new Exception($"Sandwich flavour {nameParts[0]} not implemented"),
             };
             resultingSandwich.CramType = nameParts[0] switch
@@ -84,13 +117,13 @@
                 ITEM_DROP_FLAVOUR => PokemonType.GRASS,
                 SHINY_CHANCE_FLAVOUR => PokemonType.ROCK,
                 POST_HEALING_FLAVOUR => PokemonType.DARK,
-                LEVEL_FLAVOUR => PokemonType.FIRE,
+                STAT_MULT_FLAVOUR => PokemonType.FIRE,
                 _ => throw new Exception($"Sandwich flavour {nameParts[0]} not implemented"),
             };
             // Check level (roman numeral calculator lmao)
             resultingSandwich.Level = 0;
             char prevLetter = ' ';
-            foreach (char letter in nameParts[2])
+            foreach (char letter in nameParts[1])
             {
                 resultingSandwich.Level += letter switch
                 {

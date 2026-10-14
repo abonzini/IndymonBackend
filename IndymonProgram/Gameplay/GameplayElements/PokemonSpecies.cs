@@ -9,6 +9,7 @@
         public PokemonSpecies AlternativeOf = null;
         public List<PokemonSpecies> WildAlternatives = new List<PokemonSpecies>();
         public double[] Stats = new double[6]; // All stats, hopefully init to 0
+        public int Rank = 1;
         public double Weight = 0.0f;
         public double Height = 0.0f;
         public HashSet<Move> Moveset = new HashSet<Move>();

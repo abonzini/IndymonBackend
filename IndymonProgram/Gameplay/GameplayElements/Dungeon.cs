@@ -8,7 +8,8 @@ namespace Gameplay.GameplayElements
     public enum EncounterType
     {
         UNKNOWN, /// This is an error
-        POKEMON_BATTLE, /// Starts a Pokemon Battle with mons of the floor and generic layout
+        PROCEDURAL_WILD_POKEMON_BATTLE, /// Starts a Pokemon Battle with mons of the floor and generic layout
+        SCRIPTED_BATTLE, /// Any scripted battle event (boss or special), not affected by quant sandwiches
         CAMPING, /// Camping event
         TREASURE, /// Player gets a free treasure prize from rare item pool
         GUARDED_TREASURE, /// A treasure but a mon is equipping it, uses generic room layout
@@ -24,8 +25,6 @@ namespace Gameplay.GameplayElements
         NPC_BATTLE, /// A trainer npc battles you to 3v3. Heals your current first 3 (or some random fainted if can't do 3). Losing battle doesn't end dungeon though. Different to other wild battles due to the forced 3v3 natures and instancing of an NPC. Additionally, the NPC battle is proportional to the danger lvl
         PLATE, /// Find a random evo plate
         MOVE_DISK, /// Find a random Move Disk as well as a type disk and some blanks
-        BABIES, /// Fight 6 mons from first floor but with 0.75 stat mult
-        SWARM, /// Fight 6 mons from current floor but with 0.75 stat mult
         UNOWN, /// Unown event, they form a word. You fight them and get the item if win. Unowns have a dynamic stat mult that scales
         IMP_GAIN, /// Gives IMP
         SANDWICH, /// Gives Sandwich
@@ -33,7 +32,7 @@ namespace Gameplay.GameplayElements
     [JsonConverter(typeof(StringEnumConverter))]
     public enum EncounterCategory
     {
-        SCRIPTED, // Scripted rooms, would never appear normally unless scripted
+        SCRIPTED, // Scripted rooms, would never appear normally unless scripted (bosses mostly)
         REFRESH, // Heal/refresh rooms
         PRIZE, // Prize rooms
         NEUTRAL, // Neutral rooms
@@ -90,7 +89,7 @@ namespace Gameplay.GameplayElements
     public class Encounter
     {
         public EncounterType Type { get; set; } = EncounterType.UNKNOWN; /// What type of encounter it is (good for scoring and for illustrating)
-        public EncounterCategory Category = EncounterCategory.SCRIPTED; /// What type of cateogry to be bunched in probabilistics
+        public EncounterCategory Category { get; set; } = EncounterCategory.SCRIPTED; /// What type of cateogry to be bunched in probabilistics
         // For strings, $X uses the corresponding string param
         public string PreEncounterString { get; set; } = ""; /// String that shows in beginning of encounter
         public string EncounterSuccessString { get; set; } = ""; /// String that shows in end of encounter (if event was succesful)
@@ -100,14 +99,14 @@ namespace Gameplay.GameplayElements
         public double BaseWeight { get; set; } = 1; /// Weight of event to be compared with others, to create "rare" events
         public List<WeatherForecast> WeatherOverride { get; set; } = [];
         // For battle events, there's Enemy1 and Enemy2, this allows for both Boss + Followers (1 and 2 respectively) or 2 separate group of enemies in some fights
-        public Side Enemy1Side { get; set; } = Side.TOP; // By default, enemy and all in same team
+        public Side Enemy1Side { get; set; } = Side.TOP; /// By default, enemy and all in same team
         public HashSet<AdditionalPokemonParameter> Enemy1Parameters { get; set; } = [];
         public double[] Enemy1StatMult { get; set; } = [1, 1, 1, 1, 1, 1];
         public EncounterEnemyType Enemy1Type { get; set; } = EncounterEnemyType.NONE;
         public EncounterItemType Enemy1EquipType { get; set; } = EncounterItemType.NONE;
         public double Enemy1EquipChance { get; set; } = 0;
         public int Enemy1Number { get; set; } = 0; /// How many enemies to add to this (Boss not counted if a boss fight)
-        public Side Enemy2Side { get; set; } = Side.TOP; // By default, enemy and all in same team
+        public Side Enemy2Side { get; set; } = Side.TOP; /// By default, enemy and all in same team
         public double[] Enemy2StatMult { get; set; } = [1, 1, 1, 1, 1, 1];
         public EncounterEnemyType Enemy2Type { get; set; } = EncounterEnemyType.NONE;
         public EncounterItemType Enemy2EquipType { get; set; } = EncounterItemType.NONE;
@@ -118,10 +117,6 @@ namespace Gameplay.GameplayElements
         {
             return Type.ToString();
         }
-    }
-    public class Floor
-    {
-        public Dictionary<string, HashSet<string>> WeatherMons { get; set; } /// Contains which mons are found for each weather (key). There's an ALL keyword with mons that appear in all weathers
     }
     public class Dungeon
     {
@@ -134,7 +129,7 @@ namespace Gameplay.GameplayElements
         public double GeneralItemDropChance { get; set; }
         public List<ItemDrops> CommonDrops { get; set; }
         public List<ItemDrops> RareDrops { get; set; }
-        public List<Floor> Floors { get; set; }
+        public Dictionary<string, HashSet<string>> WeatherMons { get; set; } /// Contains which mons are found for each weather (key). There's an ALL keyword with mons that appear in all weathers
         public List<Encounter> EncounterPool { get; set; }
         public List<Encounter> BossEncounters { get; set; }
         public Encounter FinalBossEncounter { get; set; }
