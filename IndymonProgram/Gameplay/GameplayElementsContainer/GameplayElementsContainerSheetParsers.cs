@@ -227,29 +227,6 @@ namespace Gameplay.GameplayElementsContainer
             }
         }
         /// <summary>
-        /// Gets the list of evolution plates
-        /// </summary>
-        /// <param name="sheetId">Sheet to google sheets</param>
-        /// <param name="sheetTab">Which tab has the data</param>
-        void ParseEvoPlateList(string sheetId, string sheetTab)
-        {
-            Console.WriteLine("Parsing Evolution Plates");
-            EvoPlates.Clear();
-            // Parse csv
-            string csv = GeneralUtilities.GetCsvFromGoogleSheets(sheetId, sheetTab);
-            string[] lines = csv.Split("\n");
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string[] fields = lines[i].Split(","); // Csv
-                EvoPlate newPlate = new EvoPlate()
-                {
-                    Name = fields[0],
-                    Type = Enum.Parse<PokemonType>(fields[1].Trim().ToUpper()),
-                };
-                EvoPlates.Add(newPlate.Name, newPlate);
-            }
-        }
-        /// <summary>
         /// Fills NPC data for existing NPCs given a place in the spreadseet
         /// </summary>
         /// <param name="sheetId">Sheet to google sheets</param>

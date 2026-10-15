@@ -12,6 +12,7 @@ namespace Gameplay.GameplayElementsContainer
         /// <param name="nMons">Number of mons to give this NPC</param>
         /// <param name="rngSeed">Seed to be used for making NPC team</param>
         /// <param name="itemEquipChance">Chance of using each of the npc's item on a mon</param>
+        /// <param name="shinyChance">Chance of each indiv mon being shiny!</param>
         /// <param name="usedItemsOut">Output of the items that have been used in this design (for exploration droprate), list WILL be modified</param>
         /// <returns>An instantiated trainer entity to use in battles and such. usedItems list will be also filled</returns>
         public TrainerEntity CreateNpcEntity(string npcId, int nMons, int rngSeed, double itemEquipChance, int shinyChance, List<string> usedItemsOut)
@@ -22,9 +23,10 @@ namespace Gameplay.GameplayElementsContainer
         /// Given an npc name, create a trainer instance (temporary) to be used for NPC battles (e.g. wild Pokemon)
         /// </summary>
         /// <param name="npcTrainer">Name of Npc to init</param>
-        /// <param name="nMons">Number of mons to give this NPC</param>
+        /// <param name="nMons">Number of mons to give this NPC. If int.max will just use all the mon table. Otherwise it'll repeat mons until number is fulfilled</param>
         /// <param name="rngSeed">Seed to be used for making NPC team</param>
-        /// <param name="monItemChance">Chance of using each of the npc's item on a mon. If chance > 1 can roll multiple times!</param>
+        /// <param name="itemChance">Chance of using each of the npc's item on a mon. If chance > 1 can roll multiple times!</param>
+        /// <param name="shinyChance">Chance of each indiv mon being shiny!</param>
         /// <param name="usedItemsOut">Output of the items that have been used in this design (for exploration droprate), list WILL be modified</param>
         /// <returns>An instantiated trainer entity to use in battles and such. usedItems list will be also filled</returns>
         public TrainerEntity CreateNpcEntity(NpcTrainer npcTrainer, int nMons, int rngSeed, double itemChance, int shinyChance, List<string> usedItemsOut)
@@ -38,16 +40,29 @@ namespace Gameplay.GameplayElementsContainer
                 Name = npcTrainer.Name,
                 AutoTeam = true
             };
-            List<PokemonSpecies> allSpecies = [.. npcTrainer.AvailablePokemon]; // Copy as it'll be shuffled
-            GeneralUtilities.ShuffleList(allSpecies, npcRng);
-            for (int i = 0; i < nMons && i < allSpecies.Count; i++) // Add species until no more to add
+            // Shuffled list
+            List<PokemonSpecies> allSpeciesShuffled = [.. npcTrainer.AvailablePokemon]; // Copy as it'll be shuffled
+            GeneralUtilities.ShuffleList(allSpeciesShuffled, npcRng);
+            // Iterator function that will re-generate allSpeciesShuffled
+            IEnumerable<PokemonSpecies> RepeatPokemonGenerator()
             {
-                PokemonSpecies chosenSpecies = allSpecies[i];
-                // Fetch alternatives of the mon to get all variations
-                if (chosenSpecies.WildAlternatives.Count != 0) // Pokemon has wild alternatives, and thus any of this could be used in its place
+                int totalYielded = 0;
+                int i = 0;
+                while (totalYielded < nMons)
                 {
-                    chosenSpecies = GeneralUtilities.GetRandomPick([.. chosenSpecies.WildAlternatives], npcRng);
+                    if (i > allSpeciesShuffled.Count) // If reached end, reset and reshuffle list
+                    {
+                        i = 0;
+                        GeneralUtilities.ShuffleList(allSpeciesShuffled, npcRng);
+                    }
+                    yield return allSpeciesShuffled[i];
                 }
+                yield break;
+            }
+            // Ok now I add mons one by one
+            IEnumerable<PokemonSpecies> monIterator = (nMons == int.MaxValue) ? allSpeciesShuffled : RepeatPokemonGenerator();
+            foreach (PokemonSpecies chosenSpecies in monIterator)
+            {
                 PokemonEntity newMon = new PokemonEntity()
                 {
                     Name = chosenSpecies.Name,

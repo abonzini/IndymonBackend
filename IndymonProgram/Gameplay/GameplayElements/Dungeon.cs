@@ -48,7 +48,7 @@ namespace Gameplay.GameplayElements
             return $"{Name} ({Chance * 100}%)";
         }
     }
-    public class ItemDrops
+    public class ItemDrop
     {
         public string Name { get; set; }
         public int Min { get; set; }
@@ -127,8 +127,8 @@ namespace Gameplay.GameplayElements
         public List<WeatherForecast> PossibleWeathers { get; set; }
         public WeatherForecast CurrentWeather { get; set; }
         public double GeneralItemDropChance { get; set; }
-        public List<ItemDrops> CommonDrops { get; set; }
-        public List<ItemDrops> RareDrops { get; set; }
+        public List<ItemDrop> CommonDrops { get; set; }
+        public List<ItemDrop> RareDrops { get; set; }
         public Dictionary<string, HashSet<string>> WeatherMons { get; set; } /// Contains which mons are found for each weather (key). There's an ALL keyword with mons that appear in all weathers
         public List<Encounter> EncounterPool { get; set; }
         public List<Encounter> BossEncounters { get; set; }

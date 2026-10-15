@@ -77,6 +77,19 @@ namespace Utilities
             ShuffleList(list, 0, list.Count, rng);
         }
         /// <summary>
+        /// Generates an integer between min-max that decays exponentially
+        /// </summary>
+        /// <param name="min">Min value</param>
+        /// <param name="max">Max value</param>
+        /// <param name="decay">Decay exponent</param>
+        /// <param name="rng">Rng to use to roll</param>
+        /// <returns>The generated random number</returns>
+        public static int GetRandomDecayingNumber(int min, int max, double decay, Random rng)
+        {
+            int amplitude = max - min;
+            return min + (int)Math.Round(Math.Pow(rng.NextDouble(), decay) * amplitude);
+        }
+        /// <summary>
         /// Gets random [min-max)
         /// </summary>
         /// <param name="minInclusive">[min</param>

@@ -36,6 +36,7 @@ namespace GameSimulator
             return new PokemonInstance()
             {
                 Name = pokemon.ToString(), // Print it with nickname w.e.
+                IsShiny = pokemon.IsShiny,
             };
         }
     }
