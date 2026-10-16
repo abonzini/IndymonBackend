@@ -25,6 +25,7 @@ namespace Gameplay.GameEngine
     public class PokemonInstance
     {
         public string Name = "";
+        public PokemonSpecies Species = null;
         public double HpPercent = 1;
         public bool IsShiny = false;
         public List<NonVolatileStatus> NonVolatileStatusConditions = [];

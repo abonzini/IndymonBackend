@@ -285,9 +285,26 @@ namespace IndymonBackendProgram
                         possibleEncountersThisRoom = [
                             new Encounter() // This encounter is simple because there's no scripted overrides just a Pokemon battle with some shit going on
                             {
-                                Type = EncounterType.PROCEDURAL_WILD_POKEMON_BATTLE
+                                Type = EncounterType.SCRIPTED_BATTLE,
+                                Category = EncounterCategory.DANGER,
+                                PreEncounterString = "Suddenly, wild Pokemon attack!",
+                                EncounterSuccessString = "You defeated the wild Pokemon and gathered some items that were dropped: $2", // Prints the prizes
+                                EncounterFailureString = "The Pokemon in this area are quite tough...",
+                                PrizeType = EncounterItemType.EQUIPPED_ITEMS,
+                                UseEnemyCountSandwich = true,
+                                Enemies = [
+                                    new EnemyParams() // Standard enemy params besides these (3 pokemon but variabel length and catchable
+                                    {
+                                        Type = EncounterEnemyType.CURRENT_FLOOR,
+                                        EquipType = EncounterItemType.COMMON_ITEM_POOL,
+                                        EquipChance = GameplayElementsContainer.NPC_ITEM_CHANCE,
+                                        Number = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
+                                        MaxSimultaneousMons = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
+                                        Catchable = true
+                                    }
+                                ]
                             }
-                            ];
+                        ];
                     }
                     else if (isFinalFloor && room == GameplayElementsContainer.DUNGEON_FINAL_BOSS_ROOM)
                     {
@@ -320,7 +337,6 @@ namespace IndymonBackendProgram
             ;
             // Exploration end part
             Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.WriteLine("Exploration end."));
-
             GameplayElementsContainer.ConsumeTrainersItems(_context.TrainerEntity); // Consume all items for all mons
             GameplayElementsContainer.ConsumeTrainersJewelry(_context.TrainerEntity); // Consume jew too
             _context.TrainerEntity.SaveTrainerCsv(DirectoryPath);
@@ -396,9 +412,8 @@ namespace IndymonBackendProgram
                     weight *= (_context.TrainerEntity.Sandwiches.Count == 0) ? 1.2 : 0.8; // If trainer has absolutely no sandwich
                     break;
                 // These events are always base chance
-                case EncounterType.PROCEDURAL_WILD_POKEMON_BATTLE:
+                case EncounterType.SCRIPTED_BATTLE:
                 case EncounterType.TREASURE:
-                case EncounterType.GUARDED_TREASURE:
                 case EncounterType.JOINER:
                 case EncounterType.DAMAGE_TRAP:
                 case EncounterType.STATUS_TRAP:
@@ -421,22 +436,15 @@ namespace IndymonBackendProgram
         {
             // Success or failure, they assemble the string, and then the string is printed in the end once loaded
             Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.WriteLine(encounter.Type.ToString()));
-            bool wasSuccessful = false;
-            List<string> prizePool = []; // Will be added to trainer IF the event is succesful
             // Now execute encounter
             switch (encounter.Type)
             {
-                case EncounterType.PROCEDURAL_WILD_POKEMON_BATTLE:
-                    // Encapsulated because it's a mess
-                    wasSuccessful = ResolveWildPokemonBattle(prizePool);
-                    break;
                 case EncounterType.SCRIPTED_BATTLE:
+                    ResolveBattleAndPrizeEncounter(encounter); // Works kinda for treasures and other stuff too lol
                     break;
                 case EncounterType.CAMPING:
                     break;
                 case EncounterType.TREASURE:
-                    break;
-                case EncounterType.GUARDED_TREASURE:
                     break;
                 case EncounterType.EVO:
                     break;
@@ -1229,58 +1237,197 @@ namespace IndymonBackendProgram
             */
         }
         /// <summary>
-        /// Encapsulation of wild pokemon battle resolution
+        /// Function that digs until the end to find every single relative of the desired Pokemon Species (i.e. it finds all alternates and prevos)
         /// </summary>
-        /// <param name="prizePool"></param>
-        /// <returns>Whether fight was succesful, mostly for string printing</returns>
-        bool ResolveWildPokemonBattle(List<string> prizePool)
+        /// <param name="speciesCollection">The species to look for family</param>
+        /// <returns>The complete family tree but no evos!</returns>
+        static HashSet<PokemonSpecies> GetFamilyHash(IEnumerable<PokemonSpecies> speciesCollection)
         {
-            string encounterStartString = "Suddenly, wild Pokemon attack!";
-            Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.WriteLine(encounterStartString));
-            // Also to put it in etc
-            NpcTrainer wildMonsTrainer = new NpcTrainer()
+            HashSet<PokemonSpecies> resultingSpecies = [];
+            foreach (PokemonSpecies species in speciesCollection)
             {
-                // No name or picture, would be left blank in renderer
-                TrainerRank = TrainerRank.WILD_MONS,
-                FullyLoadedData = true, // It's generated here...
-                AvailablePokemon = [.. _context.EncounterTable.Where(m => m.Rank == _context.CurrentFloor + 1)], // Obtain the actual mons for this floor
-                AvailableItems = [.. _context.DungeonData.CommonDrops.Select(i => i.Name)] // Adds the potential items by name, the actual drop amount will be considered later (if the battle is won!
-            };
-            // How many mons will appear?
-            int numberOfMons = GameplayElementsContainer.DEFAULT_BATTLE_NMONS + _context.GetExtraWildPokemon();
-            if (numberOfMons < 1) // Always at least one enemy...
-            {
-                numberOfMons = 1;
+                resultingSpecies.Add(species);
+                foreach (PokemonSpecies alt in species.WildAlternatives)
+                {
+                    resultingSpecies.UnionWith(GetFamilyHash([alt]));
+                }
+                resultingSpecies.UnionWith(GetFamilyHash([species.Prevo]));
             }
-            // Creates a wild mon entity given the generated "NPC" trainer plus all the stuff needed to instance
-            TrainerEntity wildTrainerEntity = GameplayElementsContainer.GlobalData.CreateNpcEntity(wildMonsTrainer, numberOfMons, _context.Rng.Next(), _context.DungeonData.GeneralItemDropChance, _context.GetShinyChance(), prizePool);
-            // Create instance of all mons
-            TrainerInstance wildTrainerInstance = new TrainerInstance()
+            return resultingSpecies;
+        }
+        /// <summary>
+        /// Resolves an encounter scripted battle. Similar to the wild battle one but this is way more custom. Doesn't use enemy quant sandwiches tho
+        /// </summary>
+        /// <param name="encounter"></param>
+        void ResolveBattleAndPrizeEncounter(Encounter encounter)
+        {
+            int paramsIndex = 0; // Index that will navigate through scripted battle's params
+            List<TrainerInstance> allEnemyInstances = []; // Contains all generated enemy instances that will participate in this fight
+            // Potential prize tables, if the event allows it, both pokemon and items but only filled if catchable
+            List<PokemonInstance> catchableEnemyMons = [];
+            List<string> recoverableItems = [];
+            // Assemble all sides, enemy sides
+            HashSet<PokemonSpecies> speciesUsed = []; // Species that have been used by these enemies
+            foreach (EnemyParams enemy in encounter.Enemies) // Instance, one by one
             {
-                Name = wildTrainerEntity.Name,
-                Team = Side.TOP,
-                MaxMonsInField = GameplayElementsContainer.DEFAULT_BATTLE_NMONS,
-                // No limit for max mon used, will start with 3-10 and then who knows
-                ActiveJewelry = wildTrainerEntity.EquippedJewelry,
-                // Will add mons one by one later due to potential customizations
-            };
-            foreach (PokemonEntity enemyMon in wildTrainerEntity.Pokemon) // Instance one by one
-            {
-                PokemonInstance nextMonInstance = SimulatorHandler.InstancePokemon(enemyMon, _context.Rng);
-                nextMonInstance.BaseStatMult = [.. Enumerable.Repeat(GetDifficultyStatMult(), 6)]; // Its stats do need to be multiplied depending on danger level
-                wildTrainerInstance.PokemonInTeam.Add(nextMonInstance);
+                List<string> itemsUsed = []; // Items that have been used by enemy, there can be duplicates
+                // Assemble what the enemy can be, and what can it have
+                HashSet<PokemonSpecies> availablePokemonSpecies = enemy.Type switch
+                {
+                    EncounterEnemyType.SPECIFIC_POKEMON => [.. encounter.Params[paramsIndex++].Split(",").Select(p => GameplayElementsContainer.GlobalData.Dex[p.Trim()])], // Gets (all the) specific pokemon in the params, separated by commas
+                    EncounterEnemyType.NEXT_FLOOR => [.. _context.EncounterTable.Where(m => m.Rank == Math.Clamp(_context.CurrentFloor + 2, 1, 3))], // Make sure floor not out of bounds!
+                    EncounterEnemyType.CURRENT_FLOOR => [.. _context.EncounterTable.Where(m => m.Rank == Math.Clamp(_context.CurrentFloor + 1, 1, 3))], // Make sure floor not out of bounds!
+                    EncounterEnemyType.PREVIOUS_FLOOR => [.. _context.EncounterTable.Where(m => m.Rank == Math.Clamp(_context.CurrentFloor + 0, 1, 3))], // Make sure floor not out of bounds!
+                    EncounterEnemyType.FIRST_FLOOR => [.. _context.EncounterTable.Where(m => m.Rank == 1)],
+                    EncounterEnemyType.FAMILY => [.. GetFamilyHash(speciesUsed)],
+                    EncounterEnemyType.NONE => throw new Exception("Enemy was not defined properly and still has NONE as type"),
+                    _ => throw new Exception("Unknown scripted enemy type"),
+                };
+                List<string> availableEquippableItems = enemy.EquipType switch
+                {
+                    EncounterItemType.NONE => [],
+                    EncounterItemType.SPECIFIC_ITEM => [.. encounter.Params[paramsIndex++].Split(",")], // Just get it from params ig
+                    EncounterItemType.COMMON_ITEM_POOL => [.. _context.DungeonData.CommonDrops.Select(d => d.Name)],
+                    EncounterItemType.RARE_ITEM_POOL => [.. _context.DungeonData.RareDrops.Select(d => d.Name)],
+                    EncounterItemType.ALL_ITEM_POOLS => [.. _context.DungeonData.CommonDrops.Select(d => d.Name), .. _context.DungeonData.RareDrops.Select(d => d.Name)],
+                    EncounterItemType.ENEMIES or EncounterItemType.EQUIPPED_ITEMS => throw new Exception("These item types are not a valid descriptor of what items a mon can equip. These are only for prizes. Try again"),
+                    _ => throw new Exception("Unknown scripted item type"),
+                };
+                // Then, time to assemble the enemy "NPC trainer"
+                NpcTrainer enemyTrainer = new NpcTrainer()
+                {
+                    // No name or picture, would be left blank in renderer
+                    TrainerRank = TrainerRank.WILD_MONS,
+                    FullyLoadedData = true, // It's generated here...
+                    AvailablePokemon = [.. availablePokemonSpecies],
+                    AvailableItems = availableEquippableItems // Adds the potential items by name, the actual drop amount and prize type would be considered later (if the battle is won!)
+                };
+                // How many mons will appear?
+                int nMons = enemy.Number;
+                if (encounter.UseEnemyCountSandwich) // Check if the sandwich can alter the count
+                {
+                    nMons += _context.GetExtraWildPokemon();
+                    if (nMons < 1) // Always at least one enemy...
+                    {
+                        nMons = 1;
+                    }
+                }
+                // Next, the trainer entity, i.e. from NPC data into an actual entity
+                TrainerEntity wildTrainerEntity = GameplayElementsContainer.GlobalData.CreateNpcEntity(enemyTrainer, nMons, _context.Rng.Next(), enemy.EquipChance, _context.GetShinyChance(), itemsUsed); // For now the shiny chance is identical to all mons, scripted or not
+                // Finally, the actual instance for game sim, both the trainer AND the mons
+                // Create instance of all mons
+                TrainerInstance wildTrainerInstance = new TrainerInstance()
+                {
+                    Name = wildTrainerEntity.Name,
+                    Team = Side.TOP,
+                    MaxMonsInField = enemy.MaxSimultaneousMons,
+                    // No limit for max mon used, will start with 3-10 and then who knows
+                    ActiveJewelry = wildTrainerEntity.EquippedJewelry,
+                    // Will add mons one by one later due to potential customizations
+                };
+                foreach (PokemonEntity enemyMon in wildTrainerEntity.Pokemon) // Instance one by one
+                {
+                    PokemonInstance nextMonInstance = SimulatorHandler.InstancePokemon(enemyMon, _context.Rng);
+                    nextMonInstance.BaseStatMult = [.. enemy.StatMult.Select(i => i * GetDifficultyStatMult())]; // Its stats do need to be multiplied depending on danger level and the event's mult
+                    wildTrainerInstance.PokemonInTeam.Add(nextMonInstance);
+                }
+                // Now that the trainer has been assembled, if catchable, need to put into the lists
+                speciesUsed.UnionWith(wildTrainerEntity.Pokemon.Select(p => p.Species)); // Add to species used, useful for inter-enemy logic
+                if (enemy.Catchable)
+                {
+                    recoverableItems.AddRange(itemsUsed);
+                    catchableEnemyMons.AddRange(wildTrainerInstance.PokemonInTeam); // Add also the mons if catchable
+                }
+                allEnemyInstances.Add(wildTrainerInstance); // Enemy is in now!
             }
-            // Combat
-            GameOutcome outcome = ResolveEncounter([wildTrainerInstance], GetGameParameters());
-            // Determine if win, if so, assign prizes, if not, etc
-            bool wasSuccessful = ProcessPostBattle([wildTrainerInstance], outcome, prizePool);
+            // Assembling of procedural strings
+            List<string> proceduralStrings = []; // Will be assembled in some cases like when a random boss is found or sth
+            if (catchableEnemyMons.Count > 0)
+            {
+                proceduralStrings.Add(string.Join(", ", [.. catchableEnemyMons.Select(p => p.Species.Name).Distinct().Order()])); // Add string containing ALL enemies species (only once)
+            }
+            if (recoverableItems.Count > 0)
+            {
+                proceduralStrings.Add(string.Join(", ", [.. recoverableItems.Distinct().Order()])); // And also all items
+            }
+            string encounterStartString = encounter.PreEncounterString;
+            string encounterWinString = encounter.EncounterSuccessString;
+            string encounterLoseString = encounter.EncounterFailureString;
+            for (int i = 1; i <= proceduralStrings.Count; i++) // Now assemble all possible strings
+            {
+                encounterStartString = encounterStartString.Replace($"${i}", proceduralStrings[i]);
+                encounterWinString = encounterWinString.Replace($"${i}", proceduralStrings[i]);
+                encounterLoseString = encounterLoseString.Replace($"${i}", proceduralStrings[i]);
+            }
+            // Pre combat text
+            Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.WriteLine(encounterStartString)); // TODO: Also animation later on ig
+            // Resolve the outcome, either via combat or some other event style
+            bool playerWon = true; // Determines if the event was a success (true if no combat)
+            if (allEnemyInstances.Count > 0)
+            {
+                GameOutcome outcome = ResolveEncounter(allEnemyInstances, GetGameParameters());
+                playerWon = outcome.WinningTeam == Side.BOTTOM; // Trainer won if bottom won
+            }
+            if (playerWon) // If won, can then assign the prizes and the capture tables
+            {
+                bool rolledItems = false;
+                // Define the prize pool, since need to assign the prizes
+                List<string> prizes = encounter.PrizeType switch
+                {
+                    EncounterItemType.NONE => [], // No prize is no prize
+                    EncounterItemType.SPECIFIC_ITEM => [.. encounter.Params[paramsIndex++].Split(",")], // All the csv prizes in the next param
+                    EncounterItemType.COMMON_ITEM_POOL => [GeneralUtilities.GetRandomPick([.. _context.DungeonData.CommonDrops.Select(d => d.Name)], _context.Rng)], // One item of the common item pool
+                    EncounterItemType.RARE_ITEM_POOL => [GeneralUtilities.GetRandomPick([.. _context.DungeonData.RareDrops.Select(d => d.Name)], _context.Rng)], // One item of the rare item pool
+                    EncounterItemType.ALL_ITEM_POOLS => [GeneralUtilities.GetRandomPick([.. _context.DropTable.Select(d => d.Name)], _context.Rng)], // Any item from the pool
+                    EncounterItemType.EQUIPPED_ITEMS => [.. recoverableItems], // All the items that were equipped by the enemies
+                    EncounterItemType.ENEMIES => [], // Nothing in prizes then (the 0-rank mon appears after)
+                    _ => throw new Exception("Unknown scripted item type for prizes"),
+                };
+                if (encounter.PrizeType == EncounterItemType.ENEMIES) // Special situation, add to 0-rank mons
+                {
+                    foreach (PokemonInstance mon in allEnemyInstances.SelectMany(e => e.PokemonInTeam))
+                    {
+                        AddMonToCatchTable(mon, 1, 0); // Add mon to catchtable, but override the rank to 0
+                    }
+                }
+                // Give the prizes then
+                foreach (string item in prizes) // Assign item + count for this dung
+                {
+                    ItemDrop foundItem = _context.DropTable.FirstOrDefault(i => i.Name == item);
+                    double count;
+                    if (foundItem == null) // Item not in the drop table, no other choice but to give 1 I guess (may be a mon too)
+                    {
+                        count = 1;
+                    }
+                    else
+                    {
+                        // Then I can actually roll this
+                        rolledItems = true;
+                        count = GeneralUtilities.GetRandomNumber(foundItem.Min, foundItem.Max + 1, _context.Rng);
+                        count *= _context.GetItemMult(); // Add the mult of course
+                        if (count < 0) count = 0; // Can't remove items!
+                    }
+                    int totalCount = (int)Math.Round(count);
+                    GameplayElementsContainer.GlobalData.GivePrizeToTrainer(item, _context.TrainerEntity, totalCount);
+                    GeneralUtilities.AddtemToCountDictionary(_context.Prizes.ItemPrizes, item, totalCount); // Add also to log message
+                }
+                // If sandwich for item drop was used, then I roll it
+                if (rolledItems)
+                {
+                    _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, s => { }); // Need to actually notify renderer about this later on
+                }
+                // Then, the mon tables. Check the CatchableSpecies, which should've been modified during battle
+                foreach (PokemonInstance mon in catchableEnemyMons.Where(m => m.Availability == BattleAvailability.FAINT)) // Can only capture fainted mons (idk how non fainted here would happen)
+                {
+                    AddMonToCatchTable(mon, 1); // Add mon to catchtable
+                }
+            }
             // If a mon count or shiny sandwich was in effect, consume it
             _context.UseSandwichEffect(SandwichEffectType.ENEMY_NUMBER, s => { });
             _context.UseSandwichEffect(SandwichEffectType.SHINY_CHANCE, s => { });
-            // Final things
-            string encounterEndString = wasSuccessful ? $"You defeated the wild Pokemon and gathered some items that were dropped: {string.Join(", ", prizePool)}" : "The Pokemon in this area are quite tough...";
-            Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.WriteLine(encounterEndString));
-            return wasSuccessful;
+            // Final things, check which string to output
+            string encounterEndString = playerWon ? encounterWinString : encounterLoseString;
+            Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.WriteLine(encounterEndString)); // TODO: anim
         }
         /// <summary>
         /// Saves exploration outcome in a txt file for quick copying
@@ -1414,50 +1561,16 @@ namespace IndymonBackendProgram
             };
             return parameters;
         }
-        bool ProcessPostBattle(List<TrainerInstance> enemyTrainers, GameOutcome outcome, List<string> itemPool)
-        {
-            bool rolledItems = false;
-            bool playerWon = outcome.WinningTeam == Side.BOTTOM; // Trainer won if bottom won
-            if (playerWon) // If won, can then assign the prizes and the capture tables
-            {
-                foreach (string item in itemPool) // Assign item + count for this dung
-                {
-                    ItemDrop foundItem = _context.DropTable.FirstOrDefault(i => i.Name == item);
-                    double count;
-                    if (foundItem == null) // Item not in the drop table, no other choice but to give 1 I guess
-                    {
-                        count = 1;
-                    }
-                    else
-                    {
-                        // Then I can actually roll this
-                        rolledItems = true;
-                        count = GeneralUtilities.GetRandomNumber(foundItem.Min, foundItem.Max + 1, _context.Rng);
-                        count *= _context.GetItemMult(); // Add the mult of course
-                        if (count < 0) count = 0; // Can't remove items!
-                    }
-                    int totalCount = (int)Math.Round(count);
-                    GameplayElementsContainer.GlobalData.GivePrizeToTrainer(item, _context.TrainerEntity, totalCount);
-                    GeneralUtilities.AddtemToCountDictionary(_context.Prizes.ItemPrizes, item, totalCount); // Add also to log message
-                }
-                // If sandwich for item drop was used, then I roll it
-                if (rolledItems) _context.UseSandwichEffect(SandwichEffectType.ITEM_DROP, s => { }); // Need to actually notify renderer about this later on
-                // Then, the mon tables
-                foreach (TrainerInstance trainer in enemyTrainers)
-                {
-                    foreach (PokemonInstance mon in trainer.PokemonInTeam.Where(m => m.Availability == BattleAvailability.FAINT)) // Can only capture fainted mons (idk how non fainted here would happen)
-                    {
-                        AddMonToCatchTable(mon, 1); // Add mon to prizes
-                    }
-                }
-            }
-            return playerWon;
-        }
+        /// <summary>
+        /// Adds a pokemon (+ count +overriden rank) to catch table
+        /// </summary>
+        /// <param name="mon">Which mon (instance) to add</param>
+        /// <param name="count">How many (can also remove if needed)</param>
+        /// <param name="rankOverride">Use species rank by default, define if there's override needed</param>
         void AddMonToCatchTable(PokemonInstance mon, int count, int rankOverride = -1)
         {
-            PokemonSpecies monSpecies = GameplayElementsContainer.GlobalData.Dex[mon.Name]; // Get the mon
-            int rank = (rankOverride < 0) ? monSpecies.Rank : rankOverride; // Check if special rank override
-            string monName = monSpecies.Name + ((mon.IsShiny) ? " ★" : "");
+            int rank = (rankOverride < 0) ? mon.Species.Rank : rankOverride; // Check if special rank override
+            string monName = mon.Species.Name + ((mon.IsShiny) ? " ★" : "");
             if (!_context.Prizes.MonsFound.TryGetValue(rank, out Dictionary<string, int> thisRankDict)) // Add for this rank if nothing yet
             {
                 thisRankDict = [];

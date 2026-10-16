@@ -37,6 +37,7 @@ namespace GameSimulator
             {
                 Name = pokemon.ToString(), // Print it with nickname w.e.
                 IsShiny = pokemon.IsShiny,
+                Species = pokemon.Species,
             };
         }
     }

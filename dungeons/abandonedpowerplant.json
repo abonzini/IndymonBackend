@@ -308,17 +308,21 @@
             "PrizeType": "RARE_ITEM_POOL"
         },
         {
-            "Type": "GUARDED_TREASURE",
+            "Type": "SCRIPTED_BATTLE",
             "Category": "DANGER",
             "Note": "Just a mon from next floor but has an item equipped which it'll use during the fight",
             "PreEventString": "In the middle of a room, you find a $2, but it's being guarded by a $1.",
             "EncounterSuccessString": "$1 runs away, you have taken its $2.",
             "EncounterFailureString": "It seems the $2 will remain safe here for now...",
-            "Enemy1Type": "NEXT_FLOOR",
-            "Enemy1EquipType": "RARE_ITEM_POOL",
-            "Enemy1EquipChance": 1,
-            "EncounterMaxSimultaneousEnemyMons": 1,
-            "EncounterEnemyNumber": 0,
+            "Enemies": [
+                {
+                    "Type": "NEXT_FLOOR",
+                    "EquipType": "RARE_ITEM_POOL",
+                    "Number": 1,
+                    "EquipChance": 1,
+                    "MaxSimultaneousMons": 1
+                }
+            ],
             "PrizeType": "EQUIPPED_ITEMS"
         },
         {
@@ -433,18 +437,27 @@
             "EncounterSuccessString": "After the dust settles, both sides retreat to their own territories.",
             "EncounterFailureString": "You should've been wiser than to get caught into a fight between wild Pokemon!",
             "Params": [
-                "Magnemite/Magneton/Magnezone",
-                "Grimer/Muk/Grimer-Alola/Muk-Alola"
+                "Magnemite,Magneton,Magnezone",
+                "Grimer,Muk,Grimer-Alola,Muk-Alola"
             ],
-            "Enemy1Side": "LEFT",
-            "Enemy1Type": "SPECIFIC_POKEMON",
-            "Enemy1EquipType": "NONE",
-            "Enemy1Number": 7,
-            "Enemy2Side": "LEFT",
-            "Enemy2Type": "SPECIFIC_POKEMON",
-            "Enemy2EquipType": "NONE",
-            "Enemy2Number": 7,
-            "EncounterMaxSimultaneousEnemyMons": 7,
+            "Enemies": [
+                {
+                    "Side": "LEFT",
+                    "Type": "SPECIFIC_POKEMON",
+                    "EquipType": "NONE",
+                    "MaxSimultaneousMons": 7,
+                    "Number": 7,
+                    "Catchable": false
+                },
+                {
+                    "Side": "RIGHT",
+                    "Type": "SPECIFIC_POKEMON",
+                    "EquipType": "NONE",
+                    "MaxSimultaneousMons": 7,
+                    "Number": 7,
+                    "Catchable": false
+                }
+            ],
             "PrizeType": "NONE"
         }
     ],
@@ -455,29 +468,31 @@
         "EncounterSuccessString": "As you defeat the titan, the whole power plant starts to make a deafening noise. Parts start moving and the Power Plant starts sparking. Better leave ASAP.",
         "EncounterFailureString": "The energies in this place are running out of control. It is no longer safe to remain here.",
         "Note": "Regieleki with with either/and Deluge + Arcs. Make regieleki faster and fight a bit longer. Regieleki will be by itself",
-        "Enemy1Parameters": [
-            "BOSS"
+        "Enemies": [
+            {
+                "Side": "TOP",
+                "AdditionalParameters": [
+                    "BOSS"
+                ],
+                "StatMult": [
+                    3,
+                    1,
+                    1,
+                    1,
+                    1,
+                    2
+                ],
+                "Type": "SPECIFIC_POKEMON",
+                "EquipType": "ALL_ITEM_POOLS",
+                "Number": 1,
+                "MaxSimultaneousMons": 1,
+                "EquipChance": 3.5
+            }
         ],
-        "Enemy1StatMult": [
-            3,
-            1,
-            1,
-            1,
-            1,
-            2
-        ],
-        "Enemy1Side": "TOP",
-        "Enemy1Type": "SPECIFIC_POKEMON",
         "Params": [
             "Regieleki",
             "Titan Plate 1"
         ],
-        "Enemy1EquipType": "ALL_ITEM_POOLS",
-        "Enemy1EquipChance": 3.5,
-        "Enemy2Type": "NONE",
-        "Enemy2EquipType": "NONE",
-        "EncounterMaxSimultaneousEnemyMons": 1,
-        "Enemy1Number": 1,
         "WeatherOverride": [
             {
                 "Name": "High Voltage Arcs",
@@ -500,34 +515,42 @@
             "EncounterSuccessString": "$1 has calmed down and is now hiding with their babies. You proceed forward.",
             "EncounterFailureString": "Momma $1 is out of control. If you approach her or any of her children, things are going to go south very fast!",
             "Note": "The idea of this one is a mon of current floor, slightly stronger (15% except speed) equipped, with 2 babies (weaker)",
-            "Enemy1Parameters": [
-                "BOSS"
+            "Enemies": [
+                {
+                    "Side": "TOP",
+                    "AdditionalParameters": [
+                        "BOSS"
+                    ],
+                    "StatMult": [
+                        1.15,
+                        1.15,
+                        1,
+                        1.15,
+                        1,
+                        1
+                    ],
+                    "Type": "CURRENT_FLOOR",
+                    "EquipType": "NONE",
+                    "MaxSimultaneousMons": 1,
+                    "Number": 1
+                },
+                {
+                    "Side": "TOP",
+                    "StatMult": [
+                        0.6,
+                        0.6,
+                        1,
+                        0.6,
+                        1,
+                        1
+                    ],
+                    "Type": "FAMILY",
+                    "EquipType": "NONE",
+                    "MaxSimultaneousMons": 2,
+                    "Number": 2,
+                    "Catchable": false
+                }
             ],
-            "Enemy1Side": "TOP",
-            "Enemy1Number": 1,
-            "Enemy1StatMult": [
-                1.15,
-                1.15,
-                1.15,
-                1.15,
-                1.15,
-                1
-            ],
-            "Enemy1Type": "CURRENT_FLOOR",
-            "Enemy1EquipType": "NONE",
-            "Enemy2Side": "TOP",
-            "Enemy2Number": 2,
-            "Enemy2StatMult": [
-                0.6,
-                0.6,
-                0.6,
-                0.6,
-                0.6,
-                1
-            ],
-            "Enemy2Type": "PREVOS_1",
-            "Enemy2EquipType": "NONE",
-            "EncounterMaxSimultaneousEnemyMons": 3,
             "PrizeType": "NONE"
         },
         {
@@ -537,25 +560,29 @@
             "EncounterSuccessString": "$1 releases all of it's energy and recovers. It's extremely thankful.",
             "EncounterFailureString": "The energies that $1 absorbed are too much. It's terrible to leave this creature suffering, but there's nothing else you can do...",
             "Note": "Inspired on deepest trench mutant mon. This mon is huge, resistant and slow, it's a survival fight. Will be in high voltage always, open field and try to add the 'giant' tag for impact",
-            "Enemy1Parameters": [
-                "BOSS"
+            "Enemies": [
+                {
+                    "Side": "TOP",
+                    "AdditionalParameters": [
+                        "BOSS",
+                        "GIANT"
+                    ],
+                    "StatMult": [
+                        4,
+                        1.3,
+                        1,
+                        1.3,
+                        1,
+                        0.5
+                    ],
+                    "Type": "CURRENT_FLOOR",
+                    "EquipType": "NONE",
+                    "MaxSimultaneousMons": 1,
+                    "Number": 1,
+                    "Catchable": false
+                }
             ],
-            "Enemy1Side": "TOP",
-            "Enemy1Number": 0,
-            "Enemy1StatMult": [
-                4,
-                1.3,
-                1,
-                1.3,
-                1,
-                0.5
-            ],
-            "Enemy1Type": "CURRENT_FLOOR",
-            "Enemy1EquipType": "NONE",
-            "Enemy2Type": "NONE",
-            "Enemy2EquipType": "NONE",
-            "EncounterMaxSimultaneousEnemyMons": 1,
-            "PrizeType": "ENEMY_1",
+            "PrizeType": "ENEMIES",
             "WeatherOverride": [
                 {
                     "Name": "High Voltage Arcs",
@@ -571,36 +598,44 @@
             "EncounterSuccessString": "$1 runs away scared, it seems you're the Power Plant Boss now.",
             "EncounterFailureString": "Now you see why $1 is the boss around these parts. Better leave before you make it angrier...",
             "Note": "Monster house inspired, there's a big boss from next floor with buddies from first floor, and the buddies keep coming",
-            "Enemy1Parameters": [
-                "BOSS"
+            "Enemies": [
+                {
+                    "Side": "TOP",
+                    "AdditionalParameters": [
+                        "BOSS"
+                    ],
+                    "StatMult": [
+                        1,
+                        1,
+                        1,
+                        1,
+                        1,
+                        1
+                    ],
+                    "Type": "NEXT_FLOOR",
+                    "EquipType": "ALL_ITEM_POOLS",
+                    "Number": 1,
+                    "MaxSimultaneousMons": 1,
+                    "EquipChance": 1.5
+                },
+                {
+                    "Side": "TOP",
+                    "StatMult": [
+                        0.6,
+                        0.6,
+                        1,
+                        0.6,
+                        1,
+                        1
+                    ],
+                    "Type": "FAMILY",
+                    "EquipType": "COMMON_ITEM_POOL",
+                    "Number": 20,
+                    "MaxSimultaneousMons": 2,
+                    "EquipChance": 0.3,
+                    "Catchable": false
+                }
             ],
-            "Enemy1Side": "TOP",
-            "Enemy1Number": 1,
-            "Enemy1StatMult": [
-                1,
-                1,
-                1,
-                1,
-                1,
-                1
-            ],
-            "Enemy1Type": "NEXT_FLOOR",
-            "Enemy1EquipType": "ALL_ITEM_POOLS",
-            "Enemy1EquipChance": 1.5,
-            "Enemy2Side": "TOP",
-            "Enemy2Number": 20,
-            "Enemy2StatMult": [
-                0.6,
-                0.6,
-                0.6,
-                0.6,
-                0.6,
-                1
-            ],
-            "Enemy2Type": "CURRENT_FLOOR",
-            "Enemy2EquipType": "COMMON_ITEM_POOL",
-            "Enemy2EquipChance": 0.3,
-            "EncounterMaxSimultaneousEnemyMons": 3,
             "PrizeType": "NONE"
         }
     ]
