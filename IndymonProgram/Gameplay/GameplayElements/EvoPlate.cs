@@ -11,7 +11,7 @@ namespace Gameplay.GameplayElements
         }
         public static IEnumerable<EvoPlate> GetAllEvoPlates()
         {
-            foreach (PokemonType type in Enum.GetValues(typeof(PokemonType)))
+            foreach (PokemonType type in Enum.GetValues<PokemonType>())
             {
                 if (type == PokemonType.NONE) continue;
                 string name = type switch

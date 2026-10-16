@@ -300,7 +300,7 @@
     },
     "EncounterPool": [
         {
-            "Type": "TREASURE",
+            "Type": "BATTLE_AND_PRIZE",
             "Category": "PRIZE",
             "PreEncounterString": "In the recycle bin, you see a perfectly functional $1 inside.",
             "EncounterSuccessString": "You pick it up and continue on your way.",
@@ -308,7 +308,7 @@
             "PrizeType": "RARE_ITEM_POOL"
         },
         {
-            "Type": "SCRIPTED_BATTLE",
+            "Type": "BATTLE_AND_PRIZE",
             "Category": "DANGER",
             "Note": "Just a mon from next floor but has an item equipped which it'll use during the fight",
             "PreEventString": "In the middle of a room, you find a $2, but it's being guarded by a $1.",
@@ -402,18 +402,20 @@
             "EncounterFailureString": "This victory leaves $1 energized. They start running onwards at maximum speed. You're unable to catch on."
         },
         {
-            "Type": "IMP_GAIN",
+            "Type": "BATTLE_AND_PRIZE",
             "Category": "PRIZE",
             "PreEventString": "You find an old Automatic ATM machine on a wall.",
             "EncounterSuccessString": "Surprisingly, it still has $1 inside.",
-            "EncounterFailureString": "This should never happen"
+            "EncounterFailureString": "This should never happen",
+            "PrizeType": "IMP"
         },
         {
-            "Type": "MOVE_DISK",
+            "Type": "BATTLE_AND_PRIZE",
             "Category": "NEUTRAL",
             "PreEventString": "You find some Team Paradox members carrying a crate full of blank disks. You are extremely suspicious of them.",
             "EncounterSuccessString": "They give you $1 as a bribe to look away.",
-            "EncounterFailureString": "They take a quick look at you, and they continue on their way. 'Nothing to see here!"
+            "EncounterFailureString": "This should never happen",
+            "PrizeType": "DISKS"
         },
         {
             "Type": "CAMPING",
@@ -423,14 +425,15 @@
             "EncounterFailureString": "If you had a sandwich, you could take a lunch break in here..."
         },
         {
-            "Type": "SANDWICH",
+            "Type": "BATTLE_AND_PRIZE",
             "Category": "NEUTRAL",
-            "PreEventString": "You find Arven in a mess hall, he's just making some sandwiches.",
+            "PreEventString": "You find Arven next to a generator that is on fire. He's just making some sandwiches using the fire nearby.",
             "EncounterSuccessString": "He shares a $1 with you, so you can try it next time you have a chance.",
-            "EncounterFailureString": "Arven is such a beginner! A real explorer always has a whole bag full of Sandwiches, gotta go!"
+            "EncounterFailureString": "This should never happen",
+            "PrizeType": "EVO_PLATE"
         },
         {
-            "Type": "SCRIPTED_BATTLE",
+            "Type": "BATTLE_AND_PRIZE",
             "Category": "DANGER",
             "Note": "Homage to the magnemite vs grimer episode",
             "PreEventString": "Suddenly. you're caught in the crossfire in a war for territory between two species of Pokemon that reside in the power plant.",
@@ -462,7 +465,7 @@
         }
     ],
     "FinalBossEncounter": {
-        "Type": "SCRIPTED_BATTLE",
+        "Type": "BATTLE_AND_PRIZE",
         "Category": "SCRIPTED",
         "PreEncounterString": "You reach the power plant's generator. The energy in this room is out of control. In the center, absorbing most of the energy a titan made of pure electricity. Before you can react, it starts moving all over the place...",
         "EncounterSuccessString": "As you defeat the titan, the whole power plant starts to make a deafening noise. Parts start moving and the Power Plant starts sparking. Better leave ASAP.",
@@ -509,7 +512,7 @@
     },
     "BossEncounters": [
         {
-            "Type": "SCRIPTED_BATTLE",
+            "Type": "BATTLE_AND_PRIZE",
             "Category": "SCRIPTED",
             "PreEncounterString": "You have disturbed a nest belonging to a mother $1. She'll do the best to defend it's babies.",
             "EncounterSuccessString": "$1 has calmed down and is now hiding with their babies. You proceed forward.",
@@ -554,7 +557,7 @@
             "PrizeType": "NONE"
         },
         {
-            "Type": "SCRIPTED_BATTLE",
+            "Type": "BATTLE_AND_PRIZE",
             "Category": "SCRIPTED",
             "PreEncounterString": "You have arrived to a huge room. An enormous $1 is in the middle, suffering. It seems the great energies of this place have overloaded it and it's out of control.",
             "EncounterSuccessString": "$1 releases all of it's energy and recovers. It's extremely thankful.",
@@ -592,7 +595,7 @@
             ]
         },
         {
-            "Type": "SCRIPTED_BATTLE",
+            "Type": "BATTLE_AND_PRIZE",
             "Category": "SCRIPTED",
             "PreEncounterString": "You have crossed eyes with an angry $1. Apparently it's the boss of this floor, and you're in their territory!.",
             "EncounterSuccessString": "$1 runs away scared, it seems you're the Power Plant Boss now.",

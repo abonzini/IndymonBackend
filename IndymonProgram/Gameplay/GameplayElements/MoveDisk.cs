@@ -1,4 +1,6 @@
-﻿namespace Gameplay.GameplayElements
+﻿using Utilities;
+
+namespace Gameplay.GameplayElements
 {
     public class MoveDisk : GameplayElement
     {
@@ -77,6 +79,24 @@
         public override string ToString()
         {
             return Name;
+        }
+        /// <summary>
+        /// Gets a Move Disk of a specific type
+        /// </summary>
+        /// <param name="type">Type to do</param>
+        /// <returns>The name of the move disk</returns>
+        internal static string GetNameByType(PokemonType type)
+        {
+            return $"{GeneralUtilities.ApaCapitalize(type.ToString())} {MOVE_DISK_TEXT}";
+        }
+        /// <summary>
+        /// Gets a Move Disk of a specific move
+        /// </summary>
+        /// <param name="move">Move to do</param>
+        /// <returns>The name of the move disk</returns>
+        internal static string GetNameByMove(Move move)
+        {
+            return $"{move.Name} {MOVE_DISK_TEXT}";
         }
     }
 }

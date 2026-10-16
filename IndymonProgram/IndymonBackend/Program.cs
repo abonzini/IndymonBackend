@@ -80,7 +80,7 @@ namespace IndymonBackendProgram
                         break;
                     case "-2":
                         Console.Write($"Which debug level?");
-                        foreach (DebugLevel dbl in Enum.GetValues(typeof(DebugLevel))) { Console.Write($"{dbl} "); }
+                        foreach (DebugLevel dbl in Enum.GetValues<DebugLevel>()) { Console.Write($"{dbl} "); }
                         Console.WriteLine();
                         GameplayElementsContainer.GlobalData.CurrentDebugLevel = Enum.Parse<DebugLevel>(Console.ReadLine());
                         break;

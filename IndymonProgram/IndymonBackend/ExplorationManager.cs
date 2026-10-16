@@ -285,7 +285,7 @@ namespace IndymonBackendProgram
                         possibleEncountersThisRoom = [
                             new Encounter() // This encounter is simple because there's no scripted overrides just a Pokemon battle with some shit going on
                             {
-                                Type = EncounterType.SCRIPTED_BATTLE,
+                                Type = EncounterType.BATTLE_AND_PRIZE,
                                 Category = EncounterCategory.DANGER,
                                 PreEncounterString = "Suddenly, wild Pokemon attack!",
                                 EncounterSuccessString = "You defeated the wild Pokemon and gathered some items that were dropped: $2", // Prints the prizes
@@ -405,22 +405,13 @@ namespace IndymonBackendProgram
                 case EncounterType.STATUS_CURE:
                     weight *= _context.TrainerInstance.PokemonInTeam.Any(p => p.NonVolatileStatusConditions.Count > 0) ? 1.2 : 0.8; // If any mon status'd
                     break;
-                case EncounterType.IMP_GAIN:
-                    weight *= (_context.TrainerEntity.Imp == 0) ? 1.2 : 0.8; // If trainer broke
-                    break;
-                case EncounterType.SANDWICH:
-                    weight *= (_context.TrainerEntity.Sandwiches.Count == 0) ? 1.2 : 0.8; // If trainer has absolutely no sandwich
-                    break;
                 // These events are always base chance
-                case EncounterType.SCRIPTED_BATTLE:
-                case EncounterType.TREASURE:
+                case EncounterType.BATTLE_AND_PRIZE:
                 case EncounterType.JOINER:
                 case EncounterType.DAMAGE_TRAP:
                 case EncounterType.STATUS_TRAP:
                 case EncounterType.KILL_TRAP:
                 case EncounterType.NPC_BATTLE:
-                case EncounterType.PLATE:
-                case EncounterType.MOVE_DISK:
                 case EncounterType.UNOWN:
                     break;
                 default:
@@ -435,16 +426,14 @@ namespace IndymonBackendProgram
         void ExecuteEncounter(Encounter encounter)
         {
             // Success or failure, they assemble the string, and then the string is printed in the end once loaded
-            Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.WriteLine(encounter.Type.ToString()));
+            Debug.DebugAction(DebugLevel.EVENT_ORGANIZER, () => Console.WriteLine($"{encounter.Type} - {encounter.PreEncounterString}"));
             // Now execute encounter
             switch (encounter.Type)
             {
-                case EncounterType.SCRIPTED_BATTLE:
+                case EncounterType.BATTLE_AND_PRIZE:
                     ResolveBattleAndPrizeEncounter(encounter); // Works kinda for treasures and other stuff too lol
                     break;
                 case EncounterType.CAMPING:
-                    break;
-                case EncounterType.TREASURE:
                     break;
                 case EncounterType.EVO:
                     break;
@@ -466,15 +455,7 @@ namespace IndymonBackendProgram
                     break;
                 case EncounterType.NPC_BATTLE:
                     break;
-                case EncounterType.PLATE:
-                    break;
-                case EncounterType.MOVE_DISK:
-                    break;
                 case EncounterType.UNOWN:
-                    break;
-                case EncounterType.IMP_GAIN:
-                    break;
-                case EncounterType.SANDWICH:
                     break;
                 default:
                     throw new Exception($"This encounter type {encounter.Type} is not known");
@@ -1265,7 +1246,7 @@ namespace IndymonBackendProgram
             List<TrainerInstance> allEnemyInstances = []; // Contains all generated enemy instances that will participate in this fight
             // Potential prize tables, if the event allows it, both pokemon and items but only filled if catchable
             List<PokemonInstance> catchableEnemyMons = [];
-            List<string> recoverableItems = [];
+            List<string> potentialPrizes = [];
             // Assemble all sides, enemy sides
             HashSet<PokemonSpecies> speciesUsed = []; // Species that have been used by these enemies
             foreach (EnemyParams enemy in encounter.Enemies) // Instance, one by one
@@ -1290,7 +1271,8 @@ namespace IndymonBackendProgram
                     EncounterItemType.COMMON_ITEM_POOL => [.. _context.DungeonData.CommonDrops.Select(d => d.Name)],
                     EncounterItemType.RARE_ITEM_POOL => [.. _context.DungeonData.RareDrops.Select(d => d.Name)],
                     EncounterItemType.ALL_ITEM_POOLS => [.. _context.DungeonData.CommonDrops.Select(d => d.Name), .. _context.DungeonData.RareDrops.Select(d => d.Name)],
-                    EncounterItemType.ENEMIES or EncounterItemType.EQUIPPED_ITEMS => throw new Exception("These item types are not a valid descriptor of what items a mon can equip. These are only for prizes. Try again"),
+                    EncounterItemType.DISKS or EncounterItemType.IMP or EncounterItemType.EVO_PLATE or EncounterItemType.SANDWICH or EncounterItemType.ENEMIES or EncounterItemType.EQUIPPED_ITEMS
+                        => throw new Exception("These item types are not a valid descriptor of what items a mon can equip. These are only for prizes. Try again"),
                     _ => throw new Exception("Unknown scripted item type"),
                 };
                 // Then, time to assemble the enemy "NPC trainer"
@@ -1335,20 +1317,41 @@ namespace IndymonBackendProgram
                 speciesUsed.UnionWith(wildTrainerEntity.Pokemon.Select(p => p.Species)); // Add to species used, useful for inter-enemy logic
                 if (enemy.Catchable)
                 {
-                    recoverableItems.AddRange(itemsUsed);
+                    potentialPrizes.AddRange(itemsUsed);
                     catchableEnemyMons.AddRange(wildTrainerInstance.PokemonInTeam); // Add also the mons if catchable
                 }
                 allEnemyInstances.Add(wildTrainerInstance); // Enemy is in now!
             }
             // Assembling of procedural strings
+            List<string> prizes = encounter.PrizeType switch // Define the prize pool first, since the prizes will be important for assembling procedural strings
+            {
+                EncounterItemType.NONE => [], // No prize is no prize
+                EncounterItemType.SPECIFIC_ITEM => [.. encounter.Params[paramsIndex++].Split(",")], // All the csv prizes in the next param
+                EncounterItemType.COMMON_ITEM_POOL => [GeneralUtilities.GetRandomPick([.. _context.DungeonData.CommonDrops.Select(d => d.Name)], _context.Rng)], // One item of the common item pool
+                EncounterItemType.RARE_ITEM_POOL => [GeneralUtilities.GetRandomPick([.. _context.DungeonData.RareDrops.Select(d => d.Name)], _context.Rng)], // One item of the rare item pool
+                EncounterItemType.ALL_ITEM_POOLS => [GeneralUtilities.GetRandomPick([.. _context.DropTable.Select(d => d.Name)], _context.Rng)], // Any item from the pool
+                EncounterItemType.EQUIPPED_ITEMS => [.. potentialPrizes], // All the items that were equipped by the enemies
+                EncounterItemType.ENEMIES => [], // Nothing in prizes then (the 0-rank mon appears after)
+                EncounterItemType.IMP => [$"{GeneralUtilities.GetRandomNumber(2, 4, _context.Rng)} IMP"], // Between 2-4 IMP
+                EncounterItemType.DISKS => [GameplayElementsContainer.GlobalData.GetMoveDiskByMove(GeneralUtilities.GetRandomPick([.. GameplayElementsContainer.GlobalData.Moves.Values], _context.Rng)).Name,
+                    GameplayElementsContainer.GlobalData.GetMoveDiskByType(GeneralUtilities.GetRandomPick([.. Enum.GetValues<PokemonType>()], _context.Rng)).Name,
+                    "Blank Disk"], // Returns one move disk, type disk, and a set of blank disks (quantity to be determined by droprate)
+                EncounterItemType.EVO_PLATE => [GeneralUtilities.GetRandomPick([.. GameplayElementsContainer.GlobalData.EvoPlates.Keys], _context.Rng)], // Random evo plate
+                EncounterItemType.SANDWICH => [GameplayElementsContainer.GlobalData.GetSandwichByEffect(
+                    GeneralUtilities.GetRandomPick([.. Enum.GetValues<SandwichEffectType>()], _context.Rng),
+                    GeneralUtilities.GetRandomDecayingNumber(1,5,2,_context.Rng),
+                    GeneralUtilities.GetRandomNumber(1,5,_context.Rng)
+                    ).Name], // Generate a random sandwich on the spot with a random effect, random duration and decaying power
+                _ => throw new Exception("Unknown scripted item type for prizes"),
+            };
             List<string> proceduralStrings = []; // Will be assembled in some cases like when a random boss is found or sth
             if (catchableEnemyMons.Count > 0)
             {
                 proceduralStrings.Add(string.Join(", ", [.. catchableEnemyMons.Select(p => p.Species.Name).Distinct().Order()])); // Add string containing ALL enemies species (only once)
             }
-            if (recoverableItems.Count > 0)
+            if (potentialPrizes.Count > 0)
             {
-                proceduralStrings.Add(string.Join(", ", [.. recoverableItems.Distinct().Order()])); // And also all items
+                proceduralStrings.Add(string.Join(", ", [.. potentialPrizes.Distinct().Order()])); // And also all items
             }
             string encounterStartString = encounter.PreEncounterString;
             string encounterWinString = encounter.EncounterSuccessString;
@@ -1371,18 +1374,6 @@ namespace IndymonBackendProgram
             if (playerWon) // If won, can then assign the prizes and the capture tables
             {
                 bool rolledItems = false;
-                // Define the prize pool, since need to assign the prizes
-                List<string> prizes = encounter.PrizeType switch
-                {
-                    EncounterItemType.NONE => [], // No prize is no prize
-                    EncounterItemType.SPECIFIC_ITEM => [.. encounter.Params[paramsIndex++].Split(",")], // All the csv prizes in the next param
-                    EncounterItemType.COMMON_ITEM_POOL => [GeneralUtilities.GetRandomPick([.. _context.DungeonData.CommonDrops.Select(d => d.Name)], _context.Rng)], // One item of the common item pool
-                    EncounterItemType.RARE_ITEM_POOL => [GeneralUtilities.GetRandomPick([.. _context.DungeonData.RareDrops.Select(d => d.Name)], _context.Rng)], // One item of the rare item pool
-                    EncounterItemType.ALL_ITEM_POOLS => [GeneralUtilities.GetRandomPick([.. _context.DropTable.Select(d => d.Name)], _context.Rng)], // Any item from the pool
-                    EncounterItemType.EQUIPPED_ITEMS => [.. recoverableItems], // All the items that were equipped by the enemies
-                    EncounterItemType.ENEMIES => [], // Nothing in prizes then (the 0-rank mon appears after)
-                    _ => throw new Exception("Unknown scripted item type for prizes"),
-                };
                 if (encounter.PrizeType == EncounterItemType.ENEMIES) // Special situation, add to 0-rank mons
                 {
                     foreach (PokemonInstance mon in allEnemyInstances.SelectMany(e => e.PokemonInTeam))

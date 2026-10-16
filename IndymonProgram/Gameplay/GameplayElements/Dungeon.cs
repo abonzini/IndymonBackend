@@ -8,9 +8,8 @@ namespace Gameplay.GameplayElements
     public enum EncounterType
     {
         UNKNOWN, /// This is an error
-        SCRIPTED_BATTLE, /// Any scripted battle event (boss or special). Can also be made procedurally
+        BATTLE_AND_PRIZE, /// Any scripted event, can have a configurable battle too and configural prize. Can also be made procedurally
         CAMPING, /// Camping event
-        TREASURE, /// Player gets a free treasure prize from rare item pool
         EVO, /// Evolution crystal event
         HP_HEAL, /// Heals percentage of all party hp
         FULL_RESTORE, /// Heals big percentage of a specific mon
@@ -21,11 +20,7 @@ namespace Gameplay.GameplayElements
         STATUS_TRAP, /// Applies a status effect to a pokemon
         KILL_TRAP, /// A random mon faints
         NPC_BATTLE, /// A trainer npc battles you to 3v3. Heals your current first 3 (or some random fainted if can't do 3). Losing battle doesn't end dungeon though. Different to other wild battles due to the forced 3v3 natures and instancing of an NPC. Additionally, the NPC battle is proportional to the danger lvl
-        PLATE, /// Find a random evo plate
-        MOVE_DISK, /// Find a random Move Disk as well as a type disk and some blanks
         UNOWN, /// Unown event, they form a word. You fight them and get the item if win. Unowns have a dynamic stat mult that scales
-        IMP_GAIN, /// Gives IMP
-        SANDWICH, /// Gives Sandwich
     }
     [JsonConverter(typeof(StringEnumConverter))]
     public enum EncounterCategory
@@ -79,6 +74,10 @@ namespace Gameplay.GameplayElements
         ALL_ITEM_POOLS, /// Random item from both item pools
         EQUIPPED_ITEMS, /// The items that have been equipped (really makes sense for prizes only)
         ENEMIES, /// Enemies willing to join you for rank 0 (yes, all of them)
+        DISKS, /// Prize is Move Disk + Some Blanks
+        EVO_PLATE, /// Prize is an evo plate
+        SANDWICH, /// Prize is a procedurally generated sandwich
+        IMP, /// Prize is some IMP
     }
     /// <summary>
     /// All the things needed to define an encounter's enemies
@@ -93,7 +92,7 @@ namespace Gameplay.GameplayElements
         public double EquipChance { get; set; } = 0;
         public int Number { get; set; } = 1; /// How many enemies to add to this side
         public int MaxSimultaneousMons { get; set; } = GameplayElementsContainer.GameplayElementsContainer.DEFAULT_BATTLE_NMONS; /// How many enemies will appear at the same time on one side of the battle
-        public bool Catchable { get; set; } = true; // Would these be catchable? (also involve items)
+        public bool Catchable { get; set; } = true; /// Would these be catchable? (also involve items)
     }
     /// <summary>
     /// Defines a specific scripted encounter, all the elements which are encounter-specific and not used for the dungeon at large

@@ -54,7 +54,7 @@
             return result;
         }
         // Generator
-        internal static string CreateName(SandwichEffectType effect, int lvl, int duration)
+        internal static string GetNameByEffect(SandwichEffectType effect, int lvl, int duration)
         {
             string sandwichName = effect switch
             {

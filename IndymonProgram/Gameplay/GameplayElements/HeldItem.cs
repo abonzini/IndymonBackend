@@ -11,7 +11,7 @@ namespace Gameplay.GameplayElements
         public static IEnumerable<HeldItem> GetAllHeldItems()
         {
             // Type-repeated items
-            foreach (PokemonType type in Enum.GetValues(typeof(PokemonType)))
+            foreach (PokemonType type in Enum.GetValues<PokemonType>())
             {
                 if (type == PokemonType.NONE) continue;
                 string berryName = type switch
@@ -43,7 +43,7 @@ namespace Gameplay.GameplayElements
                     _description = $"Halves the damage of the first {type}-type move that strikes this Pokemon in a battle."
                 };
             }
-            foreach (PokemonType type in Enum.GetValues(typeof(PokemonType)))
+            foreach (PokemonType type in Enum.GetValues<PokemonType>())
             {
                 if (type == PokemonType.NONE) continue;
                 string typeString = GeneralUtilities.ApaCapitalize(type.ToString());
@@ -54,7 +54,7 @@ namespace Gameplay.GameplayElements
                     _description = $"The first {type}-type move used by this Pokemon in battle will have its power boosted by 50%."
                 };
             }
-            foreach (PokemonType type in Enum.GetValues(typeof(PokemonType)))
+            foreach (PokemonType type in Enum.GetValues<PokemonType>())
             {
                 if (type == PokemonType.NONE) continue;
                 string itemName = type switch

@@ -8,7 +8,7 @@ namespace Gameplay.GameplayElements
         public static IEnumerable<KeyItem> GetAllKeyItems()
         {
             // Shards are one per type so just automate it
-            foreach (PokemonType type in Enum.GetValues(typeof(PokemonType)))
+            foreach (PokemonType type in Enum.GetValues<PokemonType>())
             {
                 if (type == PokemonType.NONE) continue;
                 yield return new KeyItem()

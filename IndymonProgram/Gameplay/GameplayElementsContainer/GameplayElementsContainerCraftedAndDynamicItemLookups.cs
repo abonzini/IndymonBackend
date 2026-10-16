@@ -27,6 +27,24 @@ namespace Gameplay.GameplayElementsContainer
             return disk;
         }
         /// <summary>
+        /// Gets the move disk of a specific move, ensures non-duplicate
+        /// </summary>
+        /// <param name="move">Move to do</param>
+        /// <returns>The move disk</returns>
+        public MoveDisk GetMoveDiskByMove(Move move)
+        {
+            return GetMoveDisk(MoveDisk.GetNameByMove(move));
+        }
+        /// <summary>
+        /// Gets the move disk of a specific type, ensures non-duplicate
+        /// </summary>
+        /// <param name="type">Type to do</param>
+        /// <returns>The move disk</returns>
+        public MoveDisk GetMoveDiskByType(PokemonType type)
+        {
+            return GetMoveDisk(MoveDisk.GetNameByType(type));
+        }
+        /// <summary>
         /// Gets the sandwich, tries to generate and add into lookup if didnt exist beforehand
         /// </summary>
         /// <param name="sandwichName">Name of sandwich to look for</param>
@@ -50,7 +68,7 @@ namespace Gameplay.GameplayElementsContainer
         }
         public Sandwich GetSandwichByEffect(SandwichEffectType effect, int lvl, int duration)
         {
-            return GetSandwich(Sandwich.CreateName(effect, lvl, duration));
+            return GetSandwich(Sandwich.GetNameByEffect(effect, lvl, duration));
         }
     }
 }

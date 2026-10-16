@@ -14,7 +14,7 @@ namespace Gameplay.GameplayElements
                 _description = "All IMP gains are doubled as long as this is equipped."
             };
             // Also the basic pendants, boost stats by 10% of all X-type mons for each X-type mon in lineup
-            foreach (PokemonType type in Enum.GetValues(typeof(PokemonType)))
+            foreach (PokemonType type in Enum.GetValues<PokemonType>())
             {
                 if (type == PokemonType.NONE) continue;
                 string typeString = GeneralUtilities.ApaCapitalize(type.ToString());
